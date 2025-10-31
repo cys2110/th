@@ -43,6 +43,10 @@ const breadcrumbs = computed<BreadcrumbItem[]>(() => [
     <u-page>
       <template #left>
         <u-page-aside>
+          <u-page-links
+            :links="(EVENT_PAGES.map(page => ({ label: page.label, to: { name: page.name, params: { name, id, year, edId } }, icon: page.icon, ui: { linkLeadingIcon: page.name === 'draws' ? 'rotate-270' : undefined} })) as PageLink[])"
+          />
+
           <template v-if="event && routeName === 'event'">
             <dev-only>
               <events-update
@@ -59,10 +63,6 @@ const breadcrumbs = computed<BreadcrumbItem[]>(() => [
               class="w-full justify-center"
             />
           </template>
-
-          <u-page-links
-            :links="(EVENT_PAGES.map(page => ({ label: page.label, to: { name: page.name, params: { name, id, year, edId } }, icon: page.icon, ui: { linkLeadingIcon: page.name === 'draws' ? 'rotate-270' : undefined} })) as PageLink[])"
-          />
 
           <slot name="page-left" />
         </u-page-aside>
@@ -120,8 +120,8 @@ const breadcrumbs = computed<BreadcrumbItem[]>(() => [
               target="_blank"
             />
             <u-button
-              v-if="event?.wiki_link"
-              :href="event.wiki_link"
+              v-if="event?.wiki_link || event?.edition.wiki_link"
+              :href="event.wiki_link || event.edition.wiki_link"
               :icon="ICONS.wikipedia"
               target="_blank"
             />

@@ -13,7 +13,8 @@ const refresh = ref(0)
       <dev-only>
         <events-entries-update
           v-model="refresh"
-          class="mx-1"
+          class="mr-1"
+          icon-only
         />
       </dev-only>
       <u-radio-group
@@ -25,12 +26,9 @@ const refresh = ref(0)
 
     <events-entries-players
       v-if="viewType === 'By Player'"
-      :refresh
+      v-model:refresh-count="refresh"
     />
 
-    <events-entries-teams
-      v-else
-      :refresh
-    />
+    <events-entries-teams v-else />
   </dashboard-subpanel>
 </template>

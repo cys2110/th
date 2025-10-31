@@ -5,14 +5,10 @@ const {
 } = useRoute("edition")
 const { viewMode } = useViewMode()
 
-const { data: edition } = await useFetch<EditionInterface>("/api/editions/edition", {
+const { data: edition, refresh } = await useFetch<EditionInterface>("/api/editions/edition", {
   query: { edId }
 })
-const {
-  data: events,
-  status,
-  refresh
-} = await useFetch<EventInterface[]>("/api/events", {
+const { data: events, status } = await useFetch<EventInterface[]>("/api/events", {
   query: { edId: edId },
   default: () => []
 })

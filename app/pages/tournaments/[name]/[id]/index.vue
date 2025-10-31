@@ -4,9 +4,9 @@ const {
   params: { id, name }
 } = useRoute("tournament")
 
-const selectedTab = ref("winners")
+const selectedTab = ref("Winners")
 
-const { data: tournament } = await useFetch<TournamentInterface>("/api/tournaments/overview", {
+const { data: tournament, refresh } = await useFetch<TournamentInterface>("/api/tournaments/overview", {
   key: `tournament-overview-${id}`,
   query: { id }
 })
@@ -20,9 +20,10 @@ const tournamentName = useState<string>("tournamentName", () => tournament.value
   <div class="w-full">
     <template v-if="tournament">
       <tournaments-winners
-        v-if="selectedTab === 'winners'"
+        v-if="selectedTab === 'Winners'"
         v-model="selectedTab"
         :tournament
+        :refresh
       />
       <tournaments-numbers
         v-else

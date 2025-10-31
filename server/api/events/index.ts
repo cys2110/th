@@ -49,7 +49,7 @@ export default defineEventHandler(async event => {
       if (event[key]) event[key] = event[key].toInt()
     }
     for (const key of dateKeys) {
-      if (event[key]) event[key] = event[key]
+      if (event[key]) event[key] = event[key].toStandardDate().toISOString().slice(0, 10)
     }
     return event
   })

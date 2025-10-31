@@ -21,7 +21,8 @@ export const getFlagCode = (country: CountryInterface) => {
     CGO: "congo-brazzaville",
     COD: "congo-kinshasa",
     TPE: "taiwan",
-    SVK: "slovakia"
+    SVK: "slovakia",
+    BIH: "bosnia-and-herzegovina"
   }
 
   if (countryMapping[country.id]) {

@@ -13,6 +13,7 @@ const {
 const {
   ui: { icons }
 } = useAppConfig()
+const { devMode } = useRuntimeConfig().public
 
 const columns: TableColumn<EventInterface>[] = [
   { accessorKey: "tour", header: "Tour" },
@@ -51,8 +52,16 @@ const handleSelect = async (e: Event, row: TableRow<EventInterface>) => {
   <table-wrapper>
     <template
       #navbar-right
-      v-if="edition.wiki_link"
+      v-if="edition.wiki_link || devMode"
     >
+      <dev-only>
+        <editions-update
+          :edition
+          :refresh
+          icon-only
+        />
+        <events-update icon-only />
+      </dev-only>
       <u-button
         :icon="ICONS.wikipedia"
         :href="edition.wiki_link"
@@ -60,10 +69,6 @@ const handleSelect = async (e: Event, row: TableRow<EventInterface>) => {
       />
     </template>
     <template #toolbar>
-      <dev-only>
-        <editions-update :edition />
-        <events-update :refresh />
-      </dev-only>
       <u-badge
         v-for="tour in edition.tours"
         :key="tour"
@@ -108,7 +113,7 @@ const handleSelect = async (e: Event, row: TableRow<EventInterface>) => {
               @click="reloadNuxtApp()"
             />
             <dev-only>
-              <events-update :refresh />
+              <events-update />
             </dev-only>
           </template>
         </u-empty>
@@ -155,13 +160,14 @@ const handleSelect = async (e: Event, row: TableRow<EventInterface>) => {
           v-if="row.original.winners?.length && row.original.winners[0]?.team[0]?.country"
           v-for="winner in row.original.winners"
           :key="winner.type"
-          class="flex items-center gap-2"
+          class="flex flex-col my-1"
         >
           <u-badge
             :label="winner.type"
             :color="winner.type"
+            class="w-full justify-center"
           />
-          <div class="flex flex-col">
+          <div class="flex flex-col ml-5">
             <players-link
               v-for="player in winner.team"
               :key="player.id"

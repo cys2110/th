@@ -19,6 +19,7 @@ const {
 const {
   ui: { icons }
 } = useAppConfig()
+const { devMode } = useRuntimeConfig().public
 const breakpoints = useBreakpoints(breakpointsTailwind, { ssrWidth: useSSRWidth() })
 const mdAndDown = breakpoints.smallerOrEqual("md")
 
@@ -48,10 +49,10 @@ onMounted(() => {
 const columns: TableColumn<EditionInterface>[] = [
   { accessorKey: "year" },
   { accessorKey: "tours" },
-  { accessorKey: "sponsor_name", header: "Sponsor Name" },
-  { accessorKey: "category", header: "Category" },
+  { accessorKey: "sponsor_name", header: "Sponsor Name", cell: cell => cell.renderValue() },
+  { accessorKey: "category", header: "Category", cell: cell => cell.renderValue() },
   { id: "dates", header: "Dates" },
-  { id: "Surface", accessorKey: "surface.id", header: "Surface" },
+  { id: "Surface", accessorKey: "surface.id", header: "Surface", cell: cell => cell.renderValue() },
   { accessorKey: "venues", header: "Venues" },
   {
     id: "Total financial commitment",
@@ -70,7 +71,7 @@ const handleSelect = async (e: Event, row: TableRow<EditionInterface>) => {
   <table-wrapper>
     <template
       #trailing
-      v-if="!mdAndDown"
+      v-if="(!mdAndDown && tournament?.established) || tournament?.abolished"
     >
       <div class="text-muted font-semibold w-full text-center">
         <span v-if="tournament?.established">{{ tournament.established }}</span>
@@ -80,8 +81,16 @@ const handleSelect = async (e: Event, row: TableRow<EditionInterface>) => {
     </template>
     <template
       #navbar-right
-      v-if="tournament.website"
+      v-if="tournament.website || devMode"
     >
+      <dev-only>
+        <tournaments-update
+          :tournament
+          :refresh
+          icon-only
+        />
+        <editions-update icon-only />
+      </dev-only>
       <u-button
         :to="tournament.website"
         target="_blank"
@@ -91,12 +100,6 @@ const handleSelect = async (e: Event, row: TableRow<EditionInterface>) => {
     </template>
 
     <template #toolbar>
-      <dev-only>
-        <div class="w-full flex justify-center items-center gap-1">
-          <tournaments-update :tournament />
-          <editions-update :refresh />
-        </div>
-      </dev-only>
       <div class="w-full flex items-center gap-1">
         <u-badge
           v-for="tour in tournament.tours"
@@ -117,8 +120,8 @@ const handleSelect = async (e: Event, row: TableRow<EditionInterface>) => {
           v-if="!COUNTRY_DRAWS.includes(id as string)"
           v-model="selectedTab"
           :items="[
-            { label: 'Winners', value: 'winners' },
-            { label: 'Numbers', value: 'numbers' }
+            { label: 'Winners', value: 'Winners' },
+            { label: 'Numbers', value: 'Numbers' }
           ]"
           size="xs"
           variant="link"
@@ -205,14 +208,6 @@ const handleSelect = async (e: Event, row: TableRow<EditionInterface>) => {
         </div>
       </template>
 
-      <template #sponsor_name-cell="{ cell }">
-        {{ cell.renderValue() }}
-      </template>
-
-      <template #category-cell="{ cell }">
-        {{ cell.renderValue() }}
-      </template>
-
       <template #dates-cell="{ row }">
         <template v-if="row.original.start_date && row.original.end_date">
           {{ dateTimeFormat.formatRange(new Date(row.original.start_date), new Date(row.original.end_date)) }}
@@ -258,17 +253,19 @@ const handleSelect = async (e: Event, row: TableRow<EditionInterface>) => {
           v-if="row.original.winners?.length"
           v-for="winner in row.original.winners"
           :key="`${winner.tour}-${winner.type}`"
-          class="flex items-center gap-2"
+          class="flex flex-col my-1.5"
         >
-          <u-badge
-            :label="TourEnum[winner.tour]"
-            :color="winner.tour"
-          />
-          <u-badge
-            :label="winner.type"
-            :color="winner.type"
-          />
-          <div class="flex flex-col">
+          <div class="flex items-center gap-1 *:w-full *:justify-center">
+            <u-badge
+              :label="TourEnum[winner.tour]"
+              :color="winner.tour"
+            />
+            <u-badge
+              :label="winner.type"
+              :color="winner.type"
+            />
+          </div>
+          <div class="flex flex-col ml-5">
             <players-link
               v-for="player in winner.team"
               :key="player.id"

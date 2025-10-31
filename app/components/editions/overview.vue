@@ -4,7 +4,7 @@ defineProps<{ edition: EditionInterface }>()
 
 <template>
   <div
-    class="columns-1 md:columns-2 lg:columns-3 gap-3 text-sm space-y-3 h-full *:border *:border-primary *:rounded-md *:p-3 *:break-inside-avoid-column *:will-change-transform *:*:first:font-semibold *:*:not-first:ml-3"
+    class="columns-1 md:columns-2 lg:columns-3 gap-3 text-sm space-y-3 h-fit *:border *:border-primary *:rounded-md *:p-3 *:break-inside-avoid-column *:will-change-transform *:*:first:font-semibold *:*:first:text-muted *:*:not-first:ml-3"
   >
     <div v-if="edition.sponsor_name">
       <div>Sponsor Name</div>

@@ -1,0 +1,163 @@
+<script setup lang="ts">
+import {
+  ColouredBadge,
+  CountryLink,
+  TableCellGroup,
+  TableHeaderFilter,
+  TableHeaderGroup,
+  TableHeaderName,
+  TableHeaderSort,
+  UButton
+} from "#components"
+import type { TableColumn, TableRow } from "@nuxt/ui"
+import { type Column, getFacetedRowModel, getFacetedUniqueValues, getGroupedRowModel, type GroupingOptions } from "@tanstack/vue-table"
+
+const {
+  params: { id, name }
+} = useRoute("country")
+
+const countryName = useState<string>("country-name")
+
+interface APIResponseType extends PlayerInterface {
+  start_date?: DateType
+  end_date?: DateType
+}
+
+// API call
+const { data: results, status } = await useFetch<APIResponseType[]>("/api/countries/players", {
+  query: { id },
+  default: () => [],
+  server: false
+})
+
+const columns = computed<TableColumn<APIResponseType>[]>(() => [
+  {
+    accessorKey: "tour",
+    filterFn: (row, columnId, filterValue) => filterIncludesString(row, columnId, filterValue),
+    header: ({ column }) => h(TableHeaderGroup, { column: column as Column<unknown>, label: "Tour" }),
+    cell: ({ row }) =>
+      h(TableCellGroup, { row: row as TableRow<unknown>, grouping: get(grouping), groupingColumnId: "tour" }, () =>
+        h(ColouredBadge, { label: row.getValue("tour") as string, class: "mx-auto" })
+      )
+  },
+  {
+    id: "country",
+    accessorFn: row => row.country.name,
+    filterFn: (row, columnId, filterValue) => filterIncludesString(row, columnId, filterValue),
+    header: ({ column }) => h(TableHeaderFilter, { column: column as Column<unknown>, label: "Country" }),
+    cell: ({ row }) => {
+      if (!row.getIsGrouped() || grouping.value.length === 0) {
+        return h(CountryLink, { country: row.original.country, iconOnly: true, class: "mx-auto" })
+      }
+    }
+  },
+  {
+    id: "name",
+    accessorFn: row => `${row.last_name}, ${row.first_name}`,
+    filterFn: (row, columnId, filterValue) => filterIncludesNameString(row, columnId, filterValue),
+    header: ({ column }) => h(TableHeaderName, { column: column as Column<unknown>, label: "Name" }),
+    cell: ({ row }) => {
+      if (!row.getIsGrouped() || grouping.value.length === 0) {
+        return `${row.original.first_name} ${row.original.last_name}`
+      }
+    }
+  },
+  {
+    id: "start",
+    accessorFn: row => (row.start_date ? getDate(row.start_date) : undefined),
+    header: ({ column }) => h(TableHeaderSort, { column: column as Column<unknown>, label: "Start of Representation", type: "number" }),
+    cell: ({ row }) => {
+      if ((!row.getIsGrouped() || grouping.value.length === 0) && row.original.start_date) {
+        return dateTimeFormat.format(getDate(row.original.start_date))
+      }
+    }
+  },
+  {
+    id: "end",
+    accessorFn: row => (row.end_date ? getDate(row.end_date) : undefined),
+    header: ({ column }) => h(TableHeaderSort, { column: column as Column<unknown>, label: "End of Representation", type: "number" }),
+    cell: ({ row }) => {
+      if ((!row.getIsGrouped() || grouping.value.length === 0) && row.original.end_date) {
+        return dateTimeFormat.format(getDate(row.original.end_date))
+      }
+    }
+  }
+])
+
+const grouping = ref<string[]>([])
+const grouping_options = ref<GroupingOptions>({
+  getGroupedRowModel: getGroupedRowModel()
+})
+
+const table = useTemplateRef("table")
+
+const handleSelectRow = async (row: TableRow<APIResponseType>) => {
+  if (row.getIsGrouped()) {
+    row.toggleExpanded()
+  } else {
+    await navigateTo({ name: "player", params: { id: row.original.id, name: kebabCase(`${row.original.first_name}-${row.original.last_name}`) } })
+  }
+}
+</script>
+
+<template>
+  <dashboard-subpanel
+    :title="`Players who represent or have represented ${countryName || capitalCase(name as string)}`"
+    :icon="ICONS.player"
+    id="players"
+  >
+    <template #right>
+      <u-button
+        label="Reset Sorting"
+        :icon="ICONS.sortAlpha"
+        @click="table?.tableApi.resetSorting()"
+        size="sm"
+      />
+
+      <u-button
+        label="Reset Grouping"
+        :icon="ICONS.ungroup"
+        @click="table?.tableApi.resetGrouping()"
+        size="sm"
+      />
+      <u-button
+        label="Reset Filters"
+        :icon="ICONS.noFilter"
+        @click="table?.tableApi.resetColumnFilters()"
+        size="sm"
+      />
+      <table-visibility
+        v-if="table"
+        :table="table!"
+      />
+    </template>
+
+    <u-table
+      ref="table"
+      :data="results"
+      :columns
+      :loading="['idle', 'pending'].includes(status)"
+      sticky
+      :faceted-options="{
+        getFacetedRowModel: getFacetedRowModel(),
+        getFacetedUniqueValues: getFacetedUniqueValues()
+      }"
+      :grouping="grouping"
+      v-on:update:grouping="grouping = $event"
+      :grouping-options="grouping_options"
+      @select="handleSelectRow"
+      :ui="{ root: 'w-fit min-w-1/3 mx-auto', tbody: '[&>tr]:cursor-pointer', td: 'empty:p-0' }"
+    >
+      <template #loading>
+        <table-loading-icon />
+      </template>
+
+      <template #empty>
+        <table-empty-message
+          :icon="ICONS.noPlayer"
+          :message="`No players who have represented ${countryName || capitalCase(name as string)}`"
+        />
+      </template>
+    </u-table>
+  </dashboard-subpanel>
+</template>

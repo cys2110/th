@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import type { FormErrorEvent, FormSubmitEvent } from "@nuxt/ui"
-const { person, type } = defineProps<{ person?: PersonInterface; type: "Umpire" | "Supervisor" | "Coach" }>()
+const { person, type, refresh } = defineProps<{
+  person?: PersonInterface
+  type: "Umpire" | "Supervisor" | "Coach"
+  refresh?: () => void
+}>()
 
 const toast = useToast()
 const {
@@ -10,20 +14,14 @@ const open = ref(false)
 const uploading = ref(false)
 
 const state = reactive<Partial<PersonSchema>>({
-  type,
-  id: person?.id,
-  first_name: person?.first_name,
-  last_name: person?.last_name
+  ...person,
+  type
 })
 
-const formFields = computed<FormFieldInterface<PersonSchema>[]>(
-  () =>
-    [
-      ...(person ? [{ label: "ID", key: "id", type: "text", required: true }] : []),
-      { label: "First Name", key: "first_name", type: "text", required: true },
-      { label: "Last Name", key: "last_name", type: "text", required: true }
-    ] as FormFieldInterface<PersonSchema>[]
-)
+const formFields: FormFieldInterface<PersonSchema>[] = [
+  { label: "First Name", key: "first_name", type: "text" },
+  { label: "Last Name", key: "last_name", type: "text" }
+]
 
 const handleReset = () => {
   state.id = person?.id
@@ -32,6 +30,7 @@ const handleReset = () => {
 }
 
 const onError = (event: FormErrorEvent) => {
+  console.error(event.errors)
   toast.add({
     title: "Please ensure fields are filled out correctly",
     description: event.errors.map(e => e.message).join(", "),
@@ -54,6 +53,9 @@ const onSubmit = async (event: FormSubmitEvent<PersonSchema>) => {
         color: "success"
       })
       handleReset()
+      if (refresh) {
+        refresh()
+      }
       set(open, false)
     } else {
       toast.add({
@@ -78,7 +80,7 @@ const onSubmit = async (event: FormSubmitEvent<PersonSchema>) => {
 
 <template>
   <u-modal
-    :title="person ? `Edit ${person.first_name} ${person.last_name}` : `Create ${type}`"
+    :title="person ? `Edit ${person.last_name ? `${person.first_name} ${person.last_name}` : person.id}` : `Create ${type}`"
     v-model:open="open"
     :ui="{ footer: '*:rounded-md!' }"
   >
@@ -86,7 +88,7 @@ const onSubmit = async (event: FormSubmitEvent<PersonSchema>) => {
       :icon="person ? ICONS.edit : icons.plus"
       block
       size="xs"
-      :label="person ? `${person.first_name} ${person.last_name}` : `Create ${type}`"
+      :label="person ? `Edit ${person.last_name ? `${person.first_name} ${person.last_name}` : person.id}` : `Create ${type}`"
       :color="person && !person.last_name ? 'warning' : undefined"
     />
 
@@ -99,11 +101,11 @@ const onSubmit = async (event: FormSubmitEvent<PersonSchema>) => {
         @error="onError"
       >
         <div class="grid grid-cols-2 gap-5 items-center **:rounded-md!">
-          <form-field
+          <form-input
             v-for="field in formFields"
             :key="field.label"
-            :field="field"
-            v-model="state[field.key]"
+            v-model="(state[field.key] as string)"
+            :placeholder="field.label"
           />
         </div>
       </u-form>

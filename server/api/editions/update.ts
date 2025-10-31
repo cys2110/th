@@ -3,7 +3,7 @@ import { int, Date as NeoDate } from "neo4j-driver"
 export default defineEventHandler(async event => {
   interface QueryProps {
     id: string
-    tournament: SelectOptionsType
+    tournament: string
     year: string
     tours: (keyof typeof TourEnum)[]
     start_date: any
@@ -16,7 +16,7 @@ export default defineEventHandler(async event => {
     draw_link: string
     category: string
     wiki_link: string
-    venues: SelectOptionsType[] | SelectOptionsType
+    venues: string[] | string
   }
   const {
     id,
@@ -41,10 +41,10 @@ export default defineEventHandler(async event => {
 
   const formattedParams = {
     id: int(id),
-    tournament: int(tournament.value),
+    tournament: int(tournament),
     year: int(year),
     tfc: int(tfc),
-    venues: venues ? (Array.isArray(venues) ? venues.map(v => v.value) : [venues.value]) : [],
+    venues: venues ? (Array.isArray(venues) ? venues : [venues]) : [],
     tours: tours ? (Array.isArray(tours) ? tours : [tours]) : [],
     start_date: startDate ? NeoDate.fromStandardDate(new Date(startDate.year, startDate.month - 1, startDate.day)) : null,
     end_date: endDate ? NeoDate.fromStandardDate(new Date(endDate.year, endDate.month - 1, endDate.day)) : null,

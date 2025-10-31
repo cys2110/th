@@ -23,18 +23,15 @@ defineShortcuts({
 })
 
 const state = reactive<Partial<SeedInput>>({
+  ...seed,
   event: `${edId}-${tour}`,
-  draw: seed?.draw,
-  type: seed?.type,
-  seed: seed?.seed,
-  rank: seed?.rank,
   team: seed ? { value: seed.id, label: seed.team.map((p: any) => `${p.first_name} ${p.last_name}`).join(" / ") } : undefined
 })
 
 const formFields: FormFieldInterface<SeedSchema>[] = [
-  { label: "Draw", key: "draw", type: "radio", items: ["Main", "Qualifying"], required: true },
-  { label: "Type", key: "type", type: "radio", items: ["Singles", "Doubles"], required: true },
-  { label: "Seed", key: "seed", type: "number", required: true },
+  { label: "Draw", key: "draw", type: "radio", items: ["Main", "Qualifying"] },
+  { label: "Type", key: "type", type: "radio", items: ["Singles", "Doubles"] },
+  { label: "Seed", key: "seed", type: "number" },
   { label: "Rank", key: "rank", type: "number" }
 ]
 
@@ -47,6 +44,7 @@ const handleReset = () => {
 }
 
 const onError = (event: FormErrorEvent) => {
+  console.error(event.errors)
   toast.add({
     title: "Please ensure fields are filled out correctly",
     description: event.errors.map(e => e.message).join(", "),
@@ -68,7 +66,8 @@ const onSubmit = async (event: FormSubmitEvent<SeedSchema>) => {
         icon: icons.success,
         color: "success"
       })
-      handleReset()
+      state.rank = seed?.rank
+      state.team = seed ? { value: seed.id, label: seed.team.map((p: any) => `${p.first_name} ${p.last_name}`).join(" / ") } : undefined
       set(open, false)
       refresh()
     } else {
@@ -100,8 +99,15 @@ const onSubmit = async (event: FormSubmitEvent<SeedSchema>) => {
     <u-button
       :icon="seed ? ICONS.edit : icons.plus"
       block
-      :label="iconOnly ? undefined : 'Create Seed'"
-    />
+    >
+      <template
+        #default
+        v-if="!iconOnly"
+      >
+        <slot />
+        <template v-if="!$slots['default']"> Create Seed </template>
+      </template>
+    </u-button>
 
     <template #body>
       <u-form
@@ -112,25 +118,36 @@ const onSubmit = async (event: FormSubmitEvent<SeedSchema>) => {
         @error="onError"
       >
         <div class="grid grid-cols-2 gap-5 items-center">
-          <form-field
+          <template
             v-for="field in formFields"
             :key="field.label"
-            :field
-            v-model="state[field.key]"
-          />
-
-          <div class="col-span-2">
-            <form-select-search
-              v-if="state.type"
-              v-model="state.team"
-              type="events/entries"
-              :placeholder="state.type === 'Doubles' ? 'Select Team' : 'Select Player'"
-              :id="edId"
-              :tour="(tour as keyof typeof TourEnum)"
-              :match-type="state.type"
-              block
+          >
+            <u-radio-group
+              v-if="field.type === 'radio'"
+              v-model="(state[field.key] as string)"
+              :items="field.items"
+              :legend="field.label"
+              orientation="horizontal"
             />
-          </div>
+
+            <form-input-number
+              v-else-if="field.type === 'number'"
+              v-model="(state[field.key] as number)"
+              :placeholder="field.label"
+            />
+          </template>
+
+          <form-select-search
+            v-if="state.type"
+            class="col-span-2"
+            v-model="state.team"
+            type="events/entries"
+            :placeholder="state.type === 'Doubles' ? 'Select Team' : 'Select Player'"
+            :id="edId"
+            :tour="(tour as keyof typeof TourEnum)"
+            :match-type="state.type"
+            block
+          />
         </div>
       </u-form>
     </template>

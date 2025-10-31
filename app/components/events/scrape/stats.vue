@@ -2,7 +2,7 @@
 import { type FormErrorEvent, type FormSubmitEvent } from "@nuxt/ui"
 
 const {
-  params: { tour, edId }
+  params: { tour, edId, year }
 } = useRoute("event")
 const {
   ui: { icons }
@@ -17,19 +17,18 @@ defineShortcuts({
 })
 
 const state = reactive<Partial<ScrapeInput>>({
-  eid: edId,
-  type: "Singles"
+  eid: Number(edId),
+  type: "Singles",
+  year: Number(year)
 })
 
 const formFields = computed<FormFieldInterface<ScrapeSchema>[]>(
   () =>
     [
-      { label: "Event ID", key: "eid", type: "text", subType: "number", required: true },
-      ...(tour === "WTA" ? [{ label: "WTA ID", key: "wid", type: "text", subType: "number", required: true }] : []),
-      ...(tour === "WTA" ? [{ label: "Year", key: "year", type: "text", subType: "number", required: true }] : []),
-      { label: "Match Type", key: "type", type: "radio", items: ["Singles", "Doubles"], required: true },
-      ...(tour === "WTA" ? [{ label: "Draw", key: "draw", type: "radio", items: ["Main", "Qualifying"], required: true }] : []),
-      ...(tour === "WTA" ? [{ label: "Draw Range", key: "draw_range", type: "tags", max: 2, required: true }] : []),
+      ...(tour === "WTA" ? [{ label: "WTA ID", key: "wid", type: "text", subType: "number" }] : []),
+      { label: "Match Type", key: "type", type: "radio", items: ["Singles", "Doubles"] },
+      ...(tour === "WTA" ? [{ label: "Draw", key: "draw", type: "radio", items: ["Main", "Qualifying"] }] : []),
+      ...(tour === "WTA" ? [{ label: "Draw Range", key: "draw_range", type: "tags", max: 2 }] : []),
       ...(tour === "WTA" ? [{ label: "Matches to Skip", key: "skip", type: "tags" }] : []),
       ...(tour === "ATP" ? [{ label: "Links", key: "links", type: "tags", class: "col-span-2" }] : [])
     ] as FormFieldInterface<ScrapeSchema>[]
@@ -41,6 +40,7 @@ const handleReset = () => {
 }
 
 const onError = (event: FormErrorEvent) => {
+  console.error(event.errors)
   toast.add({
     title: "Please ensure fields are filled out correctly",
     description: event.errors.map(e => e.message).join(", "),
@@ -64,7 +64,7 @@ const onSubmit = async (event: FormSubmitEvent<ScrapeSchema>) => {
         icon: icons.success,
         color: "success"
       })
-      handleReset()
+      state.links = []
       set(open, false)
     } else {
       toast.add({
@@ -106,12 +106,40 @@ const onSubmit = async (event: FormSubmitEvent<ScrapeSchema>) => {
         @error="onError"
       >
         <div class="grid grid-cols-2 gap-5">
-          <form-field
+          <template
             v-for="field in formFields"
-            :key="field.key"
-            :field
-            v-model="state[field.key]"
-          />
+            :key="field.label"
+          >
+            <form-input
+              v-if="field.type === 'text'"
+              v-model="(state[field.key] as any)"
+              :placeholder="field.label"
+              :type="field.subType"
+              :class="field.class"
+            />
+
+            <form-input-number
+              v-else-if="field.type === 'number'"
+              v-model="(state[field.key] as number)"
+              :placeholder="field.label"
+            />
+
+            <form-tags
+              v-else-if="field.type === 'tags'"
+              v-model="(state[field.key] as string[])"
+              :placeholder="field.label"
+              :class="field.class"
+              :max="field.max"
+            />
+
+            <u-radio-group
+              v-else
+              :legend="field.label"
+              v-model="(state[field.key] as string)"
+              :items="field.items"
+              orientation="horizontal"
+            />
+          </template>
         </div>
       </u-form>
     </template>

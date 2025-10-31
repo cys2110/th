@@ -2,7 +2,7 @@
 import type { FormErrorEvent, FormSubmitEvent } from "@nuxt/ui"
 
 const {
-  params: { year }
+  params: { id, year, edId }
 } = useRoute("event")
 const {
   ui: { icons }
@@ -17,16 +17,15 @@ defineShortcuts({
 })
 
 const state = reactive<Partial<ScrapeInput>>({
-  year: Number(year),
+  tid: Number(id),
+  year: Number(edId.replace(id, "")),
+  year2: Number(year),
   type: "Singles"
 })
 
 const formFields: FormFieldInterface<ScrapeSchema>[] = [
-  { label: "DB ID", key: "tid", type: "text", subType: "number", required: true },
   { label: "Site ID", key: "tid2", type: "text", subType: "number" },
-  { label: "Year Slug", key: "year", type: "text", subType: "number", required: true },
-  { label: "Year", key: "year2", type: "text", subType: "number" },
-  { label: "Match Type", key: "type", type: "radio", items: ["Singles", "Doubles"], required: true }
+  { label: "Match Type", key: "type", type: "radio", items: ["Singles", "Doubles"] }
 ]
 
 const handleReset = () => {
@@ -35,6 +34,7 @@ const handleReset = () => {
 }
 
 const onError = (event: FormErrorEvent) => {
+  console.error(event.errors)
   toast.add({
     title: "Please ensure fields are filled out correctly",
     description: event.errors.map(e => e.message).join(", "),
@@ -105,14 +105,29 @@ const onSubmit = async (event: FormSubmitEvent<ScrapeSchema>) => {
         :schema="scrapeSchema"
         :state
         @submit="onSubmit"
+        @error="onError"
       >
-        <div class="grid grid-cols-2 gap-5">
-          <form-field
+        <div class="grid grid-cols-2 gap-5 items-center">
+          <template
             v-for="field in formFields"
-            :key="field.key"
-            :field
-            v-model="state[field.key]"
-          />
+            :key="field.label"
+          >
+            <form-input
+              v-if="field.type === 'text'"
+              v-model="(state[field.key] as any)"
+              :placeholder="field.label"
+              :type="field.subType"
+              :class="field.class"
+            />
+
+            <u-radio-group
+              v-else
+              :legend="field.label"
+              v-model="(state[field.key] as string)"
+              :items="field.items"
+              orientation="horizontal"
+            />
+          </template>
         </div>
       </u-form>
     </template>

@@ -2,8 +2,9 @@
 const {
   params: { id, tour, edId }
 } = useRoute("event")
+const { devMode } = useRuntimeConfig().public
 
-const { data: event } = await useFetch<EventInterface>("/api/events/event", {
+const { data: event, refresh } = await useFetch<EventInterface>("/api/events/event", {
   key: `${edId}-${tour}`,
   query: { id: `${edId}-${tour}` }
 })
@@ -11,12 +12,20 @@ const { data: event } = await useFetch<EventInterface>("/api/events/event", {
 
 <template>
   <events-wrapper-table>
+    <template
+      #navbar-right
+      v-if="devMode"
+    >
+      <events-update
+        v-if="event"
+        :event
+        :refresh
+        icon-only
+      />
+    </template>
+
     <template #toolbar>
       <dev-only>
-        <events-update
-          v-if="event"
-          :event
-        />
         <events-scrape-draw v-if="['ATP', 'WTA'].includes(tour)" />
         <events-scrape-results v-if="tour === 'ATP'" />
         <events-scrape-stats v-if="['ATP', 'WTA'].includes(tour)" />

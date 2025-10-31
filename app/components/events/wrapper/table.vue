@@ -31,6 +31,7 @@ const toc = [
 <template>
   <table-wrapper>
     <template #navbar-right>
+      <slot name="navbar-right" />
       <u-dropdown-menu
         v-if="routeName === 'event' && !COUNTRY_DRAWS.includes(id)"
         :items="toc"
@@ -43,9 +44,9 @@ const toc = [
         target="_blank"
       />
       <u-button
-        v-if="event?.wiki_link"
+        v-if="event?.wiki_link || event?.edition.wiki_link"
         :icon="ICONS.wikipedia"
-        :to="event.wiki_link"
+        :to="event.wiki_link || event.edition.wiki_link"
         target="_blank"
       />
       <u-dropdown-menu

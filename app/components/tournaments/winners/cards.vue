@@ -57,24 +57,27 @@ const breadcrumbs: BreadcrumbItem[] = [
     <u-page>
       <template #left>
         <u-page-aside>
+          <u-tabs
+            v-if="!COUNTRY_DRAWS.includes(id as string)"
+            v-model="selectedTab"
+            :items="[
+              { label: 'Winners', value: 'Winners' },
+              { label: 'Numbers', value: 'Numbers' }
+            ]"
+            variant="link"
+            orientation="vertical"
+          />
           <dev-only>
-            <tournaments-update :tournament />
-            <editions-update :refresh />
+            <tournaments-update
+              :tournament
+              :refresh
+            />
+            <editions-update />
           </dev-only>
           <u-badge
             color="success"
             :label="`Updated: ${useDateFormat(tournament.updated_at, 'DD MMMM YYYY').value}`"
             class="w-full justify-center"
-          />
-          <u-tabs
-            v-if="!COUNTRY_DRAWS.includes(id as string)"
-            v-model="selectedTab"
-            :items="[
-              { label: 'Winners', value: 'winners' },
-              { label: 'Numbers', value: 'numbers' }
-            ]"
-            variant="link"
-            orientation="vertical"
           />
           <u-button
             label="Reset Filters"
@@ -269,12 +272,13 @@ const breadcrumbs: BreadcrumbItem[] = [
                     <div
                       v-for="venue in edition.venues"
                       :key="venue.id"
-                      class="flex items-center gap-1 w-fit"
+                      class="flex flex-wrap items-center gap-1 w-fit"
                     >
                       <span>{{ venue.name ? `${venue.name}, ${venue.city}` : venue.city }}</span>
                       <countries-link
                         :country="venue.country"
                         icon-only
+                        class="mx-0"
                       />
                     </div>
                   </div>
@@ -292,19 +296,21 @@ const breadcrumbs: BreadcrumbItem[] = [
                     <div
                       v-for="winner in edition.winners"
                       :key="`${winner.tour}-${winner.type}`"
-                      class="flex items-center gap-2 w-fit"
+                      class="flex flex-col gap-1 my-2"
                     >
-                      <u-badge
-                        :label="TourEnum[winner.tour]"
-                        :color="winner.tour"
-                        size="sm"
-                      />
-                      <u-badge
-                        :label="winner.type"
-                        :color="winner.type"
-                        size="sm"
-                      />
-                      <div class="flex flex-col">
+                      <div class="flex gap-2">
+                        <u-badge
+                          :label="TourEnum[winner.tour]"
+                          :color="winner.tour"
+                          class="w-full justify-center"
+                        />
+                        <u-badge
+                          :label="winner.type"
+                          :color="winner.type"
+                          class="w-full justify-center"
+                        />
+                      </div>
+                      <div class="flex flex-col ml-3">
                         <players-link
                           v-for="player in winner.team"
                           :key="player.id"

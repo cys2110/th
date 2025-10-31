@@ -15,7 +15,7 @@ export default defineEventHandler(async event => {
     skip: int(skip),
     tours,
     years: years.map((y: string) => int(y)),
-    winners: Array.isArray(winners) ? winners.map((w: SelectOptionsType) => w.value) : [winners.value]
+    winners: Array.isArray(winners) ? winners : [winners]
   }
 
   const { records, summary } = await useDriver().executeQuery(
@@ -43,7 +43,7 @@ export default defineEventHandler(async event => {
       LIMIT 40
       OPTIONAL MATCH (e)-[:TOOK_PLACE_IN]->(v:Venue)-[:LOCATED_IN]->(c:Country)
       OPTIONAL MATCH (e)-[:ON_SURFACE]->(s:Surface)
-      WITH e, y, s, CASE WHEN COUNT(v) = 0 THEN [] ELSE COLLECT(DISTINCT apoc.map.merge(properties(v), {country: properties(v)})) END AS venues
+      WITH e, y, s, CASE WHEN COUNT(v) = 0 THEN [] ELSE COLLECT(DISTINCT apoc.map.merge(properties(v), {country: properties(c)})) END AS venues
       CALL (e) {
         OPTIONAL MATCH (e)<-[:EVENT_OF]-(event:Event)<-[:ROUND_OF]-(:Round {round: 'Final'})<-[:PLAYED]-(:Match)<-[:SCORED]-(:Winner)<-[:SCORED]-(f:Entry)<-[:ENTERED]-(p:Player)-[:REPRESENTS]->(country:Country)
         CALL (p, country, e, event) {
@@ -61,7 +61,7 @@ export default defineEventHandler(async event => {
         ORDER BY tour, type DESC
         RETURN COLLECT(DISTINCT{team: team, type: type, tour: tour}) AS winners
       }
-      WITH e, y, s, venues, winners, [x IN labels(e) WHERE x <> 'Edition'] AS tours, [x IN winners | [j IN x.team | j.id]] AS winner_ids
+      WITH e, y, s, venues, winners, [x IN labels(e) WHERE x <> 'Edition'] AS tours, apoc.coll.flatten([x IN winners | [j IN x.team | j.id]]) AS winner_ids
       WHERE SIZE($winners) = 0 OR ANY(id IN winner_ids WHERE id IN $winners)
       RETURN apoc.map.clean(apoc.map.merge(properties(e), { tours: tours, year: y.id, surface: properties(s), venues: venues, winners: winners }), [], [null]) AS edition
     }
@@ -89,7 +89,7 @@ export default defineEventHandler(async event => {
       if (edition[key]) edition[key] = edition[key].toInt()
     }
 
-    const dateKeys = ["start_date", "end_date"]
+    const dateKeys = ["start_date", "end_date", "updated_at"]
     for (const key of dateKeys) {
       if (edition[key]) edition[key] = edition[key].toStandardDate().toISOString().slice(0, 10)
     }

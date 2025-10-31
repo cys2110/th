@@ -65,7 +65,7 @@ export default defineEventHandler(async event => {
 
   const results = records.map(record => {
     const entry = record.get("entry")
-    const numberKeys = ["seed", "q_seed", "rank"]
+    const numberKeys = ["seed", "q_seed", "rank", "points", "pm"]
 
     for (const key of numberKeys) {
       if (entry.singles?.[key]) entry.singles[key] = entry.singles[key].toInt()

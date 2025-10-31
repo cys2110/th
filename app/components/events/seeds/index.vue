@@ -9,8 +9,6 @@ const {
 const {
   ui: { icons }
 } = useAppConfig()
-const overlay = useOverlay()
-const editSeed = overlay.create(EventsSeedsUpdate)
 
 const {
   data: seeds,
@@ -102,9 +100,13 @@ const columns: TableColumn<ConsolidatedSeed>[] = [
   })
 ]
 
-const handleEditSeed = (seed: number, type: "Singles" | "Doubles", draw: "Main" | "Qualifying") => {
-  const existingSeed = seeds.value.find(s => s.seed === seed && s.type === type && s.draw === draw)
-  editSeed.open({ seed: existingSeed, refresh })
+const columnPinning = ref({
+  left: ["seed"],
+  right: []
+})
+
+const getSeed = (seed: number, type: "Singles" | "Doubles", draw: "Main" | "Qualifying") => {
+  return seeds.value.find(s => s.seed === seed && s.type === type && s.draw === draw)
 }
 </script>
 
@@ -121,7 +123,10 @@ const handleEditSeed = (seed: number, type: "Singles" | "Doubles", draw: "Main" 
           icon-only
         />
       </dev-only>
-      <events-seeds-chart :seeds />
+      <events-seeds-chart
+        v-if="seeds.length"
+        :seeds
+      />
     </template>
 
     <u-table
@@ -130,6 +135,7 @@ const handleEditSeed = (seed: number, type: "Singles" | "Doubles", draw: "Main" 
       :loading="status === 'pending'"
       sticky
       render-fallback-value="—"
+      v-model:column-pinning="columnPinning"
       class="max-h-150"
     >
       <template #loading>
@@ -140,7 +146,8 @@ const handleEditSeed = (seed: number, type: "Singles" | "Doubles", draw: "Main" 
         <u-empty
           title="No seeds found"
           :icon="ICONS.noTournament"
-          description="Please be patient as we work to add more data."
+          description="If you think this is an error, refresh the page. Otherwise, please be patient as we continue to add more data."
+          class="mx-2"
         >
           <template #actions>
             <u-button
@@ -156,86 +163,189 @@ const handleEditSeed = (seed: number, type: "Singles" | "Doubles", draw: "Main" 
       </template>
 
       <template #mainSinglesTeam-cell="{ row }">
-        <div class="flex items-center gap-2">
-          <players-link
+        <dev-only>
+          <events-seeds-update
             v-if="row.original.mainSinglesTeam.players.length"
-            :player="row.original.mainSinglesTeam.players[0]!"
-            class="mx-auto"
-            :strikethrough="row.original.mainSinglesTeam.withdrew"
-          />
-          <template v-else>{{ "—" }}</template>
-          <dev-only>
-            <events-seeds-update
-              :refresh
-              icon-only
+            :refresh
+            :seed="getSeed(row.original.seed as number, 'Singles', 'Main')"
+          >
+            <players-link
+              :player="row.original.mainSinglesTeam.players[0]!"
+              class="mx-auto"
+              :strikethrough="row.original.mainSinglesTeam.withdrew"
             />
-          </dev-only>
-        </div>
+          </events-seeds-update>
+          <template v-else>—</template>
+          <template #fallback>
+            <players-link
+              v-if="row.original.mainSinglesTeam.players.length"
+              :player="row.original.mainSinglesTeam.players[0]!"
+              class="mx-auto"
+              :strikethrough="row.original.mainSinglesTeam.withdrew"
+            />
+            <template v-else>—</template>
+          </template>
+        </dev-only>
       </template>
 
-      <template #mainSinglesRank-cell="{ cell }">
-        {{ isDefined(cell.getValue()) ? cell.getValue()!.toLocaleString() : cell.renderValue() }}
+      <template #mainSinglesRank-cell="{ cell, row }">
+        <dev-only>
+          <events-seeds-update
+            v-if="isDefined(cell.getValue())"
+            :refresh
+            :seed="getSeed(row.original.seed as number, 'Singles', 'Main')"
+          >
+            {{ isDefined(cell.getValue()) ? cell.getValue()!.toLocaleString() : cell.renderValue() }}
+          </events-seeds-update>
+          <template v-else>
+            {{ isDefined(cell.getValue()) ? cell.getValue()!.toLocaleString() : cell.renderValue() }}
+          </template>
+          <template #fallback>
+            {{ isDefined(cell.getValue()) ? cell.getValue()!.toLocaleString() : cell.renderValue() }}
+          </template>
+        </dev-only>
       </template>
 
       <template #qualSinglesTeam-cell="{ row }">
-        <div
-          @click.capture.prevent="devMode ? handleEditSeed(row.original.seed!, 'Singles', 'Qualifying') : undefined"
-          :class="{ 'cursor-pointer': devMode }"
-        >
-          <players-link
+        <dev-only>
+          <events-seeds-update
             v-if="row.original.qualSinglesTeam.players.length"
-            :player="row.original.qualSinglesTeam.players[0]!"
-            class="mx-auto"
-            :strikethrough="row.original.qualSinglesTeam.withdrew"
-          />
-          <template v-else>{{ "—" }}</template>
-        </div>
+            :refresh
+            :seed="getSeed(row.original.seed as number, 'Singles', 'Qualifying')"
+          >
+            <players-link
+              :player="row.original.qualSinglesTeam.players[0]!"
+              class="mx-auto"
+              :strikethrough="row.original.qualSinglesTeam.withdrew"
+            />
+          </events-seeds-update>
+          <template v-else>—</template>
+          <template #fallback>
+            <players-link
+              v-if="row.original.qualSinglesTeam.players.length"
+              :player="row.original.qualSinglesTeam.players[0]!"
+              class="mx-auto"
+              :strikethrough="row.original.qualSinglesTeam.withdrew"
+            />
+            <template v-else>—</template>
+          </template>
+        </dev-only>
       </template>
 
       <template #qualSinglesRank-cell="{ cell, row }">
-        {{ isDefined(cell.getValue()) ? cell.getValue()!.toLocaleString() : cell.renderValue() }}
+        <dev-only>
+          <events-seeds-update
+            v-if="isDefined(cell.getValue())"
+            :refresh
+            :seed="getSeed(row.original.seed as number, 'Singles', 'Qualifying')"
+          >
+            {{ isDefined(cell.getValue()) ? cell.getValue()!.toLocaleString() : cell.renderValue() }}
+          </events-seeds-update>
+          <template v-else>
+            {{ isDefined(cell.getValue()) ? cell.getValue()!.toLocaleString() : cell.renderValue() }}
+          </template>
+          <template #fallback>
+            {{ isDefined(cell.getValue()) ? cell.getValue()!.toLocaleString() : cell.renderValue() }}
+          </template>
+        </dev-only>
       </template>
 
       <template #mainDoublesTeam-cell="{ row }">
-        <div
-          @click.capture.prevent="devMode ? handleEditSeed(row.original.seed!, 'Doubles', 'Main') : undefined"
-          :class="{ 'cursor-pointer': devMode }"
-        >
-          <players-link
+        <dev-only>
+          <events-seeds-update
             v-if="row.original.mainDoublesTeam.players.length"
-            v-for="player in row.original.mainDoublesTeam.players"
-            :key="player.id"
-            :player="player"
-            class="mx-auto"
-            :strikethrough="row.original.mainDoublesTeam.withdrew"
-          />
-          <template v-else>{{ "—" }}</template>
-        </div>
+            :refresh
+            :seed="getSeed(row.original.seed as number, 'Doubles', 'Main')"
+          >
+            <div class="flex flex-col">
+              <players-link
+                v-for="player in row.original.mainDoublesTeam.players"
+                :key="player.id"
+                :player
+                :strikethrough="row.original.mainDoublesTeam.withdrew"
+              />
+            </div>
+          </events-seeds-update>
+          <template v-else>—</template>
+          <template #fallback>
+            <players-link
+              v-if="row.original.mainDoublesTeam.players.length"
+              v-for="player in row.original.mainDoublesTeam.players"
+              :key="player.id"
+              :player
+              class="mx-auto"
+              :strikethrough="row.original.mainDoublesTeam.withdrew"
+            />
+            <template v-else>—</template>
+          </template>
+        </dev-only>
       </template>
 
       <template #mainDoublesRank-cell="{ cell, row }">
-        {{ isDefined(cell.getValue()) ? cell.getValue()!.toLocaleString() : cell.renderValue() }}
+        <dev-only>
+          <events-seeds-update
+            v-if="isDefined(cell.getValue())"
+            :refresh
+            :seed="getSeed(row.original.seed as number, 'Doubles', 'Main')"
+          >
+            {{ isDefined(cell.getValue()) ? cell.getValue()!.toLocaleString() : cell.renderValue() }}
+          </events-seeds-update>
+          <template v-else>
+            {{ isDefined(cell.getValue()) ? cell.getValue()!.toLocaleString() : cell.renderValue() }}
+          </template>
+          <template #fallback>
+            {{ isDefined(cell.getValue()) ? cell.getValue()!.toLocaleString() : cell.renderValue() }}
+          </template>
+        </dev-only>
       </template>
 
       <template #qualDoublesTeam-cell="{ row }">
-        <div
-          @click.capture.prevent="devMode ? handleEditSeed(row.original.seed!, 'Doubles', 'Qualifying') : undefined"
-          :class="{ 'cursor-pointer': devMode }"
-        >
-          <players-link
+        <dev-only>
+          <events-seeds-update
             v-if="row.original.qualDoublesTeam.players.length"
-            v-for="player in row.original.qualDoublesTeam.players"
-            :key="player.id"
-            :player="player"
-            class="mx-auto"
-            :strikethrough="row.original.qualDoublesTeam.withdrew"
-          />
-          <template v-else>{{ "—" }}</template>
-        </div>
+            :refresh
+            :seed="getSeed(row.original.seed as number, 'Doubles', 'Qualifying')"
+          >
+            <div class="flex flex-col">
+              <players-link
+                v-for="player in row.original.qualDoublesTeam.players"
+                :key="player.id"
+                :player
+                :strikethrough="row.original.qualDoublesTeam.withdrew"
+              />
+            </div>
+          </events-seeds-update>
+          <template v-else>—</template>
+          <template #fallback>
+            <players-link
+              v-if="row.original.qualDoublesTeam.players.length"
+              v-for="player in row.original.qualDoublesTeam.players"
+              :key="player.id"
+              :player
+              class="mx-auto"
+              :strikethrough="row.original.qualDoublesTeam.withdrew"
+            />
+            <template v-else>—</template>
+          </template>
+        </dev-only>
       </template>
 
       <template #qualDoublesRank-cell="{ cell, row }">
-        {{ isDefined(cell.getValue()) ? cell.getValue()!.toLocaleString() : cell.renderValue() }}
+        <dev-only>
+          <events-seeds-update
+            v-if="isDefined(cell.getValue())"
+            :refresh
+            :seed="getSeed(row.original.seed as number, 'Doubles', 'Qualifying')"
+          >
+            {{ isDefined(cell.getValue()) ? cell.getValue()!.toLocaleString() : cell.renderValue() }}
+          </events-seeds-update>
+          <template v-else>
+            {{ isDefined(cell.getValue()) ? cell.getValue()!.toLocaleString() : cell.renderValue() }}
+          </template>
+          <template #fallback>
+            {{ isDefined(cell.getValue()) ? cell.getValue()!.toLocaleString() : cell.renderValue() }}
+          </template>
+        </dev-only>
       </template>
     </u-table>
   </dashboard-subpanel>

@@ -63,7 +63,7 @@ export default defineAppConfig({
     badge: { defaultVariants: { variant: "subtle" } },
     button: {
       slots: { base: "cursor-pointer" },
-      defaultVariants: { variant: "subtle", size: "sm" }
+      defaultVariants: { variant: "subtle", size: "xs" }
     },
     calendar: { slots: { cell: "cursor-pointer" } },
     checkbox: { slots: { base: "cursor-pointer", label: "cursor-pointer" }, defaultVariants: { size: "sm" } },

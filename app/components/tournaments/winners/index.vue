@@ -1,5 +1,9 @@
 <script setup lang="ts">
-defineProps<{ tournament: TournamentInterface }>()
+defineProps<{
+  tournament: TournamentInterface
+  refresh: () => void
+}>()
+
 const { viewMode } = useViewMode()
 const selectedTab = defineModel<string>()
 const {
@@ -26,9 +30,9 @@ const reset = () => {
   set(editions, [])
 }
 
-watchDeep(filters, reset)
+watchDeep(filters, reset, { immediate: false })
 
-const { data, status, execute, refresh } = await useFetch<{ count: number; editions: EditionInterface[] }>("/api/editions", {
+const { data, status, execute } = await useFetch<{ count: number; editions: EditionInterface[] }>("/api/editions", {
   query: { skip, filters, id },
   default: () => ({ count: 0, editions: [] }),
   onResponse: ({ response }) => {

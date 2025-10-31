@@ -7,10 +7,7 @@ const {
 const {
   params: { edId, tour }
 } = useRoute("event")
-const { devMode } = useRuntimeConfig().public
 const toast = useToast()
-const overlay = useOverlay()
-const editEntryInfo = overlay.create(EventsEntryInfoUpdate)
 const updating = ref(false)
 
 defineShortcuts({
@@ -67,14 +64,6 @@ const updateEntryInfo = async () => {
     set(updating, false)
   }
 }
-
-const handleEditEntryInfo = (relationship: string, entry: EntryInterface) => {
-  editEntryInfo.open({
-    relationship,
-    entry,
-    refresh
-  })
-}
 </script>
 
 <template>
@@ -89,7 +78,10 @@ const handleEditEntryInfo = (relationship: string, entry: EntryInterface) => {
           @click="updateEntryInfo"
           :icon="updating ? ICONS.uploading : icons.upload"
         />
-        <events-entry-info-update :refresh />
+        <events-entry-info-update
+          :refresh
+          icon-only
+        />
       </dev-only>
       <events-entry-info-chart
         v-if="data.length"
@@ -117,11 +109,7 @@ const handleEditEntryInfo = (relationship: string, entry: EntryInterface) => {
           :key="`${relationship.relationship}-${index}`"
           class="flex justify-between items-center text-sm gap-3 my-1"
         >
-          <div
-            class="flex items-center gap-2"
-            @click.capture.prevent="devMode ? handleEditEntryInfo(relationship.relationship, entry) : undefined"
-            :class="{ 'cursor-pointer': devMode }"
-          >
+          <div class="flex items-center gap-2">
             <u-badge
               :color="entry.type"
               :label="entry.type"
@@ -143,14 +131,32 @@ const handleEditEntryInfo = (relationship: string, entry: EntryInterface) => {
             </template>
           </div>
 
-          <div>
-            <span v-if="relationship.relationship === 'Last Direct Acceptance' && entry.rank">
-              {{ (entry.status === "PR" && entry.draw === "Main") || (entry.q_status === "PR" && entry.draw === "Qualifying") ? "P" : ""
-              }}{{ entry.rank }}
-            </span>
-            <span v-else-if="['Withdrawal', 'Retirement', 'Walkover', 'Default'].includes(relationship.relationship) && entry.reason">
-              {{ entry.teammate ? `${entry.reason} (${entry.teammate})` : entry.reason }}
-            </span>
+          <div v-if="entry.rank || entry.reason">
+            <dev-only>
+              <events-entry-info-update
+                :relationship="relationship.relationship"
+                :entry
+                :refresh
+              >
+                <span v-if="relationship.relationship === 'Last Direct Acceptance' && entry.rank">
+                  {{ (entry.status === "PR" && entry.draw === "Main") || (entry.q_status === "PR" && entry.draw === "Qualifying") ? "P" : ""
+                  }}{{ entry.rank }}
+                </span>
+                <span v-else-if="['Withdrawal', 'Retirement', 'Walkover', 'Default'].includes(relationship.relationship) && entry.reason">
+                  {{ entry.teammate ? `${entry.reason} (${entry.teammate})` : entry.reason }}
+                </span>
+              </events-entry-info-update>
+
+              <template #fallback>
+                <span v-if="relationship.relationship === 'Last Direct Acceptance' && entry.rank">
+                  {{ (entry.status === "PR" && entry.draw === "Main") || (entry.q_status === "PR" && entry.draw === "Qualifying") ? "P" : ""
+                  }}{{ entry.rank }}
+                </span>
+                <span v-else-if="['Withdrawal', 'Retirement', 'Walkover', 'Default'].includes(relationship.relationship) && entry.reason">
+                  {{ entry.teammate ? `${entry.reason} (${entry.teammate})` : entry.reason }}
+                </span>
+              </template>
+            </dev-only>
           </div>
         </div>
       </template>
@@ -162,12 +168,18 @@ const handleEditEntryInfo = (relationship: string, entry: EntryInterface) => {
       v-else
       title="No entry information available"
       :icon="icons.caution"
+      description="If you think this is an error, refresh the page. Otherwise, please be patient as we continue to add more data."
+      class="mx-2"
     >
-      <template
-        #actions
-        v-if="devMode"
-      >
-        <events-entry-info-update :refresh />
+      <template #actions>
+        <u-button
+          :icon="icons.reload"
+          label="Refresh"
+          @click="() => reloadNuxtApp()"
+        />
+        <dev-only>
+          <events-entry-info-update :refresh />
+        </dev-only>
       </template>
     </u-empty>
   </dashboard-subpanel>

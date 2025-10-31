@@ -9,29 +9,27 @@ export default defineEventHandler(async event => {
     OPTIONAL MATCH (e)-[:TOOK_PLACE_IN]->(v:Venue)-[:LOCATED_IN]->(c:Country)
     OPTIONAL MATCH (ed)-[:TOOK_PLACE_IN]->(v1:Venue)-[:LOCATED_IN]->(c1:Country)
     OPTIONAL MATCH (sup:Supervisor)-[:SUPERVISED]->(e)
-    WITH e, ed, t, CASE WHEN s IS NULL THEN properties(s1) ELSE properties(s) END AS surface, CASE WHEN COUNT(v) = 0 THEN COLLECT(DISTINCT apoc.map.merge(properties(v1), {country: properties(c1)})) ELSE COLLECT(DISTINCT apoc.map.merge(properties(v), {country: properties(c)})) END AS venues, COLLECT(DISTINCT properties(sup)) AS supervisors
-    RETURN {
+    WITH e, ed, t, properties(s) AS surface, properties(s1) AS edition_surface, COLLECT(DISTINCT apoc.map.clean(apoc.map.merge(properties(v), {country: properties(c)}), [], [{}])) AS venues, COLLECT(DISTINCT apoc.map.clean(apoc.map.merge(properties(v1), {country: properties(c1)}), [], [{}])) AS edition_venues, COLLECT(DISTINCT properties(sup)) AS supervisors
+    RETURN apoc.map.merge(properties(e), {
       tour: [x IN labels(e) WHERE x IN ['ATP', 'WTA', 'Men', 'Women']][0],
       level: [x IN labels(e) WHERE x IN ['Tour', 'Challenger', 'ITF']][0],
-      sponsor_name: coalesce(e.sponsor_name, ed.sponsor_name),
       venues: venues,
       surface: surface,
       supervisors: supervisors,
-      category: coalesce(e.category, ed.category),
-      start_date: coalesce(e.start_date, ed.start_date),
-      end_date: coalesce(e.end_date, ed.end_date),
-      currency: coalesce(e.currency, ed.currency),
-      pm: e.pm,
-      tfc: coalesce(e.tfc, ed.tfc, null),
-      s_draw: e.s_draw,
-      d_draw: e.d_draw,
-      site_link: e.site_link,
-      wiki_link: ed.wiki_link,
       edition: {
         id: ed.id,
-        tournament: properties(t)
+        sponsor_name: ed.sponsor_name,
+        tournament: properties(t),
+        venues: edition_venues,
+        surface: edition_surface,
+        category: ed.category,
+        start_date: ed.start_date,
+        end_date: ed.end_date,
+        currency: ed.currency,
+        tfc: ed.tfc,
+        wiki_link: ed.wiki_link
       }
-    } AS event
+    }) AS event
     `,
     { id }
   )
@@ -47,15 +45,25 @@ export default defineEventHandler(async event => {
 
   for (const key of numberKeys) {
     if (results[key]) results[key] = results[key].toInt()
+    if (results["edition"][key]) results["edition"][key] = results["edition"][key].toInt()
   }
 
   for (const key of dateKeys) {
     if (results[key]) {
       results[key] = results[key].toStandardDate().toISOString().slice(0, 10)
     }
+    if (results["edition"][key]) {
+      results["edition"][key] = results["edition"][key].toStandardDate().toISOString().slice(0, 10)
+    }
   }
 
-  results["edition"]["id"] = results["edition"]["id"].toInt()
+  if (results["venues"].length === 1 && Object.keys(results["venues"][0]).length === 0) {
+    delete results["venues"]
+  }
+  if (results["edition"]["venues"].length === 1 && Object.keys(results["edition"]["venues"][0]).length === 0) {
+    delete results["edition"]["venues"]
+  }
+
   results["edition"]["tournament"]["id"] = results["edition"]["tournament"]["id"].toInt()
 
   return results

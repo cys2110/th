@@ -24,7 +24,7 @@ const reset = () => {
   set(tournaments, [])
 }
 
-watchDeep(filters, reset)
+watchDeep(filters, reset, { immediate: false })
 
 const { data, status, execute, refresh } = await useFetch<{ count: number; tournaments: TournamentInterface[] }>("/api/tournaments", {
   query: { skip, filters },

@@ -5,7 +5,6 @@ const { round, refresh } = defineProps<{
   round?: RoundInterface
   refresh: () => void
   iconOnly?: boolean
-  block?: boolean
 }>()
 
 const {
@@ -29,26 +28,22 @@ const { data: currency } = await useFetch("/api/get-currency", {
 })
 
 const state = reactive<Partial<RoundSchema>>({
-  id: round?.id,
+  ...round,
   edition: Number(edId),
   tour,
-  round: round?.round,
   type: round?.type ?? "Singles",
   draw: round
     ? ["Qualifier", "Qualifying round 1", "Qualifying round 2", "Qualifying round 3"].includes(round.round)
       ? "Qualifying"
       : "Main"
-    : "Main",
-  number: round?.number,
-  points: round?.points,
-  pm: round?.pm
+    : "Main"
 })
 
 const formFields: FormFieldInterface<RoundSchema>[] = [
-  { label: "Round", key: "round", type: "inputMenu", items: Object.keys(RoundEnum), required: true },
-  { label: "Type", key: "type", type: "radio", items: ["Singles", "Doubles"], required: true },
-  { label: "Draw", key: "draw", type: "radio", items: ["Main", "Qualifying"], required: true },
-  { label: "Number", key: "number", type: "number", required: true },
+  { label: "Round", key: "round", type: "inputMenu", items: Object.keys(RoundEnum) },
+  { label: "Type", key: "type", type: "radio", items: ["Singles", "Doubles"] },
+  { label: "Draw", key: "draw", type: "radio", items: ["Main", "Qualifying"] },
+  { label: "Number", key: "number", type: "number" },
   { label: "Points", key: "points", type: "number" },
   { label: "Prize Money", key: "pm", type: "currency" }
 ]
@@ -67,6 +62,7 @@ const handleReset = () => {
 }
 
 const onError = (event: FormErrorEvent) => {
+  console.error(event.errors)
   toast.add({
     title: "Please ensure fields are filled out correctly",
     description: event.errors.map(e => e.message).join(", "),
@@ -88,7 +84,9 @@ const onSubmit = async (event: FormSubmitEvent<RoundSchema>) => {
         icon: icons.success,
         color: "success"
       })
-      handleReset()
+      state.round = round?.round
+      state.points = round?.points
+      state.pm = round?.pm
       set(open, false)
       if (refresh) {
         refresh()
@@ -121,9 +119,16 @@ const onSubmit = async (event: FormSubmitEvent<RoundSchema>) => {
   >
     <u-button
       :icon="round ? ICONS.edit : icons.plus"
-      :label="iconOnly ? undefined : 'Create Round'"
-      :block
-    />
+      block
+    >
+      <template
+        #default
+        v-if="!iconOnly"
+      >
+        <slot />
+        <template v-if="!$slots['default']"> Create Round </template>
+      </template>
+    </u-button>
 
     <template #body>
       <u-form
@@ -134,13 +139,40 @@ const onSubmit = async (event: FormSubmitEvent<RoundSchema>) => {
         @error="onError"
       >
         <div class="grid grid-cols-2 gap-5 items-center">
-          <form-field
+          <template
             v-for="field in formFields"
             :key="field.label"
-            :field
-            v-model="state[field.key]"
-            :currency="round?.currency || currency"
-          />
+          >
+            <u-radio-group
+              v-if="field.type === 'radio'"
+              v-model="(state[field.key] as string)"
+              :items="field.items"
+              :legend="field.label"
+              orientation="horizontal"
+            />
+
+            <form-input-number
+              v-else-if="field.type === 'number'"
+              v-model="(state[field.key] as number)"
+              :placeholder="field.label"
+            />
+
+            <form-select-menu
+              v-else-if="field.type === 'inputMenu'"
+              v-model="(state[field.key] as any)"
+              :items="(field.items as any[])"
+              :placeholder="field.label"
+              :multiple="field.multiple"
+              block
+            />
+
+            <form-currency
+              v-else-if="field.type === 'currency'"
+              v-model="(state[field.key] as number)"
+              :placeholder="field.label"
+              :currency
+            />
+          </template>
         </div>
       </u-form>
     </template>

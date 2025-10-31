@@ -1,7 +1,11 @@
 <script setup lang="ts">
 import { parseDate } from "@internationalized/date"
 import type { FormErrorEvent, FormSubmitEvent } from "@nuxt/ui"
-const { event, refresh } = defineProps<{ event?: EventInterface; refresh?: () => void }>()
+const { event, refresh } = defineProps<{
+  event?: EventInterface
+  refresh?: () => void
+  iconOnly?: boolean
+}>()
 const {
   params: { edId, year, tour, id, name }
 } = useRoute("event")
@@ -20,31 +24,15 @@ defineShortcuts({
 })
 
 const state = reactive<Partial<EventInput>>({
-  id: event?.id,
+  ...event,
   edition: Number(edId),
-  tour: event?.tour,
-  level: event?.level,
-  category: event?.category,
   start_date: event?.start_date ? parseDate(event.start_date) : undefined,
   end_date: event?.end_date ? parseDate(event.end_date) : undefined,
   surface: event?.surface?.id,
-  pm: event?.pm,
-  currency: event?.currency,
-  tfc: event?.tfc,
-  sponsor_name: event?.sponsor_name,
   venues: event?.venues
     ? event.venues.map(v => ({ value: v.id, label: v.name ? `${v.name}, ${v.city}, ${v.country.name}` : `${v.city}, ${v.country.name}` }))
     : undefined,
-  supervisors: event?.supervisors ? event.supervisors.map(s => ({ value: s.id, label: s.id })) : undefined,
-  s_draw: event?.s_draw,
-  d_draw: event?.d_draw,
-  qs_draw: event?.qs_draw,
-  qd_draw: event?.qd_draw,
-  s_link: event?.s_link,
-  d_link: event?.d_link,
-  qs_link: event?.qs_link,
-  qd_link: event?.qd_link,
-  site_link: event?.site_link
+  supervisors: event?.supervisors ? event.supervisors.map(s => ({ value: s.id, label: s.id })) : undefined
 })
 
 const formFields: FormFieldInterface<EventSchema>[] = [
@@ -52,25 +40,25 @@ const formFields: FormFieldInterface<EventSchema>[] = [
     label: "Tour",
     key: "tour",
     type: "radio",
-    items: tours.value?.length ? tours.value.map(t => ({ label: TourEnum[t], value: t })) : TOUR_OPTIONS,
-    required: true
+    items: tours.value?.length ? tours.value.map(t => ({ label: TourEnum[t], value: t })) : TOUR_OPTIONS
   },
-  { label: "Level", key: "level", type: "radio", items: ["Tour", "Challenger", "ITF"], required: true },
+  { label: "Level", key: "level", type: "radio", items: ["Tour", "Challenger", "ITF"] },
   { label: "Sponsor Name", key: "sponsor_name", type: "text", class: "col-span-2" },
   { label: "Official Site Link", key: "site_link", type: "textarea", class: "col-span-2" },
+  { label: "Wikipedia Link", key: "wiki_link", type: "textarea", class: "col-span-2" },
   { label: "Start Date", key: "start_date", type: "date" },
   { label: "End Date", key: "end_date", type: "date" },
   { label: "Category", key: "category", type: "text" },
-  { label: "Surface", key: "surface", type: "select", items: SURFACE_OPTIONS },
+  { label: "Surface", key: "surface", type: "inputMenu", items: SURFACE_OPTIONS },
   { label: "Currency", key: "currency", type: "radio", items: CURRENCY_OPTIONS },
   { label: "Prize Money", key: "pm", type: "currency" },
   { label: "Total Financial Commitment", key: "tfc", type: "currency" },
   { label: "Venues", key: "venues", type: "search", subType: "venues" },
   { label: "Supervisors", key: "supervisors", type: "search", subType: "supervisors", multiple: true, class: "col-span-2" },
-  { label: "Singles Draw Type", key: "s_draw", type: "select", items: DRAW_OPTIONS },
-  { label: "Doubles Draw Type", key: "d_draw", type: "select", items: DRAW_OPTIONS },
-  { label: "Qualifying Singles Draw Type", key: "qs_draw", type: "select", items: DRAW_OPTIONS },
-  { label: "Qualifying Doubles Draw Type", key: "qd_draw", type: "select", items: DRAW_OPTIONS },
+  { label: "Singles Draw Type", key: "s_draw", type: "inputMenu", items: DRAW_OPTIONS },
+  { label: "Doubles Draw Type", key: "d_draw", type: "inputMenu", items: DRAW_OPTIONS },
+  { label: "Qualifying Singles Draw Type", key: "qs_draw", type: "inputMenu", items: DRAW_OPTIONS },
+  { label: "Qualifying Doubles Draw Type", key: "qd_draw", type: "inputMenu", items: DRAW_OPTIONS },
   { label: "Singles Draw Link", key: "s_link", type: "textarea", class: "col-span-2" },
   { label: "Doubles Draw Link", key: "d_link", type: "textarea", class: "col-span-2" },
   { label: "Qualifying Singles Draw Link", key: "qs_link", type: "textarea", class: "col-span-2" },
@@ -79,7 +67,6 @@ const formFields: FormFieldInterface<EventSchema>[] = [
 
 const handleReset = () => {
   state.id = event?.id
-  state.edition = Number(edId)
   state.tour = event?.tour
   state.level = event?.level
   state.category = event?.category
@@ -103,9 +90,11 @@ const handleReset = () => {
   state.qs_link = event?.qs_link
   state.qd_link = event?.qd_link
   state.site_link = event?.site_link
+  state.wiki_link = event?.wiki_link
 }
 
 const onError = (event: FormErrorEvent) => {
+  console.error(event.errors)
   toast.add({
     title: "Please ensure fields are filled out correctly",
     description: event.errors.map(e => e.message).join(", "),
@@ -160,7 +149,7 @@ const onSubmit = async (form: FormSubmitEvent<EventSchema>) => {
   >
     <u-button
       :icon="event ? ICONS.edit : icons.plus"
-      :label="event ? `Edit ${event.edition.tournament.name} ${year} ${tour}` : 'Create Event'"
+      :label="iconOnly ? undefined : event ? `Edit ${event.edition.tournament.name} ${year} ${tour}` : 'Create Event'"
       block
     />
 
@@ -173,12 +162,64 @@ const onSubmit = async (form: FormSubmitEvent<EventSchema>) => {
         @error="onError"
       >
         <div class="grid grid-cols-2 gap-5 items-center">
-          <form-field
+          <template
             v-for="field in formFields"
             :key="field.label"
-            :field
-            v-model="state[field.key]"
-          />
+          >
+            <form-input
+              v-if="field.type === 'text'"
+              v-model="state[field.key]"
+              :placeholder="field.label"
+              :type="field.subType"
+              :class="field.class"
+            />
+
+            <form-select-search
+              v-else-if="field.type === 'search'"
+              v-model="(state[field.key] as any)"
+              :type="field.subType!"
+              :placeholder="field.label"
+              block
+              :class="field.class"
+            />
+
+            <u-radio-group
+              v-else-if="field.type === 'radio'"
+              v-model="(state[field.key] as string)"
+              :items="field.items"
+              :legend="field.label"
+              orientation="horizontal"
+            />
+
+            <form-select-menu
+              v-else-if="field.type === 'inputMenu'"
+              v-model="(state[field.key] as any)"
+              :items="(field.items as any[])"
+              :placeholder="field.label"
+              :multiple="field.multiple"
+              block
+            />
+
+            <form-date-picker
+              v-else-if="field.type === 'date'"
+              v-model="(state[field.key] as any)"
+              :placeholder="field.label"
+            />
+
+            <form-textarea
+              v-else-if="field.type === 'textarea'"
+              v-model="(state[field.key] as string)"
+              :placeholder="field.label"
+              :class="field.class"
+            />
+
+            <form-currency
+              v-else-if="field.type === 'currency'"
+              v-model="(state[field.key] as number)"
+              :placeholder="field.label"
+              :currency="(state['currency'] as keyof typeof CurrencyEnum)"
+            />
+          </template>
         </div>
       </u-form>
     </template>

@@ -3,13 +3,13 @@ import { EventsEntriesUpdate } from "#components"
 import type { TableColumn } from "@nuxt/ui"
 import { createColumnHelper } from "@tanstack/vue-table"
 
-defineProps<{ refresh: number }>()
 const {
   params: { edId, tour }
 } = useRoute("event")
-const { devMode } = useRuntimeConfig().public
-const overlay = useOverlay()
-const editEntry = overlay.create(EventsEntriesUpdate)
+const {
+  ui: { icons }
+} = useAppConfig()
+const refreshCount = defineModel<number>("refresh-count")
 
 const {
   data: entries,
@@ -20,12 +20,9 @@ const {
   default: () => []
 })
 
-watch(
-  () => refresh,
-  () => {
-    refresh()
-  }
-)
+watch(refreshCount, () => {
+  refresh()
+})
 
 const columnHelper = createColumnHelper<EntryByPlayerInterface>()
 
@@ -75,9 +72,10 @@ const columns: TableColumn<EntryByPlayerInterface>[] = [
   })
 ]
 
-const handleEditEntry = (entry: EntryByPlayerInterface["singles"], player: Partial<PersonInterface>, type: MatchType) => {
-  editEntry.open({ entry, player, type, refresh })
-}
+const columnPinning = ref({
+  left: ["player"],
+  right: []
+})
 </script>
 
 <template>
@@ -87,6 +85,7 @@ const handleEditEntry = (entry: EntryByPlayerInterface["singles"], player: Parti
     :loading="status === 'pending'"
     sticky
     render-fallback-value="—"
+    v-model:column-pinning="columnPinning"
     class="max-h-150"
   >
     <template #loading>
@@ -97,12 +96,18 @@ const handleEditEntry = (entry: EntryByPlayerInterface["singles"], player: Parti
       <u-empty
         title="No entries found"
         :icon="ICONS.noPeople"
+        description="If you think this is an error, refresh the page. Otherwise, please be patient as we continue to add more data."
+        class="mx-2"
       >
-        <template
-          #actions
-          v-if="devMode"
-        >
-          <events-entries-update :refresh />
+        <template #actions>
+          <u-button
+            :icon="icons.reload"
+            label="Refresh"
+            @click="() => reloadNuxtApp()"
+          />
+          <dev-only>
+            <events-entries-update :refresh />
+          </dev-only>
         </template>
       </u-empty>
     </template>
@@ -115,16 +120,6 @@ const handleEditEntry = (entry: EntryByPlayerInterface["singles"], player: Parti
       <div
         v-if="row.original.singles"
         class="flex justify-center items-center gap-2"
-        @click="
-          devMode
-            ? handleEditEntry(
-                row.original.singles,
-                { id: row.original.id, first_name: row.original.first_name, last_name: row.original.last_name, country: row.original.country },
-                'Singles'
-              )
-            : undefined
-        "
-        :class="{ 'cursor-pointer': devMode }"
       >
         <u-badge
           v-for="draw in row.original.singles.draws"
@@ -136,24 +131,27 @@ const handleEditEntry = (entry: EntryByPlayerInterface["singles"], player: Parti
       <template v-else>—</template>
     </template>
 
-    <template #singles_rank-cell="{ cell }">
-      {{ cell.renderValue() }}
+    <template #singles_rank-cell="{ cell, row }">
+      <dev-only>
+        <events-entries-update
+          v-if="isDefined(cell.getValue())"
+          :entry="row.original.singles"
+          :player="{ id: row.original.id, first_name: row.original.first_name, last_name: row.original.last_name, country: row.original.country }"
+          type="Singles"
+          :refresh
+          block
+        >
+          {{ cell.renderValue() }}
+        </events-entries-update>
+        <template v-else>{{ cell.renderValue() }}</template>
+        <template #fallback>{{ cell.renderValue() }}</template>
+      </dev-only>
     </template>
 
     <template #doubles_draws-cell="{ row }">
       <div
         v-if="row.original.doubles"
         class="flex justify-center items-center gap-2"
-        @click="
-          devMode
-            ? handleEditEntry(
-                row.original.doubles,
-                { id: row.original.id, first_name: row.original.first_name, last_name: row.original.last_name, country: row.original.country },
-                'Doubles'
-              )
-            : undefined
-        "
-        :class="{ 'cursor-pointer': devMode }"
       >
         <u-badge
           v-for="draw in row.original.doubles.draws"
@@ -165,8 +163,21 @@ const handleEditEntry = (entry: EntryByPlayerInterface["singles"], player: Parti
       <template v-else>—</template>
     </template>
 
-    <template #doubles_rank-cell="{ cell }">
-      {{ cell.renderValue() }}
+    <template #doubles_rank-cell="{ cell, row }">
+      <dev-only>
+        <events-entries-update
+          v-if="isDefined(cell.getValue())"
+          :entry="row.original.doubles"
+          :player="{ id: row.original.id, first_name: row.original.first_name, last_name: row.original.last_name, country: row.original.country }"
+          type="Doubles"
+          :refresh
+          block
+        >
+          {{ cell.renderValue() }}
+        </events-entries-update>
+        <template v-else>{{ cell.renderValue() }}</template>
+        <template #fallback>{{ cell.renderValue() }}</template>
+      </dev-only>
     </template>
   </u-table>
 </template>

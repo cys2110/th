@@ -53,16 +53,21 @@ export const entrySchema = z.object({
       value: z.string("Please enter a valid player ID"),
       label: z.string("Please enter a valid player name")
     })
+    .transform(({ value, label }) => value)
     .optional(),
   player2: z
     .object({
       value: z.string("Please enter a valid player ID"),
       label: z.string("Please enter a valid player name")
     })
+    .transform(({ value, label }) => value)
     .optional(),
-  rank2: z.number("Please enter a valid rank").int("Rank must be a number").positive("Rank must be a positive number").optional()
+  rank2: z.number("Please enter a valid rank").int("Rank must be a number").positive("Rank must be a positive number").optional(),
+  points: z.number("Please enter a valid points amount").int("Points must be a number").optional(),
+  pm: z.number("Please enter a valid prize money amount").int("Prize money must be a number").optional()
 })
 
+export type EntryInput = z.input<typeof entrySchema>
 export type EntrySchema = z.infer<typeof entrySchema>
 
 export const entryInfoSchema = z.object({
@@ -78,17 +83,21 @@ export const entryInfoSchema = z.object({
       value: z.string(),
       label: z.string()
     })
+    .transform(({ value, label }) => value)
     .optional(),
   players: z
     .array(
-      z.object({
-        value: z.string(),
-        label: z.string()
-      })
+      z
+        .object({
+          value: z.string(),
+          label: z.string()
+        })
+        .transform(({ value, label }) => value)
     )
     .optional()
 })
 
+export type EntryInfoInput = z.input<typeof entryInfoSchema>
 export type EntryInfoSchema = z.infer<typeof entryInfoSchema>
 
 export const eventSchema = z.object({
@@ -140,7 +149,8 @@ export const eventSchema = z.object({
   qs_link: z.url("Please enter a valid URL").optional(),
   qd_draw: z.string().optional(),
   qd_link: z.url("Please enter a valid URL").optional(),
-  site_link: z.url("Please enter a valid URL").optional()
+  site_link: z.url("Please enter a valid URL").optional(),
+  wiki_link: z.url("Please enter a valid URL").optional()
 })
 
 export type EventInput = z.input<typeof eventSchema>
@@ -166,6 +176,7 @@ export const matchSchema = z.object({
       value: z.string("Please enter a valid umpire ID"),
       label: z.string("Please enter a valid umpire name")
     })
+    .transform(({ value, label }) => value)
     .optional(),
   sets: z.literal(["BestOf3", "BestOf5"], "Please select a valid sets type").optional(),
   incomplete: z.string().optional(),
@@ -174,12 +185,14 @@ export const matchSchema = z.object({
       value: z.string("Please enter a valid team1 ID"),
       label: z.string("Please enter a valid team1 name")
     })
+    .transform(({ value, label }) => value)
     .optional(),
   team2: z
     .object({
       value: z.string("Please enter a valid team2 ID"),
       label: z.string("Please enter a valid team2 name")
     })
+    .transform(({ value, label }) => value)
     .optional(),
   s1: z.array(z.number().nullable()).optional(),
   s2: z.array(z.number().nullable()).optional(),
@@ -299,10 +312,11 @@ export const scrapeSchema = z.object({
   year2: z.number("Please enter a valid site year").int("Site year must be a number").positive("Site year must be a positive number").optional(),
   draw_size: z.number("Please enter a valid draw size").int("Draw size must be a number").positive("Draw size must be a positive number").optional(),
   sets: z.string().optional(),
-  eid: z.string().optional(),
+  eid: z.number().optional(),
   wid: z.number().optional(),
   draw_range: z.array(z.string().transform(s => parseInt(s, 10))).optional(),
-  skip: z.array(z.string().transform(s => parseInt(s, 10))).optional()
+  skip: z.array(z.string().transform(s => parseInt(s, 10))).optional(),
+  links: z.array(z.string()).optional()
 })
 
 export type ScrapeInput = z.input<typeof scrapeSchema>
@@ -315,12 +329,15 @@ export const seedSchema = z.object({
   type: z.literal(["Singles", "Doubles"], "Please select a valid match type"),
   seed: z.number("Please enter a valid seed number").int("Seed number must be a number").positive("Seed number must be a positive number").optional(),
   rank: z.number("Please enter a valid rank").int("Rank must be a number").positive("Rank must be a positive number").optional(),
-  team: z.object({
-    value: z.string(),
-    label: z.string()
-  })
+  team: z
+    .object({
+      value: z.string(),
+      label: z.string()
+    })
+    .transform(({ value, label }) => value)
 })
 
+export type SeedInput = z.input<typeof seedSchema>
 export type SeedSchema = z.infer<typeof seedSchema>
 
 export const tournamentSchema = z.object({

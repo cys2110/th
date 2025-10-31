@@ -6,8 +6,6 @@ import { EventsAwardsUpdate } from "#components"
 const {
   params: { edId, tour }
 } = useRoute("event")
-const overlay = useOverlay()
-const editRound = overlay.create(EventsAwardsUpdate)
 const {
   ui: { icons }
 } = useAppConfig()
@@ -61,9 +59,13 @@ const columns: TableColumn<ConsolidatedRound>[] = [
   })
 ]
 
-const handleEditRound = (round: string, type: "Singles" | "Doubles") => {
-  const existingAward = awards.value.find(a => a.round === round && a.type === type)
-  editRound.open({ round: existingAward, refresh })
+const columnPinning = ref({
+  left: ["round"],
+  right: []
+})
+
+const getRound = (round: string, type: "Singles" | "Doubles") => {
+  return awards.value.find(a => a.round === round && a.type === type)
 }
 </script>
 
@@ -89,6 +91,7 @@ const handleEditRound = (round: string, type: "Singles" | "Doubles") => {
       :loading="status === 'pending'"
       sticky
       render-fallback-value="—"
+      v-model:column-pinning="columnPinning"
     >
       <template #loading>
         <table-loading />
@@ -115,63 +118,99 @@ const handleEditRound = (round: string, type: "Singles" | "Doubles") => {
       </template>
 
       <template #singlesPm-cell="{ cell, row }">
-        <div class="flex justify-center items-center gap-1">
-          {{
-            isDefined(cell.getValue()) && row.original.currency
-              ? (cell.getValue() as number).toLocaleString("en-GB", { style: "currency", currency: row.original.currency })
-              : cell.renderValue()
-          }}
-          <dev-only v-if="isDefined(cell.getValue())">
-            <events-awards-update
-              :round="awards.find(a => a.round === row.original.round && a.type === 'Singles')"
-              icon-only
-              :refresh
-            />
-          </dev-only>
-        </div>
+        <dev-only>
+          <events-awards-update
+            v-if="isDefined(cell.getValue())"
+            :refresh
+            :round="getRound(row.original.round, 'Singles')"
+          >
+            {{
+              isDefined(cell.getValue()) && row.original.currency
+                ? (cell.getValue() as number).toLocaleString("en-GB", { style: "currency", currency: row.original.currency })
+                : cell.renderValue()
+            }}
+          </events-awards-update>
+          <template v-else>
+            {{
+              isDefined(cell.getValue()) && row.original.currency
+                ? (cell.getValue() as number).toLocaleString("en-GB", { style: "currency", currency: row.original.currency })
+                : cell.renderValue()
+            }}
+          </template>
+          <template #fallback>
+            {{
+              isDefined(cell.getValue()) && row.original.currency
+                ? (cell.getValue() as number).toLocaleString("en-GB", { style: "currency", currency: row.original.currency })
+                : cell.renderValue()
+            }}
+          </template>
+        </dev-only>
       </template>
 
       <template #singlesPoints-cell="{ cell, row }">
-        <div class="flex justify-center items-center gap-1">
-          {{ isDefined(cell.getValue()) ? (cell.getValue() as number).toLocaleString() : cell.renderValue() }}
-          <dev-only v-if="isDefined(cell.getValue())">
-            <events-awards-update
-              :round="awards.find(a => a.round === row.original.round && a.type === 'Singles')"
-              icon-only
-              :refresh
-            />
-          </dev-only>
-        </div>
+        <dev-only>
+          <events-awards-update
+            v-if="isDefined(cell.getValue())"
+            :refresh
+            :round="getRound(row.original.round, 'Singles')"
+          >
+            {{ isDefined(cell.getValue()) ? (cell.getValue() as number).toLocaleString() : cell.renderValue() }}
+          </events-awards-update>
+          <template v-else>
+            {{ isDefined(cell.getValue()) ? (cell.getValue() as number).toLocaleString() : cell.renderValue() }}
+          </template>
+          <template #fallback>
+            {{ isDefined(cell.getValue()) ? (cell.getValue() as number).toLocaleString() : cell.renderValue() }}
+          </template>
+        </dev-only>
       </template>
 
       <template #doublesPm-cell="{ cell, row }">
-        <div class="flex justify-center items-center gap-1">
-          {{
-            isDefined(cell.getValue()) && row.original.currency
-              ? (cell.getValue() as number).toLocaleString("en-GB", { style: "currency", currency: row.original.currency })
-              : cell.renderValue()
-          }}
-          <dev-only v-if="isDefined(cell.getValue())">
-            <events-awards-update
-              :round="awards.find(a => a.round === row.original.round && a.type === 'Doubles')"
-              icon-only
-              :refresh
-            />
-          </dev-only>
-        </div>
+        <dev-only>
+          <events-awards-update
+            v-if="isDefined(cell.getValue())"
+            :refresh
+            :round="getRound(row.original.round, 'Doubles')"
+          >
+            {{
+              isDefined(cell.getValue()) && row.original.currency
+                ? (cell.getValue() as number).toLocaleString("en-GB", { style: "currency", currency: row.original.currency })
+                : cell.renderValue()
+            }}
+          </events-awards-update>
+          <template v-else>
+            {{
+              isDefined(cell.getValue()) && row.original.currency
+                ? (cell.getValue() as number).toLocaleString("en-GB", { style: "currency", currency: row.original.currency })
+                : cell.renderValue()
+            }}
+          </template>
+          <template #fallback>
+            {{
+              isDefined(cell.getValue()) && row.original.currency
+                ? (cell.getValue() as number).toLocaleString("en-GB", { style: "currency", currency: row.original.currency })
+                : cell.renderValue()
+            }}
+          </template>
+        </dev-only>
       </template>
 
       <template #doublesPoints-cell="{ cell, row }">
-        <div class="flex justify-center items-center gap-1">
-          {{ isDefined(cell.getValue()) ? (cell.getValue() as number).toLocaleString() : cell.renderValue() }}
-          <dev-only v-if="isDefined(cell.getValue())">
-            <events-awards-update
-              :round="awards.find(a => a.round === row.original.round && a.type === 'Doubles')"
-              icon-only
-              :refresh
-            />
-          </dev-only>
-        </div>
+        <dev-only>
+          <events-awards-update
+            v-if="isDefined(cell.getValue())"
+            :refresh
+            :round="getRound(row.original.round, 'Doubles')"
+          >
+            {{ isDefined(cell.getValue()) ? (cell.getValue() as number).toLocaleString() : cell.renderValue() }}
+          </events-awards-update>
+          <template v-else>
+            {{ isDefined(cell.getValue()) ? (cell.getValue() as number).toLocaleString() : cell.renderValue() }}
+          </template>
+          <template #fallback>
+            {{ isDefined(cell.getValue()) ? (cell.getValue() as number).toLocaleString() : cell.renderValue() }}
+          </template>
+        </dev-only>
       </template>
     </u-table>
   </dashboard-subpanel>

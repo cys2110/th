@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import type { TableColumn } from "@nuxt/ui"
 
-defineProps<{ refresh: number }>()
 const {
   params: { edId, tour }
 } = useRoute("event")
-const { devMode } = useRuntimeConfig().public
+const {
+  ui: { icons }
+} = useAppConfig()
 
 const {
   data: entries,
@@ -15,13 +16,6 @@ const {
   query: { edId, tour },
   default: () => []
 })
-
-watch(
-  () => refresh,
-  () => {
-    refresh()
-  }
-)
 
 const columns: TableColumn<EntryInterface>[] = [
   { accessorKey: "team", header: "Team" },
@@ -41,8 +35,13 @@ const columns: TableColumn<EntryInterface>[] = [
     },
     header: "Status"
   },
-  { id: "rank", accessorFn: row => row.team.reduce((sum, player) => sum + (player.rank || 0), 0), header: "Rank" }
+  { id: "rank", accessorFn: row => row.team.reduce((sum, player) => sum + (player.rank || 0), 0), header: "Rank", cell: cell => cell.renderValue() }
 ]
+
+const columnPinning = ref({
+  left: ["team"],
+  right: []
+})
 </script>
 
 <template>
@@ -52,6 +51,7 @@ const columns: TableColumn<EntryInterface>[] = [
     :loading="status === 'pending'"
     sticky
     render-fallback-value="—"
+    v-model:column-pinning="columnPinning"
     class="max-h-150"
   >
     <template #loading>
@@ -62,12 +62,18 @@ const columns: TableColumn<EntryInterface>[] = [
       <u-empty
         title="No entries found"
         :icon="ICONS.noPeople"
+        description="If you think this is an error, refresh the page. Otherwise, please be patient as we continue to add more data."
+        class="mx-2"
       >
-        <template
-          #actions
-          v-if="devMode"
-        >
-          <events-entries-update :refresh />
+        <template #actions>
+          <u-button
+            :icon="icons.reload"
+            label="Refresh"
+            @click="() => reloadNuxtApp()"
+          />
+          <dev-only>
+            <events-entries-update :refresh />
+          </dev-only>
         </template>
       </u-empty>
     </template>
@@ -96,10 +102,6 @@ const columns: TableColumn<EntryInterface>[] = [
           :color="draw"
         />
       </div>
-    </template>
-
-    <template #rank-cell="{ cell }">
-      {{ cell.getValue() || "—" }}
     </template>
   </u-table>
 </template>

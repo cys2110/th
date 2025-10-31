@@ -6,6 +6,8 @@ const { entry, player, refresh, type } = defineProps<{
   player?: Partial<PersonInterface>
   type?: MatchType
   refresh?: () => void
+  iconOnly?: boolean
+  block?: boolean
 }>()
 
 const {
@@ -24,40 +26,49 @@ defineShortcuts({
 })
 
 const state = reactive<Partial<EntryInput>>({
+  ...entry,
   event: `${edId}-${tour}`,
-  id: entry?.id,
-  type,
-  seed: entry?.seed,
-  q_seed: entry?.q_seed,
-  status: entry?.status,
-  q_status: entry?.q_status,
-  rank: entry?.rank
+  type
 })
 
 const formFields = computed<FormFieldInterface<EntrySchema>[]>(
   () =>
     [
-      { label: "Type", key: "type", type: "radio", items: ["Singles", "Doubles"], required: true, class: "col-span-2" },
-      { label: "Seed (Main Draw)", key: "seed", type: "number" },
-      { label: "Status (Main Draw)", key: "status", type: "select", items: Object.entries(StatusEnum).map(([k, v]) => ({ value: k, label: v })) },
-      { label: "Seed (Qualifying)", key: "q_seed", type: "number" },
-      { label: "Status (Qualifying)", key: "q_status", type: "select", items: Object.entries(StatusEnum).map(([k, v]) => ({ value: k, label: v })) },
-      !entry && { label: "Player 1", key: "player1", type: "search", subType: "players" },
-      { label: "Rank", key: "rank", type: "number" },
+      { label: "Type", key: "type", type: "radio", items: ["Singles", "Doubles"], class: "col-span-2" },
+      !entry && {
+        label: "Player 1",
+        key: "player1",
+        type: "search",
+        subType: "players",
+        class: state.type === "Doubles" ? "col-span-1" : "col-span-2"
+      },
       !entry && state.type === "Doubles" && { label: "Player 2", key: "player2", type: "search", subType: "players" },
-      !entry && state.type === "Doubles" && { label: "Rank", key: "rank2", type: "number" }
+      { label: "Seed (Main Draw)", key: "seed", type: "number" },
+      { label: "Seed (Qualifying)", key: "q_seed", type: "number" },
+      { label: "Status (Main Draw)", key: "status", type: "inputMenu", items: Object.entries(StatusEnum).map(([k, v]) => ({ value: k, label: v })) },
+      {
+        label: "Status (Qualifying)",
+        key: "q_status",
+        type: "inputMenu",
+        items: Object.entries(StatusEnum).map(([k, v]) => ({ value: k, label: v }))
+      },
+      { label: "Rank", key: "rank", type: "number" },
+      !entry && state.type === "Doubles" && { label: "Rank", key: "rank2", type: "number" },
+      { label: "Points", key: "points", type: "number" },
+      { label: "Prize Money", key: "pm", type: "number" }
     ].filter(Boolean) as FormFieldInterface<EntrySchema>[]
 )
 
 const handleReset = () => {
-  state.type = entry?.type
-  ;(state.seed = entry?.seed), (state.q_seed = entry?.q_seed)
+  state.seed = entry?.seed
+  state.q_seed = entry?.q_seed
   state.status = entry?.status
   state.q_status = entry?.q_status
   state.rank = entry?.rank
 }
 
 const onError = (event: FormErrorEvent) => {
+  console.error(event.errors)
   toast.add({
     title: "Please ensure fields are filled out correctly",
     description: event.errors.map(e => e.message).join(", "),
@@ -110,7 +121,18 @@ const onSubmit = async (event: FormSubmitEvent<EntrySchema>) => {
     :title="player ? `${player.first_name} ${player.last_name}` : 'Create Entry'"
     v-model:open="open"
   >
-    <u-button :icon="entry ? ICONS.edit : icons.plus" />
+    <u-button
+      :icon="entry ? ICONS.edit : icons.plus"
+      :block
+    >
+      <template
+        #default
+        v-if="!iconOnly"
+      >
+        <slot />
+        <template v-if="!$slots['default']"> Create Entry </template>
+      </template>
+    </u-button>
 
     <template #body>
       <u-form
@@ -121,12 +143,43 @@ const onSubmit = async (event: FormSubmitEvent<EntrySchema>) => {
         @error="onError"
       >
         <div class="grid grid-cols-2 gap-5 items-center">
-          <form-field
+          <template
             v-for="field in formFields"
             :key="field.label"
-            :field
-            v-model="state[field.key]"
-          />
+          >
+            <u-radio-group
+              v-if="field.type === 'radio'"
+              v-model="(state[field.key] as string)"
+              :items="field.items"
+              :legend="field.label"
+              orientation="horizontal"
+              :class="field.class"
+            />
+
+            <form-input-number
+              v-else-if="field.type === 'number'"
+              v-model="(state[field.key] as number)"
+              :placeholder="field.label"
+            />
+
+            <form-select-menu
+              v-else-if="field.type === 'inputMenu'"
+              v-model="(state[field.key] as any)"
+              :items="(field.items as any[])"
+              :placeholder="field.label"
+              :multiple="field.multiple"
+              block
+            />
+
+            <form-select-search
+              v-else-if="field.type === 'search'"
+              v-model="(state[field.key] as any)"
+              :type="field.subType!"
+              :placeholder="field.label"
+              block
+              :class="field.class"
+            />
+          </template>
         </div>
       </u-form>
     </template>

@@ -5,6 +5,7 @@ const { entry, relationship, refresh } = defineProps<{
   entry?: EntryInterface
   relationship?: string
   refresh: () => void
+  iconOnly?: boolean
 }>()
 
 const {
@@ -25,8 +26,8 @@ defineShortcuts({
 const state = reactive<Partial<EntryInfoInput>>({
   event: `${edId}-${tour}`,
   relationship,
-  draw: entry?.draw,
-  type: entry?.type,
+  draw: entry?.draw ?? "Main",
+  type: entry?.type ?? "Singles",
   rank: entry?.rank,
   reason: entry?.reason,
   teammate: entry?.teammate,
@@ -37,19 +38,18 @@ const formFields: FormFieldInterface<EntryInfoSchema>[] = [
   {
     label: "Info Type",
     key: "relationship",
-    type: "select",
+    type: "inputMenu",
     items: ["Alternate", "Default", "Last Direct Acceptance", "Qualifier", "Retirement", "Walkover", "Wild Card", "Withdrawal"],
-    required: true,
     class: "col-span-2"
   },
-  { label: "Draw", key: "draw", type: "radio", items: ["Main", "Qualifying"], required: true },
-  { label: "Type", key: "type", type: "radio", items: ["Singles", "Doubles"], required: true }
+  { label: "Draw", key: "draw", type: "radio", items: ["Main", "Qualifying"] },
+  { label: "Type", key: "type", type: "radio", items: ["Singles", "Doubles"] }
 ]
 
 const handleReset = () => {
   state.relationship = relationship
-  state.draw = entry?.draw
-  state.type = entry?.type
+  state.draw = entry?.draw ?? "Main"
+  state.type = entry?.type ?? "Singles"
   state.rank = entry?.rank
   state.reason = entry?.reason
   state.teammate = entry?.teammate
@@ -58,6 +58,7 @@ const handleReset = () => {
 }
 
 const onError = (event: FormErrorEvent) => {
+  console.error(event.errors)
   toast.add({
     title: "Please ensure fields are filled out correctly",
     description: event.errors.map(e => e.message).join(", "),
@@ -110,10 +111,15 @@ const onSubmit = async (event: FormSubmitEvent<EntryInfoSchema>) => {
     :title="entry ? `Edit ${relationship}` : `Create ${state.relationship || 'Entry Info'}`"
     v-model:open="open"
   >
-    <u-button
-      :icon="entry ? ICONS.edit : icons.plus"
-      block
-    />
+    <u-button :icon="entry ? ICONS.edit : icons.plus">
+      <template
+        #default
+        v-if="!iconOnly"
+      >
+        <slot />
+        <template v-if="!$slots['default']"> Create Entry Info </template>
+      </template>
+    </u-button>
 
     <template #body>
       <u-form
@@ -124,12 +130,34 @@ const onSubmit = async (event: FormSubmitEvent<EntryInfoSchema>) => {
         @error="onError"
       >
         <div class="grid grid-cols-2 gap-5 items-center">
-          <form-field
+          <template
             v-for="field in formFields"
             :key="field.label"
-            :field
-            v-model="state[field.key]"
-          />
+          >
+            <u-radio-group
+              v-if="field.type === 'radio'"
+              v-model="(state[field.key] as string)"
+              :items="field.items"
+              :legend="field.label"
+              orientation="horizontal"
+            />
+
+            <form-input-number
+              v-else-if="field.type === 'number'"
+              v-model="(state[field.key] as number)"
+              :placeholder="field.label"
+            />
+
+            <form-select-menu
+              v-else-if="field.type === 'inputMenu'"
+              v-model="(state[field.key] as any)"
+              :items="(field.items as any[])"
+              :placeholder="field.label"
+              :multiple="field.multiple"
+              block
+              :class="field.class"
+            />
+          </template>
 
           <div class="col-span-2">
             <form-select-search

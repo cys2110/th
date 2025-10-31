@@ -194,10 +194,10 @@ def get_atp_player(player_id):
 @app.route("/atp_draw", methods=['POST'])
 def get_atp_draw():
     data = request.json
-    tid = int(data.get('tid'))
-    year = int(data.get('year'))
-    year2 = int(data.get('year2')) if data.get('year2') else year
-    tid2 = int(data.get('tid2')) if data.get('tid2') else tid
+    tid = data.get('tid')
+    year = data.get('year')
+    year2 = data.get('year2') if data.get('year2') else year
+    tid2 = data.get('tid2') if data.get('tid2') else tid
     draw_size = data.get('draw_size')
     match_type = data.get('type')
     draw = data.get('draw')
@@ -498,10 +498,10 @@ def get_atp_draw():
 @app.route("/atp_results", methods=['POST'])
 def get_atp_results():
     data = request.json
-    tid = int(data.get('tid'))
-    year = int(data.get('year'))
-    year2 = int(data.get('year2')) if data.get('year2') else year
-    tid2 = int(data.get('tid2')) if data.get('tid2') else tid
+    tid = data.get('tid')
+    year = data.get('year')
+    year2 = data.get('year2') if data.get('year2') else year
+    tid2 = data.get('tid2') if data.get('tid2') else tid
     match_type = data.get('type')
     matches = []
     links = []
@@ -667,7 +667,7 @@ def get_atp_results():
 @app.route("/atp_stats", methods=['POST'])
 def get_atp_stats():
     data = request.json
-    eid = int(data.get('eid'))
+    eid = data.get('eid')
     match_type = data.get('type')
     links = data.get('links')
     matches = []

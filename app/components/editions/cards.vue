@@ -30,8 +30,11 @@ const breadcrumbs: BreadcrumbItem[] = [
       <template #left>
         <u-page-aside>
           <dev-only>
-            <editions-update :edition />
-            <events-update :refresh />
+            <editions-update
+              :edition
+              :refresh
+            />
+            <events-update />
           </dev-only>
           <u-badge
             color="success"
@@ -82,8 +85,11 @@ const breadcrumbs: BreadcrumbItem[] = [
               >
                 <u-button :icon="ICONS.filter" />
                 <template #body>
-                  <editions-update :edition />
-                  <events-update :refresh />
+                  <editions-update
+                    :edition
+                    :refresh
+                  />
+                  <events-update />
                 </template>
               </u-slideover>
             </dev-only>
@@ -170,14 +176,14 @@ const breadcrumbs: BreadcrumbItem[] = [
                     <div
                       v-for="winner in event.winners"
                       :key="winner.type"
-                      class="flex items-center gap-2 w-fit"
+                      class="flex flex-col my-2"
                     >
                       <u-badge
                         :label="winner.type"
                         :color="winner.type"
-                        size="sm"
+                        class="w-full justify-center"
                       />
-                      <div class="flex flex-col">
+                      <div class="flex flex-col ml-5">
                         <players-link
                           v-for="player in winner.team"
                           :key="player.id"
@@ -211,7 +217,7 @@ const breadcrumbs: BreadcrumbItem[] = [
               @click="reloadNuxtApp()"
             />
             <dev-only>
-              <events-update :refresh />
+              <events-update />
             </dev-only>
           </template>
         </u-empty>

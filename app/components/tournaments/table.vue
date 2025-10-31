@@ -10,9 +10,12 @@ const { status, count, tournaments } = defineProps<{
 }>()
 const skip = defineModel<number>("skip")
 const filters = defineModel<Partial<FiltersInterface>>("filters")
+
 const {
   ui: { icons }
 } = useAppConfig()
+const { devMode } = useRuntimeConfig().public
+
 const table = useTemplateRef<any>("table")
 const initialised = ref(false)
 
@@ -49,17 +52,19 @@ const handleSelect = async (e: Event, row: TableRow<TournamentInterface>) => {
 
 <template>
   <table-wrapper>
+    <template
+      #navbar-right
+      v-if="devMode"
+    >
+      <tournaments-update icon-only />
+    </template>
     <template #toolbar>
-      <dev-only>
-        <tournaments-update />
-      </dev-only>
       <u-button
         label="Reset Filters"
         :icon="ICONS.noFilter"
         @click="resetFilters"
         block
       />
-
       <table-visibility
         v-if="table"
         :table="table!"
@@ -93,7 +98,7 @@ const handleSelect = async (e: Event, row: TableRow<TournamentInterface>) => {
               @click="reloadNuxtApp()"
             />
             <dev-only>
-              <tournaments-update :refresh />
+              <tournaments-update />
             </dev-only>
           </template>
         </u-empty>

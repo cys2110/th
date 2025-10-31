@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import type { FormErrorEvent, FormSubmitEvent } from "@nuxt/ui"
 
-const { venue } = defineProps<{ venue?: VenueInterface }>()
+const { venue, refresh } = defineProps<{
+  venue?: VenueInterface
+  refresh?: () => void
+}>()
 
 const toast = useToast()
 const {
@@ -11,9 +14,7 @@ const open = ref(false)
 const uploading = ref(false)
 
 const state = reactive<Partial<VenueInput>>({
-  id: venue?.id,
-  name: venue?.name,
-  city: venue?.city,
+  ...venue,
   country: venue?.country
     ? {
         value: venue.country.id,
@@ -40,6 +41,7 @@ const handleReset = () => {
 }
 
 const onError = (event: FormErrorEvent) => {
+  console.error(event.errors)
   toast.add({
     title: "Please ensure fields are filled out correctly",
     description: event.errors.map(e => e.message).join(", "),
@@ -62,6 +64,9 @@ const onSubmit = async (event: FormSubmitEvent<VenueSchema>) => {
         color: "success"
       })
       handleReset()
+      if (refresh) {
+        refresh()
+      }
       set(open, false)
     } else {
       toast.add({
@@ -96,12 +101,13 @@ const onSubmit = async (event: FormSubmitEvent<VenueSchema>) => {
     >
       <div
         v-if="venue"
-        class="flex items-center gap-2"
+        class="flex flex-wrap items-center gap-1"
       >
         <span>{{ venue.name ? `${venue.name}, ${venue.city}` : venue.city }}</span>
         <countries-link
           :country="venue.country"
           icon-only
+          class="mx-0"
         />
       </div>
       <template v-else>Create Venue</template>
@@ -116,12 +122,25 @@ const onSubmit = async (event: FormSubmitEvent<VenueSchema>) => {
         @error="onError"
       >
         <div class="grid grid-cols-2 gap-5 items-center">
-          <form-field
+          <template
             v-for="field in formFields"
             :key="field.label"
-            :field="field"
-            v-model="state[field.key]"
-          />
+          >
+            <form-input
+              v-if="field.type === 'text'"
+              v-model="state[field.key]"
+              :placeholder="field.label"
+              :class="field.class"
+            />
+
+            <form-select-search
+              v-else
+              v-model="(state[field.key] as SelectOptionsType)"
+              :placeholder="field.label"
+              :type="field.subType!"
+              block
+            />
+          </template>
         </div>
       </u-form>
     </template>

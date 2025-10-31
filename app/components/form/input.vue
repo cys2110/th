@@ -1,6 +1,6 @@
 <script setup lang="ts">
-const { type = "text" } = defineProps<{ placeholder: string; type?: string; block?: boolean }>()
-const modelValue = defineModel<string | number | undefined>()
+const { type = "text" } = defineProps<{ placeholder: string; type?: string; block?: boolean; class?: string }>()
+const modelValue = defineModel<any>()
 const {
   ui: { icons }
 } = useAppConfig()
@@ -11,6 +11,7 @@ const {
     v-model="modelValue"
     :type
     placeholder=""
+    :class
     :ui="{ base: 'peer' }"
   >
     <template

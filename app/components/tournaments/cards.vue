@@ -103,7 +103,7 @@ onMounted(() => {
 
             <template #body>
               <dev-only>
-                <tournaments-update />
+                <tournaments-update :refresh />
               </dev-only>
 
               <u-button
@@ -196,7 +196,7 @@ onMounted(() => {
               @click="reloadNuxtApp()"
             />
             <dev-only>
-              <tournaments-update :refresh />
+              <tournaments-update />
             </dev-only>
           </template>
         </u-empty>

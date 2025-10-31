@@ -12,9 +12,11 @@ export default defineEventHandler(async event => {
     player1: string
     player2: string
     rank2: string
+    points: string
+    pm: string
   }
 
-  const { event: eventId, type, seed, q_seed, status, q_status, rank, player1, player2, rank2 } = getQuery<QueryProps>(event)
+  const { event: eventId, type, seed, q_seed, status, q_status, rank, player1, player2, rank2, points, pm } = getQuery<QueryProps>(event)
 
   const formattedParams = {
     eventId,
@@ -26,7 +28,9 @@ export default defineEventHandler(async event => {
     rank: rank ? int(rank) : null,
     player1Id: player1,
     player2Id: player2 || null,
-    rank2: rank2 ? int(rank2) : null
+    rank2: rank2 ? int(rank2) : null,
+    points: points ? int(points) : null,
+    pm: pm ? int(pm) : null
   }
 
   const { summary } = await useDriver().executeQuery(
@@ -35,7 +39,7 @@ export default defineEventHandler(async event => {
     MATCH (p1:Player {id: $player1Id})
     MERGE (f:Entry:$($type) {id: $eventId || ' ' || $player1Id})
     MERGE (p1)-[t1:ENTERED]->(f)
-    SET f.seed = $seed, f.q_seed = $q_seed, f.status = $status, f.q_status = $q_status, t.rank = $rank
+    SET f.seed = $seed, f.q_seed = $q_seed, f.status = $status, f.q_status = $q_status, t.rank = $rank, f.points = $points, f.pm = $pm
     CALL (f) {
       WHEN $player2Id IS NOT NULL THEN {
         MATCH (p2:Player {id: $player2Id})

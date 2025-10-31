@@ -9,9 +9,11 @@ export default defineEventHandler(async event => {
     status: string
     q_status: string
     rank: string
+    points: string
+    pm: string
   }
 
-  const { id, type, seed, q_seed, status, q_status, rank } = getQuery<QueryProps>(event)
+  const { id, type, seed, q_seed, status, q_status, rank, points, pm } = getQuery<QueryProps>(event)
 
   const formattedParams = {
     id,
@@ -20,14 +22,16 @@ export default defineEventHandler(async event => {
     q_seed: q_seed ? int(q_seed) : null,
     status: status || null,
     q_status: q_status || null,
-    rank: rank ? int(rank) : null
+    rank: rank ? int(rank) : null,
+    points: points ? int(points) : null,
+    pm: pm ? int(pm) : null
   }
 
   const { summary } = await useDriver().executeQuery(
     `/* cypher */
     CYPHER 25
     MATCH (:Player)-[t:ENTERED]->(f:Entry {id: $id})
-    SET f.seed = $seed, f.q_seed = $q_seed, f.status = $status, f.q_status = $q_status, t.rank = $rank
+    SET f.seed = $seed, f.q_seed = $q_seed, f.status = $status, f.q_status = $q_status, t.rank = $rank, f.points = $points, f.pm = $pm
     `,
     formattedParams
   )
