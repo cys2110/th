@@ -780,5 +780,98 @@ def get_atp_stats():
 
     return jsonify({"ok": True, "eid": eid, "matches": len(matches)})
 
+# Endpoint to scrape ATP results data
+@app.route("/atp_activity", methods=['POST'])
+def get_atp_activity():
+    data = request.json
+    tid = data.get('tid')
+    tid2 = data.get('tid2') if data.get('tid2') else tid
+    year = data.get('year')
+    year2 = data.get('year2') if data.get('year2') else year
+    match_type = data.get('type')
+    category = data.get('category')
+    players = data.get('players')
+    activity = []
+
+    driver = webdriver.Chrome()
+
+    for player in players:
+        driver.get(f"https://www.atptour.com/en/players/x/{player}/player-activity?matchType={match_type}&year={year2}&tournament={tid2}_{category}")
+
+        player_activity = {
+            'player': player
+        }
+
+        WebDriverWait(driver, 10).until(EC.presence_of_all_elements_located((By.CLASS_NAME, 'atp_player-activity')))
+
+        layout = driver.find_element(By.CLASS_NAME, 'atp_player-activity').get_attribute('innerHTML')
+        soup = BeautifulSoup(layout, 'html.parser')
+
+        tournament_rows = soup.find_all('div', class_='tournament')
+
+        if len(tournament_rows) == 1:
+            row = tournament_rows[0]
+        elif len(tournament_rows) > 1:
+            target_row = None
+            for row in tournament_rows:
+                a_tag = row.find('a', href=True)
+                if a_tag and f"/{tid2}/overview" in a_tag['href']:
+                    target_row = row
+                    break
+
+            if not target_row:
+                print(f"No activity found for {player}")
+                continue
+
+            row = target_row
+        else:
+            print(f"No activity found for {player}")
+            continue
+
+        footer = row.next_sibling
+
+        if not footer or footer == "":
+            print(f"No activity found for {player}")
+            continue
+
+        footer_text = footer.get_text(strip=True).split(', ')
+        for text in footer_text:
+            label, value = text.split(': ')
+            if label == 'Points':
+                player_activity['points'] = int(value)
+            elif label == 'ATP Ranking':
+                player_activity['rank'] = int(value)
+            elif label == 'Prize Money':
+                for prefix in ['$', '€', '£', 'A$']:
+                    if value.startswith(prefix):
+                        value = value.removeprefix(prefix)
+                        break
+                player_activity['pm'] = int(value.replace(',', ''))
+
+        activity.append(player_activity)
+
+    driver.quit()
+
+    def add_activity(db):
+        for act in activity:
+            query = """
+                MATCH (p:Player {id: $player}-[t:ENTERED]->(f:Entry:$($type) {id: $entry_id})
+                SET t.rank = $rank, f.pm = $pm, f.points = $points
+            """
+
+            params = {
+                'player': act['player'],
+                'type': match_type,
+                'entry_id': f"{tid}{year}-ATP {act['player']}",
+                'rank': act.get('rank'),
+                'pm': act.get('pm'),
+                'points': act.get('points')
+            }
+            db.run(query, **params)
+
+    with GraphDatabase.driver(URI, auth=AUTH) as driver:
+        with driver.session(database="neo4j") as session:
+            records = session.execute_write(add_activity)
+
 if __name__ == "__main__":
     app.run(debug=True)

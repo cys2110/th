@@ -82,8 +82,6 @@ export default defineEventHandler(async event => {
   const normalisedPreviousCountries = formerCountriesArray.map(normaliseCountry)
   const normalisedCountry = country ? normaliseCountry(country) : null
 
-  console.log(coachesArray, formerCoachesArray)
-
   const { summary } = await useDriver().executeQuery(
     `/* cypher */
       CYPHER 25
@@ -96,8 +94,8 @@ export default defineEventHandler(async event => {
       CALL (p) {
         MATCH (p)-[v:REPRESENTS]->(c:Country)
         CALL (*) {
-          WHEN NOT c.id = $country.value THEN {
-            MATCH (c1:Country {id: $country.value})
+          WHEN NOT c.id = $country THEN {
+            MATCH (c1:Country {id: $country})
             MERGE (p)-[v1:REPRESENTS]->(c1)
             SET v1.start_date = $country.start_date
             DELETE v
@@ -111,11 +109,11 @@ export default defineEventHandler(async event => {
         WHEN $previous_countries IS NOT NULL THEN {
           OPTIONAL MATCH (p)-[v:REPRESENTED]->(c:Country)
           CALL (c, v) {
-            WITH c, v WHERE NOT c.id IN [k IN $previous_countries | k.value]
+            WITH c, v WHERE NOT c.id IN $previous_countries
             DELETE v
           }
           UNWIND $previous_countries AS k
-          MATCH (c1:Country {id: k.value})
+          MATCH (c1:Country {id: k})
           MERGE (p)-[v1:REPRESENTED]->(c1)
           SET v1.start_date = k.start_date, v1.end_date = k.end_date
         }
@@ -142,11 +140,11 @@ export default defineEventHandler(async event => {
         WHEN $coaches IS NOT NULL THEN {
           OPTIONAL MATCH (x:Coach)-[r:COACHES]->(p)
           CALL (x, r) {
-            WITH x, r WHERE NOT x.id IN [k IN $coaches | k.value]
+            WITH x, r WHERE NOT x.id IN $coaches
             DELETE r
           }
           UNWIND $coaches AS k
-          MATCH (x1:Coach {id: k.value})
+          MATCH (x1:Coach {id: k})
           MERGE (x1)-[q:COACHES]->(p)
           SET q.years = k.years
         }
@@ -155,11 +153,11 @@ export default defineEventHandler(async event => {
         WHEN $former_coaches IS NOT NULL THEN {
           OPTIONAL MATCH (x:Coach)-[r:COACHED]->(p)
           CALL (x, r) {
-            WITH x, r WHERE NOT x.id IN [k IN $former_coaches | k.value]
+            WITH x, r WHERE NOT x.id IN $former_coaches
             DELETE r
           }
           UNWIND $former_coaches AS k
-          MATCH (x1:Coach {id: k.value})
+          MATCH (x1:Coach {id: k})
           MERGE (x1)-[q:COACHED]->(p)
           SET q.years = k.years
         }

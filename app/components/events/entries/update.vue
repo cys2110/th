@@ -17,6 +17,7 @@ const toast = useToast()
 const {
   ui: { icons }
 } = useAppConfig()
+const refreshCounter = defineModel<number>()
 
 const open = ref(false)
 const uploading = ref(false)
@@ -94,6 +95,9 @@ const onSubmit = async (event: FormSubmitEvent<EntrySchema>) => {
       set(open, false)
       if (refresh) {
         refresh()
+      }
+      if (refreshCounter.value !== undefined) {
+        refreshCounter.value++
       }
     } else {
       toast.add({

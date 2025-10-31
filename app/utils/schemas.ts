@@ -207,6 +207,7 @@ export const matchSchema = z.object({
   winner: z.literal(["Team1", "Team2"], "Please select a valid winner").optional()
 })
 
+export type MatchInput = z.input<typeof matchSchema>
 export type MatchSchema = z.infer<typeof matchSchema>
 
 export const personSchema = z.object({
@@ -316,7 +317,17 @@ export const scrapeSchema = z.object({
   wid: z.number().optional(),
   draw_range: z.array(z.string().transform(s => parseInt(s, 10))).optional(),
   skip: z.array(z.string().transform(s => parseInt(s, 10))).optional(),
-  links: z.array(z.string()).optional()
+  links: z.array(z.string()).optional(),
+  players: z
+    .array(
+      z
+        .object({
+          value: z.string(),
+          label: z.string()
+        })
+        .transform(({ value, label }) => value)
+    )
+    .optional()
 })
 
 export type ScrapeInput = z.input<typeof scrapeSchema>

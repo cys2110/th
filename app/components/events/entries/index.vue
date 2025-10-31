@@ -1,6 +1,48 @@
 <script setup lang="ts">
+const {
+  params: { tour, edId }
+} = useRoute("event")
+const toast = useToast()
+const {
+  ui: { icons }
+} = useAppConfig()
+
 const viewType = ref("By Player")
 const refresh = ref(0)
+const updating = ref(false)
+
+const updateActivityInfo = async () => {
+  set(updating, true)
+  try {
+    const response = await $fetch("/api/players/activity/update", {
+      query: { id: edId }
+    })
+    if ((response as any).ok) {
+      toast.add({
+        title: "Activity updated successfully",
+        icon: icons.check,
+        color: "success"
+      })
+      refresh.value++
+    } else {
+      toast.add({
+        title: "Error updating activity",
+        description: (response as any).message,
+        icon: icons.error,
+        color: "error"
+      })
+    }
+  } catch (e) {
+    toast.add({
+      title: "Error updating activity",
+      description: (e as Error).message,
+      icon: icons.error,
+      color: "error"
+    })
+  } finally {
+    set(updating, false)
+  }
+}
 </script>
 
 <template>
@@ -11,6 +53,15 @@ const refresh = ref(0)
   >
     <template #right>
       <dev-only>
+        <events-entries-activity
+          v-if="tour === 'ATP'"
+          v-model="refresh"
+        />
+        <u-button
+          v-else
+          @click="updateActivityInfo"
+          :icon="updating ? ICONS.uploading : icons.upload"
+        />
         <events-entries-update
           v-model="refresh"
           class="mr-1"
