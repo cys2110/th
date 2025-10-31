@@ -356,7 +356,7 @@ def get_atp_draw():
                     MERGE (s1)-[:SCORED]->(m)
                 """
                 params['p1id'] = match['p1']['id']
-                params['entry1'] = f"{tid}{year}-ATP {match['p1']['id']}" if match_type == 'Singles' else f"{tid}{year} {match['p1']['id']} {match['p2']['id']}"
+                params['entry1'] = f"{tid}{year}-ATP {match['p1']['id']}" if match_type == 'Singles' else f"{tid}{year}-ATP {match['p1']['id']} {match['p2']['id']}"
                 params['score1'] = f"{match['id']} {match['p1']['id']}" if match_type == 'Singles' else f"{match['id']} {match['p1']['id']} {match['p2']['id']}"
 
                 if match['p1'].get('seed') is not None:

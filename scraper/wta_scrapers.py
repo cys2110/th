@@ -75,7 +75,6 @@ def get_wta_player(player_id):
             'The Netherlands': 'Netherlands',
             'Republic of Egypt': 'Egypt',
             'Korea (South)': 'South Korea',
-            'Bosnia-Herzegovina': "Bosnia and Herzegovina",
             'Macedonia': 'North Macedonia',
             'Hong-Kong, China': 'Hong Kong'
         }
@@ -99,7 +98,7 @@ def get_wta_player(player_id):
         plays_detail = bio_block[0].find('span', class_ = 'profile-bio__info-content')
         if plays_detail:
             plays = plays_detail.get_text(strip=True)
-            player['rh'] = True if plays == 'Right-Handed' else False
+            player['rh'] = 'Right' if plays == 'Right-Handed' else 'Left' if plays == 'Left-Handed' else None
 
         height_detail = bio_block[2].find('span', class_ = 'profile-bio__info-content')
         if height_detail:
@@ -129,7 +128,7 @@ def get_wta_player(player_id):
 
         if player.get('rh') is not None:
             query += """
-                SET p.rh = toBoolean($player.rh)
+                SET p.rh = $player.rh
             """
 
         db.run(query, **params)
@@ -143,10 +142,10 @@ def get_wta_player(player_id):
 @app.route('/wta_draw', methods=['POST'])
 def get_draw():
     data = request.json
-    tid = int(data.get('tid'))
-    year = int(data.get('year'))
-    year2 = int(data.get('year2')) if data.get('year2') else year
-    wid = int(data.get('tid2')) if data.get('tid2') else tid
+    tid = data.get('tid')
+    year = data.get('year')
+    year2 = data.get('year2') if data.get('year2') else year
+    wid = data.get('tid2') if data.get('tid2') else tid
     matches = []
 
     driver = webdriver.Chrome()
@@ -195,8 +194,8 @@ def get_draw():
                         match_no = int((round_number // 4) + 1 + index)
 
                 match_info = {
-                    'eid': int(f"{tid}{year}"),
-                    'id': f"{tid}{year} {match_no}",
+                    'eid': f"{tid}{year}-WTA",
+                    'id': f"{tid}{year}-WTA {match_no}",
                     'draw': draw_mapping[draw_type][0],
                     'type': draw_mapping[draw_type][1],
                     'match_no': match_no,
@@ -256,6 +255,10 @@ def get_draw():
             params = match
             params['s1_label'] = 'Winner' if match.get('winner') is not None and (match['winner'] == match['p1'] or match['winner'] == match['p3']) else 'Loser' if match.get('winner') is not None else None
             params['s2_label'] = 'Winner' if match.get('winner') is not None and (match['winner'] == match['p2'] or match['winner'] == match['p4']) else 'Loser' if match.get('winner') is not None else None
+            params['f1_id'] = f"{match['eid']} {match['p1']}" if match['type'] == 'Singles' else f"{match['eid']} {match['p1']} {match['p3']}"
+            params['f2_id'] = f"{match['eid']} {match['p2']}" if match['type'] == 'Singles' else f"{match['eid']} {match['p2']} {match['p4']}"
+            params['s1_id'] = f"{match['id']} {match['p1']}" if match['type'] == 'Singles' else f"{match['id']} {match['p1']} {match['p3']}"
+            params['s2_id'] = f"{match['id']} {match['p2']}" if match['type'] == 'Singles' else f"{match['id']} {match['p2']} {match['p4']}"
 
             # Base query
             query = """
@@ -274,9 +277,8 @@ def get_draw():
             if match.get('p1') is not None:
                 query += """
                     MERGE (p1:Player:WTA {id: $p1})
-                    ON CREATE SET p1:Update
-                    MERGE (f1:Entry:$($type) {id: toString($eid) || ' ' || p1.id})
-                    MERGE (s1:Score:WTA:$($type):$($draw) {id: $id || ' ' || p1.id})
+                    MERGE (f1:Entry:$($type) {id: $f1_id})
+                    MERGE (s1:Score:WTA:T1:$($type):$($draw) {id: $s1_id})
                     SET s1 += $p1_score
                     MERGE (p1)-[:ENTERED]->(f1)
                     MERGE (f1)-[:SCORED]->(s1)
@@ -299,24 +301,9 @@ def get_draw():
                     }
 
                     CALL (s1, e) {
-                        WHEN $type = 'Singles' THEN SET s1:P1
                         WHEN $type = 'Doubles' THEN {
-                            SET s1:T1, s1.id = s1.id || ' ' || $p3
                             MERGE (p3:Player:WTA {id: $p3})
-                            ON CREATE SET p3:Update
-                            MERGE (f3:Entry:Doubles {id: toString($eid) || ' ' || p3.id})
-                            MERGE (p3)-[:ENTERED]->(f3)
-                            MERGE (f3)-[:SCORED]->(s1)
-                            CALL (*) {
-                                WHEN $p1_seed IS NOT NULL AND $draw = 'Main' THEN {
-                                    SET f3.seed = $p1_seed
-                                    MERGE (f3)-[:SEEDED]->(e)
-                                }
-                                WHEN $p1_seed IS NOT NULL AND $draw = 'Qualifying' THEN {
-                                    SET f3.q_seed = $p1_seed
-                                    MERGE (f3)-[:Q_SEEDED]->(e)
-                                }
-                            }
+                            MERGE (p3)-[:ENTERED]->(f1)
                         }
                     }
                 """
@@ -325,9 +312,8 @@ def get_draw():
             if match.get('p2') is not None:
                 query += """
                     MERGE (p2:Player:WTA {id: $p2})
-                    ON CREATE SET p2:Update
-                    MERGE (f2:Entry:$($type) {id: toString($eid) || ' ' || p2.id})
-                    MERGE (s2:Score:WTA:$($type):$($draw) {id: $id || ' ' || p2.id})
+                    MERGE (f2:Entry:$($type) {id: $f2_id})
+                    MERGE (s2:Score:WTA:T2:$($type):$($draw) {id: $s2_id})
                     SET s2 += $p2_score
                     MERGE (p2)-[:ENTERED]->(f2)
                     MERGE (f2)-[:SCORED]->(s2)
@@ -350,24 +336,9 @@ def get_draw():
                     }
 
                     CALL (s2, e) {
-                        WHEN $type = 'Singles' THEN SET s2:P2
                         WHEN $type = 'Doubles' THEN {
-                            SET s2:T2, s2.id = s2.id || ' ' || $p4
                             MERGE (p4:Player:WTA {id: $p4})
-                            ON CREATE SET p4:Update
-                            MERGE (f4:Entry:Doubles {id: toString($eid) || ' ' || p4.id})
-                            MERGE (p4)-[:ENTERED]->(f4)
-                            MERGE (f4)-[:SCORED]->(s2)
-                            CALL (*) {
-                                WHEN $p2_seed IS NOT NULL AND $draw = 'Main' THEN {
-                                    SET f4.seed = $p2_seed
-                                    MERGE (f4)-[:SEEDED]->(e)
-                                }
-                                WHEN $p2_seed IS NOT NULL AND $draw = 'Qualifying' THEN {
-                                    SET f4.q_seed = $p2_seed
-                                    MERGE (f4)-[:Q_SEEDED]->(e)
-                                }
-                            }
+                            MERGE (p4)-[:ENTERED]->(f2)
                         }
                     }
                 """
@@ -383,13 +354,13 @@ def get_draw():
 @app.route('/wta_stats', methods=['POST'])
 def get_wta_stats():
     data = request.json
-    wid = int(data.get('wid'))
-    year = int(data.get('year'))
-    eid = int(data.get('eid'))
+    wid = data.get('wid')
+    year = data.get('year')
+    eid = data.get('eid')
     draw_type = data.get('draw')
     match_type = data.get('type')
-    range_start, range_end = [int(x) for x in data.get('draw_range')]
-    skip = [int(x) for x in data.get('skip')] if data.get('skip') else []
+    range_start, range_end = data.get('draw_range')
+    skip = data.get('skip') if data.get('skip') else []
     matches = []
 
     driver = webdriver.Chrome()
@@ -496,7 +467,7 @@ def get_wta_stats():
             params = {
                 'p1_id': match['p1_id'],
                 'p2_id': match['p2_id'],
-                'eid': eid,
+                'eid': f"{eid}-WTA",
                 'p1_stats': match['p1'],
                 'p2_stats': match['p2'],
                 'date': match['date'],
@@ -508,8 +479,7 @@ def get_wta_stats():
             }
 
             query = """
-                MATCH (:Player:WTA {id: $p1_id})-[]-(:Entry:$($type))-[]-(s1:Score)-[]-(m:WTA:$($draw))-[]-(s2:Score)-[]-(:Entry:$($type))-[]-(:Player:WTA {id: $p2_id})
-                MATCH (m)-[]-(r:Round:WTA:$($type):$($draw))-[]-(:Event {id: $eid})
+                MATCH (:Player:WTA {id: $p1_id})-[]-(:Entry:$($type))-[]-(s1:Score)-[]-(m:WTA:$($draw) WHERE m.id STARTS WITH $eid)-[]-(s2:Score)-[]-(:Entry:$($type))-[]-(:Player:WTA {id: $p2_id})
                 SET s1 += $p1_stats, s2 += $p2_stats, m.date = date($date), m.duration = duration({hours: $hours, minutes: $minutes}), m.court = $court
             """
 
