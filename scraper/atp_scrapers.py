@@ -836,17 +836,17 @@ def get_atp_activity():
 
         footer_text = footer.get_text(strip=True).split(', ')
         for text in footer_text:
-            label, value = text.split(': ')
+            label, value = text.split(':')
             if label == 'Points':
-                player_activity['points'] = int(value)
+                player_activity['points'] = int(value.strip())
             elif label == 'ATP Ranking':
-                player_activity['rank'] = int(value)
+                player_activity['rank'] = int(value.strip())
             elif label == 'Prize Money':
-                for prefix in ['$', '€', '£', 'A$']:
+                for prefix in [' $', ' €', ' £', ' A$']:
                     if value.startswith(prefix):
                         value = value.removeprefix(prefix)
                         break
-                player_activity['pm'] = int(value.replace(',', ''))
+                player_activity['pm'] = int(value.strip().replace(',', ''))
 
         activity.append(player_activity)
 
@@ -855,14 +855,14 @@ def get_atp_activity():
     def add_activity(db):
         for act in activity:
             query = """
-                MATCH (p:Player {id: $player}-[t:ENTERED]->(f:Entry:$($type) {id: $entry_id})
+                MATCH (p:Player {id: $player})-[t:ENTERED]->(f:Entry:$($type) WHERE f.id STARTS WITH $entry_id)
                 SET t.rank = $rank, f.pm = $pm, f.points = $points
             """
 
             params = {
                 'player': act['player'],
                 'type': match_type,
-                'entry_id': f"{tid}{year}-ATP {act['player']}",
+                'entry_id': f"{tid}{year}-ATP",
                 'rank': act.get('rank'),
                 'pm': act.get('pm'),
                 'points': act.get('points')
@@ -872,6 +872,8 @@ def get_atp_activity():
     with GraphDatabase.driver(URI, auth=AUTH) as driver:
         with driver.session(database="neo4j") as session:
             records = session.execute_write(add_activity)
+
+    return jsonify({"ok": True})
 
 if __name__ == "__main__":
     app.run(debug=True)

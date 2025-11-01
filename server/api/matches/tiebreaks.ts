@@ -1,5 +1,5 @@
 export default defineEventHandler(async event => {
-  const { edId } = getQuery(event)
+  const { id } = getQuery(event)
 
   const { summary } = await useDriver().executeQuery(
     `/* cypher */
@@ -43,7 +43,7 @@ export default defineEventHandler(async event => {
       }
       RETURN *
     `,
-    { id: edId }
+    { id }
   )
 
   if (Object.values(summary.counters.updates()).every(v => v === 0)) {

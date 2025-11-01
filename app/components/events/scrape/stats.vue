@@ -34,6 +34,8 @@ const formFields = computed<FormFieldInterface<ScrapeSchema>[]>(
     ] as FormFieldInterface<ScrapeSchema>[]
 )
 
+const cleanLink = (link: string) => link.replaceAll(/^[\s"'“”‘’\[\]]+|[\s"'“”‘’\[\]]+$/g, "")
+
 const handleReset = () => {
   state.type = "Singles"
   state.links = []
@@ -50,6 +52,7 @@ const onError = (event: FormErrorEvent) => {
 }
 
 const onSubmit = async (event: FormSubmitEvent<ScrapeSchema>) => {
+  console.log(event.data)
   set(scraping, true)
   try {
     const response = await $fetch(`${FLASK_ROUTE}/${tour.toLowerCase()}_stats`, {
@@ -130,6 +133,7 @@ const onSubmit = async (event: FormSubmitEvent<ScrapeSchema>) => {
               :placeholder="field.label"
               :class="field.class"
               :max="field.max"
+              :convert-value="field.key === 'links' ? cleanLink : undefined"
             />
 
             <u-radio-group

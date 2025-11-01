@@ -4,7 +4,7 @@ const { type, id, tour, matchType, multiple } = defineProps<{
   type: string
   block?: boolean
   icon?: string
-  size?: "md"
+  size?: "md" | "sm" | "xs"
   multiple?: boolean
   id?: string
   tour?: keyof typeof TourEnum

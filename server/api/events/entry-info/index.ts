@@ -25,8 +25,8 @@ export default defineEventHandler(async event => {
   )
 
   console.log(
-    `Notifications for events: `,
-    summary.gqlStatusObjects.filter(s => !["00000", "01N51", "01N52"].includes(s.gqlStatus))
+    `Notifications for entry info: `,
+    summary.gqlStatusObjects.filter(s => s.gqlStatus !== "00000" && !s.gqlStatus.startsWith("01N5"))
   )
 
   const getRelationship = (type: string) => {
@@ -76,8 +76,8 @@ export default defineEventHandler(async event => {
     const result = record.get("result")
     if (!result) return null
     if (result?.["rank"]) result["rank"] = result["rank"].toInt()
-    result["relationship"] = getRelationship(result["relationship"])
     result["draw"] = getDraw(result["relationship"])
+    result["relationship"] = getRelationship(result["relationship"])
     return result
   })
 

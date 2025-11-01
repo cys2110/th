@@ -27,7 +27,7 @@ export default defineEventHandler(async event => {
 
   console.log(
     `Notifications for entry info: `,
-    summary.gqlStatusObjects.filter(s => !["00000", "01N51", "01N52"].includes(s.gqlStatus))
+    summary.gqlStatusObjects.filter(s => s.gqlStatus !== "00000" && !s.gqlStatus.startsWith("01N5"))
   )
 
   if (Object.values(summary.counters.updates()).every(v => v === 0)) {

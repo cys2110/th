@@ -233,7 +233,7 @@ declare global {
     }[]
 
     h2h: {
-      opponent: PlayerInterface
+      opponent: PersonInterface
       matches: number
       wins: number
     }[]

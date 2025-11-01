@@ -73,9 +73,9 @@ const state = reactive<Partial<PlayerInput>>({
 })
 
 const formFields: FormFieldInterface<PlayerSchema>[] = [
-  { label: "First Name", key: "first_name", type: "text", required: true },
-  { label: "Last Name", key: "last_name", type: "text", required: true },
-  { label: "Tour", key: "tour", type: "radio", items: ["ATP", "WTA"], required: true },
+  { label: "First Name", key: "first_name", type: "text" },
+  { label: "Last Name", key: "last_name", type: "text" },
+  { label: "Tour", key: "tour", type: "radio", items: ["ATP", "WTA"] },
   { label: "Height (cm)", key: "height", type: "number" },
   { label: "Date of Birth", key: "dob", type: "date" },
   { label: "Date of Death", key: "dod", type: "date" },
@@ -234,23 +234,53 @@ const onSubmit = async (event: FormSubmitEvent<PlayerSchema>) => {
         @error="onError"
       >
         <div class="grid grid-cols-2 gap-5 items-center">
-          <form-field
+          <template
             v-for="field in formFields"
             :key="field.label"
-            :field
-            v-model="state[field.key]"
-          />
-
-          <u-form-field
-            label="Country"
-            class="col-span-2"
           >
-            <u-field-group class="w-full">
+            <form-input
+              v-if="field.type === 'text'"
+              v-model="state[field.key]"
+              :placeholder="field.label"
+              :type="field.subType"
+            />
+
+            <u-radio-group
+              v-else-if="field.type === 'radio'"
+              v-model="(state[field.key] as string)"
+              :legend="field.label"
+              :items="field.items"
+              orientation="horizontal"
+            />
+
+            <form-input-number
+              v-else-if="field.type === 'number'"
+              v-model="(state[field.key] as number)"
+              :placeholder="field.label"
+            />
+
+            <form-date-picker
+              v-else-if="field.type === 'date'"
+              v-model="state[field.key]"
+              :placeholder="field.label"
+            />
+
+            <form-currency
+              v-else-if="field.type === 'currency'"
+              v-model="(state[field.key] as number)"
+              :placeholder="field.label"
+            />
+          </template>
+
+          <u-form-field class="col-span-2">
+            <div class="flex justify-stretch items-center gap-0.5">
               <form-select-search
                 v-model="state.country"
                 type="countries"
-                placeholder="Select country"
+                placeholder="Country"
                 block
+                size="xs"
+                class="min-w-1/3"
               />
               <form-date-picker
                 v-model="state.country!.start_date"
@@ -261,24 +291,26 @@ const onSubmit = async (event: FormSubmitEvent<PlayerSchema>) => {
                 :icon="icons.close"
                 @click="state.country = { value: '', label: '', start_date: undefined }"
               />
-            </u-field-group>
+            </div>
           </u-form-field>
 
           <u-form-field
             label="Former Representations"
             class="col-span-2"
           >
-            <div class="flex flex-col gap-1">
-              <u-field-group
+            <div class="flex flex-col gap-1 mt-3">
+              <div
                 v-for="(country, index) in state.former_countries"
                 :key="country.value"
-                class="w-full"
+                class="flex justify-stretch items-center gap-0.5"
               >
                 <form-select-search
                   v-model="(state.former_countries![index] as SelectOptionsType)"
                   placeholder="Country"
                   type="countries"
                   block
+                  size="xs"
+                  class="min-w-1/3"
                 />
                 <form-date-picker
                   v-model="state.former_countries![index]!.start_date"
@@ -293,7 +325,7 @@ const onSubmit = async (event: FormSubmitEvent<PlayerSchema>) => {
                   :icon="icons.close"
                   @click="state.former_countries = state.former_countries?.filter(c => c.value !== country.value)"
                 />
-              </u-field-group>
+              </div>
               <u-button
                 label="Add Former Country"
                 icon="solar:globus-line-duotone"
@@ -307,8 +339,9 @@ const onSubmit = async (event: FormSubmitEvent<PlayerSchema>) => {
             v-for="group in rankFields"
             :key="group.label"
             :label="group.label"
+            class="col-span-2"
           >
-            <u-field-group class="w-full">
+            <div class="flex justify-stretch items-center gap-0.5 mt-3">
               <template
                 v-for="child in group.children"
                 :key="child.key"
@@ -317,6 +350,8 @@ const onSubmit = async (event: FormSubmitEvent<PlayerSchema>) => {
                   v-if="child.type === 'number'"
                   :placeholder="child.label"
                   v-model="(state[child.key] as number)"
+                  size="xs"
+                  class="min-w-1/4"
                 />
                 <form-date-picker
                   v-else
@@ -324,46 +359,53 @@ const onSubmit = async (event: FormSubmitEvent<PlayerSchema>) => {
                   :placeholder="child.label"
                 />
               </template>
-            </u-field-group>
+            </div>
           </u-form-field>
 
           <u-form-field
             label="Links"
             class="col-span-2"
           >
-            <div class="flex flex-col gap-2">
-              <form-field
+            <div class="flex flex-col gap-2 mt-3">
+              <form-textarea
                 v-for="field in linkFields"
                 :key="field.label"
-                v-model="state[field.key]"
-                :field
+                v-model="(state[field.key] as string)"
+                :placeholder="field.label"
               />
             </div>
           </u-form-field>
 
-          <u-form-field label="Coaches">
+          <u-form-field
+            label="Coaches"
+            class="col-span-2"
+          >
             <div class="flex flex-col gap-1">
-              <u-field-group
+              <div
                 v-if="state.coaches?.length"
                 v-for="(coach, index) in state.coaches || []"
                 :key="coach.value || index"
+                class="flex justify-stretch items-center gap-0.5 mt-3"
               >
                 <form-select-search
                   type="coaches"
                   v-model="(state.coaches![index] as SelectOptionsType)"
                   placeholder="Coach"
                   block
+                  class="min-w-1/2"
+                  size="xs"
                 />
-                <form-field
+                <form-input
                   v-model="state.coaches![index]!.years"
-                  :field="{ label: 'Years coached', key: 'coaches', type: 'text' }"
+                  placeholder="Years coached"
+                  size="xs"
                 />
                 <u-button
                   color="error"
                   :icon="icons.close"
                   @click="state.coaches = state.coaches!.filter(c => c.value !== coach.value)"
                 />
-              </u-field-group>
+              </div>
               <u-button
                 label="Add Coach"
                 icon="line-md:account-add"
@@ -373,29 +415,36 @@ const onSubmit = async (event: FormSubmitEvent<PlayerSchema>) => {
             </div>
           </u-form-field>
 
-          <u-form-field label="Former Coaches">
+          <u-form-field
+            label="Former Coaches"
+            class="col-span-2"
+          >
             <div class="flex flex-col gap-1">
-              <u-field-group
+              <div
                 v-if="state.former_coaches?.length"
                 v-for="(coach, index) in state.former_coaches || []"
                 :key="coach.value || index"
+                class="flex justify-stretch items-center gap-0.5 mt-3"
               >
                 <form-select-search
                   type="coaches"
                   v-model="(state.former_coaches![index] as SelectOptionsType)"
                   placeholder="Coach"
                   block
+                  class="min-w-1/2"
+                  size="xs"
                 />
-                <form-field
+                <form-input
                   v-model="state.former_coaches![index]!.years"
-                  :field="{ label: 'Years coached', key: 'coaches', type: 'text' }"
+                  placeholder="Years coached"
+                  size="xs"
                 />
                 <u-button
                   color="error"
                   :icon="icons.close"
                   @click="state.former_coaches = state.former_coaches.filter(c => c !== coach)"
                 />
-              </u-field-group>
+              </div>
               <u-button
                 label="Add Former Coach"
                 icon="line-md:account-add"

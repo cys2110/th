@@ -161,7 +161,7 @@ const handleScrape = async () => {
             class="flex items-center gap-2 w-fit"
           >
             <countries-link
-              v-if="player?.country"
+              v-if="player?.country?.id"
               :country="player?.country"
               icon-only
             />

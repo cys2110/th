@@ -13,7 +13,7 @@ export default defineEventHandler(async event => {
 
   const results = records.map(r => {
     const player = r.get("player")
-    return { id: player.id, label: player.first_name + " " + player.last_name }
+    return { value: player.id, label: player.first_name + " " + player.last_name }
   })
 
   return results

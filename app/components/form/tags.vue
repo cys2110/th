@@ -3,6 +3,7 @@ defineProps<{
   placeholder: string
   class?: string
   max?: number
+  convertValue?: (value: string) => string
 }>()
 const modelValue = defineModel<string[]>()
 </script>
@@ -29,6 +30,7 @@ const modelValue = defineModel<string[]>()
       :placeholder="`Enter ${placeholder.toLowerCase()}`"
       :max
       add-on-paste
+      :convert-value
     />
   </div>
 </template>

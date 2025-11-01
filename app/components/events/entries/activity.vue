@@ -21,13 +21,25 @@ const state = reactive<Partial<ScrapeInput>>({
   tid: Number(id),
   year: Number(edId.replace(id, "")),
   year2: Number(year),
-  type: "Singles",
-  draw: "Main"
+  type: "Singles"
 })
 
 const formFields: FormFieldInterface<ScrapeSchema>[] = [
   { label: "Site ID", key: "tid2", type: "text", subType: "number" },
-  { label: "Match Type", key: "type", type: "radio", items: ["Singles", "Doubles"] }
+  { label: "Match Type", key: "type", type: "radio", items: ["Singles", "Doubles"] },
+  {
+    label: "Category",
+    key: "category",
+    type: "inputMenu",
+    items: [
+      { value: "GS", label: "Grand Slam" },
+      { value: "1000", label: "ATP Masters 1000" },
+      { value: "500", label: "ATP 500" },
+      { value: "250", label: "ATP 250" },
+      { value: "CH", label: "Challenger" },
+      { value: "FU", label: "Futures" }
+    ]
+  }
 ]
 
 const handleReset = () => {
@@ -60,6 +72,7 @@ const onSubmit = async (event: FormSubmitEvent<ScrapeSchema>) => {
         color: "success"
       })
       set(open, false)
+      state.players = []
       if (refreshCounter.value !== undefined) {
         refreshCounter.value++
       }
@@ -109,6 +122,15 @@ const onSubmit = async (event: FormSubmitEvent<ScrapeSchema>) => {
               :placeholder="field.label"
               :type="field.subType"
               :class="field.class"
+            />
+
+            <form-select-menu
+              v-else-if="field.type === 'inputMenu'"
+              v-model="(state[field.key] as any[])"
+              :items="(field.items as any[])"
+              :placeholder="field.label"
+              block
+              class="col-span-2"
             />
 
             <u-radio-group

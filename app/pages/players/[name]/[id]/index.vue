@@ -27,8 +27,8 @@ const playerTour = useState<keyof typeof TourEnum | undefined>("playerTour")
           <template #description>
             <div class="flex items-center gap-2 w-fit">
               <countries-link
-                v-if="country"
-                :country
+                v-if="country?.id"
+                :country="country"
                 icon-only
               />
               <u-badge

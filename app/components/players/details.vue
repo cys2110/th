@@ -80,7 +80,9 @@ const h2hColumns: TableColumn<PlayerInterface["h2h"][number]>[] = [
 
 <template>
   <div>
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 text-sm *:*:first:font-semibold *:*:last:ml-3">
+    <div
+      class="columns-1 md:columns-2 lg:columns-3 gap-3 text-sm space-y-3 *:border *:border-primary *:rounded-md *:p-3 *:break-inside-avoid-column *:will-change-transform *:*:first:font-semibold *:*:first:text-muted *:*:not-first:ml-3"
+    >
       <div v-if="player?.age">
         <div>Age</div>
         <div>
@@ -145,11 +147,11 @@ const h2hColumns: TableColumn<PlayerInterface["h2h"][number]>[] = [
 
       <div>
         <div>Career Prize Money</div>
-        <div>{{ player?.pm.toLocaleString("en-US", { style: "currency", currency: "USD" }) }}</div>
+        <div>{{ player?.pm?.toLocaleString("en-US", { style: "currency", currency: "USD" }) }}</div>
       </div>
 
       <div
-        v-if="player?.coaches.length"
+        v-if="player?.coaches?.length"
         :class="`row-span-${player.coaches.length}`"
       >
         <div>Coaches</div>
@@ -167,7 +169,7 @@ const h2hColumns: TableColumn<PlayerInterface["h2h"][number]>[] = [
 
               <template #fallback>
                 <u-link
-                  v-if="coach.labels.includes('Player')"
+                  v-if="coach.labels?.includes('Player')"
                   :to="{ name: 'player', params: { id: coach.id, name: kebabCase(`${coach.first_name} ${coach.last_name}`) } }"
                   class="hover-link default-link"
                 >
@@ -275,6 +277,15 @@ const h2hColumns: TableColumn<PlayerInterface["h2h"][number]>[] = [
               </template>
             </u-empty>
           </template>
+
+          <template #opponent-cell="{ row }">
+            <players-link
+              v-if="row.original.opponent.last_name"
+              :player="row.original.opponent"
+            />
+          </template>
+
+          <template #wl-cell="{ row }"> {{ row.original.wins }}-{{ row.original.matches - row.original.wins }} </template>
         </u-table>
       </dashboard-subpanel>
     </div>

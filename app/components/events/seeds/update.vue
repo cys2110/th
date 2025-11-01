@@ -29,8 +29,8 @@ const state = reactive<Partial<SeedInput>>({
 })
 
 const formFields: FormFieldInterface<SeedSchema>[] = [
-  { label: "Draw", key: "draw", type: "radio", items: ["Main", "Qualifying"] },
   { label: "Type", key: "type", type: "radio", items: ["Singles", "Doubles"] },
+  { label: "Draw", key: "draw", type: "radio", items: ["Main", "Qualifying"] },
   { label: "Seed", key: "seed", type: "number" },
   { label: "Rank", key: "rank", type: "number" }
 ]

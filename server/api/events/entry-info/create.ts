@@ -1,4 +1,4 @@
-import { int, Integer } from "neo4j-driver"
+import { int } from "neo4j-driver"
 
 export default defineEventHandler(async event => {
   interface QueryProps {
@@ -125,8 +125,8 @@ export default defineEventHandler(async event => {
     case "Withdrawal":
       formattedParams["player1"] = Array.isArray(players) ? (players[0] as string) : (players as string)
       formattedParams["player2"] = Array.isArray(players) && players.length > 1 ? (players[1] as string) : null
-      formattedParams["reason"] = reason
-      formattedParams["teammate"] = teammate
+      formattedParams["reason"] = reason ?? null
+      formattedParams["teammate"] = teammate ?? null
       formattedParams["entryId"] = `${eventId} ${Array.isArray(players) ? players.join(" ") : players}`
       query = `/* cypher */
         CYPHER 25
@@ -141,8 +141,14 @@ export default defineEventHandler(async event => {
           }
         }
         CALL (*) {
-          WHEN $draw = 'Main' THEN MERGE (f)-[:WITHDREW {reason: $reason, teammate: $teammate}]->(e)
-          ELSE MERGE (f)-[:Q_WITHDREW {reason: $reason, teammate: $teammate}]->(e)
+          WHEN $draw = 'Main' THEN {
+            MERGE (f)-[t:WITHDREW]->(e)
+            SET t.reason = $reason, t.teammate = $teammate
+          }
+          ELSE {
+            MERGE (f)-[t:Q_WITHDREW]->(e)
+            SET t.reason = $reason, t.teammate = $teammate
+          }
         }
       `
       break
@@ -150,10 +156,10 @@ export default defineEventHandler(async event => {
       break
   }
 
-  const { summary } = await useDriver().executeQuery(query!)
+  const { summary } = await useDriver().executeQuery(query!, formattedParams)
 
-  if (summary.counters.updates().nodesCreated === 0) {
-    throw createError({ statusCode: 400, statusMessage: "Event could not be created" })
+  if (Object.values(summary.counters.updates()).every(v => v === 0)) {
+    throw createError({ statusCode: 400, statusMessage: "Entry info could not be created" })
   } else {
     return { ok: true }
   }

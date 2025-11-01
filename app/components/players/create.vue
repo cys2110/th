@@ -55,11 +55,7 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
       })
       handleReset()
       set(open, false)
-      // if (refresh) {
-      //   refresh()
-      // } else {
       await navigateTo({ name: "player", params: { id: event.data.id, name: "—" } })
-      // }
     } else {
       toast.add({
         title: "Error creating player",
@@ -113,7 +109,7 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
 
     <template #footer="{ close }">
       <u-button
-        form="tournament-form"
+        form="player-form"
         type="submit"
         label="Save"
         :icon="uploading ? ICONS.uploading : icons.check"

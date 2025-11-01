@@ -29,7 +29,10 @@ defineShortcuts({
 const state = reactive<Partial<EntryInput>>({
   ...entry,
   event: `${edId}-${tour}`,
-  type
+  type,
+  id: player?.id,
+  status: entry?.status ? { value: entry.status, label: StatusEnum[entry.status] } : undefined,
+  q_status: entry?.q_status ? { value: entry.q_status, label: StatusEnum[entry.q_status] } : undefined
 })
 
 const formFields = computed<FormFieldInterface<EntrySchema>[]>(
@@ -63,8 +66,8 @@ const formFields = computed<FormFieldInterface<EntrySchema>[]>(
 const handleReset = () => {
   state.seed = entry?.seed
   state.q_seed = entry?.q_seed
-  state.status = entry?.status
-  state.q_status = entry?.q_status
+  state.status = entry?.status ? { value: entry.status, label: StatusEnum[entry.status] } : undefined
+  state.q_status = entry?.q_status ? { value: entry.q_status, label: StatusEnum[entry.q_status] } : undefined
   state.rank = entry?.rank
 }
 

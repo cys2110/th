@@ -113,7 +113,17 @@ const columnPinning = ref({
     </template>
 
     <template #player-cell="{ row }">
-      <players-link :player="row.original" />
+      <players-link
+        v-if="row.original.country?.id"
+        :player="row.original"
+      />
+      <u-link
+        v-else
+        :to="{ name: 'player', params: { id: row.original.id, name: '—' } }"
+        class="hover-link default-link"
+      >
+        {{ row.original.id }}
+      </u-link>
     </template>
 
     <template #singles_draws-cell="{ row }">
@@ -134,7 +144,7 @@ const columnPinning = ref({
     <template #singles_rank-cell="{ cell, row }">
       <dev-only>
         <events-entries-update
-          v-if="isDefined(cell.getValue())"
+          v-if="isDefined(cell.getValue()) || row.original.singles?.withdrew"
           :entry="row.original.singles"
           :player="{ id: row.original.id, first_name: row.original.first_name, last_name: row.original.last_name, country: row.original.country }"
           type="Singles"
@@ -166,7 +176,7 @@ const columnPinning = ref({
     <template #doubles_rank-cell="{ cell, row }">
       <dev-only>
         <events-entries-update
-          v-if="isDefined(cell.getValue())"
+          v-if="isDefined(cell.getValue()) || row.original.doubles?.withdrew"
           :entry="row.original.doubles"
           :player="{ id: row.original.id, first_name: row.original.first_name, last_name: row.original.last_name, country: row.original.country }"
           type="Doubles"

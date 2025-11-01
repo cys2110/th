@@ -40,14 +40,26 @@ export const entrySchema = z.object({
   event: z.string().optional(),
   type: z.literal(["Singles", "Doubles"], "Please select a valid match type"),
   seed: z.number("Please enter a valid seed number").int("Seed number must be a number").positive("Seed number must be a positive number").optional(),
-  status: z.string("Please enter a valid status").optional(),
+  status: z
+    .object({
+      value: z.string("Please enter a valid status"),
+      label: z.string("Please enter a valid status label")
+    })
+    .transform(({ value, label }) => value)
+    .optional(),
   rank: z.number("Please enter a valid rank").int("Rank must be a number").positive("Rank must be a positive number").optional(),
   q_seed: z
     .number("Please enter a valid qualifying seed number")
     .int("Qualifying seed number must be a number")
     .positive("Qualifying seed number must be a positive number")
     .optional(),
-  q_status: z.string("Please enter a valid qualifying status").optional(),
+  q_status: z
+    .object({
+      value: z.string("Please enter a valid status"),
+      label: z.string("Please enter a valid status label")
+    })
+    .transform(({ value, label }) => value)
+    .optional(),
   player1: z
     .object({
       value: z.string("Please enter a valid player ID"),
@@ -327,6 +339,13 @@ export const scrapeSchema = z.object({
         })
         .transform(({ value, label }) => value)
     )
+    .optional(),
+  category: z
+    .object({
+      value: z.string(),
+      label: z.string()
+    })
+    .transform(({ value, label }) => value)
     .optional()
 })
 

@@ -1,5 +1,10 @@
 <script setup lang="ts">
-defineProps<{ placeholder: string; block?: boolean; class?: string }>()
+defineProps<{
+  placeholder: string
+  block?: boolean
+  class?: string
+  size?: "xs"
+}>()
 const modelValue = defineModel<number>()
 const {
   ui: { icons }
@@ -27,6 +32,7 @@ const {
       v-model="modelValue"
       :placeholder="`Enter ${placeholder.toLowerCase()}`"
       :decrement="false"
+      :size
     >
       <template #increment>
         <u-button

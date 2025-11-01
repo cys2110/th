@@ -67,8 +67,13 @@ export default defineEventHandler(async event => {
 
   const { summary } = await useDriver().executeQuery(query!)
 
-  if (summary.counters.updates().nodesCreated === 0) {
-    throw createError({ statusCode: 400, statusMessage: "Event could not be created" })
+  console.log(
+    `Notifications for entry info update: `,
+    summary.gqlStatusObjects.filter(s => s.gqlStatus !== "00000" && !s.gqlStatus.startsWith("01N5"))
+  )
+
+  if (Object.values(summary.counters.updates()).every(v => v === 0)) {
+    throw createError({ statusCode: 400, statusMessage: "Entry info could not be update" })
   } else {
     return { ok: true }
   }

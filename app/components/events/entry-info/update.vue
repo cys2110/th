@@ -42,8 +42,8 @@ const formFields: FormFieldInterface<EntryInfoSchema>[] = [
     items: ["Alternate", "Default", "Last Direct Acceptance", "Qualifier", "Retirement", "Walkover", "Wild Card", "Withdrawal"],
     class: "col-span-2"
   },
-  { label: "Draw", key: "draw", type: "radio", items: ["Main", "Qualifying"] },
-  { label: "Type", key: "type", type: "radio", items: ["Singles", "Doubles"] }
+  { label: "Type", key: "type", type: "radio", items: ["Singles", "Doubles"] },
+  { label: "Draw", key: "draw", type: "radio", items: ["Main", "Qualifying"] }
 ]
 
 const handleReset = () => {
@@ -170,29 +170,32 @@ const onSubmit = async (event: FormSubmitEvent<EntryInfoSchema>) => {
               :match-type="state.type"
               block
             />
-            <form-field
+            <form-select-search
               v-else-if="state.type"
               v-model="state.players"
-              :field="{ label: state.type === 'Doubles' ? 'Players' : 'Player', key: 'players', type: 'search', subType: 'players', multiple: true }"
+              type="players"
+              multiple
+              :placeholder="state.type === 'Doubles' ? 'Players' : 'Player'"
+              block
             />
           </div>
 
-          <form-field
+          <form-input-number
             v-if="state.relationship === 'Last Direct Acceptance'"
             v-model="state.rank"
-            :field="{ label: 'Rank', key: 'rank', type: 'number' }"
+            :placeholder="'Rank'"
           />
 
           <template v-if="state.relationship && ['Default', 'Retirement', 'Walkover', 'Withdrawal'].includes(state.relationship)">
-            <form-field
+            <form-input
               v-model="state.reason"
-              :field="{ label: 'Reason', key: 'reason', type: 'text' }"
+              placeholder="Reason"
             />
 
-            <form-field
+            <form-input
               v-if="state.type === 'Doubles'"
               v-model="state.teammate"
-              :field="{ label: 'Teammate', key: 'teammate', type: 'text' }"
+              placeholder="Teammate"
             />
           </template>
         </div>
