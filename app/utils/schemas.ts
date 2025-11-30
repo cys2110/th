@@ -13,17 +13,6 @@ export const optionSchema = object({
 })
 export type OptionInput = z.input<typeof optionSchema>
 
-export const tournamentFormSchema = object({
-  id: number("Please enter a tournament ID"),
-  name: string("Please enter a tournament name"),
-  tours: array(TourEnum, "Please select at least one tour"),
-  established: yearSchema.optional(),
-  abolished: yearSchema.optional(),
-  website: url("Please enter a valid url").optional()
-})
-export type TournamentFormInput = z.input<typeof tournamentFormSchema>
-export type TournamentFormSchema = z.infer<typeof tournamentFormSchema>
-
 export const venueFormSchema = z
   .object({
     id: string().optional(),

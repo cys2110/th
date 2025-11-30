@@ -1,14 +1,11 @@
 <script setup lang="ts">
-import type { TableColumn, TableRow } from "@nuxt/ui"
-import { UBadge } from "#components"
+import type { TableRow } from "@nuxt/ui"
+import { TournamentsColumns } from "#components"
 
 useHead({ title: "Tournaments" })
 
 const breakpoints = useBreakpoints(breakpointsTailwind, { ssrWidth: useSSRWidth() })
 const mdAndDown = breakpoints.smallerOrEqual("md")
-const {
-  ui: { icons, colors }
-} = useAppConfig()
 
 // Pagination / view
 const viewMode = ref(true)
@@ -55,30 +52,13 @@ const { data, status } = await useFetch("/api/tournaments", {
     established,
     abolished
   },
-  default: () => ({ count: 0, tournaments: [] as TournamentType[] })
+  default: () => ({ count: 0, tournaments: [] })
 })
 
 const [defineEmptyTemplate, reuseEmptyTemplate] = createReusableTemplate()
 
 // Table columns setup
 const table = useTemplateRef<any>("table")
-const columns: TableColumn<TournamentType>[] = [
-  {
-    accessorKey: "tours",
-    header: "Tours",
-    cell: cell => {
-      const tours = cell.getValue<(keyof typeof TourEnum)[]>()
-      return h(
-        "div",
-        { class: "flex justify-center items-center gap-1" },
-        tours.map(tour => h(UBadge, { key: tour, label: tour, color: tour as keyof typeof colors }))
-      )
-    }
-  },
-  { accessorKey: "name", header: "Tournament", cell: cell => cell.renderValue() },
-  { accessorKey: "established", header: "Established", cell: cell => cell.renderValue() },
-  { accessorKey: "abolished", header: "Abolished", cell: cell => cell.renderValue() }
-]
 
 const handleSelect = async (e: Event, row: TableRow<TournamentType>) => {
   await navigateTo({ name: "tournament", params: { id: row.original.id, name: kebabCase(row.original.name ?? "-") } })
@@ -92,73 +72,26 @@ const handleSelect = async (e: Event, row: TableRow<TournamentType>) => {
         <u-page-aside>
           <dev-only>
             <tournaments-update />
+
+            <u-separator />
           </dev-only>
 
-          <u-button
-            label="Reset Filters"
-            :icon="ICONS.noFilter"
-            @click="resetFilters"
-            block
-          />
+          <ResetFilters :reset-filters="resetFilters" />
 
-          <u-button
-            label="Reset Sorting"
-            :icon="ICONS.sortAlpha"
-            @click="resetSorting"
-            block
-          />
+          <ResetSorting :reset-sorting="resetSorting" />
 
           <table-visibility
             v-if="!viewMode && table"
             :table
           />
 
-          <u-checkbox-group
-            legend="Tours"
-            v-model="tours"
-            :items="TOUR_OPTIONS"
-            :ui="{ item: 'ml-3' }"
+          <tournaments-filters
+            location="aside"
+            v-model:tours="tours"
+            v-model:established="established"
+            v-model:sorting="sortField"
+            :sort-fields="sortFields"
           />
-
-          <form-input-label
-            v-model="established"
-            type="number"
-            placeholder="Established after"
-          />
-
-          <form-input-label
-            v-model="abolished"
-            type="number"
-            placeholder="Abolished before"
-          />
-
-          <u-form-field label="Sort by">
-            <u-field-group
-              v-if="sortField.length"
-              v-for="(field, index) in sortField"
-              :key="field.field"
-              class="w-full mb-2"
-            >
-              <u-select
-                v-model="sortField[index]!.field"
-                :items="sortFields"
-                disabled
-              />
-              <u-select
-                v-model="sortField[index]!.direction"
-                :items="SORT_DIRECTIONS"
-              />
-              <u-button
-                :icon="icons.close"
-                color="error"
-                @click="sortField.splice(index, 1)"
-              />
-            </u-field-group>
-            <form-sort-field
-              :sort-fields="sortFields"
-              v-model="sortField"
-            />
-          </u-form-field>
         </u-page-aside>
       </template>
 
@@ -168,22 +101,13 @@ const handleSelect = async (e: Event, row: TableRow<TournamentType>) => {
             type="Tournament"
             v-model="tournaments"
             :icon="ICONS.tournament"
-            multiple
           />
         </u-page-aside>
       </template>
 
       <u-page-header title="Tournaments">
         <template #links>
-          <u-tooltip :text="viewMode ? 'Cards' : 'Table'">
-            <div>
-              <u-switch
-                v-model="viewMode"
-                :checked-icon="ICONS.cards"
-                :unchecked-icon="ICONS.table"
-              />
-            </div>
-          </u-tooltip>
+          <view-switcher v-model="viewMode" />
 
           <!--Filters for smaller screens-->
           <u-slideover
@@ -198,78 +122,23 @@ const handleSelect = async (e: Event, row: TableRow<TournamentType>) => {
                 <tournaments-update />
               </dev-only>
 
-              <u-button
-                label="Reset Filters"
-                :icon="ICONS.noFilter"
-                @click="resetFilters"
-                block
-              />
+              <ResetFilters :reset-filters />
 
-              <u-button
-                label="Reset Sorting"
-                :icon="ICONS.sortAlpha"
-                @click="resetSorting"
-                block
-              />
+              <ResetSorting :reset-sorting />
 
               <table-visibility
                 v-if="!viewMode && table"
                 :table
               />
 
-              <form-search
-                type="Tournament"
-                v-model="tournaments"
-                :icon="ICONS.tournament"
-                multiple
+              <tournaments-filters
+                location="slideover"
+                v-model:tournaments="tournaments"
+                v-model:tours="tours"
+                v-model:established="established"
+                v-model:sorting="sortField"
+                :sort-fields="sortFields"
               />
-
-              <u-checkbox-group
-                legend="Tours"
-                v-model="tours"
-                :items="TOUR_OPTIONS"
-                :ui="{ item: 'ml-3' }"
-              />
-
-              <form-input-label
-                v-model="established"
-                type="number"
-                placeholder="Established after"
-              />
-
-              <form-input-label
-                v-model="abolished"
-                type="number"
-                placeholder="Abolished before"
-              />
-
-              <u-form-field label="Sort by">
-                <u-field-group
-                  v-if="sortField.length"
-                  v-for="(field, index) in sortField"
-                  :key="field.field"
-                  class="w-full mb-2"
-                >
-                  <u-select
-                    v-model="sortField[index]!.field"
-                    :items="sortFields"
-                    disabled
-                  />
-                  <u-select
-                    v-model="sortField[index]!.direction"
-                    :items="SORT_DIRECTIONS"
-                  />
-                  <u-button
-                    :icon="icons.close"
-                    color="error"
-                    @click="sortField.splice(index, 1)"
-                  />
-                </u-field-group>
-                <form-sort-field
-                  :sort-fields="sortFields"
-                  v-model="sortField"
-                />
-              </u-form-field>
             </template>
           </u-slideover>
         </template>
@@ -293,30 +162,14 @@ const handleSelect = async (e: Event, row: TableRow<TournamentType>) => {
           <!--Card view-->
           <template v-if="viewMode">
             <u-page-grid v-if="data.count || status === 'pending'">
-              <u-page-card
+              <tournaments-card
                 v-if="data.count"
                 v-for="tournament in data.tournaments"
                 :key="tournament.id.toString()"
-                :title="tournament.name"
-                highlight
-                :to="{ name: 'tournament', params: { id: tournament.id, name: kebabCase(tournament.name) } }"
-                :ui="{ root: 'h-full', body: 'w-full', leading: 'flex items-center gap-1' }"
-              >
-                <template #leading>
-                  <u-badge
-                    v-for="tour in tournament.tours"
-                    :key="tour"
-                    :color="(tour as keyof typeof colors)"
-                    :label="tour"
-                  />
-                </template>
-                <template #description>
-                  <span v-if="tournament.established">{{ tournament.established }}</span>
-                  <span v-if="tournament.established && !tournament.abolished"> - present</span>
-                  <span v-else-if="tournament.abolished && tournament.established !== tournament.abolished"> - {{ tournament.abolished }}</span>
-                </template>
-              </u-page-card>
-              <loading-base
+                :tournament
+              />
+
+              <loading-tournament
                 v-else
                 v-for="_ in 6"
                 :key="_"
@@ -330,7 +183,7 @@ const handleSelect = async (e: Event, row: TableRow<TournamentType>) => {
             v-else
             ref="table"
             :data="data.tournaments"
-            :columns
+            :columns="TournamentsColumns"
             :loading="status === 'pending'"
             sticky
             @select="handleSelect"
@@ -338,10 +191,7 @@ const handleSelect = async (e: Event, row: TableRow<TournamentType>) => {
             :ui="{ tbody: '[&>tr]:cursor-pointer', root: 'max-h-150' }"
           >
             <template #loading>
-              <u-icon
-                :name="icons.loading"
-                class="size-8"
-              />
+              <loading-icon />
             </template>
             <template #empty>
               <reuse-empty-template />
@@ -349,38 +199,12 @@ const handleSelect = async (e: Event, row: TableRow<TournamentType>) => {
           </u-table>
         </div>
 
-        <div class="sticky w-full z-50 bg-default bottom-0 mt-auto pt-3 pb-6">
-          <div class="grid grid-cols-1 lg:grid-cols-3 justify-items-center">
-            <div
-              v-if="!mdAndDown"
-              class="font-semibold text-muted"
-            >
-              {{ data.count }} tournament{{ data.count === 1 ? "" : "s" }}
-            </div>
-
-            <u-pagination
-              v-model:page="page"
-              :total="data.count"
-              :sibling-count="mdAndDown ? 1 : 2"
-              :items-per-page
-              active-variant="subtle"
-            />
-
-            <u-form-field
-              v-if="!mdAndDown"
-              label="Items per page"
-              class="w-4/5 ml-auto"
-            >
-              <u-slider
-                v-model="itemsPerPage"
-                :min="10"
-                :max="100"
-                :step="5"
-                tooltip
-              />
-            </u-form-field>
-          </div>
-        </div>
+        <counts
+          :total="data.count"
+          type="tournament"
+          v-model:page="page"
+          v-model:items-per-page="itemsPerPage"
+        />
       </u-page-body>
     </u-page>
   </u-container>

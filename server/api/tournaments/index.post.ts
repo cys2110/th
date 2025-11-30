@@ -19,7 +19,7 @@ export default defineEventHandler(async event => {
     params
   )
 
-  const count = countRecords[0]?.get("count").toInt() || 0
+  const count: number = countRecords[0]?.get("count").toInt() || 0
 
   if (count === 0) {
     return {
@@ -30,33 +30,34 @@ export default defineEventHandler(async event => {
 
   let query = `/* cypher */
     MATCH (t:Tournament)
-      WHERE (SIZE($tours) = 0 OR ANY(x IN $tours WHERE x IN labels(t)))
-      AND (SIZE($tournaments) = 0 OR t.id IN $tournaments)
 
     // Get established and abolished years for all tournaments
-    CALL (t) {
-      OPTIONAL MATCH (t)-[:ESTABLISHED]->(e:Year)
-      OPTIONAL MATCH (t)-[:ABOLISHED]->(a:Year)
-      RETURN e.id AS established, a.id AS abolished
-    }
+    OPTIONAL MATCH (t)-[:ESTABLISHED]->(e:Year)
+    OPTIONAL MATCH (t)-[:ABOLISHED]->(a:Year)
 
-    // Filter out tournaments based on established/abolished filters
-    WITH t, established, abolished
-      WHERE ($established IS NULL OR established >= $established)
+    // Filter out tournaments
+    WITH t, e.id AS established, a.id AS abolished
+    WHERE ($established IS NULL OR established >= $established)
       AND ($abolished IS NULL OR abolished <= $abolished)
+      AND (SIZE($tours) = 0 OR ANY(x IN $tours WHERE x IN labels(t)))
+      AND (SIZE($tournaments) = 0 OR t.id IN $tournaments)
+
     WITH t, established, abolished
     ORDER BY
   `
 
-  if (params.sortField.length) {
+  if (params.sortField) {
     query += params.sortField
       .map(({ field, direction }: { field: string; direction: "ASC" | "DESC" }) => {
         const keyName = field === "name" ? "t.name" : field ?? "t.name"
         return keyName + " " + direction
       })
       .join(", ")
-  } else {
-    query += `t.name`
+  }
+
+  // Always add name as a tiebreaker
+  if (!Object.keys(params.sortField).includes("name")) {
+    query += `, t.name`
   }
 
   query += `/* cypher */
@@ -86,7 +87,7 @@ export default defineEventHandler(async event => {
   })
 
   return {
-    count: count as number,
+    count,
     tournaments: results
   }
 })

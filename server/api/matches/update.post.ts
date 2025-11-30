@@ -9,7 +9,7 @@ export default defineEventHandler(async event => {
   if (params.umpire) {
     query += `
       WITH m
-      MATCH (:Umpire)-[t:UMPIRED]->(m)
+      OPTIONAL MATCH (:Umpire)-[t:UMPIRED]->(m)
       DELETE t
       WITH m
       MATCH (u:Umpire {id: $umpire})

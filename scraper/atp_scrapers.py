@@ -583,7 +583,7 @@ def get_atp_results():
                 stats_link = match.find('a', string='Stats').get('href')
                 links.append(stats_link)
             except:
-                continue
+                pass
 
             matches.append(match_detail)
 

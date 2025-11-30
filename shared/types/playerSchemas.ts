@@ -1,17 +1,91 @@
-import { array, boolean, int, object, string, z } from "zod"
+import { array, boolean, literal, number, object, string, url, z } from "zod"
 import {
-  eventSchema,
+  countrySchema,
   intToNumberSchema,
   LevelEnum,
-  matchSchema,
   MatchTypeEnum,
   neoDateToStringSchema,
   personSchema,
   RoundEnum,
   surfaceSchema,
-  teamEntrySchema,
-  tournamentSchema
+  tourEnum,
+  TourEnum
 } from "./schemas"
+import { tournamentSchema } from "./tournamentSchemas"
+import { eventSchema, teamEntrySchema } from "./eventSchemas"
+import { matchSchema } from "./matchSchemas"
+
+export const playerSchema = object({
+  age: intToNumberSchema.optional(),
+  bh: literal(["One", "Two"]).optional(),
+  ch_doubles: intToNumberSchema.optional(),
+  ch_singles: intToNumberSchema.optional(),
+  coaches: array(personSchema).optional(),
+  country: countrySchema
+    .extend({
+      start_date: neoDateToStringSchema.nullish()
+    })
+    .optional(),
+  current_doubles: intToNumberSchema.optional(),
+  current_singles: intToNumberSchema.optional(),
+  dob: neoDateToStringSchema.optional(),
+  dod: neoDateToStringSchema.optional(),
+  doubles_ch_date: neoDateToStringSchema.optional(),
+  first_name: string().optional(),
+  former_coaches: array(personSchema).optional(),
+  former_countries: array(
+    countrySchema.extend({
+      start_date: neoDateToStringSchema.optional(),
+      end_date: neoDateToStringSchema.optional()
+    })
+  ).optional(),
+  height: intToNumberSchema.optional(),
+  hof: intToNumberSchema.optional(),
+  id: string(),
+  last_name: string().optional(),
+  max_year: intToNumberSchema.optional(),
+  min_year: intToNumberSchema.optional(),
+  official_link: url().optional(),
+  pm: intToNumberSchema.optional(),
+  retired: intToNumberSchema.optional(),
+  rh: literal(["Right", "Left"]).optional(),
+  singles_ch_date: neoDateToStringSchema.optional(),
+  site_link: url().optional(),
+  tour: TourEnum.transform(val => tourEnum[val]).optional(),
+  turned_pro: intToNumberSchema.optional(),
+  updated_at: neoDateToStringSchema.optional(),
+  wiki_link: url().optional(),
+  years: array(intToNumberSchema).optional()
+})
+export type PlayerType = z.infer<typeof playerSchema>
+
+const wlMainSchema = object({
+  singles: object({
+    wl: string(),
+    titles: number()
+  }),
+  doubles: object({
+    wl: string(),
+    titles: number()
+  })
+})
+export const wlSchema = object({
+  label: string(),
+  total: wlMainSchema,
+  main: wlMainSchema,
+  qualifying: object({
+    singles: string(),
+    doubles: string()
+  })
+})
+export type WlType = z.infer<typeof wlSchema>
+
+export const playerH2HSchema = object({
+  opponent: personSchema,
+  matches: intToNumberSchema,
+  wins: intToNumberSchema
+})
+export type PlayerH2HType = z.infer<typeof playerH2HSchema>
 
 export const titlesAndFinalsSchema = object({
   id: string(),

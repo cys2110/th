@@ -169,6 +169,7 @@ const calendarDate = computed(() => {
         :month-controls="false"
         :year-controls="false"
         :fixed-weeks="false"
+        :week-starts-on="1"
       />
     </div>
   </div>

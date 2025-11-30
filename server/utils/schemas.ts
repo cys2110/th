@@ -16,7 +16,7 @@ const idSchema = union([string(), number()]).transform(val => {
   }
 })
 
-const numberToIntSchema = number().transform(val => int(val))
+export const numberToIntSchema = number().transform(val => int(val))
 
 const dateToNeoDateSchema = object({
   year: number(),
@@ -74,15 +74,6 @@ export const querySchema = object({
   venues: array(optionSchema).optional().default([]),
   year: numberToIntSchema.optional().default(int(currentYear)),
   years: array(numberToIntSchema).optional().default([])
-})
-
-export const tournamentFormSchema = object({
-  id: numberToIntSchema,
-  name: string().optional(),
-  tours: array(TourEnum).optional(),
-  established: numberToIntSchema.nullish(),
-  abolished: numberToIntSchema.nullish(),
-  website: url().nullish()
 })
 
 export const venueFormSchema = object({

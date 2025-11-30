@@ -121,15 +121,15 @@ const formFields = computed<FormFieldInterface<MatchFormSchema>[]>(
 
 const scoreFormFields = [
   { label: "Set 1", key: "s1" },
-  { label: "Tiebreak 1", key: "tb1" },
+  { label: "Tiebreak 1", key: "t1" },
   { label: "Set 2", key: "s2" },
-  { label: "Tiebreak 2", key: "tb2" },
+  { label: "Tiebreak 2", key: "t2" },
   { label: "Set 3", key: "s3" },
-  { label: "Tiebreak 3", key: "tb3" },
+  { label: "Tiebreak 3", key: "t3" },
   { label: "Set 4", key: "s4" },
-  { label: "Tiebreak 4", key: "tb4" },
+  { label: "Tiebreak 4", key: "t4" },
   { label: "Set 5", key: "s5" },
-  { label: "Tiebreak 5", key: "tb5" }
+  { label: "Tiebreak 5", key: "t5" }
 ]
 
 const statsFields = [
