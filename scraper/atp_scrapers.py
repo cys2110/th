@@ -552,7 +552,9 @@ def get_atp_results():
                 'court': court_name,
                 'hours': hours,
                 'minutes': minutes,
-                'seconds': seconds
+                'seconds': seconds,
+                't1': {},
+                't2': {}
             }
 
             if not date_obj is None:
@@ -570,7 +572,7 @@ def get_atp_results():
             for idx, player in enumerate(players_container):
                 link = player.find('a')
                 if link.get_text(strip=True) == 'Bye':
-                    continue
+                    match_detail["bye"] = True
                 else:
                     id = re.search("/([a-zA-Z0-9]{4})/", link['href'])
                     # if id is None:
@@ -578,6 +580,20 @@ def get_atp_results():
                     #         match_detail[f"p{idx + 1}"] = 'w521'
                     # else:
                     match_detail[f"p{idx + 1}"] = id.group(1)
+
+            # Get scores
+            scores_container = match.find_all('div', class_='scores')
+            for idx, score_container in enumerate(scores_container):
+                scores_items = score_container.find_all('div', class_='score-item')
+                setNumber = 0
+                for i, score in enumerate(scores_items):
+                    spans = score.find_all('span')
+                    if (len(spans) > 0):
+                        match_detail[f"t{idx + 1}"][f"s{setNumber + i + 1}"] = int(spans[0].get_text(strip=True))
+                        if len(spans) > 1:
+                            match_detail[f"t{idx + 1}"][f"t{setNumber + i + 1}"] = int(spans[1].get_text(strip=True))
+                    else:
+                        setNumber -= 1
 
             try:
                 stats_link = match.find('a', string='Stats').get('href')
@@ -590,7 +606,7 @@ def get_atp_results():
     def add_results(db):
 
         for match in matches:
-            if (match_type == 'Doubles' and match.get('p3') is None) or (match_type == 'Singles' and match.get('p1') is None):
+            if (match_type == 'Doubles' and match.get('p3') is None) or (match_type == 'Singles' and match.get('p1') is None) or match.get('bye') == True:
                 continue
             else:
                 params = {
@@ -601,7 +617,9 @@ def get_atp_results():
                     "hours": match['hours'],
                     "minutes": match['minutes'],
                     "seconds": match['seconds'],
-                    'type': match_type
+                    'type': match_type,
+                    't1': match['t1'],
+                    't2': match['t2']
                 }
 
 
@@ -614,7 +632,7 @@ def get_atp_results():
                     CYPHER 25
                     MATCH (:Player:ATP {{id: $p1id}})-[]-(:Entry:$($type))-[]-(s1:Score)-[]-(m:$($type):ATP)-[]-(s2:Score)-[]-(:Entry:$($type))-[]-(:Player:ATP {{id: $p2id}})
                     WHERE m.id STARTS WITH $eid
-                    SET m.court = $court, m.duration = duration({{hours: $hours, minutes: $minutes, seconds: $seconds}}), s1:Winner, s2:Loser
+                    SET m.court = $court, m.duration = duration({{hours: $hours, minutes: $minutes, seconds: $seconds}}), s1:Winner, s2:Loser, s1 += $t1, s2 += $t2
                 """
 
                 if match.get('date') is not None:
@@ -695,19 +713,15 @@ def get_atp_stats():
             }
 
             # Get players
-            stats_box = soup.find_all('div', class_='stats-item')
-            for idx, stat in enumerate(stats_box):
-                player = stat.find('div', class_='name')
-                p_link = player.find('a')
-                p_id = re.search(r'/([a-zA-Z0-9]{4})/', p_link['href']).group(1)
-                match_info[f"p{idx + 1}_id"] = p_id
+            players_container = soup.find(id="Stat-header")
+            def extract_team_id(container):
+                link = container.select_one('.name a')
+                return re.search(r'/([a-zA-Z0-9]{4})/', link['href']).group(1)
 
-                scores_items = stat.find_all('div', class_='score-item')
-                for i, score in enumerate(scores_items):
-                    spans = score.find_all('span')
-                    match_info[f"p{idx + 1}"][f"s{i + 1}"] = int(spans[0].get_text(strip=True))
-                    if len(spans) > 1:
-                        match_info[f"p{idx + 1}"][f"t{i + 1}"] = int(spans[1].get_text(strip=True))
+            team1_id = extract_team_id(players_container.select_one('.team1'))
+            team2_id = extract_team_id(players_container.select_one('.team2'))
+            match_info['p1_id'] = team1_id.lower()
+            match_info['p2_id'] = team2_id.lower()
 
             # Get stats
             stats_dictionary = {
