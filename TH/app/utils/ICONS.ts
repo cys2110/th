@@ -1,0 +1,31 @@
+/** @description Icons used in the app */
+
+export default {
+  calendar: "stash:calendar-star-duotone",
+  cards: "icon-park-twotone:view-grid-card",
+  coach: "icon-park-twotone:brain",
+  columnOff: "tabler:table-minus",
+  download: "line-md:downloading",
+  downloading: "line-md:downloading-loop",
+  edit: "line-md:edit-full-twotone",
+  filter: "line-md:filter-twotone",
+  filterOff: "line-md:filter-off-twotone",
+  gauge: "line-md:gauge-twotone-loop",
+  globe: "solar:globus-bold-duotone",
+  globeOff: "tabler:globe-off",
+  group: "solar:link-bold-duotone",
+  groupOff: "solar:link-broken-line-duotone",
+  h2h: "game-icons:crossed-swords",
+  one: "solar:cup-first-bold-duotone",
+  peopleOff: "icon-park-twotone:people-delete-one",
+  player: "temaki:tennis",
+  sort: "icon-park-twotone:sort",
+  sortAsc: "gravity-ui:bars-ascending-align-left-arrow-down",
+  sortDesc: "gravity-ui:bars-descending-align-left-arrow-down",
+  stats: "icon-park-twotone:analysis",
+  table: "icon-park-twotone:table-file",
+  trophy: "icon-park-twotone:trophy",
+  trophyOff: "tabler:trophy-off",
+  uploading: "line-md:uploading-loop",
+  years: "stash:calendar-duotone"
+}

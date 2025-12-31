@@ -1,0 +1,48 @@
+@import "tailwindcss" theme(static);
+@import "@nuxt/ui";
+@plugin 'tailwind-scrollbar';
+
+/* Remove scrollbar appearance */
+::-webkit-scrollbar {
+  display: none;
+}
+
+/* Remove input number spinners */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+@theme {
+  --font-sans: "Jost", sans-serif;
+  --font-cursive: "Homemade Apple", cursive;
+  --container-8xl: 120rem;
+}
+
+:root {
+  --ui-bg: var(--ui-color-neutral-100);
+  --ui-container: var(--container-8xl);
+  --ui-bg-elevated: var(--ui-color-neutral-300);
+}
+
+.dark {
+  --ui-bg: var(--ui-color-neutral-950);
+  --ui-bg-elevated: var(--ui-color-neutral-800);
+}
+
+.hover-link {
+  @apply bg-linear-to-r bg-bottom bg-[length:0_1px] bg-no-repeat transition-[background-size] hover:bg-[length:100%_1px] w-fit duration-500 cursor-pointer;
+}
+
+.default-link {
+  @apply text-muted from-(--ui-text-muted) to-(--ui-text-muted);
+}
+
+.primary-link {
+  @apply text-primary from-primary to-primary;
+}
+
+.scrollbar {
+  @apply scrollbar-thin scrollbar-thumb-primary-600 scrollbar-track-transparent overflow-y-auto scroll-smooth max-h-200 2xl:max-h-150;
+}
