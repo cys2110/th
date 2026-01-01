@@ -3,11 +3,13 @@
  * @description Player schemas shared across client and server side
  * @see module shared/types/schemas
  * @see module shared/types/enums
+ * @see module shared/types/eventSchemas
  */
 
 import { array, boolean, literal, number, object, string, url, z } from "zod"
 import { coachSchema, countrySchema, intToNumberSchema, neoDateToStringSchema, personSchema, surfaceSchema } from "./schemas"
-import { RoundEnum, tourEnumTransform } from "./enums"
+import { MatchTypeEnum, RoundEnum, tourEnumTransform } from "./enums"
+import { eventSchema } from "./eventSchemas"
 
 /** Describes the schema for a player with its full details */
 export const playerSchema = personSchema.extend({
@@ -110,6 +112,41 @@ export const playerH2HSchema = object({
 })
 /** @type {PlayerH2HType} */
 export type PlayerH2HType = z.infer<typeof playerH2HSchema>
+
+/** Describes the schema for a player's titles and finals */
+export const titlesAndFinalsSchema = eventSchema
+  .pick({
+    id: true,
+    tournament: true,
+    category: true,
+    year: true,
+    start_date: true,
+    end_date: true,
+    surface: true,
+    level: true
+  })
+  .required({
+    surface: true,
+    start_date: true,
+    end_date: true
+  })
+  .extend({
+    type: MatchTypeEnum,
+    title: boolean()
+  })
+  .transform(data => {
+    const [editionId, tour] = data.id.split("-")
+    const { end_date, ...rest } = data
+
+    return {
+      ...rest,
+      id: editionId as string,
+      tour: tour as string,
+      date: end_date
+    }
+  })
+/** @type {TitlesAndFinalsType} */
+export type TitlesAndFinalsType = z.infer<typeof titlesAndFinalsSchema>
 
 /** Describes the schema for a player's win-loss index */
 export const wlIndexMatchSchema = object({

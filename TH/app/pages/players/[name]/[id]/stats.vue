@@ -54,7 +54,10 @@ const { data: stats, status } = await useFetch<PlayerStatsType[]>("/api/player/s
 
             <filters-draw-type v-model="drawType" />
 
-            <filters-years v-model="years" />
+            <filters-years
+              v-model="years"
+              multiple
+            />
 
             <filters-surfaces v-model="(surfaces as string[])" />
           </filters>
@@ -87,7 +90,10 @@ const { data: stats, status } = await useFetch<PlayerStatsType[]>("/api/player/s
 
                 <filters-draw-type v-model="drawType" />
 
-                <filters-years v-model="years" />
+                <filters-years
+                  v-model="years"
+                  multiple
+                />
 
                 <filters-surfaces v-model="(surfaces as string[])" />
               </filters>

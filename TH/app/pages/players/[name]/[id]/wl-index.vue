@@ -57,7 +57,10 @@ const handleSelectRow = (_e: Event, row: TableRow<WLIndexType>) => {
 
             <filters-draw-type v-model="drawType" />
 
-            <filters-years v-model="years" />
+            <filters-years
+              v-model="years"
+              multiple
+            />
           </filters>
         </u-page-aside>
       </template>
@@ -87,7 +90,10 @@ const handleSelectRow = (_e: Event, row: TableRow<WLIndexType>) => {
 
                 <filters-draw-type v-model="drawType" />
 
-                <filters-years v-model="years" />
+                <filters-years
+                  v-model="years"
+                  multiple
+                />
               </filters>
             </template>
           </u-slideover>

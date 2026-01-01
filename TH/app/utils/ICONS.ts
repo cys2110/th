@@ -4,6 +4,7 @@ export default {
   barChart: "solar:chart-2-bold-duotone",
   calendar: "stash:calendar-star-duotone",
   cards: "icon-park-twotone:view-grid-card",
+  category: "icon-park-twotone:category-management",
   coach: "icon-park-twotone:brain",
   columnOff: "tabler:table-minus",
   download: "line-md:downloading",

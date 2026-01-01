@@ -44,7 +44,7 @@ const handleClick = () => {
 <template>
   <u-button
     :label="label"
-    :icon="icon"
+    :trailing-icon="icon"
     variant="ghost"
     color="neutral"
     @click="handleClick"

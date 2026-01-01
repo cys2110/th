@@ -3,6 +3,9 @@
 import {
   CountriesLink,
   PlayersLink,
+  TableClientFilterHeader,
+  TableClientGroupHeader,
+  TableClientSortHeader,
   TableServerFilterHeader,
   TableServerFilterSearchHeader,
   TableServerGroupHeader,
@@ -10,11 +13,13 @@ import {
   UBadge,
   UButton,
   UChip,
+  UIcon,
+  UInputMenu,
   ULink,
   UProgress
 } from "#components"
 import type { TableColumn } from "@nuxt/ui"
-import { createColumnHelper } from "@tanstack/vue-table"
+import { createColumnHelper, type Column } from "@tanstack/vue-table"
 import appConfig from "~/app.config"
 
 const currentYear = new Date().getFullYear()
@@ -498,6 +503,313 @@ export const recentEventColumns: TableColumn<PlayerRecentEventType>[] = [
       const round = cell.getValue<string>()
 
       return title ? `Win` : round
+    }
+  }
+]
+
+/**
+ * @constant titlesAndFinalsColumns - Column definitions for player's titles and finals table
+ */
+export const titlesAndFinalsColumns: TableColumn<TitlesAndFinalsType>[] = [
+  {
+    accessorKey: "year",
+    aggregationFn: "uniqueCount",
+    header: ({ column }) =>
+      h("div", { class: "flex items-center gap-0.5 justify-center" }, [
+        h(TableClientGroupHeader, {
+          column: column as Column<unknown>
+        }),
+        h(TableClientFilterHeader, {
+          column: column as Column<unknown>,
+          label: "Year"
+        }),
+        h(TableClientSortHeader, {
+          column: column as Column<unknown>
+        })
+      ]),
+    cell: ({ cell, row, table }) => {
+      const value = cell.getValue<number>()
+      if (row.getIsGrouped()) {
+        if (row.groupingColumnId === "year") {
+          return h("div", { class: "flex items-center py-1" }, [
+            h(UButton, {
+              variant: "ghost",
+              class: ["mr-2 transition-transform duration-300 hover:bg-transparent active:bg-transparent", row.getIsExpanded() && "rotate-90"],
+              icon: appConfig.ui.icons.chevronDoubleRight,
+              onClick: () => row.toggleExpanded()
+            }),
+            value
+          ])
+        } else {
+          const currentGroupingIndex = table.getState().grouping.indexOf(row.groupingColumnId!)
+          const yearGroupingIndex = table.getState().grouping.indexOf("year")
+          if (yearGroupingIndex === -1) {
+            return `${value} year${value !== 1 ? "s" : ""}`
+          } else if (currentGroupingIndex < yearGroupingIndex) {
+            const uniqueYears = useArrayUnique(row.getLeafRows().map(r => r.original.year)).value.length
+            return `${uniqueYears} year${uniqueYears !== 1 ? "s" : ""}`
+          }
+        }
+      } else if (!table.getState().grouping.includes("year")) {
+        return value
+      }
+    }
+  },
+  {
+    accessorKey: "date",
+    header: ({ column }) =>
+      h(TableClientSortHeader, {
+        column: column as Column<unknown>,
+        label: "Dates"
+      }),
+    cell: ({ row }) => {
+      const { start_date, date } = row.original
+
+      if (!row.getIsGrouped()) {
+        return dateTimeFormat.formatRange(new Date(start_date), new Date(date))
+      }
+    }
+  },
+  {
+    accessorKey: "type",
+    header: ({ column }) =>
+      h("div", { class: "flex items-center gap-0.5 justify-center" }, [
+        h(TableClientGroupHeader, {
+          column: column as Column<unknown>
+        }),
+        h(TableClientFilterHeader, {
+          column: column as Column<unknown>,
+          label: "S/D"
+        }),
+        h(TableClientSortHeader, {
+          column: column as Column<unknown>
+        })
+      ]),
+    cell: ({ cell, row, table }) => {
+      const value = cell.getValue<keyof typeof appConfig.ui.colors>()
+
+      if (row.getIsGrouped()) {
+        if (row.groupingColumnId === "type") {
+          return h("div", { class: "flex items-center py-1" }, [
+            h(UButton, {
+              variant: "ghost",
+              class: ["mr-2 transition-transform duration-300 hover:bg-transparent active:bg-transparent", row.getIsExpanded() && "rotate-90"],
+              icon: appConfig.ui.icons.chevronDoubleRight,
+              onClick: () => row.toggleExpanded()
+            }),
+            h(UBadge, { label: value, color: value, class: "w-full" })
+          ])
+        }
+      } else if (!table.getState().grouping.includes("type")) {
+        return h(UBadge, { label: value, color: value, class: "w-full" })
+      }
+    }
+  },
+  {
+    accessorKey: "level",
+    header: ({ column }) =>
+      h("div", { class: "flex items-center gap-0.5 justify-center" }, [
+        h(TableClientGroupHeader, {
+          column: column as Column<unknown>
+        }),
+        h(TableClientFilterHeader, {
+          column: column as Column<unknown>,
+          label: "Level"
+        }),
+        h(TableClientSortHeader, {
+          column: column as Column<unknown>
+        })
+      ]),
+    cell: ({ cell, row, table }) => {
+      const value = cell.getValue<keyof typeof appConfig.ui.colors>()
+
+      if (row.getIsGrouped()) {
+        if (row.groupingColumnId === "level") {
+          return h("div", { class: "flex items-center py-1" }, [
+            h(UButton, {
+              variant: "ghost",
+              class: ["mr-2 transition-transform duration-300 hover:bg-transparent active:bg-transparent", row.getIsExpanded() && "rotate-90"],
+              icon: appConfig.ui.icons.chevronDoubleRight,
+              onClick: () => row.toggleExpanded()
+            }),
+            h(UBadge, { label: value, color: value, class: "w-full" })
+          ])
+        }
+      } else if (!table.getState().grouping.includes("level")) {
+        return h(UBadge, { label: value, color: value, class: "w-full" })
+      }
+    }
+  },
+  {
+    accessorKey: "category",
+    aggregationFn: "uniqueCount",
+    header: ({ column }) =>
+      h("div", { class: "flex items-center gap-0.5 justify-center" }, [
+        h(TableClientGroupHeader, {
+          column: column as Column<unknown>
+        }),
+        h(TableClientFilterHeader, {
+          column: column as Column<unknown>,
+          label: "Category"
+        }),
+        h(TableClientSortHeader, {
+          column: column as Column<unknown>
+        })
+      ]),
+    cell: ({ cell, row, table }) => {
+      if (row.getIsGrouped()) {
+        if (row.groupingColumnId === "category") {
+          return h("div", { class: "flex items-center py-1" }, [
+            h(UButton, {
+              variant: "ghost",
+              class: ["mr-2 transition-transform duration-300 hover:bg-transparent active:bg-transparent", row.getIsExpanded() && "rotate-90"],
+              icon: appConfig.ui.icons.chevronDoubleRight,
+              onClick: () => row.toggleExpanded()
+            }),
+            cell.getValue<string>()
+          ])
+        } else {
+          const currentGroupingIndex = table.getState().grouping.indexOf(row.groupingColumnId!)
+          const categoryGroupingIndex = table.getState().grouping.indexOf("category")
+          if (categoryGroupingIndex === -1) {
+            const value = cell.getValue<number>()
+
+            return `${value} categor${value !== 1 ? "ies" : "y"}`
+          } else if (currentGroupingIndex < categoryGroupingIndex) {
+            const uniqueCategories = useArrayUnique(row.getLeafRows().map(r => r.original.category)).value.length
+            return `${uniqueCategories} categor${uniqueCategories !== 1 ? "ies" : "y"}`
+          }
+        }
+      } else if (!table.getState().grouping.includes("category")) {
+        return cell.getValue<string>()
+      }
+    }
+  },
+  {
+    accessorKey: "tournament.name",
+    header: ({ column }) =>
+      h("div", { class: "flex items-center gap-0.5 justify-center" }, [
+        h(TableClientGroupHeader, {
+          column: column as Column<unknown>
+        }),
+        h(TableClientFilterHeader, {
+          column: column as Column<unknown>,
+          label: "Tournament"
+        }),
+        h(TableClientSortHeader, {
+          column: column as Column<unknown>
+        })
+      ]),
+    cell: ({ row, table }) => {
+      const {
+        tournament: { id, name }
+      } = row.original
+      if (row.getIsGrouped()) {
+        if (row.groupingColumnId === "tournament_name") {
+          return h("div", { class: "flex items-center py-1" }, [
+            h(UButton, {
+              variant: "ghost",
+              class: ["mr-2 transition-transform duration-300 hover:bg-transparent active:bg-transparent", row.getIsExpanded() && "rotate-90"],
+              icon: appConfig.ui.icons.chevronDoubleRight,
+              onClick: () => row.toggleExpanded()
+            }),
+            h(ULink, { class: "hover-link default-link", to: { name: "tournament", params: { id, name: kebabCase(name) } } }, () => name)
+          ])
+        } else {
+          const currentGroupingIndex = table.getState().grouping.indexOf(row.groupingColumnId!)
+          const tournamentGroupingIndex = table.getState().grouping.indexOf("tournament_name")
+
+          if (currentGroupingIndex < tournamentGroupingIndex || tournamentGroupingIndex === -1) {
+            const uniqueTournaments = useArrayUnique(row.getLeafRows().map(r => r.original.tournament.name)).value.length
+            const totalTournaments = row.getLeafRows().length
+
+            return `${totalTournaments} tournament${totalTournaments !== 1 ? "s" : ""} (${uniqueTournaments} unique)`
+          }
+        }
+      } else if (!table.getState().grouping.includes("tournament_name")) {
+        return h(ULink, { class: "hover-link default-link", to: { name: "tournament", params: { id, name: kebabCase(name) } } }, () => name)
+      }
+    }
+  },
+  {
+    accessorKey: "surface.surface",
+    aggregationFn: "uniqueCount",
+    header: ({ column }) =>
+      h("div", { class: "flex items-center gap-0.5 justify-center" }, [
+        h(TableClientGroupHeader, {
+          column: column as Column<unknown>
+        }),
+        h(TableClientFilterHeader, {
+          column: column as Column<unknown>,
+          label: "Surface"
+        }),
+        h(TableClientSortHeader, {
+          column: column as Column<unknown>
+        })
+      ]),
+    cell: ({ cell, row, table }) => {
+      if (row.getIsGrouped()) {
+        if (row.groupingColumnId === "surface_surface") {
+          return h("div", { class: "flex items-center py-1" }, [
+            h(UButton, {
+              variant: "ghost",
+              class: ["mr-2 transition-transform duration-300 hover:bg-transparent active:bg-transparent", row.getIsExpanded() && "rotate-90"],
+              icon: appConfig.ui.icons.chevronDoubleRight,
+              onClick: () => row.toggleExpanded()
+            }),
+            row.original.surface.id
+          ])
+        } else {
+          const currentGroupingIndex = table.getState().grouping.indexOf(row.groupingColumnId!)
+          const surfaceGroupingIndex = table.getState().grouping.indexOf("surface_surface")
+          if (surfaceGroupingIndex === -1) {
+            const value = cell.getValue<number>()
+
+            return `${value} surface${value !== 1 ? "s" : ""}`
+          } else if (currentGroupingIndex < surfaceGroupingIndex) {
+            const uniqueSurfaces = useArrayUnique(row.getLeafRows().map(r => r.original.surface.surface)).value.length
+            return `${uniqueSurfaces} surface${uniqueSurfaces !== 1 ? "s" : ""}`
+          }
+        }
+      } else if (!table.getState().grouping.includes("surface")) {
+        return row.original.surface.id
+      }
+    }
+  },
+  {
+    accessorKey: "title",
+    meta: { class: { td: "text-center" } },
+    header: ({ column }) => {
+      const items = [
+        { label: "Titles", value: true },
+        { label: "Finals", value: false }
+      ]
+
+      // @ts-expect-error
+      return h(UInputMenu, {
+        modelValue: column.getFilterValue(),
+        "onUpdate:modelValue": (val: boolean | undefined) => column.setFilterValue(val),
+        items,
+        placeholder: "Title",
+        variant: "none",
+        icon: ICONS.filter,
+        valueKey: "value"
+      })
+    },
+    cell: ({ row }) => {
+      if (!row.getIsGrouped()) {
+        if (row.original.title) {
+          return h(UIcon, {
+            name: appConfig.ui.icons.success,
+            class: "text-success"
+          })
+        } else {
+          return h(UIcon, {
+            name: appConfig.ui.icons.error,
+            class: "text-error"
+          })
+        }
+      }
     }
   }
 ]

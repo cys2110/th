@@ -4,7 +4,7 @@
  * @see module server/utils/schemas
  */
 
-import { array, object, string, union, url, z } from "zod"
+import { array, literal, object, string, union, url, z } from "zod"
 import { dateToNeoDateSchema, numberToIntSchema, optionSchema, paginationSchema } from "./schemas"
 
 /** Describes a schema for a player query */

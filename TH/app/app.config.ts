@@ -96,7 +96,7 @@ export default defineAppConfig({
       slots: {
         root: "w-full",
         content: "ring-primary cursor-pointer",
-        trailingIcon: "group-data-[state=open]:rotate-180 duration-250"
+        trailingIcon: "group-data-[state=open]:rotate-180 duration-250 cursor-pointer"
       }
     },
     pageAside: { slots: { container: "*:my-2" } },
