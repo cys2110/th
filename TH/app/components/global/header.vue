@@ -1,5 +1,5 @@
 <script setup lang="ts">
-/** Header component with navigation menu. */
+
 
 import type { NavigationMenuItem } from "@nuxt/ui"
 

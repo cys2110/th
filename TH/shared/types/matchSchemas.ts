@@ -1,9 +1,4 @@
-/**
- * @module shared/types/matchSchemas
- * @description This module defines and exports schemas related to matches used for shared type validation
- * @see module shared/types/schemas
- * @see module shared/types/enums
- */
+
 
 import { object, string } from "zod"
 import { intToNumberSchema } from "./schemas"

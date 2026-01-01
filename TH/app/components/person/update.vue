@@ -2,7 +2,7 @@
 import type { FormErrorEvent, FormSubmitEvent } from "@nuxt/ui"
 import { cloneDeep, isEqual } from "lodash"
 
-/** Component to create or update a coach, umpire or supervisor */
+
 const props = defineProps<{
   person?: PersonType
   type: "Umpire" | "Supervisor" | "Coach"

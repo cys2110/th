@@ -1,8 +1,5 @@
 <script setup lang="ts">
-/**
- * Component to clear sorting on tanstack table where sorting is handled by tanstack table
- * @prop table - the table ref containing the table API
- */
+
 
 import type { Table } from "@tanstack/vue-table"
 

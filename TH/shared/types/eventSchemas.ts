@@ -1,10 +1,4 @@
-/**
- * @module shared/types/eventSchemas
- * @description Event schemas shared across client and server side
- * @see module shared/types/schemas
- * @see module shared/types/enums
- * @see module shared/types/tournamentSchemas
- */
+
 
 import { object, string } from "zod"
 import { baseTournamentSchema } from "./tournamentSchemas"

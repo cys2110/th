@@ -1,4 +1,4 @@
-/** Column definitions for player related tables */
+
 
 import {
   CountriesLink,
@@ -24,16 +24,7 @@ import appConfig from "~/app.config"
 
 const currentYear = new Date().getFullYear()
 
-/**
- * @function playerColumns
- * @param {Ref<string[] | null>} tours - reactive reference to selected tours for filtering
- * @param {Ref<string[] | null>} grouping - reactive reference to current grouping state
- * @param {Ref<OptionType[] | null>} players - reactive reference to selected players for filtering
- * @param {Ref<OptionType[] | null>} countries - reactive reference to selected countries for filtering
- * @param {Ref<OptionType[] | null>} coaches - reactive reference to selected coaches for filtering
- * @param {Ref<SortFieldType[]>} sortField - reactive reference to current sorting state
- * @returns {TableColumn<PlayersResultsType>[]} Array of table column definitions for players table
- * */
+
 
 export const playerColumns = (
   grouping: Ref<string[] | null>,
@@ -301,7 +292,7 @@ export const playerColumns = (
 
 const wlColumnHelper = createColumnHelper<WLType>()
 
-/** @constant playerWLColumns - Column definitions for player's WL table */
+
 export const playerWLColumns: TableColumn<WLType>[] = [
   {
     accessorKey: "label",
@@ -423,7 +414,7 @@ export const playerWLColumns: TableColumn<WLType>[] = [
   })
 ]
 
-/** @constant playerH2HColumns - Column definitions for player's H2H table */
+
 export const playerH2HColumns: TableColumn<PlayerH2HType>[] = [
   {
     id: "opponent",
@@ -461,7 +452,7 @@ export const playerH2HColumns: TableColumn<PlayerH2HType>[] = [
   }
 ]
 
-/** @constant recentEventColumns - Column definitions for player's recent events table */
+
 export const recentEventColumns: TableColumn<PlayerRecentEventType>[] = [
   {
     accessorKey: "tournament.name",
@@ -507,9 +498,7 @@ export const recentEventColumns: TableColumn<PlayerRecentEventType>[] = [
   }
 ]
 
-/**
- * @constant titlesAndFinalsColumns - Column definitions for player's titles and finals table
- */
+
 export const titlesAndFinalsColumns: TableColumn<TitlesAndFinalsType>[] = [
   {
     accessorKey: "year",
@@ -814,9 +803,7 @@ export const titlesAndFinalsColumns: TableColumn<TitlesAndFinalsType>[] = [
   }
 ]
 
-/**
- * @constant wlIndexColumns - Column definitions for player's WL Index table
- */
+
 export const wlIndexColumns: TableColumn<WLIndexType>[] = [
   {
     accessorKey: "category",
@@ -889,9 +876,7 @@ export const wlIndexColumns: TableColumn<WLIndexType>[] = [
   }
 ]
 
-/**
- * @constant playerStatsColumns - Column definitions for player's stats table
- */
+
 export const playerStatsColumns: TableColumn<PlayerStatsType>[] = [
   { accessorKey: "stat", header: "" },
   {
@@ -917,10 +902,7 @@ export const playerStatsColumns: TableColumn<PlayerStatsType>[] = [
   }
 ]
 
-/**
- * @function playerRecordColumns
- * @returns {TableColumn<RecordType>[]} Array of table column definitions for player's record table
- */
+
 const recordColumnHelper = createColumnHelper<RecordType>()
 export const playerRecordColumns = (tour: "ATP" | "WTA"): TableColumn<RecordType>[] => [
   { accessorKey: "year", header: "Year" },

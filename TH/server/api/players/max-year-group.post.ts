@@ -1,4 +1,4 @@
-/** API route to fetch players by max year */
+
 
 export default defineEventHandler(async event => {
   const params = await readValidatedBody(event, body => playerQuerySchema.parse(body))

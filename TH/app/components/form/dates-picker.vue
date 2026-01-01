@@ -1,8 +1,5 @@
 <script setup lang="ts">
-/**
- * Date range picker component for forms
- * @model {Object} dateRange - Two-way bound model for the selected date range.
- */
+
 
 import { CalendarDate } from "@internationalized/date"
 

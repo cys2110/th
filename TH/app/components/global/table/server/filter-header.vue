@@ -1,11 +1,5 @@
 <script setup lang="ts">
-/**
- * Header component for filterable table columns where server-side filtering is applied.
- * @prop label - Label for the filter header.
- * @prop options - Array of options for filtering.
- * @prop multiple - Whether multiple selections are allowed.
- * @model modelValue - Two-way bound model for selected filter options.
- */
+
 
 import type { InputMenuItem } from "@nuxt/ui"
 

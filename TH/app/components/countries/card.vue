@@ -1,8 +1,5 @@
 <script setup lang="ts">
-/**
- * Basic card to display country information
- * @prop {CountryType} country - The country to display
- */
+
 
 defineProps<{
   country: CountryType

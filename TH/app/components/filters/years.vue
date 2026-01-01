@@ -1,8 +1,5 @@
 <script setup lang="ts">
-/**
- * Year filter component allowing selection of years via input menu.
- * @model years - Two-way bound model for selected years.
- */
+
 
 withDefaults(
   defineProps<{

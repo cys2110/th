@@ -1,4 +1,4 @@
-/**Hex code colours for charts */
+
 export default {
   light: {
     amber: "#92400e",

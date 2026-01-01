@@ -1,10 +1,5 @@
 <script setup lang="ts" generic="T">
-/**
- * Header component for sortable table columns where tanstack/vue-table handles the sorting logic.
- * @prop column - The column object from tanstack/vue-table.
- * @prop label - Optional label for the sort header.
- * @model modelValue - Two-way bound model for the filter values.
- */
+
 
 import type { Column } from "@tanstack/vue-table"
 

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-/** About page */
+
 
 useHead({ title: "About" })
 </script>

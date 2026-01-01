@@ -1,4 +1,4 @@
-/** API route to fetch a player's top head-to-head records */
+
 
 export default defineEventHandler(async event => {
   const params = getQuery(event)

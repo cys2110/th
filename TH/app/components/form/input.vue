@@ -1,11 +1,5 @@
 <script setup lang="ts">
-/**
- * A reusable input component with a clear button.
- * @prop placeholder - The placeholder text for the input.
- * @prop type - The type of the input (text or number).
- * @prop disabled - Whether the input is disabled.
- * @model modelValue - Two-way bound model for the input value.
- */
+
 
 withDefaults(
   defineProps<{

@@ -1,8 +1,5 @@
 <script setup lang="ts">
-/**
- * Component to update a player
- * @prop {PlayerDetailsType} player - The player details
- */
+
 
 import { parseDate } from "@internationalized/date"
 import type { FormErrorEvent, FormSubmitEvent } from "@nuxt/ui"

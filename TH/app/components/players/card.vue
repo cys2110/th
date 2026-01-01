@@ -1,8 +1,5 @@
 <script setup lang="ts">
-/**
- * Player card component to display player information in a card format
- * @prop {BasePlayerType} player - the player object containing player details
- */
+
 
 const props = defineProps<{
   player: BasePlayerType

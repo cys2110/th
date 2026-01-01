@@ -1,9 +1,5 @@
 <script setup lang="ts" generic="T">
-/**
- * Header component for grouping table columns where tanstack/vue-table handles the grouping logic.
- * @prop column - The column object from tanstack/vue-table.
- * @prop label - Optional label for the grouping header.
- */
+
 
 import type { Column } from "@tanstack/vue-table"
 

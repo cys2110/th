@@ -1,9 +1,5 @@
 <script setup lang="ts">
-/**
- * @description Dashboard subpanel component with optional title and icon
- * @prop title - Optional title for the subpanel
- * @prop icon - Optional icon name for the subpanel
- */
+
 
 defineProps<{ title?: string; icon?: string }>()
 </script>

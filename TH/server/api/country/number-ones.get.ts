@@ -1,4 +1,4 @@
-/** API route to fetch number one ranked players for a country */
+
 
 export default defineEventHandler(async event => {
   const { id } = getQuery(event)

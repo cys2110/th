@@ -1,4 +1,4 @@
-/** Barrel file to allow auto importing of schemas and columns */
+
 
 // Schemas
 export * from "./schemas"

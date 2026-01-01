@@ -1,8 +1,5 @@
 <script setup lang="ts">
-/**
- * Draw type filter component allowing selection of draw types via radio buttons.
- * @model drawType - Two-way bound model for selected draw type.
- */
+
 
 withDefaults(
   defineProps<{

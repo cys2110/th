@@ -1,5 +1,5 @@
 <script setup lang="ts">
-/** Component to switch between card and table view modes. */
+
 
 const viewMode = useViewModeStore()
 </script>

@@ -1,8 +1,5 @@
 <script setup lang="ts">
-/**
- * Surface filter component allowing selection of surfaces via checkboxes.
- * @model surfaces - Two-way bound model for selected surfaces.
- */
+
 withDefaults(
   defineProps<{
     disabled?: boolean

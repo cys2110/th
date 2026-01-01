@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { TableRow } from "@nuxt/ui"
 
-/** Component to display player's recent events */
+
 
 const {
   params: { id }

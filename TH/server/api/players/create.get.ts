@@ -1,4 +1,4 @@
-/** API route to create a new player */
+
 
 export default defineEventHandler(async event => {
   const params = getQuery(event)

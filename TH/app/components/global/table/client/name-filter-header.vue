@@ -1,10 +1,5 @@
 <script setup lang="ts" generic="T">
-/**
- * Header component for filterable table columns where tanstack/vue-table handles the filtering logic.
- * @prop column - The column object from tanstack/vue-table.
- * @prop label - Label for the filter header.
- * @model modelValue - Two-way bound model for the filter values.
- */
+
 
 import type { Column } from "@tanstack/vue-table"
 

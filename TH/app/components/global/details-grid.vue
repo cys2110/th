@@ -1,5 +1,5 @@
 <script setup lang="ts">
-/** Reusable component to display a grid of details */
+
 </script>
 
 <template>

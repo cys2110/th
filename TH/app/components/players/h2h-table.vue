@@ -1,5 +1,5 @@
 <script setup lang="ts">
-/** Component to display player's head-to-head table */
+
 
 import type { ContextMenuItem, TableRow } from "@nuxt/ui"
 

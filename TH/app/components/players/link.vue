@@ -1,5 +1,5 @@
 <script setup lang="ts">
-/** Reusable component to display a link to a player's page. */
+
 
 withDefaults(
   defineProps<{

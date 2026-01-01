@@ -1,9 +1,5 @@
 <script setup lang="ts">
-/**
- * Level filter component allowing selection of levels via checkboxes.
- * @prop disabled - Whether the filter is disabled.
- * @model levels - Two-way bound model for selected levels.
- */
+
 withDefaults(
   defineProps<{
     disabled?: boolean

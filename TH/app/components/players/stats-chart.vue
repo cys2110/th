@@ -1,15 +1,7 @@
 <script setup lang="ts">
 import type { AsyncDataRequestStatus } from "#app"
 
-/**
- * Player Status Chart Modal Component
- * @prop stats - The player statistics data to display in the chart.
- * @prop status - The status of the data fetch request.
- * @model levels - The selected levels filter.
- * @model drawType - The selected draw type filter.
- * @model years - The selected years filter.
- * @model surfaces - The selected surfaces filter.
- */
+
 
 const props = defineProps<{
   stats: PlayerStatsType[]

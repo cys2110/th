@@ -1,13 +1,9 @@
-/**
- * @module server/utils/playerSchemas
- * @description This module defines and exports the player-related schemas used for server side validation
- * @see module server/utils/schemas
- */
+
 
 import { array, literal, object, string, union, url, z } from "zod"
 import { dateToNeoDateSchema, numberToIntSchema, optionSchema, paginationSchema } from "./schemas"
 
-/** Describes a schema for a player query */
+
 export const playerQuerySchema = paginationSchema.extend({
   coaches: array(optionSchema).default([]),
   countries: array(optionSchema).default([]),
@@ -17,7 +13,7 @@ export const playerQuerySchema = paginationSchema.extend({
   tours: array(TourInputEnum).default([])
 })
 
-/** Describes a schema for a player win-loss index query */
+
 export const wlIndexQuerySchema = object({
   id: string(),
   levels: array(LevelEnum).default([]),
@@ -25,7 +21,7 @@ export const wlIndexQuerySchema = object({
   years: array(numberToIntSchema).default([])
 })
 
-/** Describes the schema for a player's stats query */
+
 export const playerStatsQuerySchema = object({
   id: string(),
   levels: array(LevelEnum).default([]),
@@ -34,7 +30,7 @@ export const playerStatsQuerySchema = object({
   surfaces: array(SurfaceEnum).default([])
 })
 
-/** Describes a schema for backend validation of player form */
+
 export const playerFormSchema = object({
   id: string(),
   first_name: string().optional(),
@@ -102,7 +98,7 @@ export const playerFormSchema = object({
   return newObject
 })
 
-/** Describes a schema for the api response of a player record */
+
 export const playerRecordSchema = object({
   tournament: baseTournamentSchema,
   round: RoundEnum,

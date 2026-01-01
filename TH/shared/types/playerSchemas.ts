@@ -1,17 +1,11 @@
-/**
- * @module shared/types/playerSchemas
- * @description Player schemas shared across client and server side
- * @see module shared/types/schemas
- * @see module shared/types/enums
- * @see module shared/types/eventSchemas
- */
+
 
 import { array, boolean, literal, number, object, string, url, z } from "zod"
 import { coachSchema, countrySchema, intToNumberSchema, neoDateToStringSchema, personSchema, surfaceSchema } from "./schemas"
 import { MatchTypeEnum, RoundEnum, tourEnumTransform } from "./enums"
 import { eventSchema } from "./eventSchemas"
 
-/** Describes the schema for a player with its full details */
+
 export const playerSchema = personSchema.extend({
   age: intToNumberSchema.optional(),
   bh: literal(["One", "Two"]).optional(),
@@ -42,7 +36,7 @@ export const playerSchema = personSchema.extend({
   years: array(intToNumberSchema)
 })
 
-/** Describes the schema for a player with its basic details */
+
 export const basePlayerSchema = playerSchema.pick({
   id: true,
   first_name: true,
@@ -53,10 +47,10 @@ export const basePlayerSchema = playerSchema.pick({
   min_year: true,
   tour: true
 })
-/** @type {BasePlayerType} */
+
 export type BasePlayerType = z.infer<typeof basePlayerSchema>
 
-/** Describes a schema for a player with its overview details */
+
 export const playerOverviewSchema = playerSchema.pick({
   id: true,
   first_name: true,
@@ -68,19 +62,19 @@ export const playerOverviewSchema = playerSchema.pick({
   country: true,
   years: true
 })
-/** @type {PlayerOverviewType} */
+
 export type PlayerOverviewType = z.infer<typeof playerOverviewSchema>
 
-/** Describes a schema for a player's details */
+
 export const playerDetailsSchema = playerSchema.omit({
   max_year: true,
   min_year: true,
   years: true
 })
-/** @type {PlayerDetailsType} */
+
 export type PlayerDetailsType = z.infer<typeof playerDetailsSchema>
 
-/** Describes the schema for a player's win-loss record */
+
 const wlMainSchema = object({
   singles: object({
     wl: string(),
@@ -101,19 +95,19 @@ export const wlSchema = object({
     doubles: string()
   })
 })
-/** @type {WLType} */
+
 export type WLType = z.infer<typeof wlSchema>
 
-/** Describes the schema for a player's head to head records against another player */
+
 export const playerH2HSchema = object({
   opponent: personSchema,
   wins: intToNumberSchema,
   losses: intToNumberSchema
 })
-/** @type {PlayerH2HType} */
+
 export type PlayerH2HType = z.infer<typeof playerH2HSchema>
 
-/** Describes the schema for a player's titles and finals */
+
 export const titlesAndFinalsSchema = eventSchema
   .pick({
     id: true,
@@ -145,10 +139,10 @@ export const titlesAndFinalsSchema = eventSchema
       date: end_date
     }
   })
-/** @type {TitlesAndFinalsType} */
+
 export type TitlesAndFinalsType = z.infer<typeof titlesAndFinalsSchema>
 
-/** Describes the schema for a player's win-loss index */
+
 export const wlIndexMatchSchema = object({
   surface: surfaceSchema,
   round: RoundEnum,

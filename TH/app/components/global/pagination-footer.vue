@@ -1,12 +1,5 @@
 <script setup lang="ts">
-/**
- * Pagination footer component to navigate through paginated data
- * @prop {number} total - Total number of items
- * @prop {string} placeholder - Placeholder text to describe the items
- * @prop {boolean} [showPaginationControls=true] - Whether to show pagination controls
- * @model page - Current page number
- * @model offset - Number of items per page
- */
+
 
 withDefaults(
   defineProps<{

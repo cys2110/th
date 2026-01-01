@@ -1,14 +1,5 @@
 <script setup lang="ts">
-/**
- * A reusable component for filtering and sorting data.
- * @prop {OptionType[]} [sortFields] - The fields available for sorting.
- * @prop {Function} [resetFilters] - Function to reset all filters.
- * @prop {Function} [resetSorting] - Function to reset sorting.
- * @prop {Function} [resetGrouping] - Function to reset grouping.
- * @prop {Object} [table] - Table instance for column visibility management.
- * @prop {Table<any>} [table.tableApi] - The table API instance from TanStack Table.
- * @model sortField - The current sorting fields and directions.
- */
+
 
 import type { Table } from "@tanstack/vue-table"
 

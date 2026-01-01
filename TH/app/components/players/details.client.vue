@@ -1,5 +1,5 @@
 <script setup lang="tsx">
-/** Component to display player's details */
+
 const props = defineProps<{
   player: PlayerDetailsType
 }>()

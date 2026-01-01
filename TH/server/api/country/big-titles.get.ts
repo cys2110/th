@@ -1,4 +1,4 @@
-/** API route to fetch big titles won by a country's players */
+
 
 export default defineEventHandler(async event => {
   const { id } = getQuery(event)

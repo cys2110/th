@@ -1,8 +1,5 @@
 <script setup lang="ts">
-/**
- * Component to display players who have won big titles for a country
- * @prop {CountryType} country
- */
+
 
 import type { Table } from "@tanstack/vue-table"
 import type { TableRow } from "@nuxt/ui"

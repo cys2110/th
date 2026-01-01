@@ -1,9 +1,5 @@
 <script setup lang="ts">
-/**
- * Reusable textarea component for form inputs.
- * @prop {string} placeholder - Placeholder text for the textarea.
- * @model {string} modelValue - Two-way bound model for the textarea value.
- */
+
 
 defineProps<{
   placeholder: string

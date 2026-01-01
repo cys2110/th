@@ -1,5 +1,5 @@
 <script setup lang="ts">
-/** Loading component for details grid */
+
 </script>
 
 <template>

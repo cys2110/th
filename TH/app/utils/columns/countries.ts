@@ -1,4 +1,4 @@
-/** Column definitions for country related tables */
+
 
 import type { TableColumn } from "@nuxt/ui"
 import type { Column } from "@tanstack/vue-table"
@@ -13,7 +13,7 @@ import {
 } from "#components"
 import appConfig from "~/app.config"
 
-/** @constant countriesColumns - column definitions for countries page */
+
 export const countriesColumns: TableColumn<CountryType>[] = [
   {
     accessorKey: "name",
@@ -79,7 +79,7 @@ const levelBadgeMapping: Record<string, keyof typeof appConfig.ui.colors> = {
   Olympics: "warning"
 }
 
-/** @constant countryTitlesColumns - column definitions for big titles table on country page */
+
 export const countryTitlesColumns: TableColumn<CountryTitleType>[] = [
   {
     accessorKey: "tour",

@@ -1,4 +1,4 @@
-/** Player store */
+
 
 export const usePlayerStore = defineStore("player", () => {
   const firstName = ref("")

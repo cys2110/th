@@ -1,8 +1,5 @@
 <script setup lang="ts">
-/**
- * Input menu form component allowing selection of items via input menu.
- * @model modelValue - Two-way bound model for selected items.
- */
+
 
 withDefaults(
   defineProps<{

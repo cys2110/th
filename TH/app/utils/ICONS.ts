@@ -1,4 +1,4 @@
-/** Icons used in the app */
+
 
 export default {
   barChart: "solar:chart-2-bold-duotone",

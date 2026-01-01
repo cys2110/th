@@ -1,4 +1,4 @@
-/** API route to fetch a player's recent events */
+
 
 export default defineEventHandler(async event => {
   const params = getQuery(event)

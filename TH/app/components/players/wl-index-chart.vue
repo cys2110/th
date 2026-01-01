@@ -2,14 +2,7 @@
 import type { AsyncDataRequestStatus } from "#app"
 import type { CallbackDataParams } from "echarts/types/dist/shared"
 
-/**
- * Win-Loss Index Chart Modal Component
- * @prop index - The win-loss index data to display in the chart.
- * @prop status - The status of the data fetch request.
- * @model levels - The selected levels filter.
- * @model drawType - The selected draw type filter.
- * @model years - The selected years filter.
- */
+
 
 const props = defineProps<{
   index: WLIndexType[]

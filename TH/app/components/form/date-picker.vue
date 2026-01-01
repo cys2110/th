@@ -1,10 +1,5 @@
 <script setup lang="ts">
-/**
- * Reusable date picker component for form inputs.
- * @prop {string} [min] - Minimum selectable date in ISO format (YYYY-MM-DD).
- * @prop {string} [max] - Maximum selectable date in ISO format (YYYY-MM-DD).
- * @model {CalendarDate} date - Two-way bound model for the selected date.
- */
+
 
 import { CalendarDate, parseDate } from "@internationalized/date"
 

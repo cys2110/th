@@ -1,8 +1,5 @@
 <script setup lang="ts">
-/**
- * Timeline component to display a player's titles and finals
- * @props events - Array of TitlesAndFinalsType objects
- */
+
 
 const props = defineProps<{
   events: TitlesAndFinalsType[]

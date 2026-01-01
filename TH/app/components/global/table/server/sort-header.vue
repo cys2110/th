@@ -1,10 +1,5 @@
 <script setup lang="ts">
-/**
- * Header component for sortable table columns where tanstack/vue-table handles the sorting logic.
- * @prop label - Optional label for the sort header.
- * @prop sortKey - The key to sort by when this header is clicked.
- * @model modelValue - Two-way bound model for the sort values.
- */
+
 
 const props = defineProps<{
   label?: string

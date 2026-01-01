@@ -1,5 +1,5 @@
 <script setup lang="ts">
-/** Home page */
+
 
 import type { PageFeatureProps } from "@nuxt/ui"
 

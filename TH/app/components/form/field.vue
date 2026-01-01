@@ -1,9 +1,5 @@
 <script setup lang="ts" generic="S">
-/**
- * Reusable form field component that dynamically form components based on field type.
- * @prop {FormFieldInterface<S>} field - The form field configuration.
- * @model {any} modelValue - Two-way bound model for the form field values.
- */
+
 
 defineProps<{
   field: FormFieldInterface<S>
