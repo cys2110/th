@@ -86,6 +86,19 @@ declare global {
   }
 
   /**
+   * @type {PlayerStatsType}
+   * @property {string} stat - The name of the statistic
+   * @property {number} value - The value of the statistic
+   * @property {boolean} [percent] - Indicates if the value is a percentage
+   */
+
+  type PlayerStatsType = {
+    stat: string
+    percent?: boolean
+    value: number
+  }
+
+  /**
    * @type {RecordType}
    * @property {number} year - The year of the record
    * @property {Object} tournaments - An object where each key is a tournament name and the value is an object containing singles and doubles rounds

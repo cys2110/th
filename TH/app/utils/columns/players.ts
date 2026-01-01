@@ -578,6 +578,34 @@ export const wlIndexColumns: TableColumn<WLIndexType>[] = [
 ]
 
 /**
+ * @constant playerStatsColumns - Column definitions for player's stats table
+ */
+export const playerStatsColumns: TableColumn<PlayerStatsType>[] = [
+  { accessorKey: "stat", header: "" },
+  {
+    accessorKey: "value",
+    meta: { class: { td: "text-right" } },
+    header: "",
+    cell: ({ row }) => {
+      if (row.original.percent) {
+        return h(UProgress, {
+          modelValue: row.original.value,
+          max: 100,
+          status: true,
+          ui: {
+            root: "min-w-60 md:min-w-sm",
+            base: "bg-Inactive-300 dark:bg-Inactive-800",
+            indicator: "bg-Inactive-600 dark:bg-Inactive-500"
+          }
+        })
+      } else {
+        return row.original.value
+      }
+    }
+  }
+]
+
+/**
  * @function playerRecordColumns
  * @returns {TableColumn<RecordType>[]} Array of table column definitions for player's record table
  */

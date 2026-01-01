@@ -1,5 +1,5 @@
 /**
- * @module server/api/utils/schemas
+ * @module server/utils/schemas
  * @description This module defines and exports common schemas used across the server API
  */
 

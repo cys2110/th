@@ -1,7 +1,7 @@
 /**
- * @module server/api/utils/playerSchemas
+ * @module server/utils/playerSchemas
  * @description This module defines and exports the player-related schemas used for server side validation
- * @see module server/api/utils/schemas
+ * @see module server/utils/schemas
  */
 
 import { array, object, string, union, url, z } from "zod"
@@ -23,6 +23,15 @@ export const wlIndexQuerySchema = object({
   levels: array(LevelEnum).default([]),
   drawType: DrawEnum.nullable().default(null),
   years: array(numberToIntSchema).default([])
+})
+
+/** Describes the schema for a player's stats query */
+export const playerStatsQuerySchema = object({
+  id: string(),
+  levels: array(LevelEnum).default([]),
+  drawType: DrawEnum.nullable().default(null),
+  years: array(numberToIntSchema).default([]),
+  surfaces: array(SurfaceEnum).default([])
 })
 
 /** Describes a schema for backend validation of player form */
