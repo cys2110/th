@@ -84,3 +84,10 @@ export const playerFormSchema = object({
 
   return newObject
 })
+
+/** Describes a schema for the api response of a player record */
+export const playerRecordSchema = object({
+  tournament: baseTournamentSchema,
+  round: RoundEnum,
+  year: intToNumberSchema
+})

@@ -328,7 +328,11 @@ const handleSelectRow = (_e: Event, row: TableRow<PlayersResultsType>) => {
           <empty
             message="No players found"
             :icon="ICONS.peopleOff"
-          ></empty>
+          >
+            <dev-only>
+              <players-create />
+            </dev-only>
+          </empty>
         </define-empty-template>
 
         <!--Card view-->

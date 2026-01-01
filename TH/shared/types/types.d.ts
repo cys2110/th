@@ -66,6 +66,22 @@ declare global {
     min_year: number
     max_year: number
   }
+
+  /**
+   * @type {RecordType}
+   * @property {number} year - The year of the record
+   * @property {Object} tournaments - An object where each key is a tournament name and the value is an object containing singles and doubles rounds
+   * @property {RoundEnumType} [tournaments.singles] - The round reached in singles
+   * @property {RoundEnumType} [tournaments.doubles] - The round reached in doubles
+   */
+  type RecordType = {
+    year: number
+  } & {
+    [tournament: string]: {
+      singles?: RoundEnumType
+      doubles?: RoundEnumType
+    }
+  }
 }
 
 export {}

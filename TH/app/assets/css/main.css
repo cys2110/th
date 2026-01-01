@@ -43,6 +43,10 @@ input::-webkit-inner-spin-button {
   @apply text-primary from-primary to-primary;
 }
 
+.success-link {
+  @apply text-success from-success to-success;
+}
+
 .scrollbar {
   @apply scrollbar-thin scrollbar-thumb-primary-600 scrollbar-track-transparent overflow-y-auto scroll-smooth max-h-200 2xl:max-h-150;
 }
