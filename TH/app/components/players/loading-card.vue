@@ -1,3 +1,7 @@
+<script setup lang="ts">
+/** Loading card component to indicate loading player state with skeletons */
+</script>
+
 <template>
   <u-page-card
     highlight

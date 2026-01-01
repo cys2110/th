@@ -1,4 +1,12 @@
 <script setup lang="ts">
+/**
+ * A component that searches and selects fetched options based on user input.
+ * @prop {string} type - The type of options to search for (e.g., "Player", "Country").
+ * @prop {string} [icon] - Optional icon to display in the command palette.
+ * @prop {string} [placeholder] - Optional placeholder text for the search input.
+ * @model modelValue - Two-way bound model for selected options.
+ */
+
 const props = defineProps<{
   type: string
   icon?: string

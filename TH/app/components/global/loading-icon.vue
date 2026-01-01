@@ -1,5 +1,5 @@
 <script setup lang="ts">
-/** @description Default loading icon */
+/** Default loading icon */
 
 const {
   ui: { icons }

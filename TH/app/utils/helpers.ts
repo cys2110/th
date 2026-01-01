@@ -1,3 +1,16 @@
+/** Helper functions */
+
+/**
+ * @constant dateTimeFormat
+ * @description An Intl.DateTimeFormat instance for formatting dates in "en-GB" locale.
+ */
+export const dateTimeFormat = new Intl.DateTimeFormat("en-GB", {
+  day: "numeric",
+  month: "long",
+  year: "numeric",
+  timeZone: "UTC"
+})
+
 /**
  * @function getFlagCode - Returns the appropriate flag icon code for a given country.
  * @param {CountryType} country - The country object containing id and alpha2 code.
@@ -23,3 +36,14 @@ export const getFlagCode = (country: CountryType) => {
   }
   return `flag:${country.alpha2}-4x3`
 }
+
+/**
+ * @constant shortDateFormat
+ * @description An Intl.DateTimeFormat instance for formatting dates in short "en-GB" locale.
+ */
+export const shortDateFormat = new Intl.DateTimeFormat("en-GB", {
+  day: "numeric",
+  month: "numeric",
+  year: "2-digit",
+  timeZone: "UTC"
+})

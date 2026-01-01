@@ -1,4 +1,10 @@
 <script setup lang="ts">
+/**
+ * Reusable component to display a link to a country's page with its flag and name.
+ * @prop country - The country object containing its details.
+ * @prop iconOnly - Whether to display only the flag icon without the country name.
+ */
+
 withDefaults(
   defineProps<{
     country: CountryType

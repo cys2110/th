@@ -1,8 +1,8 @@
 <script setup lang="ts">
 /**
- * @description Component to show empty state with a message and an icon.
- * @param message - The message to display in the empty state.
- * @param icon - The icon to display in the empty state (default: "line-md:alert-circle-twotone-loop").
+ * Component to show empty state with a message and an icon.
+ * @prop message - The message to display in the empty state.
+ * @prop icon - The icon to display in the empty state (default: "line-md:alert-circle-twotone-loop").
  */
 
 withDefaults(

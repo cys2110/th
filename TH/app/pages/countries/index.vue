@@ -1,4 +1,6 @@
 <script setup lang="ts">
+/** Countries page */
+
 import type { TableRow } from "@nuxt/ui"
 import { getFacetedRowModel, getFacetedUniqueValues, getGroupedRowModel } from "@tanstack/vue-table"
 import type { Table } from "@tanstack/vue-table"

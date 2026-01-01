@@ -1,4 +1,6 @@
 <script setup lang="ts">
+/** Country page */
+
 definePageMeta({ name: "country" })
 
 const {

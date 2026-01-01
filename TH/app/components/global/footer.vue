@@ -1,7 +1,5 @@
 <script setup lang="ts">
-/**
- * @description Footer component displaying related links.
- */
+/** Footer component displaying related links. */
 
 import type { FooterColumn } from "@nuxt/ui"
 

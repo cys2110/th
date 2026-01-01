@@ -1,3 +1,5 @@
+/** API route to fetch players by min year */
+
 export default defineEventHandler(async event => {
   const params = await readValidatedBody(event, body => playerQuerySchema.parse(body))
 

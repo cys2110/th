@@ -1,4 +1,4 @@
-/** @description Helper functions to transform route query parameters */
+/** Helper functions to transform route query parameters */
 
 /**
  * @function toArray - Converts a route query parameter to an array

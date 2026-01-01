@@ -7,16 +7,18 @@
 import { object, string, z } from "zod"
 import { intToNumberSchema } from "./schemas"
 
-/** @interface TournamentType - Represents a tournament with its details */
+/** Defines the schema for a tournament with all details */
 export const tournamentSchema = object({
   id: intToNumberSchema,
   name: string()
 })
+/** @type {TournamentType} */
 export type TournamentType = z.infer<typeof tournamentSchema>
 
-/** @interface TournamentType - Represents a tournament with its base details */
+/** Defines the base schema for a tournament with minimal details */
 export const baseTournamentSchema = tournamentSchema.pick({
   id: true,
   name: true
 })
+/** @type {BaseTournamentType} */
 export type BaseTournamentType = z.infer<typeof baseTournamentSchema>

@@ -1,4 +1,4 @@
-/** @description Column definitions for country related tables */
+/** Column definitions for country related tables */
 
 import type { TableColumn } from "@nuxt/ui"
 import type { Column } from "@tanstack/vue-table"

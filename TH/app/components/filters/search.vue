@@ -1,4 +1,13 @@
 <script setup lang="ts">
+/**
+ * A search filter component that fetches and displays options based on user input.
+ * @prop type - The type of options to search for (e.g., players, countries).
+ * @prop multiple - Whether multiple selections are allowed.
+ * @prop icon - Optional icon to display in the input menu.
+ * @prop placeholder - Optional placeholder text for the input menu.
+ * @model modelValue - Two-way bound model for selected options.
+ */
+
 const props = withDefaults(
   defineProps<{
     type: string

@@ -1,7 +1,17 @@
 <script setup lang="ts">
 definePageMeta({ name: "record" })
+const {
+  params: { id }
+} = useRoute("record")
+const playerStore = usePlayerStore()
 </script>
 
 <template>
-  <div> Page: players/[name]/[id]/record </div>
+  <u-container class="max-w-7xl">
+    <u-page>
+      <players-wrapper />
+
+      <u-page-body></u-page-body>
+    </u-page>
+  </u-container>
 </template>

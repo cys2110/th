@@ -1,6 +1,7 @@
-/** @description Icons used in the app */
+/** Icons used in the app */
 
 export default {
+  barChart: "solar:chart-2-bold-duotone",
   calendar: "stash:calendar-star-duotone",
   cards: "icon-park-twotone:view-grid-card",
   coach: "icon-park-twotone:brain",
@@ -16,16 +17,19 @@ export default {
   group: "solar:link-bold-duotone",
   groupOff: "solar:link-broken-line-duotone",
   h2h: "game-icons:crossed-swords",
+  h2hOff: "tabler:sword-off",
   one: "solar:cup-first-bold-duotone",
   peopleOff: "icon-park-twotone:people-delete-one",
   player: "temaki:tennis",
+  profile: "solar:user-id-bold-duotone",
   sort: "icon-park-twotone:sort",
   sortAsc: "gravity-ui:bars-ascending-align-left-arrow-down",
   sortDesc: "gravity-ui:bars-descending-align-left-arrow-down",
-  stats: "icon-park-twotone:analysis",
+  stats: "icon-park-twotone:market-analysis",
   table: "icon-park-twotone:table-file",
   trophy: "icon-park-twotone:trophy",
   trophyOff: "tabler:trophy-off",
   uploading: "line-md:uploading-loop",
+  wikipedia: "tabler:brand-wikipedia",
   years: "stash:calendar-duotone"
 }

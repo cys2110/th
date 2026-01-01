@@ -1,4 +1,10 @@
 <script setup lang="ts" generic="S">
+/**
+ * Reusable form field component that dynamically form components based on field type.
+ * @prop {FormFieldInterface<S>} field - The form field configuration.
+ * @model {any} modelValue - Two-way bound model for the form field values.
+ */
+
 defineProps<{
   field: FormFieldInterface<S>
 }>()
@@ -13,12 +19,19 @@ const cleanLink = (link: string) => link.replaceAll(/^[\s"'“”‘’\[\]]+|[\
     :name="(field.key as string)"
     :label="field.label"
     :required="field.required"
+    :class="field.class"
     :ui="{ label: 'text-xs' }"
   >
     <form-input
       v-if="field.type === 'text'"
       v-model="modelValue[field.key]"
-      :placeholder="`Enter ${field.label.toLowerCase()}`"
+      :placeholder="field.placeholder ?? `Enter ${field.label.toLowerCase()}`"
+    />
+
+    <form-textarea
+      v-else-if="field.type === 'textarea'"
+      v-model="modelValue[field.key]"
+      :placeholder="field.placeholder ?? `Enter ${field.label.toLowerCase()}`"
     />
 
     <u-radio-group
@@ -26,6 +39,16 @@ const cleanLink = (link: string) => link.replaceAll(/^[\s"'“”‘’\[\]]+|[\
       v-model="modelValue[field.key]"
       :items="field.items"
       orientation="horizontal"
+    />
+
+    <form-date-picker
+      v-else-if="field.type === 'date'"
+      v-model="modelValue[field.key]"
+    />
+
+    <form-dates-picker
+      v-else-if="field.type === 'dates'"
+      v-model="modelValue[field.key]"
     />
   </u-form-field>
 </template>

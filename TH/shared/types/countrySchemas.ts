@@ -12,7 +12,7 @@ import { playerSchema } from "./playerSchemas"
 import { editionSchema } from "./editionSchemas"
 import { MatchTypeEnum } from "./enums"
 
-/** @interface CountryTitleType - Represents players who have won big titles for a country and the title details */
+/** Describes a schema for players who have won big titles for a country and the title details */
 export const countryTitleSchema = playerSchema
   .pick({
     id: true,
@@ -36,9 +36,10 @@ export const countryTitleSchema = playerSchema
         type: MatchTypeEnum
       })
   })
+/** @type {CountryTitleType} */
 export type CountryTitleType = z.infer<typeof countryTitleSchema>
 
-/** @interface CountryNumberOneType - Represents the number one players from a country */
+/** Describes a schema for number one players from a country */
 export const countryNumberOneSchema = playerSchema
   .pick({
     id: true,
@@ -54,4 +55,5 @@ export const countryNumberOneSchema = playerSchema
     first_name: true,
     last_name: true
   })
+/** @type {CountryNumberOneType} */
 export type CountryNumberOneType = z.infer<typeof countryNumberOneSchema>

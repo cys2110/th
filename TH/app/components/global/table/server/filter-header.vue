@@ -1,11 +1,13 @@
 <script setup lang="ts">
-import type { InputMenuItem } from "@nuxt/ui"
-
 /**
- * @description Header component for filterable table columns where server-side filtering is applied.
- * @param label - Label for the filter header.
- * @param options - Array of options for filtering.
+ * Header component for filterable table columns where server-side filtering is applied.
+ * @prop label - Label for the filter header.
+ * @prop options - Array of options for filtering.
+ * @prop multiple - Whether multiple selections are allowed.
+ * @model modelValue - Two-way bound model for selected filter options.
  */
+
+import type { InputMenuItem } from "@nuxt/ui"
 
 const props = withDefaults(
   defineProps<{

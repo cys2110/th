@@ -1,7 +1,7 @@
 <script setup lang="ts">
 /**
- * @description Component to display players who have won big titles for a country
- * @param {CountryType} country
+ * Component to display players who have won big titles for a country
+ * @prop {CountryType} country
  */
 
 import type { Table } from "@tanstack/vue-table"

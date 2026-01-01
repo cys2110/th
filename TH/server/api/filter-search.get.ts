@@ -1,3 +1,5 @@
+/** API route to fetch search results */
+
 import { int } from "neo4j-driver"
 
 export default defineEventHandler(async event => {

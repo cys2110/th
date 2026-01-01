@@ -1,7 +1,7 @@
 <script setup lang="ts">
 /**
  * @description Component to display players who have achieved No. 1 ranking for a country
- * @param {CountryType} country
+ * @prop {CountryType} country
  */
 
 defineProps<{ country: CountryType }>()

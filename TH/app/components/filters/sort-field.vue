@@ -1,4 +1,10 @@
 <script setup lang="ts">
+/**
+ * Modal component to add sort fields for filtering data.
+ * @prop {OptionType[]} sortFields - Array of available sort fields.
+ * @model sortField - Two-way bound model for selected sort fields.
+ */
+
 defineProps<{
   sortFields: OptionType[]
 }>()

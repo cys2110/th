@@ -1,7 +1,7 @@
 <script setup lang="ts">
 /**
- * @description Component to clear filters on tanstack table where filtering is handled by tanstack table
- * @param table - the table ref containing the table API
+ * Component to clear filters on tanstack table where filtering is handled by tanstack table
+ * @prop table - the table ref containing the table API
  */
 
 import type { Table } from "@tanstack/vue-table"

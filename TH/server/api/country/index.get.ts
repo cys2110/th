@@ -1,3 +1,5 @@
+/** API route to fetch a country's details */
+
 export default defineEventHandler(async event => {
   const { id } = getQuery(event)
 

@@ -1,9 +1,10 @@
 <script setup lang="ts">
 /**
- * @description Header component for filterable table columns where server-side filtering is applied.
- * @param label - Label for the filter header.
- * @param type - Type of filter (e.g., "Player", "Country").
- * @param multiple - Whether multiple selections are allowed.
+ * Header component for filterable table columns where server-side filtering is applied.
+ * @prop label - Label for the filter header.
+ * @prop type - Type of filter (e.g., "Player", "Country").
+ * @prop multiple - Whether multiple selections are allowed.
+ * @model modelValue - Two-way bound model for selected filter options.
  */
 
 const props = withDefaults(

@@ -91,6 +91,7 @@ export default defineAppConfig({
     formField: { slots: { label: "font-semibold text-muted text-sm" } },
     header: { slots: { title: "font-cursive" } },
     input: { slots: { root: "w-full" } },
+    inputDate: { slots: { base: "w-full focus-within:ring focus-within:ring-2 focus-within:ring-primary" } },
     inputMenu: {
       slots: {
         root: "w-full",
@@ -133,6 +134,7 @@ export default defineAppConfig({
     tabs: {
       slots: { trigger: "cursor-pointer" },
       defaultVariants: { size: "md" }
-    }
+    },
+    textarea: { slots: { root: "w-full" } }
   }
 })

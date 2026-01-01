@@ -1,4 +1,9 @@
 <script setup lang="ts">
+/**
+ * A component to display a country number one player's card with career high details.
+ * @prop {CountryNumberOneType} player - The player data to display
+ */
+
 defineProps<{ player: CountryNumberOneType }>()
 
 const {

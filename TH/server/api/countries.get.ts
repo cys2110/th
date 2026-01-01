@@ -1,6 +1,4 @@
-/**
- * @description API route to fetch all countries
- */
+/** API route to fetch all countries */
 
 export default defineEventHandler(async event => {
   let query = `/* cypher */

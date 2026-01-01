@@ -1,5 +1,5 @@
 <script setup lang="ts">
-/** @description Loading card component to indicate loading state with skeletons */
+/** Loading card component to indicate loading state with skeletons */
 </script>
 
 <template>

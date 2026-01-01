@@ -1,4 +1,6 @@
 <script setup lang="ts">
+/** Form to create a player in db */
+
 import type { FormErrorEvent, FormSubmitEvent } from "@nuxt/ui"
 import * as z from "zod"
 

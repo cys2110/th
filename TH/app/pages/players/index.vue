@@ -1,4 +1,6 @@
 <script setup lang="ts">
+/** Players page */
+
 import type { TableRow } from "@nuxt/ui"
 import type { Table } from "@tanstack/vue-table"
 
