@@ -17,6 +17,14 @@ export const playerQuerySchema = paginationSchema.extend({
   tours: array(TourInputEnum).default([])
 })
 
+/** Describes a schema for a player win-loss index query */
+export const wlIndexQuerySchema = object({
+  id: string(),
+  levels: array(LevelEnum).default([]),
+  drawType: DrawEnum.nullable().default(null),
+  years: array(numberToIntSchema).default([])
+})
+
 /** Describes a schema for backend validation of player form */
 export const playerFormSchema = object({
   id: string(),

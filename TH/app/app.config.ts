@@ -109,6 +109,7 @@ export default defineAppConfig({
         wrapper: "flex-row justify-between"
       }
     },
+    progress: { slots: { status: "w-full!" } },
     select: {
       slots: {
         base: "cursor-pointer w-full",

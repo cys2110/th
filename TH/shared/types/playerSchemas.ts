@@ -5,9 +5,9 @@
  * @see module shared/types/enums
  */
 
-import { array, literal, number, object, string, url, z } from "zod"
-import { coachSchema, countrySchema, intToNumberSchema, neoDateToStringSchema, personSchema } from "./schemas"
-import { tourEnumTransform } from "./enums"
+import { array, boolean, literal, number, object, string, url, z } from "zod"
+import { coachSchema, countrySchema, intToNumberSchema, neoDateToStringSchema, personSchema, surfaceSchema } from "./schemas"
+import { RoundEnum, tourEnumTransform } from "./enums"
 
 /** Describes the schema for a player with its full details */
 export const playerSchema = personSchema.extend({
@@ -110,3 +110,29 @@ export const playerH2HSchema = object({
 })
 /** @type {PlayerH2HType} */
 export type PlayerH2HType = z.infer<typeof playerH2HSchema>
+
+/** Describes the schema for a player's win-loss index */
+export const wlIndexMatchSchema = object({
+  surface: surfaceSchema,
+  round: RoundEnum,
+  noOfSets: intToNumberSchema,
+  year: intToNumberSchema,
+  category: string().nullable(),
+  win: boolean(),
+  opponent: object({
+    s1: intToNumberSchema.nullish(),
+    s2: intToNumberSchema.nullish(),
+    s3: intToNumberSchema.nullish(),
+    s4: intToNumberSchema.nullish(),
+    s5: intToNumberSchema.nullish(),
+    rh: string().nullable(),
+    rank: intToNumberSchema.nullable()
+  }),
+  score: object({
+    s1: intToNumberSchema.nullish(),
+    s2: intToNumberSchema.nullish(),
+    s3: intToNumberSchema.nullish(),
+    s4: intToNumberSchema.nullish(),
+    s5: intToNumberSchema.nullish()
+  })
+})

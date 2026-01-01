@@ -68,6 +68,24 @@ declare global {
   }
 
   /**
+   * @type {WLIndexType}
+   * @property {string} category - The category of the win-loss index
+   * @property {string} stat - The specific statistic being measured
+   * @property {number} wins - The number of wins
+   * @property {number} losses - The number of losses
+   * @property {number} value - The calculated value of the statistic
+   * @property {number} titles - The number of titles won
+   */
+  type WLIndexType = {
+    category: string
+    stat: string
+    wins: number
+    losses: number
+    value: number
+    titles: number
+  }
+
+  /**
    * @type {RecordType}
    * @property {number} year - The year of the record
    * @property {Object} tournaments - An object where each key is a tournament name and the value is an object containing singles and doubles rounds

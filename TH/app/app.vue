@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { en_gb } from "@nuxt/ui/locale"
+import { registerTheme } from "echarts"
+import ShineTheme from "~/assets/shine"
 
 useHead({
   titleTemplate: "%s %separator %category %separator %siteName",
@@ -10,8 +12,18 @@ useHead({
   },
   htmlAttrs: { class: "scroll-smooth" }
 })
+const colorMode = useColorMode()
 
 provideSSRWidth(1024)
+
+// Echarts options
+provide(
+  THEME_KEY,
+  computed(() => (colorMode.value === "dark" ? "dark" : "light"))
+)
+provide(LOADING_OPTIONS_KEY, {
+  maskColor: computed(() => (colorMode.value === "dark" ? COLOURS.light.slate : COLOURS.dark.slate)).value
+})
 </script>
 
 <template>
