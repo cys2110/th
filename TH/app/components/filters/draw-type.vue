@@ -1,6 +1,4 @@
 <script setup lang="ts">
-
-
 withDefaults(
   defineProps<{
     disabled?: boolean
@@ -18,7 +16,7 @@ const drawType = defineModel<DrawEnumType>()
 
 <template>
   <u-radio-group
-    legend="S/D"
+    legend="Draw Type"
     v-model="drawType"
     :items="drawOptions"
     :disabled="disabled"

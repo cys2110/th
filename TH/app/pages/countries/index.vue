@@ -1,6 +1,4 @@
 <script setup lang="ts">
-
-
 import type { TableRow } from "@nuxt/ui"
 import { getFacetedRowModel, getFacetedUniqueValues, getGroupedRowModel } from "@tanstack/vue-table"
 import type { Table } from "@tanstack/vue-table"
@@ -91,21 +89,12 @@ const handleSelectRow = (e: Event, row: TableRow<CountryType>) => {
           </template>
 
           <!--Table global resets-->
-          <template v-else>
-            <table-client-clear-filters
-              v-if="table"
-              :table="table"
-            />
+          <template v-else-if="table">
+            <table-client-clear-filters :table="table" />
 
-            <table-client-clear-sorting
-              v-if="table"
-              :table="table"
-            />
+            <table-client-clear-sorting :table="table" />
 
-            <table-client-clear-grouping
-              v-if="table"
-              :table="table"
-            />
+            <table-client-clear-grouping :table="table" />
           </template>
         </u-page-aside>
       </template>

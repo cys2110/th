@@ -1,8 +1,6 @@
-
-
-import { object, string } from "zod"
-import { intToNumberSchema } from "./schemas"
-import { IncompleteEnum } from "./enums"
+import { array, boolean, literal, object, string } from "zod"
+import { intToNumberSchema, neoDateToStringSchema } from "./schemas"
+import { DrawEnum, IncompleteEnum, RoundEnum } from "./enums"
 
 export const scoreSchema = object({
   id: string(),
@@ -40,4 +38,16 @@ export const scoreSchema = object({
   avg2_speed: intToNumberSchema.optional(),
   serve_games: intToNumberSchema.optional(),
   return_games: intToNumberSchema.optional()
+})
+
+export const matchSchema = object({
+  date: neoDateToStringSchema.optional(),
+  draw: DrawEnum,
+  id: string(),
+  incomplete: IncompleteEnum.optional(),
+  match_no: intToNumberSchema,
+  round: RoundEnum,
+  sets: array(array(array(intToNumberSchema.nullable()))).optional(),
+  stats: boolean(),
+  winning_team: literal(["t1", "t2"]).optional()
 })

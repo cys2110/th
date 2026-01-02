@@ -1,25 +1,24 @@
 <script setup lang="ts">
 withDefaults(
   defineProps<{
-    items?: LevelEnumType[]
     disabled?: boolean
     orientation?: "horizontal" | "vertical"
   }>(),
   {
-    items: () => Object.values(LevelEnum.enum),
     disabled: false,
     orientation: "vertical"
   }
 )
 
-const levels = defineModel<LevelEnumType[]>()
+const matchTypeOptions = Object.values(MatchTypeEnum.enum)
+const matchType = defineModel<MatchTypeEnumType>()
 </script>
 
 <template>
-  <u-checkbox-group
-    legend="Levels"
-    v-model="levels"
-    :items="items"
+  <u-radio-group
+    legend="S/D"
+    v-model="matchType"
+    :items="matchTypeOptions"
     :disabled="disabled"
     :orientation="orientation"
   />

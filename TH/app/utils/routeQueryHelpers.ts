@@ -1,8 +1,16 @@
-
-
-
 export const toArray = (param: string | string[] | null): string[] | null => (param ? (Array.isArray(param) ? param : [param]) : [])
 
+export const toNumberArray = (param: string | string[] | null) => {
+  if (param) {
+    if (Array.isArray(param)) {
+      return param.map(Number)
+    } else {
+      return [Number(param)]
+    }
+  }
+
+  return []
+}
 
 export const parseSort = (value: string | string[] | null): SortFieldType[] => {
   if (!value) return []
@@ -20,13 +28,11 @@ export const parseSort = (value: string | string[] | null): SortFieldType[] => {
     .filter(Boolean) as SortFieldType[]
 }
 
-
 export const serialiseSort = (value: SortFieldType[]): string | null => {
   if (!value?.length) return null
 
   return value.map(item => `${item.field}:${item.direction}`).join(",")
 }
-
 
 export const parseOption = (value: string | string[] | null): OptionType[] => {
   if (!value) return []
@@ -44,7 +50,6 @@ export const parseOption = (value: string | string[] | null): OptionType[] => {
     })
     .filter(Boolean) as OptionType[]
 }
-
 
 export const serialiseOption = (value: OptionType[]): string | null => {
   if (!value?.length) return null

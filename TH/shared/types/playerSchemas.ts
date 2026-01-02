@@ -1,10 +1,9 @@
-
-
 import { array, boolean, literal, number, object, string, url, z } from "zod"
 import { coachSchema, countrySchema, intToNumberSchema, neoDateToStringSchema, personSchema, surfaceSchema } from "./schemas"
-import { MatchTypeEnum, RoundEnum, tourEnumTransform } from "./enums"
-import { eventSchema } from "./eventSchemas"
-
+import { LevelEnum, MatchTypeEnum, RoundEnum, tourEnumTransform } from "./enums"
+import { entrySchema, eventSchema } from "./eventSchemas"
+import { matchSchema } from "./matchSchemas"
+import { editionSchema } from "./editionSchemas"
 
 export const playerSchema = personSchema.extend({
   age: intToNumberSchema.optional(),
@@ -36,7 +35,6 @@ export const playerSchema = personSchema.extend({
   years: array(intToNumberSchema)
 })
 
-
 export const basePlayerSchema = playerSchema.pick({
   id: true,
   first_name: true,
@@ -49,7 +47,6 @@ export const basePlayerSchema = playerSchema.pick({
 })
 
 export type BasePlayerType = z.infer<typeof basePlayerSchema>
-
 
 export const playerOverviewSchema = playerSchema.pick({
   id: true,
@@ -65,7 +62,6 @@ export const playerOverviewSchema = playerSchema.pick({
 
 export type PlayerOverviewType = z.infer<typeof playerOverviewSchema>
 
-
 export const playerDetailsSchema = playerSchema.omit({
   max_year: true,
   min_year: true,
@@ -73,7 +69,6 @@ export const playerDetailsSchema = playerSchema.omit({
 })
 
 export type PlayerDetailsType = z.infer<typeof playerDetailsSchema>
-
 
 const wlMainSchema = object({
   singles: object({
@@ -98,7 +93,6 @@ export const wlSchema = object({
 
 export type WLType = z.infer<typeof wlSchema>
 
-
 export const playerH2HSchema = object({
   opponent: personSchema,
   wins: intToNumberSchema,
@@ -107,6 +101,80 @@ export const playerH2HSchema = object({
 
 export type PlayerH2HType = z.infer<typeof playerH2HSchema>
 
+export const activityStatsSchema = object({
+  singles_wins: intToNumberSchema,
+  singles_losses: intToNumberSchema,
+  doubles_wins: intToNumberSchema,
+  doubles_losses: intToNumberSchema,
+  singles_titles: intToNumberSchema,
+  doubles_titles: intToNumberSchema
+})
+
+export const activityMatchSchema = matchSchema
+  .pick({
+    id: true,
+    match_no: true,
+    round: true,
+    incomplete: true,
+    sets: true,
+    winning_team: true,
+    draw: true,
+    stats: true,
+    date: true
+  })
+  .extend({
+    opponent: entrySchema
+      .omit({
+        draws: true
+      })
+      .extend({
+        team: array(
+          personSchema.extend({
+            rank: intToNumberSchema.optional()
+          })
+        )
+      })
+      .optional()
+  })
+
+export type ActivityMatchType = z.infer<typeof activityMatchSchema>
+
+export const activitySchema = editionSchema
+  .pick({
+    sponsor_name: true,
+    category: true,
+    start_date: true,
+    end_date: true,
+    venues: true,
+    currency: true,
+    id: true,
+    year: true,
+    tournament: true,
+    surface: true
+  })
+  .required({
+    start_date: true,
+    end_date: true,
+    surface: true
+  })
+  .extend({
+    tour: tourEnumTransform,
+    level: LevelEnum,
+    type: MatchTypeEnum,
+    partner: personSchema.nullish(),
+    player: entrySchema.omit({
+      draws: true
+    }),
+    match: activityMatchSchema
+  })
+
+export type ActivityType = z.infer<typeof activitySchema>
+
+const consolidatedActivitySchema = activitySchema.omit({ match: true }).extend({
+  match: array(activityMatchSchema)
+})
+
+export type ConsolidatedActivityType = z.infer<typeof consolidatedActivitySchema>
 
 export const titlesAndFinalsSchema = eventSchema
   .pick({
@@ -141,7 +209,6 @@ export const titlesAndFinalsSchema = eventSchema
   })
 
 export type TitlesAndFinalsType = z.infer<typeof titlesAndFinalsSchema>
-
 
 export const wlIndexMatchSchema = object({
   surface: surfaceSchema,

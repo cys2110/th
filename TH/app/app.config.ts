@@ -95,7 +95,7 @@ export default defineAppConfig({
     inputMenu: {
       slots: {
         root: "w-full",
-        content: "ring-primary cursor-pointer",
+        content: "ring-primary cursor-pointer min-w-fit",
         trailingIcon: "group-data-[state=open]:rotate-180 duration-250 cursor-pointer"
       }
     },
@@ -110,6 +110,12 @@ export default defineAppConfig({
       }
     },
     progress: { slots: { status: "w-full!" } },
+    radioGroup: {
+      slots: {
+        base: "cursor-pointer",
+        label: "cursor-pointer"
+      }
+    },
     select: {
       slots: {
         base: "cursor-pointer w-full",

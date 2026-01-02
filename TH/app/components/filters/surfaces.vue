@@ -1,17 +1,17 @@
 <script setup lang="ts">
-
 withDefaults(
   defineProps<{
+    items?: SurfaceEnumType[]
     disabled?: boolean
     orientation?: "horizontal" | "vertical"
   }>(),
   {
     disabled: false,
-    orientation: "vertical"
+    orientation: "vertical",
+    items: () => Object.values(SurfaceEnum.enum)
   }
 )
 
-const surfaceOptions = Object.values(SurfaceEnum.enum)
 const surfaces = defineModel<string[]>()
 </script>
 
@@ -19,7 +19,7 @@ const surfaces = defineModel<string[]>()
   <u-checkbox-group
     legend="Surfaces"
     v-model="(surfaces as SurfaceEnumType[])"
-    :items="surfaceOptions"
+    :items="items"
     :orientation="orientation"
     :disabled="disabled"
   />

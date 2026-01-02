@@ -1,5 +1,3 @@
-
-
 export const useViewModeStore = defineStore("viewMode", () => {
   const isCardView = ref(true)
 

@@ -1,6 +1,4 @@
 <script setup lang="ts">
-
-
 import type { Table } from "@tanstack/vue-table"
 
 defineProps<{

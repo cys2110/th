@@ -1,15 +1,10 @@
-
-
 import { array, literal, number, object, string, z } from "zod"
 import { Integer, Date as NeoDate } from "neo4j-driver"
 import { EnvironmentEnum, SurfaceEnum } from "./enums"
 
-
 export const intToNumberSchema = z.instanceof(Integer).transform(val => val.toInt())
 
-
 export const neoDateToStringSchema = z.instanceof(NeoDate).transform(val => val.toStandardDate().toISOString().slice(0, 10))
-
 
 export const sortFieldSchema = object({
   field: string(),
@@ -17,7 +12,6 @@ export const sortFieldSchema = object({
 })
 
 export type SortFieldType = z.infer<typeof sortFieldSchema>
-
 
 export const countrySchema = object({
   id: string(),
@@ -30,6 +24,14 @@ export const countrySchema = object({
 
 export type CountryType = z.infer<typeof countrySchema>
 
+export const venueSchema = object({
+  id: string(),
+  name: string().optional(),
+  city: string(),
+  country: countrySchema
+})
+
+export type VenueType = z.infer<typeof venueSchema>
 
 export const personSchema = object({
   id: string(),
@@ -39,7 +41,6 @@ export const personSchema = object({
 })
 
 export type PersonType = z.infer<typeof personSchema>
-
 
 export const coachSchema = personSchema
   .omit({
@@ -52,9 +53,7 @@ export const coachSchema = personSchema
 
 export type CoachType = z.infer<typeof coachSchema>
 
-
 export const yearSchema = number("Please enter a valid year").int("Please enter a valid year").positive("Please enter a valid year")
-
 
 export const surfaceSchema = object({
   id: string(),

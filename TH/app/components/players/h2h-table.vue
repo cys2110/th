@@ -1,10 +1,8 @@
 <script setup lang="ts">
-
-
 import type { ContextMenuItem, TableRow } from "@nuxt/ui"
 
 const {
-  params: { id }
+  params: { id, name }
 } = useRoute("player")
 const playerStore = usePlayerStore()
 const router = useRouter()
@@ -42,8 +40,8 @@ const getRowItems = (row: TableRow<PlayerH2HType>) => {
       to: {
         name: "h2h",
         query: {
-          team1: id,
-          team2: opponent.id
+          team1: `${name}:${id}`,
+          team2: `${opponent.last_name ? `${opponent.first_name} ${opponent.last_name}` : opponent.id}:${opponent.id}`
         }
       }
     }
@@ -55,11 +53,13 @@ const onContextmenu = (e: Event, row: TableRow<PlayerH2HType>) => {
 }
 
 const handleSelect = (e: Event, row: TableRow<PlayerH2HType>) => {
+  const { opponent } = row.original
+
   router.push({
     name: "h2h",
     query: {
-      team1: id,
-      team2: row.original.opponent.id
+      team1: `${name}:${id}`,
+      team2: `${opponent.last_name ? `${opponent.first_name} ${opponent.last_name}` : opponent.id}:${opponent.id}`
     }
   })
 }

@@ -1,6 +1,4 @@
 <script setup lang="ts" generic="T">
-
-
 import type { Column } from "@tanstack/vue-table"
 
 const props = defineProps<{
@@ -12,11 +10,11 @@ const sortedUniqueValues = computed(() => {
   const uniqueValues = Array.from(props.column.getFacetedUniqueValues().keys()).sort()
 
   return uniqueValues.map(value => {
-    const nameArray = value.split(", ")
+    const [last_name, first_name] = value.split(", ")
 
     return {
       value,
-      label: `${nameArray[1]} ${nameArray[0]}`
+      label: `${first_name} ${last_name}`
     }
   })
 })

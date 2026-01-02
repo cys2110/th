@@ -32,15 +32,15 @@ const yearOptions = computed(() => useSorted(useArrayUnique(events.value.map(e =
 const categories = ref<string[]>([])
 const categoryOptions = computed(() => useSorted(useArrayUnique(events.value.map(e => e.category))).value)
 
-const tournaments = ref<number[]>([])
+const tournaments = ref<OptionType[]>([])
 const tournamentOptions = computed(
   () =>
     useSorted(
       useArrayUnique(
-        events.value.map(e => e.tournament),
-        (a, b) => a.id === b.id
+        events.value.map(e => ({ value: e.tournament.id, label: e.tournament.name })),
+        (a, b) => a.value === b.value
       ),
-      (a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase())
+      (a, b) => a.label.toLowerCase().localeCompare(b.label.toLowerCase())
     ).value
 )
 
@@ -63,7 +63,7 @@ const filteredEvents = computed(() =>
     const surfaceMatch = surfaces.value.length === 0 || surfaces.value.includes(event.surface.surface)
     const yearMatch = years.value.length === 0 || years.value.includes(event.year)
     const categoryMatch = categories.value.length === 0 || (event.category && categories.value.includes(event.category))
-    const tournamentMatch = tournaments.value.length === 0 || tournaments.value.includes(event.tournament.id)
+    const tournamentMatch = tournaments.value.length === 0 || tournaments.value.some(t => t.value === event.tournament.id)
 
     return selectionMatch && typeMatch && levelMatch && surfaceMatch && yearMatch && categoryMatch && tournamentMatch
   })
@@ -141,20 +141,14 @@ const handleSelectRow = (_e: Event, row: TableRow<TitlesAndFinalsType>) => {
               multiple
             />
 
-            <form-input-menu
+            <filters-categories
               v-model="categories"
-              placeholder="Categories"
-              :items="categories"
-              multiple
-              :icon="ICONS.category"
+              :items="(categoryOptions as string[])"
             />
 
-            <form-input-menu
+            <filters-tournaments
               v-model="tournaments"
-              placeholder="Tournaments"
               :items="tournamentOptions"
-              multiple
-              :icon="ICONS.trophy"
             />
           </filters>
         </u-page-aside>

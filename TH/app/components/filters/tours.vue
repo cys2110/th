@@ -1,6 +1,4 @@
 <script setup lang="ts">
-
-
 import type { CheckboxGroupItem } from "@nuxt/ui"
 
 withDefaults(

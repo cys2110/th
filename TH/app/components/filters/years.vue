@@ -1,6 +1,4 @@
 <script setup lang="ts">
-
-
 withDefaults(
   defineProps<{
     yearOptions?: number[]

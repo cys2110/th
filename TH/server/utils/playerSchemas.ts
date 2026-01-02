@@ -1,8 +1,5 @@
-
-
 import { array, literal, object, string, union, url, z } from "zod"
 import { dateToNeoDateSchema, numberToIntSchema, optionSchema, paginationSchema } from "./schemas"
-
 
 export const playerQuerySchema = paginationSchema.extend({
   coaches: array(optionSchema).default([]),
@@ -13,6 +10,15 @@ export const playerQuerySchema = paginationSchema.extend({
   tours: array(TourInputEnum).default([])
 })
 
+export const activityQuerySchema = object({
+  id: string(),
+  categories: array(string()).default([]),
+  levels: array(LevelEnum).default([]),
+  matchType: MatchTypeEnum.default("Singles"),
+  surfaces: array(SurfaceEnum).default([]),
+  tournaments: array(optionSchema).default([]),
+  years: array(numberToIntSchema).default([])
+})
 
 export const wlIndexQuerySchema = object({
   id: string(),
@@ -21,7 +27,6 @@ export const wlIndexQuerySchema = object({
   years: array(numberToIntSchema).default([])
 })
 
-
 export const playerStatsQuerySchema = object({
   id: string(),
   levels: array(LevelEnum).default([]),
@@ -29,7 +34,6 @@ export const playerStatsQuerySchema = object({
   years: array(numberToIntSchema).default([]),
   surfaces: array(SurfaceEnum).default([])
 })
-
 
 export const playerFormSchema = object({
   id: string(),
@@ -97,7 +101,6 @@ export const playerFormSchema = object({
 
   return newObject
 })
-
 
 export const playerRecordSchema = object({
   tournament: baseTournamentSchema,
