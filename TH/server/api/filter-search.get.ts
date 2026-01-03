@@ -1,11 +1,7 @@
-
-
-import { int } from "neo4j-driver"
-
 export default defineEventHandler(async event => {
   interface QueryProps {
     search: string
-    type: "Coach" | "Country" | "Player"
+    type: "Coach" | "Country" | "Player" | "Tournament"
   }
 
   const params = getQuery<QueryProps>(event)
@@ -41,6 +37,13 @@ export default defineEventHandler(async event => {
         LIMIT 40
       `
       break
+    case "Tournament":
+      query = `/* cypher */
+        OPTIONAL MATCH (n:Tournament) WHERE n.name =~ '(?i).*'+ $search + '(?i).*'
+        RETURN { value: n.id, label: n.name } AS result
+        ORDER BY toLower(n.name)
+        LIMIT 40
+      `
     default:
       break
   }
@@ -55,7 +58,7 @@ export default defineEventHandler(async event => {
 
       if (!result) return null
 
-      // result["value"] = type === "Tournament" ? result["value"].toInt() : result["value"]
+      result["value"] = params.type === "Tournament" ? result["value"].toInt() : result["value"]
 
       return result
     })

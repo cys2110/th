@@ -1,6 +1,4 @@
 <script setup lang="ts" generic="S">
-
-
 defineProps<{
   field: FormFieldInterface<S>
 }>()
@@ -32,6 +30,13 @@ const cleanLink = (link: string) => link.replaceAll(/^[\s"'“”‘’\[\]]+|[\
 
     <u-radio-group
       v-else-if="field.type === 'radio'"
+      v-model="modelValue[field.key]"
+      :items="field.items"
+      orientation="horizontal"
+    />
+
+    <u-checkbox-group
+      v-else-if="field.type === 'checkbox'"
       v-model="modelValue[field.key]"
       :items="field.items"
       orientation="horizontal"

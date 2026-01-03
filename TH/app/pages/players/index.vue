@@ -1,6 +1,4 @@
 <script setup lang="ts">
-
-
 import type { TableRow } from "@nuxt/ui"
 import type { Table } from "@tanstack/vue-table"
 
@@ -275,7 +273,7 @@ const handleSelectRow = (_e: Event, row: TableRow<PlayersResultsType>) => {
 
       <u-page-header title="Players">
         <template #links>
-          <view-switcher class="hidden md:block" />
+          <view-switcher />
 
           <!--Filters for smaller screens-->
           <u-slideover
