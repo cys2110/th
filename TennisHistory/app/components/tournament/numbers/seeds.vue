@@ -153,6 +153,31 @@ const groupedData = computed(() => {
           </div>
         </template>
       </u-page-card>
+
+      <u-page-card
+        v-else
+        v-for="_ in 3"
+        :key="_"
+        highlight
+        :ui="{ body: 'w-full' }"
+      >
+        <template #title>
+          <u-skeleton class="h-5 w-15" />
+        </template>
+
+        <template #description>
+          <div class="*:my-2 *:*:my-1">
+            <div
+              v-for="_ in 2"
+              :key="_"
+            >
+              <u-skeleton class="h-5 w-full" />
+              <u-skeleton class="h-5 w-1/4 mx-auto" />
+              <u-skeleton class="h-5 w-3/4" />
+            </div>
+          </div>
+        </template>
+      </u-page-card>
     </u-page-columns>
 
     <empty
@@ -161,12 +186,4 @@ const groupedData = computed(() => {
       :message="`The top seeds have never all reached the later rounds of ${tournamentStore.name}`"
     />
   </dashboard-subpanel>
-  <!--
-      <loading-tournament-seeds
-        v-else
-        v-for="_ in 3"
-        :key="_"
-      />
-    </u-page-columns>
-  </div> -->
 </template>

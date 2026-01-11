@@ -1,6 +1,4 @@
 <script setup lang="ts">
-
-
 import type { Table } from "@tanstack/vue-table"
 
 defineProps<{
@@ -10,7 +8,7 @@ defineProps<{
 
 <template>
   <u-button
-    label="Clear Grouping"
+    label="Reset Grouping"
     :icon="ICONS.groupOff"
     @click="() => table?.tableApi.resetGrouping()"
     block

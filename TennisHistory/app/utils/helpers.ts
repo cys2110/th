@@ -5,8 +5,6 @@ export const dateTimeFormat = new Intl.DateTimeFormat("en-GB", {
   timeZone: "UTC"
 })
 
-// export const getColour = (index: number) => CATEGORY_COLOURS[index % CATEGORY_COLOURS.length]
-
 export const getFlagCode = (country: CountryType) => {
   const circleFlagsMapping: Record<typeof country.id, string> = {
     URS: "soviet-union",
@@ -28,13 +26,13 @@ export const getFlagCode = (country: CountryType) => {
   return `flag:${country.alpha2}-4x3`
 }
 
-// export const getDurationString = (durationInSeconds: number) => {
-//   const hours = Math.floor(durationInSeconds / 3600)
-//   const minutes = Math.floor((durationInSeconds % 3600) / 60)
-//   const seconds = durationInSeconds % 60
+export const getDurationString = (durationInSeconds: number) => {
+  const hours = Math.floor(durationInSeconds / 3600)
+  const minutes = Math.floor((durationInSeconds % 3600) / 60)
+  const seconds = durationInSeconds % 60
 
-//   return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`
-// }
+  return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`
+}
 
 export const shortDateFormat = new Intl.DateTimeFormat("en-GB", {
   day: "numeric",

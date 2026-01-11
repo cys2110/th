@@ -9,7 +9,7 @@ import {
   UButton
 } from "#components"
 import type { TableColumn } from "@nuxt/ui"
-import type { Column } from "@tanstack/table-core"
+import { createColumnHelper, type Column } from "@tanstack/table-core"
 import appConfig from "~/app.config"
 
 const breakpoints = useBreakpoints(breakpointsTailwind, { ssrWidth: useSSRWidth() })
@@ -293,6 +293,350 @@ export const editionColumns: TableColumn<BrokenOutEditionType>[] = [
       const uniqueCount = useArrayUnique(uniqueValues).value.filter(Boolean).length
 
       return uniqueCount ? `${uniqueCount} winner${uniqueCount === 1 ? "" : "s"}` : null
+    }
+  }
+]
+
+const resultsColumnHelper = createColumnHelper<ResultMatchType>()
+
+export const resultsColumns: TableColumn<ResultMatchType>[] = [
+  {
+    accessorKey: "tour",
+    header: ({ column }) =>
+      h("div", { class: "flex items-center gap-0.5 justify-center" }, [
+        h(TableClientGroupHeader, {
+          column: column as Column<unknown>
+        }),
+        h(TableClientFilterHeader, {
+          column: column as Column<unknown>,
+          label: "Tour",
+          icon: ICONS.tour
+        })
+      ]),
+    cell: ({ row, table }) => {
+      const currentGrouping = table.getState().grouping
+      const { tour } = row.original
+
+      if (row.getIsGrouped()) {
+        return h("div", { class: "flex items-center py-1" }, [
+          h(UButton, {
+            variant: "ghost",
+            class: ["mr-2 transition-transform duration-300 hover:bg-transparent active:bg-transparent", row.getIsExpanded() && "rotate-90"],
+            icon: appConfig.ui.icons.chevronDoubleRight,
+            onClick: () => row.toggleExpanded()
+          }),
+          h(UBadge, {
+            label: tour,
+            color: tour as keyof typeof appConfig.ui.colors
+          })
+        ])
+      } else if (!currentGrouping.includes("tour")) {
+        return h(UBadge, {
+          label: tour,
+          color: tour as keyof typeof appConfig.ui.colors,
+          class: "w-full"
+        })
+      }
+    }
+  },
+  {
+    accessorKey: "type",
+    header: ({ column }) =>
+      h("div", { class: "flex items-center gap-0.5 justify-center" }, [
+        h(TableClientGroupHeader, {
+          column: column as Column<unknown>
+        }),
+        h(TableClientFilterHeader, {
+          column: column as Column<unknown>,
+          label: "S/D",
+          icon: ICONS.people
+        })
+      ]),
+    cell: ({ row, table }) => {
+      const currentGrouping = table.getState().grouping
+      const { type } = row.original
+
+      if (row.getIsGrouped()) {
+        return h("div", { class: "flex items-center py-1" }, [
+          h(UButton, {
+            variant: "ghost",
+            class: ["mr-2 transition-transform duration-300 hover:bg-transparent active:bg-transparent", row.getIsExpanded() && "rotate-90"],
+            icon: appConfig.ui.icons.chevronDoubleRight,
+            onClick: () => row.toggleExpanded()
+          }),
+          h(UBadge, {
+            label: type,
+            color: type as keyof typeof appConfig.ui.colors
+          })
+        ])
+      } else if (!currentGrouping.includes("type")) {
+        return h(UBadge, {
+          label: type,
+          color: type as keyof typeof appConfig.ui.colors,
+          class: "w-full"
+        })
+      }
+    }
+  },
+  {
+    accessorKey: "round",
+    header: ({ column }) =>
+      h("div", { class: "flex items-center gap-0.5 justify-center" }, [
+        h(TableClientFilterHeader, {
+          column: column as Column<unknown>,
+          label: "Round"
+        }),
+        h(TableClientSortHeader, {
+          column: column as Column<unknown>
+        })
+      ])
+  },
+  {
+    accessorKey: "date",
+    sortUndefined: 1,
+    header: ({ column }) =>
+      h(TableClientSortHeader, {
+        column: column as Column<unknown>,
+        label: "Date"
+      }),
+    cell: ({ row }) => {
+      if (!row.getIsGrouped() && row.original.date) {
+        return useDateFormat(row.original.date, "dddd MMMM DD YYYY").value
+      }
+    }
+  },
+  {
+    accessorKey: "duration",
+    sortUndefined: 1,
+    meta: { class: { td: "text-center" } },
+    header: ({ column }) => h(TableClientSortHeader, { column: column as Column<unknown>, label: "Duration" }),
+    cell: ({ row }) => {
+      if (!row.getIsGrouped() && row.original.duration) {
+        return getDurationString(row.original.duration)
+      }
+    }
+  },
+  {
+    accessorKey: "court",
+    header: ({ column }) =>
+      h("div", { class: "flex items-center gap-0.5 justify-center" }, [
+        h(TableClientFilterHeader, {
+          column: column as Column<unknown>,
+          label: "Court",
+          icon: ICONS.court
+        }),
+        h(TableClientSortHeader, {
+          column: column as Column<unknown>
+        })
+      ])
+  },
+  {
+    id: "umpire",
+    accessorKey: "umpire.id",
+    header: ({ column }) =>
+      h("div", { class: "flex items-center gap-0.5 justify-center" }, [
+        h(TableClientFilterHeader, {
+          column: column as Column<unknown>,
+          label: "Umpire",
+          icon: ICONS.umpire
+        }),
+        h(TableClientSortHeader, {
+          column: column as Column<unknown>
+        })
+      ])
+  },
+  resultsColumnHelper.group({
+    id: "Winner",
+    header: () => h(UBadge, { label: "Winner", color: "success", class: "w-full" }),
+    columns: [
+      {
+        id: "winner_team",
+        accessorFn: row => row.winner.team.map(p => `${p.last_name}, ${p.first_name}`).join(" / "),
+        header: ({ column }) =>
+          h("div", { class: "flex items-center gap-0.5 justify-center" }, [
+            h(TableClientNameFilterHeader, {
+              column: column as Column<unknown>,
+              label: "Team",
+              icon: ICONS.player
+            }),
+            h(TableClientSortHeader, {
+              column: column as Column<unknown>
+            })
+          ]),
+        cell: ({ row }) => {
+          if (!row.getIsGrouped()) {
+            const { winner } = row.original
+            return winner.team.map(p =>
+              h(PlayerLink, {
+                key: p.id,
+                player: p
+              })
+            )
+          }
+        }
+      },
+      {
+        id: "winner_status",
+        accessorFn: row => {
+          const statuses: (string | number)[] = []
+
+          const { seed, q_seed, status, q_status } = row.winner
+          const { round } = row
+
+          if (round.includes("Qualifying")) {
+            if (q_seed) statuses.push(q_seed)
+            if (q_status) statuses.push(statusEnum[q_status])
+          } else {
+            if (seed) statuses.push(seed)
+            if (status) statuses.push(statusEnum[status])
+          }
+
+          return statuses.join(" / ")
+        },
+        meta: { class: { td: "text-center" } },
+        header: "Seed/Status"
+      },
+      {
+        id: "winner_rank",
+        accessorFn: row => row.winner.team.reduce((acc, player) => acc + (player.rank ?? 0), 0),
+        aggregationFn: "mean",
+        meta: { class: { td: "text-center" } },
+        header: "Rank",
+        cell: ({ row, cell }) => {
+          const value = cell.getValue<number>()
+
+          if (row.getIsGrouped()) {
+            return Math.round(value)
+          } else {
+            return value
+          }
+        }
+      }
+    ]
+  }),
+  resultsColumnHelper.group({
+    id: "loser",
+    header: () => h(UBadge, { label: "Loser", color: "ITF", class: "w-full" }),
+    columns: [
+      {
+        id: "loser_team",
+        accessorFn: row => row.loser.team.map(p => `${p.last_name}, ${p.first_name}`).join(" / "),
+        header: ({ column }) =>
+          h("div", { class: "flex items-center gap-0.5 justify-center" }, [
+            h(TableClientNameFilterHeader, {
+              column: column as Column<unknown>,
+              label: "Team",
+              icon: ICONS.player
+            }),
+            h(TableClientSortHeader, {
+              column: column as Column<unknown>
+            })
+          ]),
+        cell: ({ row }) => {
+          if (!row.getIsGrouped()) {
+            const { loser } = row.original
+            return loser.team.map(p =>
+              h(PlayerLink, {
+                key: p.id,
+                player: p
+              })
+            )
+          }
+        }
+      },
+      {
+        id: "loser_status",
+        accessorFn: row => {
+          const statuses: (string | number)[] = []
+
+          const { seed, q_seed, status, q_status } = row.loser
+          const { round } = row
+
+          if (round.includes("Qualifying")) {
+            if (q_seed) statuses.push(q_seed)
+            if (q_status) statuses.push(statusEnum[q_status])
+          } else {
+            if (seed) statuses.push(seed)
+            if (status) statuses.push(statusEnum[status])
+          }
+
+          return statuses.join(" / ")
+        },
+        meta: { class: { td: "text-center" } },
+        header: "Seed/Status"
+      },
+      {
+        id: "loser_rank",
+        accessorFn: row => row.loser.team.reduce((acc, player) => acc + (player.rank ?? 0), 0),
+        aggregationFn: "mean",
+        header: "Rank",
+        meta: { class: { td: "text-center" } },
+        cell: ({ row, cell }) => {
+          const value = cell.getValue<number>()
+
+          if (row.getIsGrouped()) {
+            return Math.round(value)
+          } else {
+            return value
+          }
+        }
+      }
+    ]
+  }),
+  {
+    id: "score",
+    header: "Score",
+    cell: ({ row }) => {
+      if (!row.getIsGrouped() && row.original.sets?.[0]?.length) {
+        return h("div", { class: "flex items-center" }, [
+          h(
+            "div",
+            { class: "flex items-center gap-1 mr-2" },
+            row.original.sets?.[0].map((set, index) =>
+              h(
+                "span",
+                {
+                  key: index
+                },
+                [
+                  `${set[0]}${row.original.sets![1]![index]![0]}`,
+                  isDefined(set[1]) &&
+                    isDefined(row.original.sets![1]![index]![1]) &&
+                    h("sup", {}, set[1] < row.original.sets![1]![index]![1] ? set[1] : row.original.sets![1]![index]![1])
+                ].filter(Boolean)
+              )
+            )
+          ),
+          row.original.incomplete &&
+            h(UBadge, {
+              label: row.original.incomplete,
+              color: "error"
+            })
+        ])
+      }
+    }
+  },
+  {
+    id: "h2h",
+    header: "",
+    cell: ({ row }) => {
+      if (!row.getIsGrouped()) {
+        return h(UButton, {
+          label: "H2H",
+          icon: ICONS.h2h,
+          to: {
+            name: "h2h",
+            query: {
+              team1: `${row.original.winner.team.map(p => kebabCase(`${p.first_name}-${p.last_name}`)).join("+")}:${row.original.winner.team
+                .map(p => p.id)
+                .join("+")}`,
+              team2: `${row.original.loser.team.map(p => kebabCase(`${p.first_name}-${p.last_name}`)).join("+")}:${row.original.loser.team
+                .map(p => p.id)
+                .join("/")}`
+            }
+          }
+        })
+      }
     }
   }
 ]

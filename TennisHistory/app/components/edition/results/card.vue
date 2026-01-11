@@ -112,11 +112,12 @@ const {
     </div>
 
     <template #footer>
-      <u-field-group>
+      <u-field-group class="w-full justify-stretch flex">
         <u-button
           label="Stats"
           :icon="ICONS.stats"
           :disabled="!match.stats && !devMode"
+          block
           :to="{
             name: 'match',
             params: { name, id, year, edId },
@@ -127,6 +128,7 @@ const {
         <u-button
           label="H2H"
           :icon="ICONS.h2h"
+          block
           :to="{ name: 'head-to-head', params: { p1Name: match.winner!.team.map(p => kebabCase(`${p.first_name}-${p.last_name}`)).join('+'), p2Name: match.loser!.team.map(p => kebabCase(`${p.first_name}-${p.last_name}`)).join('+'), p1Id: match.winner!.team.map(p => p.id).join('+'), p2Id: match.loser!.team.map(p => p.id).join('+') } }"
         />
       </u-field-group>

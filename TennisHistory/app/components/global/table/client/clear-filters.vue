@@ -1,6 +1,4 @@
 <script setup lang="ts">
-
-
 import type { Table } from "@tanstack/vue-table"
 
 defineProps<{
@@ -10,7 +8,7 @@ defineProps<{
 
 <template>
   <u-button
-    label="Clear Filters"
+    label="Reset Filters"
     :icon="ICONS.filterOff"
     @click="() => table?.tableApi.resetColumnFilters()"
     block

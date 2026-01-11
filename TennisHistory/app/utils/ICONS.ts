@@ -1,5 +1,4 @@
 export default {
-  // court: "game-icons:tennis-court",
   // home: "line-md:home-md-twotone",
   // layers: "solar:layers-minimalistic-line-duotone",
   // level: "solar:server-minimalistic-bold-duotone",
@@ -9,7 +8,6 @@ export default {
   // supervisor: "solar:clipboard-bold-duotone",
   // tennis: "game-icons:tennis-racket",
   // toc: "line-md:list-indented",
-  // umpire: "game-icons:whistle",
   // venue: "tabler:building-stadium",
   areaChart: "icon-park-twotone:area-map",
   awards: "game-icons:money-stack",
@@ -22,6 +20,7 @@ export default {
   coach: "icon-park-twotone:brain",
   colour: "solar:palette-round-bold-duotone",
   columnOff: "tabler:table-minus",
+  court: "game-icons:tennis-court",
   download: "line-md:downloading",
   downloading: "line-md:downloading-loop",
   draw: "game-icons:family-tree",
@@ -55,6 +54,7 @@ export default {
   tour: "icon-park-twotone:public-toilet",
   trophy: "icon-park-twotone:trophy",
   trophyOff: "tabler:trophy-off",
+  umpire: "game-icons:whistle",
   uploading: "line-md:uploading-loop",
   wikipedia: "tabler:brand-wikipedia",
   years: "stash:calendar-duotone"

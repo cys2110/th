@@ -3,7 +3,7 @@ import { intToNumberSchema, neoDateToStringSchema, personSchema, surfaceSchema }
 import { Duration, Integer } from "neo4j-driver"
 import { entrySchema, eventSchema } from "./eventSchemas"
 import { editionSchema } from "./editionSchemas"
-import { DrawEnum, IncompleteEnum, RoundEnum } from "./enums"
+import { DrawEnum, IncompleteEnum, MatchTypeEnum, RoundEnum, tourEnumTransform } from "./enums"
 
 export const scoreFormSchema = object({
   id: string(),
@@ -44,64 +44,56 @@ export const scoreFormSchema = object({
 })
 
 export const matchSchema = object({
+  court: string().optional(),
   date: neoDateToStringSchema.optional(),
   draw: DrawEnum,
+  duration: z
+    .instanceof(Duration)
+    .transform(val => (val.seconds as Integer).toInt())
+    .optional(),
   id: string(),
   incomplete: IncompleteEnum.optional(),
+  loser: entrySchema
+    .omit({
+      draws: true
+    })
+    .extend({
+      team: array(
+        personSchema.extend({
+          rank: intToNumberSchema.optional()
+        })
+      )
+    })
+    .optional(),
   match_no: intToNumberSchema,
+  noOfSets: intToNumberSchema.optional(),
   round: RoundEnum,
+  round_no: intToNumberSchema,
   sets: array(array(array(intToNumberSchema.nullable()))).optional(),
   stats: boolean(),
+  tour: tourEnumTransform,
+  type: MatchTypeEnum,
+  umpire: personSchema
+    .omit({
+      country: true
+    })
+    .optional(),
+  winner: entrySchema
+    .omit({
+      draws: true
+    })
+    .extend({
+      team: array(
+        personSchema.extend({
+          rank: intToNumberSchema.optional()
+        })
+      )
+    })
+    .optional(),
   winning_team: literal(["t1", "t2"]).optional()
 })
 
-// export const matchSchema = object({
-//   id: string(),
-//   noOfSets: intToNumberSchema.optional(),
-//   match_no: intToNumberSchema,
-//   duration: z
-//     .instanceof(Duration)
-//     .transform(val => (val.seconds as Integer).toInt())
-//     .optional(),
-//   date: neoDateToStringSchema.optional(),
-//   court: string().optional(),
-//   draw: DrawEnum,
-//   type: MatchTypeEnum,
-//   round: RoundEnum,
-//   round_no: intToNumberSchema,
-//   umpire: personSchema
-//     .omit({
-//       country: true
-//     })
-//     .optional(),
-//   stats: boolean(),
-//   incomplete: IncompleteEnum.optional(),
-//   sets: array(array(array(intToNumberSchema.nullable()))).optional(),
-//   winner: entrySchema
-//     .omit({
-//       draws: true
-//     })
-//     .extend({
-//       team: array(
-//         personSchema.extend({
-//           rank: intToNumberSchema.optional()
-//         })
-//       )
-//     })
-//     .optional(),
-//   loser: entrySchema
-//     .omit({
-//       draws: true
-//     })
-//     .extend({
-//       team: array(
-//         personSchema.extend({
-//           rank: intToNumberSchema.optional()
-//         })
-//       )
-//     })
-//     .optional(),
-//   tour: TourEnum.transform(val => tourEnum[val]),
+// export const matchSchema = object(
 //   t1: entrySchema
 //     .omit({
 //       draws: true
@@ -127,36 +119,36 @@ export const matchSchema = object({
 //     })
 //     .optional(),
 //   team1: scoreFormSchema.optional(),
-//   team2: scoreFormSchema.optional(),
-//   winning_team: literal(["t1", "t2"]).optional()
+//   team2: scoreFormSchema.optional()
 // })
 // export type MatchType = z.infer<typeof matchSchema>
 
-// export const resultMatchSchema = matchSchema
-//   .pick({
-//     id: true,
-//     noOfSets: true,
-//     match_no: true,
-//     duration: true,
-//     date: true,
-//     court: true,
-//     draw: true,
-//     type: true,
-//     round: true,
-//     round_no: true,
-//     umpire: true,
-//     stats: true,
-//     incomplete: true,
-//     sets: true,
-//     winner: true,
-//     loser: true,
-//     tour: true
-//   })
-//   .required({
-//     winner: true,
-//     loser: true
-//   })
-// export type ResultMatchType = z.infer<typeof resultMatchSchema>
+export const resultMatchSchema = matchSchema
+  .pick({
+    id: true,
+    noOfSets: true,
+    match_no: true,
+    duration: true,
+    date: true,
+    court: true,
+    draw: true,
+    type: true,
+    round: true,
+    round_no: true,
+    umpire: true,
+    stats: true,
+    incomplete: true,
+    sets: true,
+    winner: true,
+    loser: true,
+    tour: true
+  })
+  .required({
+    winner: true,
+    loser: true
+  })
+
+export type ResultMatchType = z.infer<typeof resultMatchSchema>
 
 // export const eventDrawLinksSchema = eventSchema.pick({
 //   s_draw: true,

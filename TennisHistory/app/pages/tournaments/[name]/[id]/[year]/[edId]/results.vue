@@ -1,111 +1,100 @@
 <script setup lang="ts">
-import type { TableRow } from "@nuxt/ui"
-import type { GroupingOptions } from "@tanstack/vue-table"
-import { getGroupedRowModel, getFacetedRowModel, getFacetedUniqueValues } from "@tanstack/vue-table"
-
 definePageMeta({ name: "results" })
 
 const {
-  params: { id, name, year, edId }
+  params: { edId }
 } = useRoute("results")
 const {
   ui: { icons }
 } = useAppConfig()
 const toast = useToast()
-const { devMode } = useRuntimeConfig().public
-const router = useRouter()
+const viewMode = useViewModeStore()
+const tournamentStore = useTournamentStore()
 
-const viewMode = ref(true)
 const updating = ref(false)
 
-const [defineEmptyTemplate, reuseEmptyTemplate] = createReusableTemplate()
+const players = ref<string[]>([])
+const tour = ref<keyof typeof tourEnum>()
+const draw = ref<DrawEnumType>()
+const matchType = ref<MatchTypeEnumType>()
 
-// const { data, status, refresh } = await useFetch("/api/editions/results", {
-//   query: { edId },
-//   default: () => []
-// })
+const resetFilters = () => {
+  players.value = []
+  tour.value = undefined
+  draw.value = undefined
+}
 
-// const matches = computed(() => {
-//   const consolidatedData = []
+const {
+  data: matches,
+  status,
+  refresh
+} = await useFetch("/api/edition/results", {
+  query: { edId },
+  default: () => [],
+  onResponseError: ({ error }) => console.error("Error fetching edition results:", error)
+})
 
-//   const rounds = useArrayUnique(data.value.map(m => m.round))
+const playerOptions = computed(() => {
+  const uniqueWinners = matches.value.map(m => m.winner.team).flat()
 
-//   for (const round of rounds.value) {
-//     const roundMatches = data.value.filter(m => m.round === round)
-//     consolidatedData.push({ title: round, matches: roundMatches })
-//   }
-//   return consolidatedData
-// })
+  const uniqueLosers = matches.value.map(m => m.loser.team).flat()
 
-// const updateTiebreaks = async () => {
-//   set(updating, true)
-//   try {
-//     const response = await $fetch("/api/matches/tiebreaks", {
-//       query: { id: edId }
-//     })
-//     if ((response as any).ok) {
-//       toast.add({
-//         title: "Tiebreaks updated successfully",
-//         icon: icons.check,
-//         color: "success"
-//       })
-//       refresh()
-//     } else {
-//       toast.add({
-//         title: "Error updating tiebreaks",
-//         description: (response as any).message,
-//         icon: icons.error,
-//         color: "error"
-//       })
-//     }
-//   } catch (e) {
-//     toast.add({
-//       title: "Error updating tiebreaks",
-//       description: (e as Error).message,
-//       icon: icons.error,
-//       color: "error"
-//     })
-//   } finally {
-//     set(updating, false)
-//   }
-// }
+  const uniquePlayers = [...uniqueWinners, ...uniqueLosers].sort((a, b) => {
+    if (a.last_name === b.last_name) {
+      return a.first_name!.localeCompare(b.first_name!)
+    }
+    return a.last_name!.localeCompare(b.last_name!)
+  })
 
-// const grouping = ref<string[]>([])
-// const grouping_options = ref<GroupingOptions>({
-//   groupedColumnMode: "remove",
-//   getGroupedRowModel: getGroupedRowModel()
-// })
+  return useArrayUnique(
+    uniquePlayers.map(p => ({
+      label: `${p.first_name ?? ""} ${p.last_name ?? ""}`.trim(),
+      value: p.id
+    })),
+    (a, b) => a.value === b.value
+  ).value
+})
 
-// const handleSelect = (e: Event, row: TableRow<ResultMatchType>) => {
-//   if (devMode || row.original.stats) {
-//     const { tour, draw, type, match_no } = row.original
+const updateTiebreaks = async () => {
+  set(updating, true)
+  try {
+    const response = await $fetch("/api/matches/tiebreaks", {
+      query: { id: edId }
+    })
+    if (response.success) {
+      toast.add({
+        title: "Tiebreaks updated successfully",
+        icon: icons.check,
+        color: "success"
+      })
+      refresh()
+    } else {
+      toast.add({
+        title: "Error updating tiebreaks",
+        description: (response as any).message,
+        icon: icons.error,
+        color: "error"
+      })
+    }
+  } catch (e) {
+    toast.add({
+      title: "Error updating tiebreaks",
+      description: (e as Error).message,
+      icon: icons.error,
+      color: "error"
+    })
+  } finally {
+    set(updating, false)
+  }
+}
 
-//     router.push({
-//       name: "match",
-//       params: {
-//         id,
-//         name,
-//         year,
-//         edId
-//       },
-//       query: {
-//         tour,
-//         draw,
-//         type,
-//         match_no
-//       }
-//     })
-//   }
-// }
+const tableRef = useTemplateRef("tableRef")
 </script>
 
 <template>
   <u-container>
-    <!-- <u-page :ui="{ center: devMode ? '' : 'lg:col-span-10' }">
-      <template
-        #left
-        v-if="devMode"
-      >
+    <u-page>
+      <template #left>
         <u-page-aside>
           <dev-only>
             <u-button
@@ -113,96 +102,92 @@ const [defineEmptyTemplate, reuseEmptyTemplate] = createReusableTemplate()
               :icon="updating ? ICONS.uploading : icons.upload"
               label="Update tiebreaks"
               block
+              color="Doubles"
             />
 
-            <matches-update :refresh />
+            <match-update :refresh />
+
+            <u-separator />
           </dev-only>
+
+          <template v-if="tableRef?.table">
+            <table-client-clear-filters :table="tableRef.table" />
+
+            <table-client-clear-sorting :table="tableRef.table" />
+
+            <table-client-clear-grouping :table="tableRef.table" />
+
+            <table-client-visibility :table="tableRef.table" />
+          </template>
+
+          <template v-else>
+            <u-button
+              @click="resetFilters"
+              :icon="ICONS.filterOff"
+              label="Reset filters"
+              block
+            />
+
+            <u-form-field label="Filter by">
+              <div class="*:my-2">
+                <u-input-menu
+                  v-model="players"
+                  value-key="value"
+                  label-key="label"
+                  placeholder="Select players"
+                  multiple
+                  :icon="ICONS.player"
+                  :items="playerOptions"
+                />
+
+                <u-radio-group
+                  v-if="tournamentStore.tours.length > 1"
+                  legend="Tour"
+                  v-model="tour"
+                  :items="tournamentStore.tours"
+                />
+
+                <filters-draw-type
+                  v-if="matches.some(match => match.draw === 'Qualifying')"
+                  v-model="draw"
+                />
+
+                <filters-match-type
+                  v-if="matches.some(match => match.type === 'Singles') && matches.some(match => match.type === 'Doubles')"
+                  v-model="matchType"
+                />
+              </div>
+            </u-form-field>
+          </template>
         </u-page-aside>
       </template>
 
-      <editions-wrapper>
+      <edition-wrapper>
         <template #header-links>
-          <u-tooltip :text="viewMode ? 'Cards' : 'Table'">
-            <div>
-              <u-switch
-                v-model="viewMode"
-                :checked-icon="ICONS.cards"
-                :unchecked-icon="ICONS.table"
-              />
-            </div>
-          </u-tooltip>
+          <view-switcher />
         </template>
-      </editions-wrapper>
+      </edition-wrapper>
 
-      <u-page-body class="mt-0">
-        <define-empty-template>
-          <empty
-            message="No matches found"
-            class="mx-2"
-          >
-            <dev-only>
-              <matches-update :refresh />
-            </dev-only>
-          </empty>
-        </define-empty-template>
+      <u-page-body>
+        <edition-results-stepper
+          v-if="viewMode.isCardView"
+          :matches
+          :status
+          :refresh
+          :players
+          :tour
+          :draw
+          :type="matchType"
+        />
 
-        <template v-if="viewMode">
-          <u-stepper
-            v-if="matches.length"
-            :items="matches"
-            :linear="false"
-          >
-            <template #indicator="{ item }">
-              {{ roundEnum[item.title as keyof typeof roundEnum] }}
-            </template>
-
-            <template #content="{ item }">
-              <u-page-columns class="2xl:columns-4">
-                <editions-results-card
-                  v-for="match in item.matches"
-                  :key="match.id"
-                  :match
-                />
-              </u-page-columns>
-            </template>
-          </u-stepper>
-
-          <reuse-empty-template v-else />
-        </template>
-
-        <u-table
+        <edition-results-table
           v-else
-          :data
-          :columns="resultsColumns"
-          :loading="status === 'pending'"
-          :grouping
-          :grouping-options="grouping_options"
-          :faceted-options="{
-            getFacetedRowModel: getFacetedRowModel(),
-            getFacetedUniqueValues: getFacetedUniqueValues()
-          }"
-          @select="handleSelect"
-          sticky
-          render-fallback-value="—"
-          :ui="{
-            root: 'max-h-150',
-            td: 'empty: p-0'
-          }"
-          :meta="{
-            class: {
-              tr: (row: TableRow<ResultMatchType>) => devMode && !row.original.stats ? 'bg-warning/20 cursor-pointer' : row.original.stats ? 'cursor-pointer' : ''
-            }
-          }"
-        >
-          <template #loading>
-            <loading-icon />
-          </template>
-
-          <template #empty>
-            <reuse-empty-template />
-          </template>
-        </u-table>
+          ref="tableRef"
+          :matches
+          :status
+          :refresh
+        />
       </u-page-body>
-    </u-page> -->
+    </u-page>
   </u-container>
 </template>

@@ -142,17 +142,9 @@ export default defineAppConfig({
         trailingIcon: "group-data-[state=open]:rotate-180 duration-250"
       }
     },
-    // selectMenu: {
-    //   slots: {
-    //     base: "cursor-pointer w-full",
-    //     content: "ring-primary cursor-pointer w-full",
-    //     trailingIcon: "group-data-[state=open]:rotate-180 duration-250"
-    //   },
-    //   defaultVariants: { size: "sm" }
-    // },
     slideover: { slots: { body: "flex flex-col gap-5" } },
     slider: { slots: { thumb: "cursor-pointer", track: "cursor-pointer" } },
-    // stepper: { slots: { trigger: "cursor-pointer" } },
+    stepper: { slots: { trigger: "cursor-pointer" } },
     switch: {
       slots: {
         base: "data-[state=checked]:bg-primary-200 data-[state=unchecked]:dark:bg-primary-800 cursor-pointer",

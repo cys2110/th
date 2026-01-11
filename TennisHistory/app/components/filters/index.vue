@@ -41,32 +41,10 @@ const {
     block
   />
 
-  <u-dropdown-menu
+  <table-client-visibility
     v-if="table"
-    :items="
-      table?.tableApi
-        ?.getAllFlatColumns()
-        .filter((column) => column.getCanHide())
-        .map((column) => ({
-          label: startCase(column.id),
-          type: 'checkbox' as const,
-          checked: column.getIsVisible(),
-          onUpdateChecked(checked: boolean) {
-            table?.tableApi?.getColumn(column.id)?.toggleVisibility(!!checked)
-          },
-          onSelect(e?: Event) {
-            e?.preventDefault()
-          }
-        }))
-    "
-    :content="{ align: 'end' }"
-  >
-    <u-button
-      label="Hide Columns"
-      :icon="ICONS.columnOff"
-      block
-    />
-  </u-dropdown-menu>
+    :table
+  />
 
   <template v-if="!table">
     <u-separator v-if="resetFilters" />

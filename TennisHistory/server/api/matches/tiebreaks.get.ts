@@ -1,8 +1,9 @@
 export default defineEventHandler(async event => {
-  const { id } = getQuery(event)
+  try {
+    const { id } = getQuery(event)
 
-  const { summary } = await useDriver().executeQuery(
-    `/* cypher */
+    const { summary } = await useDriver().executeQuery(
+      `/* cypher */
       CYPHER 25
       MATCH (s1:T1)-[:SCORED]->(m:Match WHERE m.id STARTS WITH $id)<-[:SCORED]-(s2:T2)
       CALL (*) {
@@ -43,12 +44,15 @@ export default defineEventHandler(async event => {
       }
       RETURN *
     `,
-    { id }
-  )
+      { id }
+    )
 
-  if (Object.values(summary.counters.updates()).every(v => v === 0)) {
-    throw createError({ statusCode: 400, statusMessage: "Tiebreaks could not be updated" })
-  } else {
-    return { ok: true }
+    if (Object.values(summary.counters.updates()).every(v => v === 0)) {
+      throw createError({ statusCode: 400, statusMessage: "Tiebreaks could not be updated" })
+    } else {
+      return { success: true }
+    }
+  } catch (error) {
+    throw error
   }
 })
