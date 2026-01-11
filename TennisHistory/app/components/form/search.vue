@@ -1,14 +1,20 @@
 <script setup lang="ts">
-const { type, id, multiple, tour, matchType } = defineProps<{
-  placeholder?: string
-  type: string
-  icon?: string
-  multiple?: boolean
-  id?: string
-  tour?: TourEnumType
-  matchType?: MatchTypeEnumType
-  max?: number
-}>()
+const props = withDefaults(
+  defineProps<{
+    placeholder?: string
+    type: string
+    icon?: string
+    multiple?: boolean
+    //   id?: string
+    // tour?: TourEnumType
+    // matchType?: MatchTypeEnumType
+    // max?: number
+  }>(),
+  {
+    multiple: false
+  }
+)
+
 const {
   ui: { icons }
 } = useAppConfig()
@@ -17,7 +23,10 @@ const searchTerm = ref("")
 const modelValue = defineModel<OptionType[] | OptionType>()
 
 const { data, status, refresh } = await useFetch<OptionType[] & { icon?: CountryType }>(`/api/filter-search`, {
-  query: { search: searchTerm, id, type, tour, matchType },
+  query: {
+    search: searchTerm, //, id, type, tour, matchType
+    type: props.type
+  },
   default: () => [],
   transform: data => {
     return data.map(item => {
@@ -35,7 +44,7 @@ const { data, status, refresh } = await useFetch<OptionType[] & { icon?: Country
 })
 
 const handleClear = () => {
-  modelValue.value = multiple ? [] : undefined
+  modelValue.value = props.multiple ? [] : undefined
   searchTerm.value = ""
 }
 </script>
@@ -49,7 +58,6 @@ const handleClear = () => {
     :loading="status === 'pending'"
     :placeholder="`Select ${placeholder?.toLowerCase() ?? `${type.toLowerCase()}s`}`"
     :icon
-    :ui="{ content: 'min-w-sm' }"
   >
     <template #content-bottom>
       <u-field-group>
@@ -66,7 +74,6 @@ const handleClear = () => {
         </dev-only>
         <u-button
           label="Clear"
-          size="xs"
           @click="handleClear"
           :icon="icons.close"
           block

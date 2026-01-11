@@ -6,12 +6,14 @@ const {
   ui: { icons }
 } = useAppConfig()
 const toast = useToast()
+const router = useRouter()
+
 const open = ref(false)
 const uploading = ref(false)
 
 const schema = z.object({
   id: z.string("Please enter an ID"),
-  tour: TourEnum
+  tour: TourInputEnum
 })
 type Schema = z.infer<typeof schema>
 
@@ -39,9 +41,11 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
       icon: icons.success,
       color: "success"
     })
+
     handleReset()
     set(open, false)
-    await navigateTo({ name: "player", params: { id: event.data.id, name: "—" } })
+
+    router.push({ name: "player", params: { id: event.data.id, name: "—" } })
   } else {
     toast.add({
       title: "Error creating player",

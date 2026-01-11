@@ -1,63 +1,52 @@
 import { array, boolean, object, string, url, z } from "zod"
-import {
-  CurrencyEnum,
-  DrawEnum,
-  intToNumberSchema,
-  LevelEnum,
-  MatchTypeEnum,
-  neoDateToStringSchema,
-  personSchema,
-  RoundEnum,
-  StatusEnum,
-  surfaceSchema,
-  tourEnum,
-  TourEnum,
-  venueSchema,
-  type DrawEnumType
-} from "./schemas"
+import { countrySchema, intToNumberSchema, neoDateToStringSchema, personSchema, surfaceSchema, venueSchema } from "./schemas"
+import { CurrencyEnum, DrawEnum, LevelEnum, MatchTypeEnum, RoundEnum, StatusEnum, tourEnumTransform, type DrawEnumType } from "./enums"
+import { baseTournamentSchema } from "./tournamentSchemas"
 
 export const eventSchema = object({
-  id: string(),
-  sponsor_name: string().optional(),
   category: string().optional(),
-  start_date: neoDateToStringSchema.optional(),
-  end_date: neoDateToStringSchema.optional(),
   currency: CurrencyEnum.optional(),
-  pm: intToNumberSchema.optional(),
-  tfc: intToNumberSchema.optional(),
-  updated_at: neoDateToStringSchema,
-  venues: array(venueSchema).default([]),
-  surface: surfaceSchema.optional(),
-  tour: TourEnum.transform(val => tourEnum[val]),
+  end_date: neoDateToStringSchema.optional(),
+  id: string(),
   level: LevelEnum,
-  supervisors: array(
-    personSchema.omit({
-      country: true
-    })
-  ),
+  pm: intToNumberSchema.optional(),
   site_link: url().optional(),
+  sponsor_name: string().optional(),
+  start_date: neoDateToStringSchema.optional(),
+  supervisors: array(personSchema.omit({ country: true })),
+  surface: surfaceSchema.optional(),
+  tfc: intToNumberSchema.optional(),
+  tournament: baseTournamentSchema.optional(),
+  tour: tourEnumTransform,
+  venues: array(venueSchema).default([]),
   wiki_link: url().optional(),
-  s_draw: string().optional(),
-  d_draw: string().optional(),
-  qs_draw: string().optional(),
-  qd_draw: string().optional(),
-  s_link: url().optional(),
-  d_link: url().optional(),
-  qs_link: url().optional(),
-  qd_link: url().optional()
+  year: intToNumberSchema.optional()
 })
+
+// export const eventSchema = object({
+//   updated_at: neoDateToStringSchema,
+//   s_draw: string().optional(),
+//   d_draw: string().optional(),
+//   qs_draw: string().optional(),
+//   qd_draw: string().optional(),
+//   s_link: url().optional(),
+//   d_link: url().optional(),
+//   qs_link: url().optional(),
+//   qd_link: url().optional()
+// })
 export type EventType = z.infer<typeof eventSchema>
 
 export const awardSchema = object({
   id: string(),
   round: RoundEnum,
-  number: intToNumberSchema,
+  number: intToNumberSchema.optional(),
   points: intToNumberSchema.optional(),
   pm: intToNumberSchema.optional(),
   currency: CurrencyEnum.optional(),
   type: MatchTypeEnum,
-  tour: TourEnum.transform(val => tourEnum[val])
+  tour: tourEnumTransform
 })
+
 export type AwardType = z.infer<typeof awardSchema>
 
 export const seedSchema = object({
@@ -68,15 +57,16 @@ export const seedSchema = object({
   withdrew: boolean(),
   draw: DrawEnum,
   type: MatchTypeEnum,
-  tour: TourEnum.transform(val => tourEnum[val]),
+  tour: tourEnumTransform,
   team: array(personSchema)
 })
+
 export type SeedType = z.infer<typeof seedSchema>
 
 export const entryInfoSchema = object({
   id: string(),
   type: MatchTypeEnum,
-  tour: TourEnum.transform(val => tourEnum[val]),
+  tour: tourEnumTransform,
   reason: string().optional(),
   rank: intToNumberSchema.optional(),
   relationship: string(),
@@ -134,9 +124,10 @@ export const entryInfoSchema = object({
     draw: getDraw(data.relationship)
   }
 })
+
 export type EntryInfoType = z.infer<typeof entryInfoSchema>
 
-export const entrySchema = object({
+export const entrySchema = personSchema.extend({
   id: string(),
   draws: array(DrawEnum),
   rank: intToNumberSchema.optional(),
@@ -147,12 +138,13 @@ export const entrySchema = object({
   points: intToNumberSchema.optional(),
   pm: intToNumberSchema.optional()
 })
+
 export type EntryType = z.infer<typeof entrySchema>
 
 export const teamEntrySchema = entrySchema
   .extend({
     type: MatchTypeEnum,
-    tour: TourEnum.transform(val => tourEnum[val]),
+    tour: tourEnumTransform,
     team: array(
       personSchema.extend({
         rank: intToNumberSchema.optional()
@@ -163,11 +155,29 @@ export const teamEntrySchema = entrySchema
     ...data,
     withdrew: !data.draws.length
   }))
+
 export type TeamEntryType = z.infer<typeof teamEntrySchema>
+
+export const countryTeamSchema = countrySchema.extend({
+  seed: intToNumberSchema.optional(),
+  team: array(
+    personSchema
+      .omit({
+        country: true
+      })
+      .extend({
+        tour: tourEnumTransform,
+        singles: intToNumberSchema.optional(),
+        doubles: intToNumberSchema.optional()
+      })
+  ).optional()
+})
+
+export type CountryTeamType = z.infer<typeof countryTeamSchema>
 
 export const playerEntrySchema = personSchema
   .extend({
-    tour: TourEnum.transform(val => tourEnum[val]),
+    tour: tourEnumTransform,
     singles: entrySchema
       .partial({
         draws: true
@@ -194,4 +204,5 @@ export const playerEntrySchema = personSchema
         }
       : undefined
   }))
+
 export type PlayerEntryType = z.infer<typeof playerEntrySchema>

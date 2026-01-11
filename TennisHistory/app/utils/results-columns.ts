@@ -1,4 +1,4 @@
-import { PlayersLink, UBadge, UButton, UInputMenu } from "#components"
+import { PlayerLink, UBadge, UButton, UInputMenu } from "#components"
 import type { TableColumn, TableRow } from "@nuxt/ui"
 import { createColumnHelper } from "@tanstack/vue-table"
 import appConfig from "~/app.config"
@@ -213,7 +213,7 @@ const columns: TableColumn<ResultMatchType>[] = [
         cell: ({ row }) => {
           if (!row.getIsGrouped()) {
             return row.original.winner.team.map(p =>
-              h(PlayersLink, {
+              h(PlayerLink, {
                 key: p.id,
                 player: p,
                 class: "mx-auto"
@@ -282,7 +282,7 @@ const columns: TableColumn<ResultMatchType>[] = [
         cell: ({ row }) => {
           if (!row.getIsGrouped()) {
             return row.original.loser.team.map(p =>
-              h(PlayersLink, {
+              h(PlayerLink, {
                 key: p.id,
                 player: p,
                 class: "mx-auto"

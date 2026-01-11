@@ -3,7 +3,7 @@ export default defineNuxtConfig({
   compatibilityDate: "2025-07-15",
   devtools: { enabled: true },
 
-  modules: ["@nuxt/eslint", "@nuxt/hints", "@nuxt/image", "@vueuse/nuxt", "nuxt-echarts", "nuxt-neo4j", "@nuxt/ui"],
+  modules: ["@nuxt/eslint", "@nuxt/image", "@pinia/nuxt", "@vueuse/nuxt", "nuxt-echarts", "nuxt-neo4j", "@nuxt/ui"],
 
   // Set page transitions
   app: { pageTransition: { name: "page", mode: "out-in" } },
@@ -52,20 +52,12 @@ export default defineNuxtConfig({
         imports: ["useRouteQuery"]
       },
       {
-        from: "@vueuse/math",
-        imports: ["useAverage"]
-      },
-      {
         from: "convert",
         imports: ["convert"]
       },
       {
-        from: "change-case",
-        imports: ["kebabCase", "capitalCase", "sentenceCase"]
-      },
-      {
-        from: "kmh-to-mph",
-        imports: [{ name: "default", as: "kmhToMph" }]
+        from: "lodash",
+        imports: ["kebabCase", "startCase", "groupBy", "isEqual", "cloneDeep"]
       }
     ]
   },
@@ -82,7 +74,15 @@ export default defineNuxtConfig({
   echarts: {
     renderer: "canvas",
     charts: ["ScatterChart", "LineChart", "BarChart", "TreeChart", "GaugeChart", "PieChart"],
-    components: ["DatasetComponent", "GridComponent", "TooltipComponent", "LegendComponent", "PolarComponent", "TransformComponent"],
+    components: [
+      "DatasetComponent",
+      "GridComponent",
+      "TooltipComponent",
+      "LegendComponent",
+      "PolarComponent",
+      "TransformComponent",
+      "TitleComponent"
+    ],
     features: ["UniversalTransition", "LabelLayout"]
   },
   // Nuxt UI configuration
@@ -108,7 +108,10 @@ export default defineNuxtConfig({
         "ITF",
         "Main",
         "Qualifying"
-      ]
+      ],
+      defaultVariants: {
+        size: "sm"
+      }
     }
   },
   // Custom icons

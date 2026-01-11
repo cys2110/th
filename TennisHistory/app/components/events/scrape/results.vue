@@ -8,6 +8,7 @@ const {
   ui: { icons }
 } = useAppConfig()
 const toast = useToast()
+const tournamentStore = useTournamentStore()
 
 const open = ref(false)
 const scraping = ref(false)
@@ -19,11 +20,6 @@ const initialState = {
 }
 
 const state = ref<Partial<ScrapeFormInput>>({ ...initialState })
-
-const formFields: FormFieldInterface<ScrapeFormSchema>[] = [
-  { label: "Site ID", key: "tid2", type: "text", subType: "number" },
-  { label: "Match Type", key: "type", type: "radio", items: ["Singles", "Doubles"], required: true }
-]
 
 const handleReset = () => set(state, { ...initialState })
 
@@ -38,7 +34,7 @@ const onSubmit = async (event: FormSubmitEvent<ScrapeFormSchema>) => {
       "Content-Type": "application/json",
       body: JSON.stringify(event.data)
     })
-    if ((response as any).ok) {
+    if ((response as any).success) {
       toast.add({
         title: "Results scraped",
         icon: icons.success,
@@ -50,7 +46,7 @@ const onSubmit = async (event: FormSubmitEvent<ScrapeFormSchema>) => {
       const url = URL.createObjectURL(blob)
       const a = document.createElement("a")
       a.href = url
-      a.download = "atp_results.json"
+      a.download = `${tournamentStore.name}_year_${event.data.year}_${event.data.type}.json`
       a.click()
       URL.revokeObjectURL(url)
       set(open, false)
@@ -72,6 +68,11 @@ const onSubmit = async (event: FormSubmitEvent<ScrapeFormSchema>) => {
     set(scraping, false)
   }
 }
+
+const formFields: FormFieldInterface<ScrapeFormSchema>[] = [
+  { label: "Site ID", key: "tid2", type: "text", subType: "number" },
+  { label: "Match Type", key: "type", type: "radio", items: ["Singles", "Doubles"], required: true }
+]
 </script>
 
 <template>
@@ -79,7 +80,10 @@ const onSubmit = async (event: FormSubmitEvent<ScrapeFormSchema>) => {
     title="Scrape results"
     v-model:open="open"
   >
-    <u-button :icon="ICONS.cards" />
+    <u-button
+      :icon="ICONS.cards"
+      color="Doubles"
+    />
 
     <template #body>
       <u-form

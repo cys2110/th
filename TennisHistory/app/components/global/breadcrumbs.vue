@@ -37,10 +37,6 @@ const breadcrumbs = computed<BreadcrumbItem[]>(() => {
     case "wl-index":
       crumbs.push({ label: "Players", icon: ICONS.player, to: { name: "players" } })
       break
-    case "tournament":
-    case "edition":
-    case "results":
-    case "draws":
     case "match":
       crumbs.push(
         { label: "Tournaments", icon: ICONS.tournament, to: { name: "tournaments" } },

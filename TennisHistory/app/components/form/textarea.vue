@@ -1,6 +1,10 @@
 <script setup lang="ts">
-defineProps<{ placeholder: string }>()
+defineProps<{
+  placeholder: string
+}>()
+
 const modelValue = defineModel<string>()
+
 const {
   ui: { icons }
 } = useAppConfig()
@@ -19,7 +23,6 @@ const {
       <u-button
         color="neutral"
         variant="link"
-        size="xs"
         :icon="icons.close"
         aria-label="Clear input"
         @click="modelValue = undefined"

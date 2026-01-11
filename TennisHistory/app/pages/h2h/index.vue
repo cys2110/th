@@ -3,37 +3,37 @@ useHead({ title: "Head to Head" })
 const toast = useToast()
 
 // TODO: Add WTA players
-const { data, status } = await useFetch("/api/h2h", {
-  default: () => ({ players: [], results: [] })
-})
+// const { data, status } = await useFetch("/api/h2h", {
+//   default: () => ({ players: [], results: [] })
+// })
 
-const player1Id = ref()
-const player2Id = ref()
+// const player1Id = ref()
+// const player2Id = ref()
 
-const navigateToH2H = async () => {
-  // TODO: Add guard to check tours are the same
-  if (player1Id.value && player2Id.value) {
-    await navigateTo({
-      name: "head-to-head",
-      params: {
-        p1Id: player1Id.value.value,
-        p2Id: player2Id.value.value,
-        p1Name: kebabCase(player1Id.value.label),
-        p2Name: kebabCase(player2Id.value.label)
-      }
-    })
-  } else {
-    toast.add({
-      title: "Please select two players",
-      color: "error"
-    })
-  }
-}
+// const navigateToH2H = async () => {
+//   // TODO: Add guard to check tours are the same
+//   if (player1Id.value && player2Id.value) {
+//     await navigateTo({
+//       name: "head-to-head",
+//       params: {
+//         p1Id: player1Id.value.value,
+//         p2Id: player2Id.value.value,
+//         p1Name: kebabCase(player1Id.value.label),
+//         p2Name: kebabCase(player2Id.value.label)
+//       }
+//     })
+//   } else {
+//     toast.add({
+//       title: "Please select two players",
+//       color: "error"
+//     })
+//   }
+// }
 </script>
 
 <template>
   <u-container>
-    <u-page>
+    <!-- <u-page>
       <template #left>
         <u-page-aside>
           <client-only>
@@ -71,6 +71,6 @@ const navigateToH2H = async () => {
           />
         </client-only>
       </u-page-body>
-    </u-page>
+    </u-page> -->
   </u-container>
 </template>

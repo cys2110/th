@@ -1,11 +1,10 @@
 <script setup lang="ts">
 import { parseDate } from "@internationalized/date"
 import type { FormErrorEvent, FormSubmitEvent } from "@nuxt/ui"
-import { cloneDeep, isEqual } from "lodash"
+import type { FetchError } from "ofetch"
 
-const { edition, tournament, refresh } = defineProps<{
+const props = defineProps<{
   edition?: EditionDetailsType
-  tournament?: TournamentType
   refresh?: () => void
 }>()
 
@@ -17,51 +16,143 @@ const {
   ui: { icons }
 } = useAppConfig()
 const router = useRouter()
+const tournamentStore = useTournamentStore()
 
 const open = ref(false)
 const uploading = ref(false)
 
 const initialState = {
-  ...edition,
-  currency: edition?.currency ? { value: edition.currency, label: currencyEnum[edition.currency as keyof typeof currencyEnum] } : undefined,
+  ...props.edition,
+  currency: props.edition?.currency
+    ? { value: props.edition.currency, label: currencyEnum[props.edition.currency as keyof typeof currencyEnum] }
+    : undefined,
   tournament: Number(id),
   year: year ? Number(year) : undefined,
-  tours: (edition?.tours ?? tournament?.tours!).map(tour => {
-    return tourEnum[tour]
+  tours: (props.edition?.tours ?? tournamentStore.tours!).map(tour => {
+    return tourEnum[tour] as TourInputEnumType
   }),
   dates: {
-    start: edition?.start_date ? parseDate(edition.start_date) : undefined,
-    end: edition?.end_date ? parseDate(edition.end_date) : undefined
+    start: props.edition?.start_date ? parseDate(props.edition.start_date) : undefined,
+    end: props.edition?.end_date ? parseDate(props.edition.end_date) : undefined
   },
-  surface: edition?.surface?.id,
-  venues: edition?.venues
-    ? edition.venues.map(v => ({ value: v.id, label: v.name ? `${v.name}, ${v.city}, ${v.country!.name}` : `${v.city}, ${v.country!.name}` }))
+  surface: props.edition?.surface?.id,
+  venues: props.edition?.venues
+    ? props.edition.venues.map(v => ({ value: v.id, label: v.name ? `${v.name}, ${v.city}, ${v.country!.name}` : `${v.city}, ${v.country!.name}` }))
     : undefined
 }
 
 const state = ref<Partial<EditionFormInput>>(cloneDeep(initialState))
 
+const handleReset = () => set(state, cloneDeep(initialState))
+
+const onError = (event: FormErrorEvent) => console.error(event.errors)
+
+const onSubmit = async (event: FormSubmitEvent<EditionFormSchema>) => {
+  set(uploading, true)
+
+  // Get dirty fields from the form
+  const fields = Object.keys(event.data) as (keyof EditionFormSchema)[]
+  const dirtyFields: Partial<EditionFormSchema> = {}
+
+  for (const field of fields) {
+    if (field === "id") dirtyFields[field] = event.data[field] // Always include the edition ID
+
+    if (!props.edition && (field === "tournament" || field === "tours")) {
+      // Always include the tournament ID and tours when creating a new edition
+      // @ts-expect-error
+      dirtyFields[field] = event.data[field]
+    }
+
+    if (!isEqual(event.data[field], initialState[field])) {
+      // @ts-expect-error
+      dirtyFields[field] = event.data[field] ?? null
+    }
+  }
+
+  if (Object.keys(dirtyFields).length) {
+    try {
+      const response = await $fetch(`/api/editions/${props.edition ? "update" : "create"}`, {
+        method: "POST",
+        body: dirtyFields
+      })
+
+      if (response?.success) {
+        toast.add({
+          title: `${tournamentStore.name} ${event.data.year} ${props.edition ? "updated" : "created"}`,
+          icon: icons.success,
+          color: "success"
+        })
+
+        if (props.refresh) {
+          props.refresh() // Refresh edition details
+
+          await nextTick(() => {
+            handleReset() // Reset form
+            set(open, false) // Close modal
+          })
+        } else {
+          // Navigate to the new edition page
+          router.push({
+            name: "edition",
+            params: { id, name, edId: event.data.id, year: event.data.year }
+          })
+        }
+      } else {
+        toast.add({
+          title: `Error ${props.edition ? "updating" : "creating"} edition`,
+          icon: icons.error,
+          color: "error"
+        })
+      }
+    } catch (e) {
+      if (typeof e === "object" && e && "statusMessage" in e) {
+        const err = e as FetchError<ValidationError>
+
+        if (err.statusMessage === "Invalid request body") {
+          console.error(
+            "Validation errors: ",
+            err.data?.validationErrors.map(e => `${e.path.join(".")}: ${e.message}`)
+          )
+        }
+      } else {
+        console.error(e)
+      }
+    }
+  } else {
+    toast.add({
+      title: "No changes to save",
+      icon: icons.caution,
+      color: "warning"
+    })
+  }
+
+  set(uploading, false)
+}
+
 const formFields = computed<FormFieldInterface<EditionFormSchema>[]>(
   () =>
     [
-      { label: "ID", key: "id", type: "text", subType: "number", required: true, disabled: !!edition },
+      { label: "ID", key: "id", type: "text", subType: "number", required: true, disabled: !!props.edition },
       { label: "Year", key: "year", type: "inputMenu", items: ALL_YEARS, required: true },
       { label: "Sponsor Name", key: "sponsor_name", type: "text", class: "col-span-2" },
-      ((tournament?.tours && tournament?.tours.length > 1) || (edition?.tournament?.tours && edition?.tournament?.tours.length > 1)) && {
-        label: "Tours",
-        key: "tours",
-        type: "checkbox",
-        required: true,
-        items:
-          edition?.tournament?.tours || tournament?.tours
-            ? (edition?.tournament?.tours || tournament?.tours!).map((t: any) => ({ label: t, value: tourEnum[t as keyof typeof tourEnum] }))
-            : TOUR_OPTIONS
-      },
+      ...(tournamentStore.tours.length > 1
+        ? [
+            {
+              label: "Tours",
+              key: "tours",
+              type: "checkbox",
+              required: true,
+              items: tournamentStore.tours.length
+                ? tournamentStore.tours.map((t: any) => ({ label: t, value: tourEnum[t as keyof typeof tourEnum] }))
+                : TOUR_OPTIONS
+            }
+          ]
+        : []),
       {
         label: "Category",
         key: "category",
         type: "text",
-        class: (tournament?.tours && tournament?.tours.length > 1) || edition ? "col-span-1" : "col-span-2"
+        class: tournamentStore.tours.length > 1 ? "col-span-1" : "col-span-2"
       },
       { label: "Dates", key: "dates", type: "dates", class: "col-span-2" },
       { label: "Surface", key: "surface", type: "inputMenu", items: SURFACE_OPTIONS },
@@ -80,96 +171,26 @@ const formFields = computed<FormFieldInterface<EditionFormSchema>[]>(
       { label: "Wikipedia Link", key: "wiki_link", type: "textarea", class: "col-span-2" }
     ].filter(Boolean) as FormFieldInterface<EditionFormSchema>[]
 )
-
-const handleReset = () => set(state, cloneDeep(initialState))
-
-const onError = (event: FormErrorEvent) => console.error(event.errors)
-
-const onSubmit = async (event: FormSubmitEvent<EditionFormSchema>) => {
-  set(uploading, true)
-
-  // Get dirty fields from the form
-  const fields = Object.keys(event.data) as (keyof EditionFormSchema)[]
-  const dirtyFields: Partial<EditionFormSchema> = {}
-  fields.forEach(field => {
-    if (!isEqual(event.data[field], initialState[field])) {
-      // @ts-expect-error
-      dirtyFields[field] = event.data[field] ?? null
-    }
-  })
-
-  if (Object.keys(dirtyFields).length) {
-    dirtyFields["id"] = event.data.id // Always include the edition ID
-
-    if (!edition) {
-      dirtyFields["tournament"] = event.data.tournament // Always include the tournament ID
-      dirtyFields["tours"] = event.data.tours // Always include the tours
-    }
-
-    const response = await $fetch(`/api/editions/${edition ? "update" : "create"}`, {
-      method: "POST",
-      body: dirtyFields
-    })
-
-    if ((response as any).ok) {
-      toast.add({
-        title: `${edition?.tournament?.name ?? tournament?.name} ${event.data.year} ${edition ? "updated" : "created"}`,
-        icon: icons.success,
-        color: "success"
-      })
-
-      if (refresh) {
-        refresh() // Refresh edition details
-
-        nextTick(() => {
-          handleReset() // Reset form
-        })
-      } else {
-        // Navigate to the new edition page
-        router.push({
-          name: "edition",
-          params: { id, name, edId: event.data.id, year: event.data.year }
-        })
-      }
-
-      set(open, false) // Close modal
-    } else {
-      toast.add({
-        title: `Error ${edition ? "updating" : "creating"} edition`,
-        icon: icons.error,
-        color: "error"
-      })
-    }
-  } else {
-    toast.add({
-      title: "No changes to save",
-      icon: icons.caution,
-      color: "warning"
-    })
-  }
-
-  set(uploading, false)
-}
 </script>
 
 <template>
   <u-modal
-    :title="edition && year ? `${edition.tournament?.name} ${year}` : 'Create Edition'"
+    :title="year ? `${tournamentStore.name} ${year}` : 'Create Edition'"
     v-model:open="open"
   >
     <u-button
       :icon="edition ? ICONS.edit : icons.plus"
-      :label="edition && year ? `${edition.tournament?.name} ${year}` : 'Create Edition'"
+      :label="year ? `${tournamentStore.name} ${year}` : 'Create Edition'"
       block
+      color="Doubles"
     />
 
     <template #body>
-      <!--@vue-expect-error-->
       <u-form
         id="edition-form"
         :schema="editionFormSchema"
         :state="state"
-        @submit="onSubmit"
+        @submit="onSubmit as any"
         @error="onError"
       >
         <div class="grid grid-cols-2 gap-3 items-center">
@@ -188,7 +209,7 @@ const onSubmit = async (event: FormSubmitEvent<EditionFormSchema>) => {
         form="edition-form"
         type="submit"
         label="Save"
-        :icon="uploading ? ICONS.uploading : icons.check"
+        :icon="uploading ? ICONS.uploading : icons.upload"
         block
       />
       <u-button

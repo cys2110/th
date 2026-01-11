@@ -38,76 +38,75 @@ const resetFilters = () => {
   year.value = playerOverview.value?.years?.slice(-1)[0] || new Date().getFullYear()
 }
 
-const { data, status } = await useFetch("/api/players/activity", {
-  method: "POST",
-  body: {
-    id,
-    year,
-    tournaments,
-    categories,
-    levels,
-    matchType,
-    dateRange,
-    surfaces
-  },
-  default: () => ({
-    stats: { singles_wins: 0, singles_losses: 0, doubles_wins: 0, doubles_losses: 0, singles_titles: 0, doubles_titles: 0 },
-    events: []
-  })
-})
+// const { data, status } = await useFetch("/api/players/activity", {
+//   method: "POST",
+//   body: {
+//     id,
+//     year,
+//     tournaments,
+//     categories,
+//     levels,
+//     matchType,
+//     dateRange,
+//     surfaces
+//   },
+//   default: () => ({
+//     stats: { singles_wins: 0, singles_losses: 0, doubles_wins: 0, doubles_losses: 0, singles_titles: 0, doubles_titles: 0 },
+//     events: []
+//   })
+// })
 
-const consolidatedEvents = computed(() => {
-  const uniqueEvents = useArrayUnique(data.value.events.map(e => e.id)).value
+// const consolidatedEvents = computed(() => {
+//   const uniqueEvents = useArrayUnique(data.value.events.map(e => e.id)).value
 
-  return uniqueEvents.map(eventId => {
-    const matchingEvents = data.value.events.filter(e => e.id === eventId)
+//   return uniqueEvents.map(eventId => {
+//     const matchingEvents = data.value.events.filter(e => e.id === eventId)
 
-    return {
-      ...matchingEvents[0],
-      match: matchingEvents.flatMap(e => e.match)
-    } as ConsolidatedActivityType
-  })
-})
+//     return {
+//       ...matchingEvents[0],
+//       match: matchingEvents.flatMap(e => e.match)
+//     } as ConsolidatedActivityType
+//   })
+// })
 
-const columnVisibility = computed(() => {
-  if (matchType.value === "Singles") {
-    return {
-      partner: false
-    }
-  } else {
-    return {
-      partner: true
-    }
-  }
-})
+// const columnVisibility = computed(() => {
+//   if (matchType.value === "Singles") {
+//     return {
+//       partner: false
+//     }
+//   } else {
+//     return {
+//       partner: true
+//     }
+//   }
+// })
 
-const handleSelect = (e: Event, row: TableRow<ActivityType>) => {
-  if (row.original.match.stats) {
-    router.push({
-      name: "match",
-      params: {
-        id: row.original.tournament.id,
-        name: kebabCase(row.original.tournament.name),
-        year: row.original.year,
-        edId: row.original.id
-      },
-      query: {
-        tour: row.original.tour,
-        type: row.original.type,
-        draw: row.original.match.draw,
-        match_no: row.original.match.match_no
-      }
-    })
-  }
-}
+// const handleSelect = (e: Event, row: TableRow<ActivityType>) => {
+//   if (row.original.match.stats) {
+//     router.push({
+//       name: "match",
+//       params: {
+//         id: row.original.tournament.id,
+//         name: kebabCase(row.original.tournament.name),
+//         year: row.original.year,
+//         edId: row.original.id
+//       },
+//       query: {
+//         tour: row.original.tour,
+//         type: row.original.type,
+//         draw: row.original.match.draw,
+//         match_no: row.original.match.match_no
+//       }
+//     })
+//   }
+// }
 </script>
 
 <template>
   <u-container>
-    <u-page>
+    <!-- <u-page>
       <template #left>
         <u-page-aside>
-          <!--@vue-expect-error-->
           <filters
             :filters="['tournaments', 'levels', 'categories', 'surfaces', 'dateRange', 'matchType']"
             v-model:tournaments="tournaments"
@@ -130,17 +129,16 @@ const handleSelect = (e: Event, row: TableRow<ActivityType>) => {
 
       <players-wrapper>
         <template #header-links>
-          <view-switcher v-model="viewMode" />
+          <view-switcher v-model="viewMode" />-->
 
-          <!--Filters for smaller screens-->
-          <u-slideover
+    <!--Filters for smaller screens-->
+    <!-- <u-slideover
             title="Filters"
             class="ml-auto lg:hidden"
           >
             <u-button :icon="ICONS.filter" />
 
             <template #body>
-              <!--@vue-expect-error-->
               <filters
                 :filters="['tournaments', 'levels', 'categories', 'surfaces', 'dateRange', 'matchType']"
                 v-model:tournaments="tournaments"
@@ -167,6 +165,7 @@ const handleSelect = (e: Event, row: TableRow<ActivityType>) => {
         <define-empty-template>
           <empty :message="`${playerName} played no ${matchType} matches in this year`" />
         </define-empty-template>
+
         <u-container class="my-5 flex items-center justify-stretch gap-5">
           <u-container class="ring-2 ring-Singles p-5 rounded-lg text-center">
             <div class="font-semibold text-muted">Singles</div>
@@ -183,6 +182,7 @@ const handleSelect = (e: Event, row: TableRow<ActivityType>) => {
             </div>
           </u-container>
         </u-container>
+
         <template v-if="viewMode">
           <u-page-list
             v-if="data.events.length || status === 'pending'"
@@ -225,6 +225,6 @@ const handleSelect = (e: Event, row: TableRow<ActivityType>) => {
           </template>
         </u-table>
       </u-page-body>
-    </u-page>
+    </u-page> -->
   </u-container>
 </template>

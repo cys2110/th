@@ -10,99 +10,99 @@ const { data: teams } = await useFetch("/api/h2h/players", {
   query: { p1Id, p2Id }
 })
 
-const { data: matches, status } = await useFetch("/api/h2h/matches", {
-  query: { p1Id, p2Id },
-  default: () => []
-})
+// const { data: matches, status } = await useFetch("/api/h2h/matches", {
+//   query: { p1Id, p2Id },
+//   default: () => []
+// })
 
-const teamNames = computed(() => {
-  const team1Name = teams.value ? teams.value.team1.players.map(p => `${p.first_name} ${p.last_name}`).join(" / ") : capitalCase(p1Name as string)
-  const team2Name = teams.value ? teams.value.team2.players.map(p => `${p.first_name} ${p.last_name}`).join(" / ") : capitalCase(p2Name as string)
-  return { team1Name, team2Name }
-})
+// const teamNames = computed(() => {
+//   const team1Name = teams.value ? teams.value.team1.players.map(p => `${p.first_name} ${p.last_name}`).join(" / ") : capitalCase(p1Name as string)
+//   const team2Name = teams.value ? teams.value.team2.players.map(p => `${p.first_name} ${p.last_name}`).join(" / ") : capitalCase(p2Name as string)
+//   return { team1Name, team2Name }
+// })
 
-const player1Id = computed({
-  get() {
-    const p1IdArray = p1Id.split("+")
+// const player1Id = computed({
+//   get() {
+//     const p1IdArray = p1Id.split("+")
 
-    if (p1IdArray.length > 1) {
-      return undefined
-    } else {
-      return {
-        value: p1Id,
-        label: teams ? `${teams.value?.team1.players[0]?.first_name} ${teams.value?.team1.players[0]?.last_name}` : capitalCase(p1Name as string)
-      }
-    }
-  },
-  set(newValue) {
-    if (newValue) {
-      navigateTo({
-        name: "head-to-head",
-        params: {
-          p1Id: newValue.value,
-          p2Id,
-          p1Name: kebabCase(newValue.label),
-          p2Name
-        }
-      })
-    }
-  }
-})
+//     if (p1IdArray.length > 1) {
+//       return undefined
+//     } else {
+//       return {
+//         value: p1Id,
+//         label: teams ? `${teams.value?.team1.players[0]?.first_name} ${teams.value?.team1.players[0]?.last_name}` : capitalCase(p1Name as string)
+//       }
+//     }
+//   },
+//   set(newValue) {
+//     if (newValue) {
+//       navigateTo({
+//         name: "head-to-head",
+//         params: {
+//           p1Id: newValue.value,
+//           p2Id,
+//           p1Name: kebabCase(newValue.label),
+//           p2Name
+//         }
+//       })
+//     }
+//   }
+// })
 
-const player2Id = computed({
-  get() {
-    const p2IdArray = p2Id.split("+")
+// const player2Id = computed({
+//   get() {
+//     const p2IdArray = p2Id.split("+")
 
-    if (p2IdArray.length > 1) {
-      return undefined
-    } else {
-      return {
-        value: p2Id,
-        label: teams ? `${teams.value?.team2.players[0]?.first_name} ${teams.value?.team2.players[0]?.last_name}` : capitalCase(p2Name as string)
-      }
-    }
-  },
-  set(newValue) {
-    if (newValue) {
-      navigateTo({
-        name: "head-to-head",
-        params: {
-          p1Id,
-          p2Id: newValue.value,
-          p1Name,
-          p2Name: kebabCase(newValue.label)
-        }
-      })
-    }
-  }
-})
+//     if (p2IdArray.length > 1) {
+//       return undefined
+//     } else {
+//       return {
+//         value: p2Id,
+//         label: teams ? `${teams.value?.team2.players[0]?.first_name} ${teams.value?.team2.players[0]?.last_name}` : capitalCase(p2Name as string)
+//       }
+//     }
+//   },
+//   set(newValue) {
+//     if (newValue) {
+//       navigateTo({
+//         name: "head-to-head",
+//         params: {
+//           p1Id,
+//           p2Id: newValue.value,
+//           p1Name,
+//           p2Name: kebabCase(newValue.label)
+//         }
+//       })
+//     }
+//   }
+// })
 
-useHead({
-  title: () => `${teamNames.value.team1Name} v ${teamNames.value.team2Name} | Head to Head`
-})
+// useHead({
+//   title: () => `${teamNames.value.team1Name} v ${teamNames.value.team2Name} | Head to Head`
+// })
 
-const playerLinks = computed<PageLink[]>(() => {
-  if (teams.value) {
-    const team1Links = teams.value.team1.players.map(p => ({
-      label: `${p.first_name} ${p.last_name}`,
-      to: { name: "player", params: { id: p.id, name: kebabCase(`${p.first_name} ${p.last_name}`) } },
-      icon: ICONS.player
-    }))
-    const team2Links = teams.value.team2.players.map(p => ({
-      label: `${p.first_name} ${p.last_name}`,
-      to: { name: "player", params: { id: p.id, name: kebabCase(`${p.first_name} ${p.last_name}`) } },
-      icon: ICONS.player
-    }))
-    return [...team1Links, ...team2Links] as PageLink[]
-  }
+// const playerLinks = computed<PageLink[]>(() => {
+//   if (teams.value) {
+//     const team1Links = teams.value.team1.players.map(p => ({
+//       label: `${p.first_name} ${p.last_name}`,
+//       to: { name: "player", params: { id: p.id, name: kebabCase(`${p.first_name} ${p.last_name}`) } },
+//       icon: ICONS.player
+//     }))
+//     const team2Links = teams.value.team2.players.map(p => ({
+//       label: `${p.first_name} ${p.last_name}`,
+//       to: { name: "player", params: { id: p.id, name: kebabCase(`${p.first_name} ${p.last_name}`) } },
+//       icon: ICONS.player
+//     }))
+//     return [...team1Links, ...team2Links] as PageLink[]
+//   }
 
-  return []
-})
+//   return []
+// })
 </script>
 
 <template>
   <u-container>
-    <u-page>
+    <!-- <u-page>
       <template #left>
         <u-page-aside>
           <u-page-links :links="playerLinks" />
@@ -166,6 +166,6 @@ const playerLinks = computed<PageLink[]>(() => {
           :teams
         />
       </u-page-body>
-    </u-page>
+    </u-page> -->
   </u-container>
 </template>

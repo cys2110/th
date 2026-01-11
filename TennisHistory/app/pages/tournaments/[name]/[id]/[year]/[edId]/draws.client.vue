@@ -24,132 +24,132 @@ const showTour = ref(true)
 const showDraw = ref(true)
 const showType = ref(true)
 
-const { data } = await useFetch("/api/editions/draws/links", {
-  query: { edId },
-  onResponse: ({ response }) => {
-    if (response._data?.draw_type) {
-      set(drawType, response._data?.draw_type)
-      set(drawLink, response._data?.draw_link)
-      set(showTour, false)
-      set(showDraw, false)
+// const { data } = await useFetch("/api/editions/draws/links", {
+//   query: { edId },
+//   onResponse: ({ response }) => {
+//     if (response._data?.draw_type) {
+//       set(drawType, response._data?.draw_type)
+//       set(drawLink, response._data?.draw_link)
+//       set(showTour, false)
+//       set(showDraw, false)
 
-      if (response._data?.draw_type === "Laver Cup") set(showType, false)
-    } else if (response._data?.events?.length) {
-      if (response._data.events.length === 1) set(showTour, false)
+//       if (response._data?.draw_type === "Laver Cup") set(showType, false)
+//     } else if (response._data?.events?.length) {
+//       if (response._data.events.length === 1) set(showTour, false)
 
-      if (response._data.events.every((e: any) => !e.qs_draw && !e.qd_draw)) {
-        set(showDraw, false)
-      }
+//       if (response._data.events.every((e: any) => !e.qs_draw && !e.qd_draw)) {
+//         set(showDraw, false)
+//       }
 
-      if (response._data.events.every((e: any) => !e.s_draw) || response._data.events.every((e: any) => !e.d_draw)) {
-        set(showType, false)
-      }
+//       if (response._data.events.every((e: any) => !e.s_draw) || response._data.events.every((e: any) => !e.d_draw)) {
+//         set(showType, false)
+//       }
 
-      set(selectedTour, response._data.events[0]!.tour)
-      const groupedLinks = []
+//       set(selectedTour, response._data.events[0]!.tour)
+//       const groupedLinks = []
 
-      for (const event of response._data.events) {
-        groupedLinks.push({
-          tour: event.tour,
-          Singles: {
-            Main: event.s_draw
-              ? {
-                  draw: event.s_draw === "Round robin" ? "Round robin" : "Elimination",
-                  link: event.s_link
-                }
-              : undefined,
-            Qualifying: event.qs_draw
-              ? {
-                  draw: event.qs_draw === "Round robin" ? "Round robin" : "Elimination",
-                  link: event.qs_link
-                }
-              : undefined
-          },
-          Doubles: {
-            Main: event.d_draw
-              ? {
-                  draw: event.d_draw === "Round robin" ? "Round robin" : "Elimination",
-                  link: event.d_link
-                }
-              : undefined,
-            Qualifying: event.qd_draw
-              ? {
-                  draw: event.qd_draw === "Round robin" ? "Round robin" : "Elimination",
-                  link: event.qd_link
-                }
-              : undefined
-          }
-        })
-      }
+//       for (const event of response._data.events) {
+//         groupedLinks.push({
+//           tour: event.tour,
+//           Singles: {
+//             Main: event.s_draw
+//               ? {
+//                   draw: event.s_draw === "Round robin" ? "Round robin" : "Elimination",
+//                   link: event.s_link
+//                 }
+//               : undefined,
+//             Qualifying: event.qs_draw
+//               ? {
+//                   draw: event.qs_draw === "Round robin" ? "Round robin" : "Elimination",
+//                   link: event.qs_link
+//                 }
+//               : undefined
+//           },
+//           Doubles: {
+//             Main: event.d_draw
+//               ? {
+//                   draw: event.d_draw === "Round robin" ? "Round robin" : "Elimination",
+//                   link: event.d_link
+//                 }
+//               : undefined,
+//             Qualifying: event.qd_draw
+//               ? {
+//                   draw: event.qd_draw === "Round robin" ? "Round robin" : "Elimination",
+//                   link: event.qd_link
+//                 }
+//               : undefined
+//           }
+//         })
+//       }
 
-      set(links, keyBy(groupedLinks, "tour"))
-    }
-  }
-})
+//       set(links, keyBy(groupedLinks, "tour"))
+//     }
+//   }
+// })
 
-watchImmediate([selectedTour, selectedType, selectedDraw], () => {
-  if (isUpdating.value) return
+// watchImmediate([selectedTour, selectedType, selectedDraw], () => {
+//   if (isUpdating.value) return
 
-  const tour = selectedTour.value
-  const type = selectedType.value
-  const draw = selectedDraw.value
-  const combo = links.value[tour]?.[type]?.[draw]
+//   const tour = selectedTour.value
+//   const type = selectedType.value
+//   const draw = selectedDraw.value
+//   const combo = links.value[tour]?.[type]?.[draw]
 
-  if (!combo) {
-    isUpdating.value = true
+//   if (!combo) {
+//     isUpdating.value = true
 
-    if (draw === "Main") {
-      set(selectedType, type === "Singles" ? "Doubles" : "Singles")
-    } else {
-      set(selectedDraw, "Main")
-    }
+//     if (draw === "Main") {
+//       set(selectedType, type === "Singles" ? "Doubles" : "Singles")
+//     } else {
+//       set(selectedDraw, "Main")
+//     }
 
-    nextTick(() => (isUpdating.value = false))
-    return
-  }
+//     nextTick(() => (isUpdating.value = false))
+//     return
+//   }
 
-  isUpdating.value = true
-  set(drawType, combo.draw)
-  set(drawLink, combo.link)
-  nextTick(() => (isUpdating.value = false))
-})
+//   isUpdating.value = true
+//   set(drawType, combo.draw)
+//   set(drawLink, combo.link)
+//   nextTick(() => (isUpdating.value = false))
+// })
 
-const updateTiebreaks = async () => {
-  set(updating, true)
-  try {
-    const response = await $fetch("/api/matches/tiebreaks", {
-      query: { id: edId }
-    })
-    if ((response as any).ok) {
-      toast.add({
-        title: "Tiebreaks updated successfully",
-        icon: icons.check,
-        color: "success"
-      })
-    } else {
-      toast.add({
-        title: "Error updating tiebreaks",
-        description: (response as any).message,
-        icon: icons.error,
-        color: "error"
-      })
-    }
-  } catch (e) {
-    toast.add({
-      title: "Error updating tiebreaks",
-      description: (e as Error).message,
-      icon: icons.error,
-      color: "error"
-    })
-  } finally {
-    set(updating, false)
-  }
-}
+// const updateTiebreaks = async () => {
+//   set(updating, true)
+//   try {
+//     const response = await $fetch("/api/matches/tiebreaks", {
+//       query: { id: edId }
+//     })
+//     if ((response as any).ok) {
+//       toast.add({
+//         title: "Tiebreaks updated successfully",
+//         icon: icons.check,
+//         color: "success"
+//       })
+//     } else {
+//       toast.add({
+//         title: "Error updating tiebreaks",
+//         description: (response as any).message,
+//         icon: icons.error,
+//         color: "error"
+//       })
+//     }
+//   } catch (e) {
+//     toast.add({
+//       title: "Error updating tiebreaks",
+//       description: (e as Error).message,
+//       icon: icons.error,
+//       color: "error"
+//     })
+//   } finally {
+//     set(updating, false)
+//   }
+// }
 </script>
 
 <template>
   <u-container>
-    <u-page>
+    <!-- <u-page>
       <template #left>
         <u-page-aside>
           <dev-only>
@@ -209,6 +209,6 @@ const updateTiebreaks = async () => {
           message="No draw available"
         />
       </u-page-body>
-    </u-page>
+    </u-page> -->
   </u-container>
 </template>

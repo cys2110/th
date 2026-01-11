@@ -7,9 +7,6 @@ const { player } = defineProps<{
   player: PlayerDetailsType
 }>()
 
-const {
-  params: { id }
-} = useRoute("player")
 const toast = useToast()
 const {
   ui: { icons }
@@ -141,8 +138,6 @@ const onSubmit = async (event: FormSubmitEvent<PlayerFormSchema>) => {
 
   if (Object.keys(dirtyFields).length) {
     dirtyFields["id"] = event.data.id // Always include the player ID
-
-    console.log(dirtyFields)
 
     const response = await $fetch("/api/players/update", {
       method: "POST",

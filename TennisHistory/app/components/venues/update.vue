@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import type { FormErrorEvent, FormSubmitEvent } from "@nuxt/ui"
-import { cloneDeep, isEqual } from "lodash"
+import type { FetchError } from "ofetch"
 
-const { venue, refresh } = defineProps<{
+const props = defineProps<{
   venue?: VenueType
   refresh?: () => void
 }>()
@@ -15,22 +15,16 @@ const open = ref(false)
 const uploading = ref(false)
 
 const initialState = {
-  ...venue,
-  country: venue?.country
+  ...props.venue,
+  country: props.venue?.country
     ? {
-        value: venue.country.id,
-        label: venue.country.name
+        value: props.venue.country.id,
+        label: props.venue.country.name
       }
     : undefined
 }
 
 const state = ref<Partial<VenueFormInput>>(cloneDeep(initialState))
-
-const formFields: FormFieldInterface<VenueFormSchema>[] = [
-  { label: "Name", key: "name", type: "text", class: "col-span-2" },
-  { label: "City", key: "city", type: "text", required: true },
-  { label: "Country", key: "country", type: "search", subType: "Country", placeholder: "Countries", required: true, icon: ICONS.countries }
-]
 
 const handleReset = () => set(state, cloneDeep(initialState))
 
@@ -42,37 +36,62 @@ const onSubmit = async (event: FormSubmitEvent<VenueFormSchema>) => {
   // Get dirty fields from the form
   const fields = Object.keys(event.data) as (keyof VenueFormSchema)[]
   const dirtyFields: Partial<VenueFormSchema> = {}
-  fields.forEach(field => {
+
+  for (const field of fields) {
+    if (field === "id") dirtyFields[field] = event.data[field]
+
     if (!isEqual(event.data[field], initialState[field])) {
       // @ts-expect-error
       dirtyFields[field] = event.data[field] ?? null
     }
-  })
+  }
 
   if (Object.keys(dirtyFields).length) {
-    dirtyFields["id"] = event.data.id // Always include the venue ID
-
-    const response = await $fetch(`/api/venues/${venue ? "update" : "create"}`, {
-      method: "POST",
-      body: dirtyFields
-    })
-
-    if ((response as any).ok) {
-      toast.add({
-        title: `${event.data.id} ${venue ? "updated" : "created"}`,
-        icon: icons.success,
-        color: "success"
+    try {
+      const response = await $fetch(`/api/venues/${props.venue ? "update" : "create"}`, {
+        method: "POST",
+        body: dirtyFields
       })
 
-      if (refresh) {
-        refresh() // Refresh venue details
+      if ((response as any).success) {
+        toast.add({
+          title: `${event.data.id} ${props.venue ? "updated" : "created"}`,
+          icon: icons.success,
+          color: "success"
+        })
+
+        if (props.refresh) {
+          props.refresh() // Refresh venue details
+        }
+
+        await nextTick(() => {
+          handleReset() // Reset form
+          set(open, false) // Close modal
+        })
+      } else {
+        toast.add({
+          title: `Error ${props.venue ? "updating" : "creating"} venue`,
+          icon: icons.error,
+          color: "error"
+        })
+      }
+    } catch (e) {
+      if (typeof e === "object" && e && "statusMessage" in e) {
+        const err = e as FetchError<ValidationError>
+
+        if (err.statusMessage === "Invalid request body") {
+          console.error(
+            "Validation errors: ",
+            err.data?.validationErrors.map(e => `${e.path.join(".")}: ${e.message}`)
+          )
+        }
+      } else {
+        console.error(e)
       }
 
-      handleReset() // Reset form
-      set(open, false) // Close modal
-    } else {
       toast.add({
-        title: `Error ${venue ? "updating" : "creating"} venue`,
+        title: `Error ${props.venue ? "updating" : "creating"} ${event.data.id}`,
+        description: (e as Error).message,
         icon: icons.error,
         color: "error"
       })
@@ -87,6 +106,12 @@ const onSubmit = async (event: FormSubmitEvent<VenueFormSchema>) => {
 
   set(uploading, false)
 }
+
+const formFields: FormFieldInterface<VenueFormSchema>[] = [
+  { label: "Name", key: "name", type: "text", class: "col-span-2" },
+  { label: "City", key: "city", type: "text", required: true },
+  { label: "Country", key: "country", type: "search", subType: "Country", placeholder: "Countries", required: true, icon: ICONS.globe }
+]
 </script>
 
 <template>
@@ -97,13 +122,14 @@ const onSubmit = async (event: FormSubmitEvent<VenueFormSchema>) => {
     <u-button
       :icon="venue ? ICONS.edit : icons.plus"
       block
+      color="Doubles"
     >
       <div
         v-if="venue"
         class="flex flex-wrap items-center gap-1"
       >
         <span>{{ venue.name ? `${venue.name}, ${venue.city}` : venue.city }}</span>
-        <countries-link
+        <country-link
           :country="venue.country!"
           icon-only
           class="mx-0"
@@ -118,7 +144,7 @@ const onSubmit = async (event: FormSubmitEvent<VenueFormSchema>) => {
         class="flex flex-wrap items-center gap-1"
       >
         <span>{{ venue.name ? `${venue.name}, ${venue.city}` : venue.city }}</span>
-        <countries-link
+        <country-link
           :country="venue.country!"
           icon-only
           class="mx-0"
@@ -151,7 +177,7 @@ const onSubmit = async (event: FormSubmitEvent<VenueFormSchema>) => {
         form="venue-form"
         type="submit"
         label="Save"
-        :icon="uploading ? ICONS.uploading : icons.check"
+        :icon="uploading ? ICONS.uploading : icons.upload"
         block
       />
       <u-button

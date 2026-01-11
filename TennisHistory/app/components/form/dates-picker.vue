@@ -2,8 +2,10 @@
 import { CalendarDate } from "@internationalized/date"
 
 defineProps<{ placeholder?: string }>()
-const inputDateRef = useTemplateRef("inputDateRef")
+
 const dateRange = defineModel<{ start: CalendarDate | undefined; end: CalendarDate | undefined }>()
+
+const inputDateRef = useTemplateRef("inputDateRef")
 </script>
 
 <template>
@@ -18,7 +20,7 @@ const dateRange = defineModel<{ start: CalendarDate | undefined; end: CalendarDa
         <u-button
           color="neutral"
           variant="link"
-          :icon="ICONS.event"
+          :icon="ICONS.calendar"
           aria-label="Select a date range"
           class="px-0"
         />

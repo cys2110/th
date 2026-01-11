@@ -1,10 +1,10 @@
-import { ULink } from "#components"
+import { UBadge, ULink } from "#components"
 import type { TableColumn } from "@nuxt/ui"
 import { createColumnHelper } from "@tanstack/vue-table"
 
 const columnHelper = createColumnHelper<RecordType>()
 
-const columns = (tour: string): TableColumn<RecordType>[] => [
+const columns = (tour: TourEnumType): TableColumn<RecordType>[] => [
   { accessorKey: "year", header: "Year" },
   columnHelper.group({
     id: "australian-open",
@@ -20,7 +20,12 @@ const columns = (tour: string): TableColumn<RecordType>[] => [
     columns: [
       {
         accessorKey: "580.singles",
-        header: "Singles",
+        header: () =>
+          h(UBadge, {
+            color: "Singles",
+            label: "Singles",
+            class: "w-full"
+          }),
         cell: ({ row, cell }) => {
           if (cell.getValue()) {
             return h(
@@ -46,7 +51,12 @@ const columns = (tour: string): TableColumn<RecordType>[] => [
       },
       {
         accessorKey: "580.doubles",
-        header: "Doubles",
+        header: () =>
+          h(UBadge, {
+            color: "Doubles",
+            label: "Doubles",
+            class: "w-full"
+          }),
         cell: ({ row, cell }) => {
           if (cell.getValue()) {
             return h(
@@ -86,7 +96,12 @@ const columns = (tour: string): TableColumn<RecordType>[] => [
     columns: [
       {
         accessorKey: "520.singles",
-        header: "Singles",
+        header: () =>
+          h(UBadge, {
+            color: "Singles",
+            label: "Singles",
+            class: "w-full"
+          }),
         cell: ({ row, cell }) => {
           if (cell.getValue()) {
             return h(
@@ -112,7 +127,12 @@ const columns = (tour: string): TableColumn<RecordType>[] => [
       },
       {
         accessorKey: "520.doubles",
-        header: "Doubles",
+        header: () =>
+          h(UBadge, {
+            color: "Doubles",
+            label: "Doubles",
+            class: "w-full"
+          }),
         cell: ({ row, cell }) => {
           if (cell.getValue()) {
             return h(
@@ -152,7 +172,12 @@ const columns = (tour: string): TableColumn<RecordType>[] => [
     columns: [
       {
         accessorKey: "540.singles",
-        header: "Singles",
+        header: () =>
+          h(UBadge, {
+            color: "Singles",
+            label: "Singles",
+            class: "w-full"
+          }),
         cell: ({ row, cell }) => {
           if (cell.getValue()) {
             return h(
@@ -178,7 +203,12 @@ const columns = (tour: string): TableColumn<RecordType>[] => [
       },
       {
         accessorKey: "540.doubles",
-        header: "Doubles",
+        header: () =>
+          h(UBadge, {
+            color: "Doubles",
+            label: "Doubles",
+            class: "w-full"
+          }),
         cell: ({ row, cell }) => {
           if (cell.getValue()) {
             return h(
@@ -218,7 +248,12 @@ const columns = (tour: string): TableColumn<RecordType>[] => [
     columns: [
       {
         accessorKey: "560.singles",
-        header: "Singles",
+        header: () =>
+          h(UBadge, {
+            color: "Singles",
+            label: "Singles",
+            class: "w-full"
+          }),
         cell: ({ row, cell }) => {
           if (cell.getValue()) {
             return h(
@@ -244,7 +279,12 @@ const columns = (tour: string): TableColumn<RecordType>[] => [
       },
       {
         accessorKey: "560.doubles",
-        header: "Doubles",
+        header: () =>
+          h(UBadge, {
+            color: "Doubles",
+            label: "Doubles",
+            class: "w-full"
+          }),
         cell: ({ row, cell }) => {
           if (cell.getValue()) {
             return h(
@@ -277,14 +317,19 @@ const columns = (tour: string): TableColumn<RecordType>[] => [
         ULink,
         {
           class: "hover-link default-link",
-          to: { name: "tournament", params: { id: "605", name: "finals" } }
+          to: { name: "tournament", params: { id: tour === "WTA" ? "808" : "605", name: "finals" } }
         },
         () => "Finals"
       ),
     columns: [
       {
-        accessorKey: "605.singles",
-        header: "Singles",
+        accessorKey: `${tour === "WTA" ? "808" : "605"}.singles`,
+        header: () =>
+          h(UBadge, {
+            color: "Singles",
+            label: "Singles",
+            class: "w-full"
+          }),
         cell: ({ row, cell }) => {
           if (cell.getValue()) {
             return h(
@@ -294,9 +339,9 @@ const columns = (tour: string): TableColumn<RecordType>[] => [
                 to: {
                   name: "edition",
                   params: {
-                    id: "605",
+                    id: tour === "WTA" ? "808" : "605",
                     name: "finals",
-                    edId: `605${row.original.year}-${tour}`,
+                    edId: `${tour === "WTA" ? "808" : "605"}${row.original.year}-${tour}`,
                     year: row.original.year
                   }
                 }
@@ -309,8 +354,13 @@ const columns = (tour: string): TableColumn<RecordType>[] => [
         }
       },
       {
-        accessorKey: "605.doubles",
-        header: "Doubles",
+        accessorKey: `${tour === "WTA" ? "808" : "605"}.doubles`,
+        header: () =>
+          h(UBadge, {
+            color: "Doubles",
+            label: "Doubles",
+            class: "w-full"
+          }),
         cell: ({ row, cell }) => {
           if (cell.getValue()) {
             return h(
@@ -320,9 +370,9 @@ const columns = (tour: string): TableColumn<RecordType>[] => [
                 to: {
                   name: "edition",
                   params: {
-                    id: "605",
+                    id: tour === "WTA" ? "808" : "605",
                     name: "finals",
-                    edId: `605${row.original.year}-${tour}`,
+                    edId: `${tour === "WTA" ? "808" : "605"}${row.original.year}-${tour}`,
                     year: row.original.year
                   }
                 }
@@ -350,7 +400,12 @@ const columns = (tour: string): TableColumn<RecordType>[] => [
     columns: [
       {
         accessorKey: "96.singles",
-        header: "Singles",
+        header: () =>
+          h(UBadge, {
+            color: "Singles",
+            label: "Singles",
+            class: "w-full"
+          }),
         cell: ({ row, cell }) => {
           if (cell.getValue()) {
             return h(
@@ -376,7 +431,12 @@ const columns = (tour: string): TableColumn<RecordType>[] => [
       },
       {
         accessorKey: "96.doubles",
-        header: "Doubles",
+        header: () =>
+          h(UBadge, {
+            color: "Doubles",
+            label: "Doubles",
+            class: "w-full"
+          }),
         cell: ({ row, cell }) => {
           if (cell.getValue()) {
             return h(

@@ -57,52 +57,52 @@ watchDeep(
 )
 
 // API call
-const { data, status } = await useFetch("/api/results-archive", {
-  method: "POST",
-  body: {
-    skip,
-    offset: itemsPerPage,
-    sortField,
-    tournaments,
-    tours,
-    levels,
-    categories,
-    surfaces,
-    venues,
-    countries,
-    supervisors,
-    umpires,
-    years,
-    dateRange,
-    environment
-  },
-  default: () => ({ count: 0, editions: [] })
-})
+// const { data, status } = await useFetch("/api/results-archive", {
+//   method: "POST",
+//   body: {
+//     skip,
+//     offset: itemsPerPage,
+//     sortField,
+//     tournaments,
+//     tours,
+//     levels,
+//     categories,
+//     surfaces,
+//     venues,
+//     countries,
+//     supervisors,
+//     umpires,
+//     years,
+//     dateRange,
+//     environment
+//   },
+//   default: () => ({ count: 0, editions: [] })
+// })
 
-// Table columns setup
-const table = useTemplateRef<any>("table")
+// // Table columns setup
+// const table = useTemplateRef<any>("table")
 
-const columnPinning = ref({
-  left: ["tournament"],
-  right: []
-})
+// const columnPinning = ref({
+//   left: ["tournament"],
+//   right: []
+// })
 
-const handleSelect = (e: Event, row: TableRow<any>) => {
-  router.push({
-    name: "edition",
-    params: {
-      id: row.original.tournament.id,
-      name: kebabCase(row.original.tournament.name),
-      year: row.original.year,
-      edId: row.original.id
-    }
-  })
-}
+// const handleSelect = (e: Event, row: TableRow<any>) => {
+//   router.push({
+//     name: "edition",
+//     params: {
+//       id: row.original.tournament.id,
+//       name: kebabCase(row.original.tournament.name),
+//       year: row.original.year,
+//       edId: row.original.id
+//     }
+//   })
+// }
 </script>
 
 <template>
   <u-container class="min-h-screen">
-    <u-page>
+    <!-- <u-page>
       <template #left>
         <u-page-aside>
           <dev-only>
@@ -112,10 +112,10 @@ const handleSelect = (e: Event, row: TableRow<any>) => {
             <lazy-coaches-merge hydrate-on-interaction="mouseover" />
             <lazy-umpires-merge hydrate-on-interaction="mouseover" />
             <u-separator />
-          </dev-only>
+          </dev-only>-->
 
-          <!--@vue-expect-error-->
-          <filters
+    <!--@vue-expect-error-->
+    <!--<filters
             :filters="[
               'tours',
               'levels',
@@ -161,17 +161,17 @@ const handleSelect = (e: Event, row: TableRow<any>) => {
       </template>
 
       <u-page-header title="Results Archive">
-        <template #links>
-          <!--Filters for smaller screens-->
-          <u-slideover
+        <template #links>-->
+    <!--Filters for smaller screens-->
+    <!-- <u-slideover
             title="Filters"
             class="ml-auto lg:hidden"
           >
             <u-button :icon="ICONS.filter" />
 
-            <template #body>
-              <!--@vue-expect-error-->
-              <filters
+            <template #body> -->
+    <!--@vue-expect-error-->
+    <!--<filters
                 :filters="[
                   'tours',
                   'levels',
@@ -249,6 +249,6 @@ const handleSelect = (e: Event, row: TableRow<any>) => {
       type="editions"
       v-model:page="page"
       v-model:items-per-page="itemsPerPage"
-    />
+    /> -->
   </u-container>
 </template>

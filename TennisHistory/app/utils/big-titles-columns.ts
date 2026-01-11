@@ -93,12 +93,8 @@ const columns: TableColumn<CountryTitleType>[] = [
     aggregationFn: "extent",
     cell: ({ cell, row }) => {
       if (row.getCanExpand()) {
-        const [min, max] = cell.getValue() as number[]
-        if (min === max) {
-          return min
-        } else {
-          return `${min} - ${max}`
-        }
+        const [min, max] = cell.getValue<number[]>()
+        return min === max ? `${min}` : `${min} - ${max}`
       } else {
         return cell.getValue()
       }

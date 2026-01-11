@@ -4,7 +4,7 @@ import { dateRangeSchema } from "./schemas"
 export const editionFormSchema = object({
   id: numberToIntSchema,
   tournament: numberToIntSchema.optional(),
-  tours: array(string()).optional(),
+  tours: array(TourInputEnum).optional(),
   surface: string().nullish(),
   year: numberToIntSchema.optional(),
   sponsor_name: string().nullish(),
@@ -19,7 +19,7 @@ export const editionFormSchema = object({
 }).transform(data => {
   const { id, tournament, tours, surface, year, venues, dates, ...rest } = data
 
-  return {
+  const newObject = {
     id,
     tournament,
     tours,
@@ -32,4 +32,19 @@ export const editionFormSchema = object({
       end_date: dates?.end
     }
   }
+
+  // Remove undefined fields from edition
+  Object.keys(newObject).forEach(key => {
+    if (newObject[key as keyof typeof newObject] === undefined) {
+      delete newObject[key as keyof typeof newObject]
+    }
+  })
+
+  Object.keys(newObject.edition).forEach(key => {
+    if (newObject.edition[key as keyof typeof newObject.edition] === undefined) {
+      delete newObject.edition[key as keyof typeof newObject.edition]
+    }
+  })
+
+  return newObject
 })

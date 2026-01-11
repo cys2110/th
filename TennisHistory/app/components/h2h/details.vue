@@ -21,7 +21,7 @@ const {
               v-for="(player, index) in teams.team1.players"
               :key="player.id"
             >
-              <players-link :player="(player as PersonType)" />
+              <player-link :player="(player as PersonType)" />
               <span v-if="index < teams.team1.players.length - 1"> / </span>
             </template>
           </div>
@@ -33,7 +33,7 @@ const {
               v-for="(player, index) in teams.team2.players"
               :key="player.id"
             >
-              <players-link :player="(player as PersonType)" />
+              <player-link :player="(player as PersonType)" />
               <span v-if="index < teams.team2.players.length - 1"> / </span>
             </template>
           </div>

@@ -3,7 +3,7 @@ export default defineEventHandler(async query => {
 
   const { records: singlesRecords } = await useDriver().executeQuery(
     `/* cypher */
-      WITH [580, 520, 540, 560, 605, 96] AS tournamentIds
+      WITH [580, 520, 540, 560, 605, 96, 808] AS tournamentIds
       MATCH (p:Player {id: $id})
       UNWIND tournamentIds AS tid
       MATCH (t:Tournament {id: tid})<-[:EDITION_OF]-(ed:Edition)-[:IN_YEAR]->(y:Year)
@@ -40,7 +40,7 @@ export default defineEventHandler(async query => {
 
   const { records: doublesRecords } = await useDriver().executeQuery(
     `/* cypher */
-      WITH [580, 520, 540, 560, 605, 96] AS tournamentIds
+      WITH [580, 520, 540, 560, 605, 96, 808] AS tournamentIds
       MATCH (p:Player {id: $id})
       UNWIND tournamentIds AS tid
       MATCH (t:Tournament {id: tid})<-[:EDITION_OF]-(ed:Edition)-[:IN_YEAR]->(y:Year)
@@ -90,7 +90,7 @@ export default defineEventHandler(async query => {
   const allYears = [...new Set([...singlesResults.filter(Boolean).map(r => r?.year), ...doublesResults.filter(Boolean).map(r => r?.year)])]
 
   const combinedResults = allYears.map(year => {
-    const tournaments = [580, 520, 540, 560, 605, 96]
+    const tournaments = [580, 520, 540, 560, 605, 96, 808]
 
     const result: { year: number; [key: string]: any } = {
       year: year as number,
@@ -99,7 +99,8 @@ export default defineEventHandler(async query => {
       "540": {},
       "560": {},
       "605": {},
-      "96": {}
+      "96": {},
+      "808": {}
     }
 
     tournaments.forEach(tid => {

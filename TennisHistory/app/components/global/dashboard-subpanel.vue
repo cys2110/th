@@ -3,7 +3,7 @@ defineProps<{ title?: string; icon?: string }>()
 </script>
 
 <template>
-  <div class="w-full flex flex-col max-h-200">
+  <div class="w-full flex flex-col">
     <div class="h-(--ui-header-height) shrink-0 flex items-center justify-between border-b border-default px-4 sm:px-6 gap-1.5 mb-5">
       <div class="flex items-center gap-1.5 min-w-0">
         <u-icon
@@ -23,6 +23,8 @@ defineProps<{ title?: string; icon?: string }>()
         <slot name="right" />
       </div>
     </div>
-    <slot />
+    <div class="max-h-150 overflow-y-auto p-5">
+      <slot />
+    </div>
   </div>
 </template>

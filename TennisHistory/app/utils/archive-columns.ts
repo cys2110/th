@@ -1,4 +1,4 @@
-import { CountriesLink, DevOnly, PersonUpdate, UBadge, UButton, VenuesUpdate } from "#components"
+import { CountryLink, DevOnly, PersonUpdate, UBadge, UButton, VenuesUpdate } from "#components"
 import type { TableColumn } from "@nuxt/ui"
 import appConfig from "~/app.config"
 
@@ -73,7 +73,7 @@ const columns: TableColumn<any>[] = [
               fallback: () =>
                 h("div", { class: "flex items-center gap-2" }, [
                   venue.name ? `${venue.name}, ${venue.city}` : venue.city,
-                  h(CountriesLink, { country: venue.country })
+                  h(CountryLink, { country: venue.country })
                 ])
             }
           )

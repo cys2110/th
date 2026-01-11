@@ -1,4 +1,4 @@
-import { PlayersLink, ULink } from "#components"
+import { CountryLink, PlayerLink, ULink } from "#components"
 import type { TableColumn } from "@nuxt/ui"
 
 const columns: TableColumn<PlayerH2HType>[] = [
@@ -6,26 +6,16 @@ const columns: TableColumn<PlayerH2HType>[] = [
     id: "opponent",
     meta: { class: { th: "text-left" } },
     header: "Opponent",
-    cell: ({ row }) => {
-      if (row.original.opponent.last_name) {
-        return h(PlayersLink, {
-          player: row.original.opponent
-        })
-      } else {
-        return h(
-          ULink,
-          {
-            class: "hover-link default-link",
-            to: {
-              name: "player",
-              params: { id: row.original.opponent.id, name: "—" }
-            },
-            target: "_blank"
-          },
-          () => row.original.opponent.id
-        )
-      }
-    }
+    cell: ({ row }) =>
+      h("div", { class: "flex items-center gap-2" }, [
+        row.original.opponent.country?.id &&
+          h(CountryLink, {
+            country: row.original.opponent.country,
+            iconOnly: true,
+            class: "mx-0"
+          }),
+        row.original.opponent.last_name ? `${row.original.opponent.first_name} ${row.original.opponent.last_name}` : row.original.opponent.id
+      ])
   },
   {
     id: "wl",

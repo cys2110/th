@@ -94,7 +94,7 @@ const handleSelect = (e: Event, row: TableRow<ActivityMatchType>) => {
             class="flex items-center gap-2"
           >
             {{ venue.name ? `${venue.name}, ${venue.city}` : venue.city }}
-            <countries-link
+            <country-link
               :country="venue.country"
               icon-only
             />
@@ -102,7 +102,7 @@ const handleSelect = (e: Event, row: TableRow<ActivityMatchType>) => {
         </div>
         <div v-if="event.partner">
           <div>Partner</div>
-          <players-link :player="event.partner" />
+          <player-link :player="event.partner" />
         </div>
       </div>
 

@@ -1,45 +1,61 @@
-import { array, object, string, url, z } from "zod"
-import {
-  CurrencyEnum,
-  intToNumberSchema,
-  MatchTypeEnum,
-  neoDateToStringSchema,
-  personSchema,
-  surfaceSchema,
-  tourEnum,
-  TourEnum,
-  venueSchema
-} from "./schemas"
-import { baseTournamentSchema, tournamentSchema } from "./tournamentSchemas"
+import { array, boolean, object, string, union, url, z } from "zod"
+import { countrySchema, intToNumberSchema, neoDateToStringSchema, personSchema, surfaceSchema, venueSchema } from "./schemas"
+import { baseTournamentSchema } from "./tournamentSchemas"
 import { eventSchema } from "./eventSchemas"
+import { CurrencyEnum, MatchTypeEnum, RoundEnum, tourEnumTransform } from "./enums"
 
 export const editionSchema = object({
-  id: intToNumberSchema,
-  year: intToNumberSchema,
-  currency: CurrencyEnum.optional(),
-  tfc: intToNumberSchema.optional(),
-  start_date: neoDateToStringSchema.optional(),
-  end_date: neoDateToStringSchema.optional(),
-  updated_at: neoDateToStringSchema,
-  tours: array(TourEnum.transform(val => tourEnum[val])),
-  sponsor_name: string().optional(),
   category: string().optional(),
-  draw_type: string().optional(),
+  currency: CurrencyEnum.optional(),
   draw_link: url().optional(),
-  wiki_link: url().optional(),
+  draw_type: string().optional(),
+  end_date: neoDateToStringSchema.optional(),
+  events: array(eventSchema).default([]),
+  id: intToNumberSchema,
+  sponsor_name: string().optional(),
+  start_date: neoDateToStringSchema.optional(),
   surface: surfaceSchema.optional(),
+  tfc: intToNumberSchema.optional(),
   tournament: baseTournamentSchema,
+  tours: array(tourEnumTransform),
   venues: array(venueSchema).default([]),
-  winners: array(
+  updated_at: neoDateToStringSchema,
+  wiki_link: url().optional(),
+  winner: union([
     object({
       type: MatchTypeEnum,
-      tour: TourEnum.transform(val => tourEnum[val]),
+      tour: tourEnumTransform,
       team: array(personSchema)
-    })
-  ).default([])
-  // events: array(eventSchema).default([])
+    }),
+    countrySchema
+  ]).optional(),
+  year: intToNumberSchema
 })
+
 export type EditionType = z.infer<typeof editionSchema>
+
+export const playerRecentEventSchema = editionSchema
+  .pick({
+    tournament: true,
+    id: true,
+    year: true,
+    start_date: true,
+    end_date: true,
+    surface: true,
+    category: true
+  })
+  .required({
+    start_date: true,
+    end_date: true,
+    category: true,
+    surface: true
+  })
+  .extend({
+    round: RoundEnum,
+    title: boolean()
+  })
+
+export type PlayerRecentEventType = z.infer<typeof playerRecentEventSchema>
 
 export const baseEditionSchema = editionSchema.pick({
   id: true,
@@ -53,34 +69,35 @@ export const baseEditionSchema = editionSchema.pick({
   venues: true,
   tfc: true,
   currency: true,
-  winners: true
+  winner: true
 })
 export type BaseEditionType = z.infer<typeof baseEditionSchema>
 
 export const editionDetailsSchema = editionSchema.omit({
-  winners: true,
+  winner: true,
   year: true
 })
+
 export type EditionDetailsType = z.infer<typeof editionDetailsSchema>
 
-export const resultsArchiveSchema = editionSchema
-  .pick({
-    id: true,
-    surface: true,
-    venues: true,
-    year: true,
-    category: true,
-    start_date: true,
-    end_date: true
-  })
-  .extend({
-    tournament: tournamentSchema.omit({
-      tours: true
-    }),
-    events: array(
-      eventSchema.extend({
-        umpires: array(personSchema)
-      })
-    )
-  })
-export type ResultsArchiveType = z.infer<typeof resultsArchiveSchema>
+// export const resultsArchiveSchema = editionSchema
+//   .pick({
+//     id: true,
+//     surface: true,
+//     venues: true,
+//     year: true,
+//     category: true,
+//     start_date: true,
+//     end_date: true
+//   })
+//   .extend({
+//     tournament: tournamentSchema.omit({
+//       tours: true
+//     }),
+//     events: array(
+//       eventSchema.extend({
+//         umpires: array(personSchema)
+//       })
+//     )
+//   })
+// export type ResultsArchiveType = z.infer<typeof resultsArchiveSchema>

@@ -29,34 +29,25 @@ const resetSorting = () => set(sortField, [])
 
 watchDeep([continents, countries, itemsPerPage, sortField], () => set(page, 1), { immediate: true })
 
-const { data, status } = await useFetch("/api/countries", {
-  method: "POST",
-  body: { skip, countries, continents, offset: itemsPerPage, sortField },
-  default: () => ({ count: 0, countries: [] })
-})
+// const { data, status } = await useFetch("/api/countries", {
+//   method: "POST",
+//   body: { skip, countries, continents, offset: itemsPerPage, sortField },
+//   default: () => ({ count: 0, countries: [] })
+// })
 
-// Table columns setup
-const table = useTemplateRef<any>("table")
+// // Table columns setup
+// const table = useTemplateRef<any>("table")
 
-const handleSelectRow = (e: Event, row: TableRow<CountryType>) => {
-  router.push({ name: "country", params: { id: row.original.id, name: kebabCase(row.original.name) } })
-}
+// const handleSelectRow = (e: Event, row: TableRow<CountryType>) => {
+//   router.push({ name: "country", params: { id: row.original.id, name: kebabCase(row.original.name) } })
+// }
 </script>
 
 <template>
   <u-container class="min-h-screen flex flex-col">
-    <u-page class="flex-1">
+    <!-- <u-page class="flex-1">
       <template #left>
         <u-page-aside>
-          <ResetFilters :reset-filters />
-
-          <ResetSorting :reset-sorting />
-
-          <table-visibility
-            v-if="!viewMode && table"
-            :table
-          />
-
           <filters
             :filters="['continents']"
             :reset-filters
@@ -64,6 +55,7 @@ const handleSelectRow = (e: Event, row: TableRow<CountryType>) => {
             :sort-fields="sortFields"
             v-model:continents="continents"
             v-model:sorting="sortField"
+            :table
           />
         </u-page-aside>
       </template>
@@ -81,10 +73,10 @@ const handleSelectRow = (e: Event, row: TableRow<CountryType>) => {
 
       <u-page-header title="Countries">
         <template #links>
-          <view-switcher v-model="viewMode" />
+          <view-switcher v-model="viewMode" />-->
 
-          <!--Filters for smaller screens-->
-          <u-slideover
+    <!--Filters for smaller screens-->
+    <!--<u-slideover
             title="Filters"
             class="ml-auto lg:hidden"
           >
@@ -105,18 +97,18 @@ const handleSelectRow = (e: Event, row: TableRow<CountryType>) => {
         </template>
       </u-page-header>
 
-      <u-page-body>
-        <!--Empty template-->
-        <define-empty-template>
+      <u-page-body>-->
+    <!--Empty template-->
+    <!--<define-empty-template>
           <empty
             message="No countries found"
             :icon="ICONS.noCountries"
             class="mx-2"
           />
-        </define-empty-template>
+        </define-empty-template>-->
 
-        <!--Card view-->
-        <template v-if="viewMode">
+    <!--Card view-->
+    <!-- <template v-if="viewMode">
           <u-page-grid v-if="data.count || status === 'pending'">
             <countries-card
               v-if="data.countries.length"
@@ -132,10 +124,10 @@ const handleSelectRow = (e: Event, row: TableRow<CountryType>) => {
             />
           </u-page-grid>
           <reuse-empty-template v-else />
-        </template>
+        </template> -->
 
-        <!--Table view-->
-        <u-table
+    <!--Table view-->
+    <!--<u-table
           v-else
           ref="table"
           :data="data.countries"
@@ -160,6 +152,6 @@ const handleSelectRow = (e: Event, row: TableRow<CountryType>) => {
       :placeholder="data.count === 1 ? 'country' : 'countries'"
       v-model:page="page"
       v-model:items-per-page="itemsPerPage"
-    />
+    /> -->
   </u-container>
 </template>

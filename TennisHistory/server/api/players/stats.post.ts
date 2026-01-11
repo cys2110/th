@@ -162,7 +162,7 @@ export default defineEventHandler(async event => {
       stat: "Return Games Won",
       percent: true,
       value: percentage(
-        results.reduce((acc, r) => r.bps_converted ?? 0 + acc, 0),
+        results.reduce((acc, r) => acc + (r.bps_converted ?? 0), 0),
         results.reduce((acc, r) => acc + (r.return_games ?? 0), 0)
       )
     },

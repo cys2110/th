@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { TableRow } from "@nuxt/ui"
+import { getGroupedRowModel } from "@tanstack/vue-table"
 
 useHead({ title: "Players" })
 const router = useRouter()
@@ -18,6 +19,7 @@ const coaches = ref([])
 const min_year = ref<number>()
 const max_year = ref<number>()
 const status = ref<string>()
+
 const resetFilters = () => {
   const arrayFilters = [players, countries, tours, coaches]
   const undefinedFilters = [min_year, max_year, status]
@@ -32,46 +34,53 @@ const sortFields = [
   { label: "Year of First Tournament", value: "min_year" },
   { label: "Year of Last Tournament", value: "max_year" }
 ]
+
 const resetSorting = () => set(sortField, [])
 
 // Reset page on filter/sort change
-watch([tours, players, countries, coaches, min_year, max_year, status, itemsPerPage, sortField], () => {
-  set(page, 1)
-})
+watchDeep(
+  [tours, players, countries, coaches, min_year, max_year, status, itemsPerPage, sortField],
+  () => {
+    set(page, 1)
+  },
+  { immediate: true }
+)
 
 // API call
-const { data, status: apiStatus } = await useFetch("/api/players", {
-  method: "POST",
-  body: {
-    skip,
-    offset: itemsPerPage,
-    sortField,
-    players,
-    tours,
-    countries,
-    coaches,
-    min_year,
-    max_year,
-    status
-  },
-  default: () => ({ count: 0, players: [] })
-})
+// const { data, status: apiStatus } = await useFetch("/api/players", {
+//   method: "POST",
+//   body: {
+//     skip,
+//     offset: itemsPerPage,
+//     sortField,
+//     players,
+//     tours,
+//     countries,
+//     coaches,
+//     min_year,
+//     max_year,
+//     status
+//   },
+//   default: () => ({ count: 0, players: [] })
+// })
 
-const table = useTemplateRef<any>("table")
-const handleSelect = (e: Event, row: TableRow<BasePlayerType>) => {
-  router.push({
-    name: "player",
-    params: {
-      id: row.original.id,
-      name: row.original.first_name ? kebabCase(`${row.original.first_name} ${row.original.last_name}`) : "—"
-    }
-  })
-}
+// const table = useTemplateRef<any>("table")
+// const handleSelect = (e: Event, row: TableRow<BasePlayerType>) => {
+//   if (!row.getIsGrouped()) {
+//     router.push({
+//       name: "player",
+//       params: {
+//         id: row.original.id,
+//         name: row.original.first_name ? kebabCase(`${row.original.first_name} ${row.original.last_name}`) : "—"
+//       }
+//     })
+//   }
+// }
 </script>
 
 <template>
   <u-container class="min-h-screen flex flex-col">
-    <u-page class="flex-1">
+    <!-- <u-page class="flex-1">
       <template #left>
         <u-page-aside>
           <dev-only>
@@ -108,10 +117,13 @@ const handleSelect = (e: Event, row: TableRow<BasePlayerType>) => {
 
       <u-page-header title="Players">
         <template #links>
-          <view-switcher v-model="viewMode" />
+          <view-switcher
+            v-model="viewMode"
+            class="hidden md:block"
+          />-->
 
-          <!--Filters for smaller screens-->
-          <u-slideover
+    <!--Filters for smaller screens-->
+    <!-- <u-slideover
             title="Filters"
             class="ml-auto lg:hidden"
           >
@@ -138,9 +150,9 @@ const handleSelect = (e: Event, row: TableRow<BasePlayerType>) => {
         </template>
       </u-page-header>
 
-      <u-page-body>
-        <!--Empty template-->
-        <define-empty-template>
+      <u-page-body> -->
+    <!--Empty template-->
+    <!--<define-empty-template>
           <empty
             message="No players found"
             :icon="ICONS.noPeople"
@@ -153,7 +165,7 @@ const handleSelect = (e: Event, row: TableRow<BasePlayerType>) => {
         </define-empty-template>
 
         <template v-if="viewMode">
-          <u-page-grid v-if="data.count || status === 'pending'">
+          <u-page-columns v-if="data.count || status === 'pending'">
             <players-card
               v-if="data.count"
               v-for="player in data.players"
@@ -166,7 +178,7 @@ const handleSelect = (e: Event, row: TableRow<BasePlayerType>) => {
               v-for="_ in 6"
               :key="_"
             />
-          </u-page-grid>
+          </u-page-columns>
 
           <reuse-empty-template v-else />
         </template>
@@ -176,13 +188,19 @@ const handleSelect = (e: Event, row: TableRow<BasePlayerType>) => {
           ref="table"
           :data="data.players"
           :columns="playersColumns"
-          :loading="status === 'pending'"
+          :loading="apiStatus === 'pending'"
+          :grouping-options="{
+            getGroupedRowModel: getGroupedRowModel()
+          }"
           sticky
           @select="handleSelect"
           render-fallback-value="—"
+          :meta="{ class: {
+            tr: (row: TableRow<BasePlayerType>) => row.getIsGrouped() ? 'cursor-default' : `cursor-pointer bg-${row.original.tour}/10`
+          }}"
           :ui="{
-            root: 'max-h-150',
-            tbody: '[&>tr]:cursor-pointer'
+            root: 'max-h-200 xl:max-h-160',
+            td: 'empty: p-0'
           }"
         >
           <template #loading>
@@ -200,6 +218,6 @@ const handleSelect = (e: Event, row: TableRow<BasePlayerType>) => {
       type="player"
       v-model:page="page"
       v-model:items-per-page="itemsPerPage"
-    />
+    /> -->
   </u-container>
 </template>

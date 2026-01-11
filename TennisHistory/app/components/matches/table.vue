@@ -126,7 +126,7 @@ const columns: TableColumn<MatchStatsType["stats"][number]>[] = [
             orientation="vertical"
             class="h-4"
           />
-          <players-link :player />
+          <player-link :player />
         </template>
       </div>
     </template>
@@ -166,7 +166,7 @@ const columns: TableColumn<MatchStatsType["stats"][number]>[] = [
             orientation="vertical"
             class="h-4"
           />
-          <players-link :player />
+          <player-link :player />
         </template>
       </div>
     </template>

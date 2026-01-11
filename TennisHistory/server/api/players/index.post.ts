@@ -53,8 +53,7 @@ export default defineEventHandler(async event => {
         OPTIONAL MATCH (coach:Coach)-[t:COACHES|COACHED]->(p)
         RETURN
           CASE WHEN COUNT(coach) = 0 THEN [] ELSE
-          COLLECT(
-            DISTINCT
+          COLLECT(DISTINCT
             apoc.map.clean(
               apoc.map.merge(
                 apoc.map.submap(

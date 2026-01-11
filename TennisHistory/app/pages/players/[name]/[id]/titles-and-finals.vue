@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { TableRow } from "@nuxt/ui"
+import { getFacetedRowModel, getFacetedUniqueValues } from "@tanstack/vue-table"
 
 definePageMeta({ name: "titles-and-finals" })
 
@@ -14,27 +15,27 @@ const [defineEmptyTemplate, reuseEmptyTemplate] = createReusableTemplate()
 
 const playerName = useState("playerName")
 
-const { data: events, status } = await useFetch("/api/players/titles-and-finals", {
-  query: { id, selection },
-  default: () => []
-})
+// const { data: events, status } = await useFetch("/api/players/titles-and-finals", {
+//   query: { id, selection },
+//   default: () => []
+// })
 
-const handleSelect = (e: Event, row: TableRow<TitlesAndFinalsType>) => {
-  router.push({
-    name: "edition",
-    params: {
-      id: row.original.tournament.id,
-      name: kebabCase(row.original.tournament.name),
-      edId: row.original.id,
-      year: row.original.year
-    }
-  })
-}
+// const handleSelect = (e: Event, row: TableRow<TitlesAndFinalsType>) => {
+//   router.push({
+//     name: "edition",
+//     params: {
+//       id: row.original.tournament.id,
+//       name: kebabCase(row.original.tournament.name),
+//       edId: row.original.id,
+//       year: row.original.year
+//     }
+//   })
+// }
 </script>
 
 <template>
   <u-container class="max-w-7xl">
-    <u-page>
+    <!-- <u-page>
       <players-wrapper>
         <template #header-links>
           <view-switcher v-model="viewMode" />
@@ -129,6 +130,10 @@ const handleSelect = (e: Event, row: TableRow<TitlesAndFinalsType>) => {
           :data="events"
           :columns="titlesAndFinalsColumns"
           :loading="status === 'pending'"
+          :faceted-options="{
+            getFacetedRowModel: getFacetedRowModel(),
+            getFacetedUniqueValues: getFacetedUniqueValues()
+          }"
           sticky
           @select="handleSelect"
           :ui="{ root: 'w-fit min-w-1/3 mx-auto', tbody: '[&>tr]:cursor-pointer', td: 'empty:p-0' }"
@@ -141,6 +146,6 @@ const handleSelect = (e: Event, row: TableRow<TitlesAndFinalsType>) => {
           </template>
         </u-table>
       </u-page-body>
-    </u-page>
+    </u-page> -->
   </u-container>
 </template>

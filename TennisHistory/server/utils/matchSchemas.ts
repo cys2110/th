@@ -40,57 +40,57 @@ const scoreFormSchema = object({
   return_games: numberToIntSchema.nullish().default(null)
 })
 
-export const matchFormSchema = object({
-  id: string().optional(),
-  event: string(),
-  type: MatchTypeEnum,
-  draw: DrawEnum,
-  round: RoundEnum,
-  match_no: numberToIntSchema,
-  incomplete: IncompleteEnum.nullish().default(null),
-  court: string().nullish().default(null),
-  date: dateToNeoDateSchema.nullish().default(null),
-  duration: string().nullish().default(null),
-  group: string().nullish().default(null),
-  umpire: optionSchema.optional(),
-  t1: optionSchema.optional(),
-  t2: optionSchema.optional(),
-  winner: literal(["t1", "t2"]).optional(),
-  noOfSets: literal(["Best Of 3", "Best Of 5"]).optional(),
-  team1: scoreFormSchema,
-  team2: scoreFormSchema
-}).transform(data => {
-  const mid = data.id ?? `${data.event} ${data.type.charAt(0)} ${data.draw.charAt(0)} ${data.match_no}`
+// export const matchFormSchema = object({
+//   id: string().optional(),
+//   event: string(),
+//   type: MatchTypeEnum,
+//   draw: DrawEnum,
+//   round: RoundEnum,
+//   match_no: numberToIntSchema,
+//   incomplete: IncompleteEnum.nullish().default(null),
+//   court: string().nullish().default(null),
+//   date: dateToNeoDateSchema.nullish().default(null),
+//   duration: string().nullish().default(null),
+//   group: string().nullish().default(null),
+//   umpire: optionSchema.optional(),
+//   t1: optionSchema.optional(),
+//   t2: optionSchema.optional(),
+//   winner: literal(["t1", "t2"]).optional(),
+//   noOfSets: literal(["Best Of 3", "Best Of 5"]).optional(),
+//   team1: scoreFormSchema,
+//   team2: scoreFormSchema
+// }).transform(data => {
+//   const mid = data.id ?? `${data.event} ${data.type.charAt(0)} ${data.draw.charAt(0)} ${data.match_no}`
 
-  let duration = null
+//   let duration = null
 
-  if (data.duration) {
-    const parts = data.duration.split(":").map(part => parseInt(part, 10))
-    const hours = parts.length === 3 ? parts[0] : 0
-    const minutes = parts.length === 3 ? parts[1] : parts[0]
-    const seconds = parts.length === 3 ? parts[2] : parts[1]
+//   if (data.duration) {
+//     const parts = data.duration.split(":").map(part => parseInt(part, 10))
+//     const hours = parts.length === 3 ? parts[0] : 0
+//     const minutes = parts.length === 3 ? parts[1] : parts[0]
+//     const seconds = parts.length === 3 ? parts[2] : parts[1]
 
-    const allSeconds = Number(hours) * 3600 + Number(minutes) * 60 + Number(seconds)
-    duration = new Duration(0, 0, allSeconds, 0)
-  }
+//     const allSeconds = Number(hours) * 3600 + Number(minutes) * 60 + Number(seconds)
+//     duration = new Duration(0, 0, allSeconds, 0)
+//   }
 
-  return {
-    ...data,
-    id: mid,
-    team1: {
-      ...data.team1,
-      id: data.team1.id ?? `${mid} ${(data.t1 as string).replace(data.event, "").trim()}`
-    },
-    team2: {
-      ...data.team2,
-      id: data.team2.id ?? `${mid} ${(data.t2 as string).replace(data.event, "").trim()}`
-    },
-    match: {
-      duration,
-      incomplete: data.incomplete,
-      court: data.court,
-      date: data.date,
-      group: data.group
-    }
-  }
-})
+//   return {
+//     ...data,
+//     id: mid,
+//     team1: {
+//       ...data.team1,
+//       id: data.team1.id ?? `${mid} ${(data.t1 as string).replace(data.event, "").trim()}`
+//     },
+//     team2: {
+//       ...data.team2,
+//       id: data.team2.id ?? `${mid} ${(data.t2 as string).replace(data.event, "").trim()}`
+//     },
+//     match: {
+//       duration,
+//       incomplete: data.incomplete,
+//       court: data.court,
+//       date: data.date,
+//       group: data.group
+//     }
+//   }
+// })

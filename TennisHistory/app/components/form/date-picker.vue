@@ -6,8 +6,9 @@ defineProps<{
   max?: string
 }>()
 
-const inputDateRef = useTemplateRef("inputDateRef")
 const date = defineModel<CalendarDate>()
+
+const inputDateRef = useTemplateRef("inputDateRef")
 </script>
 
 <template>
@@ -23,7 +24,7 @@ const date = defineModel<CalendarDate>()
         <u-button
           color="neutral"
           variant="link"
-          :icon="ICONS.event"
+          :icon="ICONS.calendar"
           aria-label="Select date"
           class="px-0"
         />

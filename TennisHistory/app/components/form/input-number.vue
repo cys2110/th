@@ -1,9 +1,15 @@
 <script setup lang="ts">
-defineProps<{
-  placeholder: string
-  currency?: CurrencyEnumType
-  disabled?: boolean
-}>()
+withDefaults(
+  defineProps<{
+    placeholder: string
+    currency?: CurrencyEnumType
+    disabled?: boolean
+  }>(),
+  {
+    disabled: false
+  }
+)
+
 const modelValue = defineModel<number>()
 const {
   ui: { icons }
@@ -31,7 +37,6 @@ const {
         v-if="isDefined(modelValue)"
         color="neutral"
         variant="link"
-        size="xs"
         :icon="icons.close"
         aria-label="Clear input"
         @click="modelValue = undefined"

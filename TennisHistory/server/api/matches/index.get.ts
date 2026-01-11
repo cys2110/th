@@ -1,5 +1,4 @@
 import { int } from "neo4j-driver"
-import { rawMatchSchema } from "~~/shared/types/matchSchemas"
 
 export default defineEventHandler(async query => {
   const { edId, tour, matchNo, draw, type } = getQuery(query)

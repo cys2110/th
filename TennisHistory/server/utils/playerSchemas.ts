@@ -1,5 +1,39 @@
-import { array, object, string, url } from "zod"
+import { array, object, string, union, url } from "zod"
 import { dateToNeoDateSchema, optionSchema } from "./schemas"
+
+export const playerQuerySchema = paginationSchema.extend({
+  coaches: array(optionSchema).default([]),
+  countries: array(optionSchema).default([]),
+  grouping: array(string()).default([]),
+  key: union([numberToIntSchema, string()]).nullable().default(null),
+  players: array(optionSchema).default([]),
+  tours: array(TourInputEnum).default([])
+})
+
+export const activityQuerySchema = object({
+  id: string(),
+  categories: array(string()).default([]),
+  levels: array(LevelEnum).default([]),
+  matchType: MatchTypeEnum.default("Singles"),
+  surfaces: array(SurfaceEnum).default([]),
+  tournaments: array(optionSchema).default([]),
+  years: array(numberToIntSchema).default([])
+})
+
+export const wlIndexQuerySchema = object({
+  id: string(),
+  levels: array(LevelEnum).default([]),
+  drawType: DrawEnum.nullable().default(null),
+  years: array(numberToIntSchema).default([])
+})
+
+export const playerStatsQuerySchema = object({
+  id: string(),
+  levels: array(LevelEnum).default([]),
+  drawType: DrawEnum.nullable().default(null),
+  years: array(numberToIntSchema).default([]),
+  surfaces: array(SurfaceEnum).default([])
+})
 
 export const playerFormSchema = object({
   id: string(),
@@ -8,7 +42,7 @@ export const playerFormSchema = object({
   country: object({
     name: optionSchema,
     start_date: dateToNeoDateSchema.optional()
-  }).optional(),
+  }),
   former_countries: array(
     object({
       name: optionSchema,
@@ -20,8 +54,8 @@ export const playerFormSchema = object({
   ).nullish(),
   official_link: url().nullish(),
   wiki_link: url().nullish(),
-  dob: dateToNeoDateSchema.optional(),
-  dod: dateToNeoDateSchema.optional(),
+  dob: dateToNeoDateSchema.nullish(),
+  dod: dateToNeoDateSchema.nullish(),
   height: numberToIntSchema.nullish(),
   rh: string().nullish(),
   bh: string().nullish(),
@@ -41,37 +75,35 @@ export const playerFormSchema = object({
     })
   ).nullish()
 }).transform(data => {
-  const { id, country, former_countries, coaches, former_coaches, hof, turned_pro, retired, ...rest } = data
+  const { first_name, last_name, official_link, wiki_link, dob, dod, height, rh, bh, ...rest } = data
 
-  return {
-    id,
-    hof,
-    country,
-    former_countries: former_countries
-      ? former_countries.map(country => ({
-          name: country.name,
-          dates: country.dates
-            ? {
-                start_date: country.dates.start,
-                end_date: country.dates.end
-              }
-            : undefined
-        }))
-      : undefined,
-    coaches,
-    former_coaches,
-    retired,
-    turned_pro,
+  const newObject = {
+    ...rest,
     player: {
-      ...rest
+      first_name,
+      last_name,
+      official_link,
+      wiki_link,
+      dob,
+      dod,
+      height,
+      rh,
+      bh
     }
   }
+
+  // Remove undefined values from player object in order not to reset values unintentionally
+  Object.keys(newObject.player).forEach(key => {
+    if (newObject.player[key as keyof typeof newObject.player] === undefined) {
+      delete newObject.player[key as keyof typeof newObject.player]
+    }
+  })
+
+  return newObject
 })
 
 export const playerRecordSchema = object({
-  tournament: tournamentSchema.omit({
-    tours: true
-  }),
+  tournament: baseTournamentSchema,
   round: RoundEnum,
   year: intToNumberSchema
 })

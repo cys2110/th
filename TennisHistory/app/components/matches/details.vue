@@ -65,7 +65,7 @@ const calendarDate = computed(() => {
               orientation="vertical"
               class="h-4"
             />
-            <players-link :player />
+            <player-link :player />
             <small v-if="isDefined(player.rank)">[{{ player.rank }}]</small>
           </template>
 
@@ -102,7 +102,7 @@ const calendarDate = computed(() => {
               orientation="vertical"
               class="h-4"
             />
-            <players-link :player />
+            <player-link :player />
             <small v-if="isDefined(player.rank)">[{{ player.rank }}]</small>
           </template>
 

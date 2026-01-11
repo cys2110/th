@@ -1,55 +1,81 @@
+import { ZodError } from "zod"
+
 export default defineEventHandler(async event => {
-  const params = await readValidatedBody(event, body => tournamentFormSchema.parse(body))
+  try {
+    const params = await readValidatedBody(event, body => tournamentFormSchema.parse(body))
 
-  let query = `/* cypher */
-    MATCH (t:Tournament {id: $id})
-    SET t += $tournament, t.updated_at = date()
-  `
-
-  if ("tours" in params && params.tours !== undefined) {
-    query += `
-      REMOVE t:$( [x IN labels(t) WHERE x <> 'Tournament'] )
-      SET t:$( $tours )
-    `
-  }
-
-  if ("established" in params && params.established !== undefined) {
-    query += `
-      WITH t
-      OPTIONAL MATCH (t)-[t1:ESTABLISHED]->(:Year)
-      DELETE t1
+    let query = `/* cypher */
+      MATCH (t:Tournament {id: $id})
+      SET t += $tournament, t.updated_at = date()
     `
 
-    if (params.established) {
+    if ("tours" in params) {
       query += `
-        WITH t
-        MATCH (y:Year {id: $established})
-        MERGE (t)-[:ESTABLISHED]->(y)
+        REMOVE t:$( [x IN labels(t) WHERE x <> 'Tournament'] )
+        SET t:$( $tours )
       `
     }
-  }
 
-  if ("abolished" in params && params.abolished !== undefined) {
-    query += `
-      WITH t
-      OPTIONAL MATCH (t)-[t1:ABOLISHED]->(:Year)
-      DELETE t1
-    `
+    if ("established" in params) {
+      query += `
+          WITH t
+          OPTIONAL MATCH (t)-[t1:ESTABLISHED]->(:Year)
+          DELETE t1
+        `
 
-    if (params.abolished) {
+      if (params.established) {
+        query += `
+          WITH t
+          MATCH (y:Year {id: $established})
+          MERGE (t)-[:ESTABLISHED]->(y)
+        `
+      }
+    }
+
+    if ("abolished" in params) {
       query += `
         WITH t
-        MATCH (y:Year {id: $abolished})
-        MERGE (t)-[:ABOLISHED]->(y)
+        OPTIONAL MATCH (t)-[t1:ABOLISHED]->(:Year)
+        DELETE t1
       `
+
+      if (params.abolished) {
+        query += `
+          WITH t
+          MATCH (y:Year {id: $abolished})
+          MERGE (t)-[:ABOLISHED]->(y)
+        `
+      }
     }
-  }
 
-  const { summary } = await useDriver().executeQuery(query, params)
+    const { summary } = await useDriver().executeQuery(query, params)
 
-  if (Object.values(summary.counters.updates()).every(v => v === 0)) {
-    throw createError({ statusCode: 400, statusMessage: "Tournament could not be updated" })
-  } else {
-    return { ok: true }
+    if (summary.gqlStatusObjects.some(s => s.gqlStatus === "02000")) {
+      throw createError({
+        statusCode: 400,
+        statusMessage: `${params.tournament.name} could not be found.`
+      })
+    } else if (Object.values(summary.counters.updates()).every(v => v === 0)) {
+      throw createError({
+        statusCode: 400,
+        statusMessage: `No changes to save for ${params.tournament.name}.`
+      })
+    } else {
+      return { success: true }
+    }
+  } catch (error) {
+    const zodErr = error instanceof ZodError ? error : error instanceof Error && error.cause instanceof ZodError ? error.cause : null
+
+    if (zodErr) {
+      throw createError({
+        statusCode: 400,
+        statusMessage: "Invalid request body",
+        data: {
+          validationErrors: zodErr.issues
+        }
+      })
+    }
+
+    throw error
   }
 })

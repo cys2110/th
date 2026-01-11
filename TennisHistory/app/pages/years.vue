@@ -5,46 +5,46 @@ const {
   ui: { icons }
 } = useAppConfig()
 
-const { data: year } = await useFetch("/api/years", {
-  query: { id },
-  default: () => ({ tournaments: [], players: [] })
-})
+// const { data: year } = await useFetch("/api/years", {
+//   query: { id },
+//   default: () => ({ tournaments: [], players: [] })
+// })
 
-const tournamentCollapsibles = computed(() => {
-  const tournamentTypes = useArrayUnique(year.value.tournaments.map(t => t.type)).value
+// const tournamentCollapsibles = computed(() => {
+//   const tournamentTypes = useArrayUnique(year.value.tournaments.map(t => t.type)).value
 
-  const labelMapping = {
-    ESTABLISHED: "established",
-    ABOLISHED: "abolished"
-  }
+//   const labelMapping = {
+//     ESTABLISHED: "established",
+//     ABOLISHED: "abolished"
+//   }
 
-  return tournamentTypes.map(type => ({
-    label: labelMapping[type as keyof typeof labelMapping],
-    tournaments: year.value.tournaments.filter(t => t.type === type)
-  }))
-})
+//   return tournamentTypes.map(type => ({
+//     label: labelMapping[type as keyof typeof labelMapping],
+//     tournaments: year.value.tournaments.filter(t => t.type === type)
+//   }))
+// })
 
-const playerCollapsibles = computed(() => {
-  const playerStatuses = useArrayUnique(year.value.players.map(p => p.type)).value
+// const playerCollapsibles = computed(() => {
+//   const playerStatuses = useArrayUnique(year.value.players.map(p => p.type)).value
 
-  const labelMapping = {
-    Born: "born",
-    Died: "who died",
-    RETIRED: "who retired",
-    TURNED_PRO: "who turned pro",
-    "Hall of Fame Induction": "inducted into the Hall of Fame"
-  }
+//   const labelMapping = {
+//     Born: "born",
+//     Died: "who died",
+//     RETIRED: "who retired",
+//     TURNED_PRO: "who turned pro",
+//     "Hall of Fame Induction": "inducted into the Hall of Fame"
+//   }
 
-  return playerStatuses.map(status => ({
-    label: labelMapping[status as keyof typeof labelMapping],
-    players: year.value.players.filter(p => p.type === status)
-  }))
-})
+//   return playerStatuses.map(status => ({
+//     label: labelMapping[status as keyof typeof labelMapping],
+//     players: year.value.players.filter(p => p.type === status)
+//   }))
+// })
 </script>
 
 <template>
   <u-container>
-    <u-page>
+    <!-- <u-page>
       <template #left>
         <u-page-aside>
           <form-input-menu
@@ -115,7 +115,7 @@ const playerCollapsibles = computed(() => {
               <div
                 class="flex flex-col gap-2 max-h-100 overflow-y-auto scrollbar-thin scrollbar-thumb-primary-600 scrollbar-track-transparent scrollbar-thumb-rounded-full text-sm ml-3"
               >
-                <players-link
+                <player-link
                   v-for="player in type.players"
                   :key="player.id"
                   :player
@@ -131,6 +131,6 @@ const playerCollapsibles = computed(() => {
           :icon="ICONS.noEdition"
         />
       </u-page-body>
-    </u-page>
+    </u-page> -->
   </u-container>
 </template>

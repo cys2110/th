@@ -24,6 +24,7 @@ const { data: player } = await useFetch("/api/players/overview", {
   query: { id }
 })
 
+// Set browser tab name here to set for all player sub-pages
 useHead({
   title: () =>
     `${currentPage.value?.label} | ${player.value?.first_name ? `${player.value.first_name} ${player.value.last_name}` : capitalCase(name)}`
@@ -64,42 +65,45 @@ const activeRoute = computed({
 <template>
   <u-page-header
     :title="playerName"
-    class="border-none mb-0"
+    :ui="{
+      root: 'border-none mb-0',
+      description: 'text-md w-fit flex items-center gap-2'
+    }"
   >
     <template #headline>
       <breadcrumbs />
     </template>
 
-    <template #description>
-      <div
-        v-if="player"
-        class="flex items-center gap-2 w-fit mb-2"
-      >
-        <countries-link
-          v-if="player?.country?.id"
-          :country="player.country"
-          icon-only
-        />
+    <template
+      #description
+      v-if="player"
+    >
+      <country-link
+        v-if="player?.country?.id"
+        :country="player.country"
+        icon-only
+      />
 
-        <u-badge
-          :color="activeYears.active ? 'Active' : 'Inactive'"
-          :label="activeYears.active ? 'Active' : 'Inactive'"
-        />
+      <u-badge
+        :color="activeYears.active ? 'Active' : 'Inactive'"
+        :label="activeYears.active ? 'Active' : 'Inactive'"
+      />
 
-        <u-badge
-          :color="(player.tour as keyof typeof colors)"
-          :label="player.tour"
-        />
+      <u-badge
+        :color="(player.tour as keyof typeof colors)"
+        :label="player.tour"
+      />
 
-        <div>
-          Years Active: {{ activeYears.activeYears }} ({{ activeYears.numberOfYears }} year{{ activeYears.numberOfYears === 1 ? "" : "s" }})
-        </div>
-      </div>
+      <div> Years Active: {{ activeYears.activeYears }} ({{ activeYears.numberOfYears }} year{{ activeYears.numberOfYears === 1 ? "" : "s" }}) </div>
+    </template>
+
+    <template #default>
       <u-tabs
         v-model="activeRoute"
         :content="false"
         :items="playerPages"
         variant="link"
+        :ui="{ list: 'justify-end' }"
       />
     </template>
 

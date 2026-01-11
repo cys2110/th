@@ -1,4 +1,4 @@
-import { PlayersLink, ULink } from "#components"
+import { PlayerLink, ULink } from "#components"
 import type { TableColumn, TableRow } from "@nuxt/ui"
 
 const columns: (players: H2HPlayerType[]) => TableColumn<H2HBaseType>[] = players => [
@@ -15,7 +15,7 @@ const columns: (players: H2HPlayerType[]) => TableColumn<H2HBaseType>[] = player
     cell: ({ row }) => {
       const player = players.find(p => p.id === row.original.player)
 
-      return h(PlayersLink, { player: player as PersonType })
+      return h(PlayerLink, { player: player as PersonType })
     }
   },
   ...players.map(player => ({

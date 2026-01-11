@@ -20,88 +20,88 @@ const updating = ref(false)
 
 const [defineEmptyTemplate, reuseEmptyTemplate] = createReusableTemplate()
 
-const { data, status, refresh } = await useFetch("/api/editions/results", {
-  query: { edId },
-  default: () => []
-})
+// const { data, status, refresh } = await useFetch("/api/editions/results", {
+//   query: { edId },
+//   default: () => []
+// })
 
-const matches = computed(() => {
-  const consolidatedData = []
+// const matches = computed(() => {
+//   const consolidatedData = []
 
-  const rounds = useArrayUnique(data.value.map(m => m.round))
+//   const rounds = useArrayUnique(data.value.map(m => m.round))
 
-  for (const round of rounds.value) {
-    const roundMatches = data.value.filter(m => m.round === round)
-    consolidatedData.push({ title: round, matches: roundMatches })
-  }
-  return consolidatedData
-})
+//   for (const round of rounds.value) {
+//     const roundMatches = data.value.filter(m => m.round === round)
+//     consolidatedData.push({ title: round, matches: roundMatches })
+//   }
+//   return consolidatedData
+// })
 
-const updateTiebreaks = async () => {
-  set(updating, true)
-  try {
-    const response = await $fetch("/api/matches/tiebreaks", {
-      query: { id: edId }
-    })
-    if ((response as any).ok) {
-      toast.add({
-        title: "Tiebreaks updated successfully",
-        icon: icons.check,
-        color: "success"
-      })
-      refresh()
-    } else {
-      toast.add({
-        title: "Error updating tiebreaks",
-        description: (response as any).message,
-        icon: icons.error,
-        color: "error"
-      })
-    }
-  } catch (e) {
-    toast.add({
-      title: "Error updating tiebreaks",
-      description: (e as Error).message,
-      icon: icons.error,
-      color: "error"
-    })
-  } finally {
-    set(updating, false)
-  }
-}
+// const updateTiebreaks = async () => {
+//   set(updating, true)
+//   try {
+//     const response = await $fetch("/api/matches/tiebreaks", {
+//       query: { id: edId }
+//     })
+//     if ((response as any).ok) {
+//       toast.add({
+//         title: "Tiebreaks updated successfully",
+//         icon: icons.check,
+//         color: "success"
+//       })
+//       refresh()
+//     } else {
+//       toast.add({
+//         title: "Error updating tiebreaks",
+//         description: (response as any).message,
+//         icon: icons.error,
+//         color: "error"
+//       })
+//     }
+//   } catch (e) {
+//     toast.add({
+//       title: "Error updating tiebreaks",
+//       description: (e as Error).message,
+//       icon: icons.error,
+//       color: "error"
+//     })
+//   } finally {
+//     set(updating, false)
+//   }
+// }
 
-const grouping = ref<string[]>([])
-const grouping_options = ref<GroupingOptions>({
-  groupedColumnMode: "remove",
-  getGroupedRowModel: getGroupedRowModel()
-})
+// const grouping = ref<string[]>([])
+// const grouping_options = ref<GroupingOptions>({
+//   groupedColumnMode: "remove",
+//   getGroupedRowModel: getGroupedRowModel()
+// })
 
-const handleSelect = (e: Event, row: TableRow<ResultMatchType>) => {
-  if (devMode || row.original.stats) {
-    const { tour, draw, type, match_no } = row.original
+// const handleSelect = (e: Event, row: TableRow<ResultMatchType>) => {
+//   if (devMode || row.original.stats) {
+//     const { tour, draw, type, match_no } = row.original
 
-    router.push({
-      name: "match",
-      params: {
-        id,
-        name,
-        year,
-        edId
-      },
-      query: {
-        tour,
-        draw,
-        type,
-        match_no
-      }
-    })
-  }
-}
+//     router.push({
+//       name: "match",
+//       params: {
+//         id,
+//         name,
+//         year,
+//         edId
+//       },
+//       query: {
+//         tour,
+//         draw,
+//         type,
+//         match_no
+//       }
+//     })
+//   }
+// }
 </script>
 
 <template>
   <u-container>
-    <u-page :ui="{ center: devMode ? '' : 'lg:col-span-10' }">
+    <!-- <u-page :ui="{ center: devMode ? '' : 'lg:col-span-10' }">
       <template
         #left
         v-if="devMode"
@@ -203,6 +203,6 @@ const handleSelect = (e: Event, row: TableRow<ResultMatchType>) => {
           </template>
         </u-table>
       </u-page-body>
-    </u-page>
+    </u-page> -->
   </u-container>
 </template>

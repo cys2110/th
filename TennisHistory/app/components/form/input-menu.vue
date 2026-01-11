@@ -1,9 +1,18 @@
 <script setup lang="ts">
-defineProps<{
-  items: any[]
-  placeholder: string
-  multiple?: boolean
-}>()
+withDefaults(
+  defineProps<{
+    items: any[]
+    placeholder?: string
+    multiple?: boolean
+    disabled?: boolean
+  }>(),
+  {
+    multiple: false,
+    placeholder: "Select an option",
+    disabled: false
+  }
+)
+
 const modelValue = defineModel<any>()
 
 const {
@@ -17,11 +26,11 @@ const {
     :items
     :placeholder
     :multiple
+    :disabled
   >
     <template #content-bottom>
       <u-button
         label="Clear"
-        size="xs"
         @click="modelValue = multiple ? [] : undefined"
         :icon="icons.close"
         block

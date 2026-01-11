@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { FormErrorEvent, FormSubmitEvent } from "@nuxt/ui"
 
-const { tour } = defineProps<{
+const props = defineProps<{
   tour: keyof typeof tourEnum
 }>()
 
@@ -24,30 +24,7 @@ const initialState = {
   draw: "Main" as DrawEnumType
 }
 
-const state = ref<Partial<ScrapeFormInput>>({ ...initialState })
-
-const formFields = computed<FormFieldInterface<ScrapeFormSchema>[]>(
-  () =>
-    [
-      { label: "Site ID", key: "tid2", type: "text", subType: "number", class: "col-span-2" },
-      ...(tour === "ATP" ? [{ label: "Draw Size", key: "draw_size", type: "number", required: true }] : []),
-      ...(tour === "ATP" ? [{ label: "Match Type", key: "type", type: "radio", items: ["Singles", "Doubles"], required: true }] : []),
-      ...(tour === "ATP" ? [{ label: "Draw", key: "draw", type: "radio", items: ["Main", "Qualifying"], required: true }] : []),
-      ...(tour === "ATP"
-        ? [
-            {
-              label: "Best of",
-              key: "sets",
-              type: "radio",
-              items: [
-                { label: "Best of 3", value: "BestOf3" },
-                { label: "Best of 5", value: "BestOf5" }
-              ]
-            }
-          ]
-        : [])
-    ] as FormFieldInterface<ScrapeFormSchema>[]
-)
+const state = ref<Partial<ScrapeFormInput>>(cloneDeep(initialState))
 
 const handleReset = () => set(state, { ...initialState })
 
@@ -55,14 +32,15 @@ const onError = (event: FormErrorEvent) => console.error(event.errors)
 
 const onSubmit = async (event: FormSubmitEvent<ScrapeFormSchema>) => {
   set(scraping, true)
+
   try {
-    const response = await $fetch(`${FLASK_ROUTE}/${tour.toLowerCase()}_draw`, {
+    const response = await $fetch(`${FLASK_ROUTE}/${props.tour.toLowerCase()}_draw`, {
       method: "POST",
       timeout: 120_000,
       "Content-Type": "application/json",
       body: JSON.stringify(event.data)
     })
-    if ((response as any).ok) {
+    if ((response as any).success) {
       toast.add({
         title: "Draw scraped",
         icon: icons.success,
@@ -87,6 +65,28 @@ const onSubmit = async (event: FormSubmitEvent<ScrapeFormSchema>) => {
     set(scraping, false)
   }
 }
+
+const formFields = computed<FormFieldInterface<ScrapeFormSchema>[]>(() => {
+  if (props.tour === "ATP") {
+    return [
+      { label: "Site ID", key: "tid2", type: "text", subType: "number", class: "col-span-2" },
+      { label: "Draw Size", key: "draw_size", type: "number", required: true },
+      { label: "Match Type", key: "type", type: "radio", items: ["Singles", "Doubles"], required: true },
+      { label: "Draw", key: "draw", type: "radio", items: ["Main", "Qualifying"], required: true },
+      {
+        label: "Best of",
+        key: "sets",
+        type: "radio",
+        items: [
+          { label: "Best of 3", value: "BestOf3" },
+          { label: "Best of 5", value: "BestOf5" }
+        ]
+      }
+    ]
+  } else {
+    return [{ label: "Site ID", key: "tid2", type: "text", subType: "number", class: "col-span-2" }]
+  }
+})
 </script>
 
 <template>
@@ -97,6 +97,7 @@ const onSubmit = async (event: FormSubmitEvent<ScrapeFormSchema>) => {
     <u-button
       :icon="ICONS.draw"
       :ui="{ leadingIcon: 'rotate-270' }"
+      color="Doubles"
     />
 
     <template #body>

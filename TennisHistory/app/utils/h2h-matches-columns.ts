@@ -1,4 +1,4 @@
-import { PlayersLink, UBadge, ULink } from "#components"
+import { PlayerLink, UBadge, ULink } from "#components"
 import type { TableColumn } from "@nuxt/ui"
 
 const columns = (teams: { team1: H2HTeamType; team2: H2HTeamType }): TableColumn<H2HMatchType>[] => [
@@ -31,7 +31,7 @@ const columns = (teams: { team1: H2HTeamType; team2: H2HTeamType }): TableColumn
         "div",
         { class: "flex flex-col items-center" },
         (row.original.winning_team === "t1" ? teams.team1.players : teams.team2.players).map(p =>
-          h(PlayersLink, { key: p.id, player: p as PersonType })
+          h(PlayerLink, { key: p.id, player: p as PersonType })
         )
       )
   },

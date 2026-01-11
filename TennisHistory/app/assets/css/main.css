@@ -2,14 +2,22 @@
 @import "@nuxt/ui";
 @plugin 'tailwind-scrollbar';
 
-@theme {
-  --font-sans: "Fira Sans Condensed", sans-serif;
-  --font-cursive: "Petit Formal Script", cursive;
-  --container-8xl: 120rem;
-}
-
+/* Remove scrollbar appearance */
 ::-webkit-scrollbar {
   display: none;
+}
+
+/* Remove input number spinners */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+@theme {
+  --font-sans: "Jost", sans-serif;
+  --font-cursive: "Homemade Apple", cursive;
+  --container-8xl: 120rem;
 }
 
 :root {
@@ -23,10 +31,8 @@
   --ui-bg-elevated: var(--ui-color-neutral-800);
 }
 
-input::-webkit-outer-spin-button,
-input::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
+.hover-link {
+  @apply bg-linear-to-r bg-bottom bg-[length:0_1px] bg-no-repeat transition-[background-size] hover:bg-[length:100%_1px] w-fit duration-500 cursor-pointer;
 }
 
 .hover-link {
@@ -39,4 +45,12 @@ input::-webkit-inner-spin-button {
 
 .primary-link {
   @apply text-primary from-primary to-primary;
+}
+
+.success-link {
+  @apply text-success from-success to-success;
+}
+
+.scrollbar {
+  @apply scrollbar-thin scrollbar-thumb-primary-600 scrollbar-track-transparent overflow-y-auto scroll-smooth max-h-200 2xl:max-h-150;
 }

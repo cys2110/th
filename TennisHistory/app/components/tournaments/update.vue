@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import type { FormErrorEvent, FormSubmitEvent } from "@nuxt/ui"
-import { cloneDeep, isEqual } from "lodash"
+import type { FetchError } from "ofetch"
 
-const { tournament, refresh } = defineProps<{
+const props = defineProps<{
   tournament?: TournamentType
   refresh?: () => void
 }>()
@@ -17,24 +17,11 @@ const open = ref(false)
 const uploading = ref(false)
 
 const initialState = {
-  ...tournament,
-  tours: tournament?.tours
-    ? tournament.tours.map(tour => {
-        return tourEnum[tour]
-      })
-    : []
+  ...props.tournament,
+  tours: props.tournament?.tours ? props.tournament.tours.map(tour => tourEnumTransform.parse(tour) as TourInputEnumType) : []
 }
 
 const state = ref<Partial<TournamentFormInput>>(cloneDeep(initialState))
-
-const formFields: FormFieldInterface<TournamentFormSchema>[] = [
-  { label: "ID", key: "id", type: "text", subType: "number", required: true, disabled: !!tournament },
-  { label: "Tours", key: "tours", type: "checkbox", items: TOUR_OPTIONS, required: true },
-  { label: "Name", key: "name", type: "text", required: true, class: "col-span-2" },
-  { label: "Established", placeholder: "Enter year established", key: "established", type: "text", subType: "number" },
-  { label: "Abolished", placeholder: "Enter year abolished", key: "abolished", type: "text", subType: "number" },
-  { label: "Website", placeholder: "Enter website URL", key: "website", type: "textarea", class: "col-span-2" }
-]
 
 const handleReset = () => set(state, cloneDeep(initialState))
 
@@ -43,49 +30,75 @@ const onError = (event: FormErrorEvent) => console.error(event.errors)
 const onSubmit = async (event: FormSubmitEvent<TournamentFormSchema>) => {
   set(uploading, true)
 
-  // Get dirty fields from the form
+  // Only send the changed fields to reduce payload size
   const fields = Object.keys(event.data) as (keyof TournamentFormSchema)[]
   const dirtyFields: Partial<TournamentFormSchema> = {}
-  fields.forEach(field => {
+
+  for (const field of fields) {
+    if (field === "id") dirtyFields[field] = event.data[field] // Always include ID to identify the tournament
+
     if (!isEqual(event.data[field], initialState[field])) {
       // @ts-expect-error
       dirtyFields[field] = event.data[field] ?? null
     }
-  })
+  }
 
   if (Object.keys(dirtyFields).length) {
-    dirtyFields["id"] = event.data.id // Always include the tournament ID
-
-    const response = await $fetch(`/api/tournaments/${tournament ? "update" : "create"}`, {
-      method: "POST",
-      body: dirtyFields
-    })
-
-    if ((response as any).ok) {
-      toast.add({
-        title: `${event.data.name} ${tournament ? "updated" : "created"}`,
-        icon: icons.success,
-        color: "success"
+    try {
+      const response = await $fetch(`/api/tournaments/${props.tournament ? "update" : "create"}`, {
+        method: "POST",
+        body: dirtyFields
       })
 
-      if (refresh) {
-        refresh() // Refresh tournament details
-
-        nextTick(() => {
-          handleReset() // Reset form to updated tournament details
+      if (response?.success) {
+        toast.add({
+          title: `${event.data.name} successfully ${props.tournament ? "updated" : "created"}`,
+          icon: icons.success,
+          color: "success"
         })
+
+        if (props.refresh) {
+          // Refresh tournament details and update form with latest data
+          props.refresh()
+
+          await nextTick(() => {
+            handleReset()
+            set(open, false)
+          })
+        } else {
+          // Navigate to the new tournament page
+          router.push({
+            name: "tournament",
+            params: {
+              id: event.data.id,
+              name: kebabCase(event.data.name)
+            }
+          })
+        }
       } else {
-        // Navigate to the new tournament page
-        router.push({
-          name: "tournament",
-          params: { id: event.data.id.toString(), name: kebabCase(event.data.name) }
+        toast.add({
+          title: `Error ${props.tournament ? "updating" : "creating"} ${event.data.name}`,
+          icon: icons.error,
+          color: "error"
         })
       }
+    } catch (e) {
+      if (typeof e === "object" && e && "statusMessage" in e) {
+        const err = e as FetchError<ValidationError>
 
-      set(open, false) // Close modal
-    } else {
+        if (err.statusMessage === "Invalid request body") {
+          console.error(
+            "Validation errors: ",
+            err.data?.validationErrors.map(e => `${e.path.join(".")}: ${e.message}`)
+          )
+        }
+      } else {
+        console.error(e)
+      }
+
       toast.add({
-        title: `Error ${tournament ? "updating" : "creating"} tournament`,
+        title: `Error ${props.tournament ? "updating" : "creating"} ${event.data.name}`,
+        description: (e as Error).message,
         icon: icons.error,
         color: "error"
       })
@@ -100,16 +113,26 @@ const onSubmit = async (event: FormSubmitEvent<TournamentFormSchema>) => {
 
   set(uploading, false)
 }
+
+const formFields: FormFieldInterface<TournamentFormSchema>[] = [
+  { label: "ID", key: "id", type: "text", subType: "number", required: true, disabled: !!props.tournament },
+  { label: "Tours", key: "tours", type: "checkbox", items: TOUR_OPTIONS, required: true },
+  { label: "Name", key: "name", type: "text", required: true, class: "col-span-2" },
+  { label: "Established", placeholder: "Enter year established", key: "established", type: "text", subType: "number" },
+  { label: "Abolished", placeholder: "Enter year abolished", key: "abolished", type: "text", subType: "number" },
+  { label: "Website", placeholder: "Enter website URL", key: "website", type: "textarea", class: "col-span-2" }
+]
 </script>
 
 <template>
   <u-modal
-    :title="tournament?.name ?? 'Create Tournament'"
+    :title="state?.name ?? 'Create Tournament'"
     v-model:open="open"
   >
     <u-button
       :icon="tournament ? ICONS.edit : icons.plus"
       :label="tournament?.name ?? 'Create Tournament'"
+      color="Doubles"
       block
     />
 
@@ -137,7 +160,7 @@ const onSubmit = async (event: FormSubmitEvent<TournamentFormSchema>) => {
         form="tournament-form"
         type="submit"
         label="Save"
-        :icon="uploading ? ICONS.uploading : icons.check"
+        :icon="uploading ? ICONS.uploading : icons.upload"
         block
       />
       <u-button

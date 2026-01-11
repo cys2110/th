@@ -1,5 +1,8 @@
 <script setup lang="ts">
+import { getGroupedRowModel } from "@tanstack/table-core"
+
 definePageMeta({ name: "wl-index" })
+
 const {
   params: { id }
 } = useRoute("wl-index")
@@ -17,21 +20,23 @@ const resetFilters = () => {
   years.value = []
 }
 
-const { data: index, status } = await useFetch<WLIndexType[]>("/api/players/wl-index", {
-  method: "POST",
-  body: {
-    id,
-    levels,
-    drawType,
-    years
-  },
-  default: () => []
-})
+// const { data: index, status } = await useFetch<WLIndexType[]>("/api/players/wl-index", {
+//   method: "POST",
+//   body: {
+//     id,
+//     levels,
+//     drawType,
+//     years
+//   },
+//   default: () => []
+// })
+
+// const grouping = ["category"]
 </script>
 
 <template>
   <u-container>
-    <u-page>
+    <!-- <u-page>
       <template #left>
         <u-page-aside>
           <players-wl-index-chart
@@ -51,9 +56,9 @@ const { data: index, status } = await useFetch<WLIndexType[]>("/api/players/wl-i
       </template>
 
       <players-wrapper>
-        <template #header-links>
-          <!--Filters for smaller screens-->
-          <u-slideover
+        <template #header-links>-->
+    <!--Filters for smaller screens-->
+    <!--<u-slideover
             v-if="mdAndDown"
             title="Filters"
             class="ml-auto lg:hidden"
@@ -77,6 +82,10 @@ const { data: index, status } = await useFetch<WLIndexType[]>("/api/players/wl-i
           :data="index"
           :columns="wlIndexColumns"
           :loading="status === 'pending'"
+          :grouping="grouping"
+          :grouping-options="{
+            getGroupedRowModel: getGroupedRowModel()
+          }"
           sticky
           :ui="{ root: 'w-fit min-w-1/3 mx-auto max-h-150', td: 'empty:p-0' }"
         >
@@ -91,6 +100,6 @@ const { data: index, status } = await useFetch<WLIndexType[]>("/api/players/wl-i
           </template>
         </u-table>
       </u-page-body>
-    </u-page>
+    </u-page> -->
   </u-container>
 </template>

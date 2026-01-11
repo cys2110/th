@@ -5,16 +5,16 @@ const {
   params: { id, name }
 } = useRoute("country")
 
-const { data: country } = await useFetch("/api/countries", {
-  query: { id }
-})
+// const { data: country } = await useFetch("/api/countries", {
+//   query: { id }
+// })
 
-useHead({ title: () => `${country.value?.name || capitalCase(name as string)} | Countries` })
+// useHead({ title: () => `${country.value?.name || capitalCase(name as string)} | Countries` })
 </script>
 
 <template>
   <u-container class="max-w-7xl">
-    <u-page>
+    <!-- <u-page>
       <u-page-header>
         <template #headline>
           <breadcrumbs />
@@ -48,6 +48,6 @@ useHead({ title: () => `${country.value?.name || capitalCase(name as string)} | 
           :icon="ICONS.noCountries"
         />
       </u-page-body>
-    </u-page>
+    </u-page> -->
   </u-container>
 </template>

@@ -10,11 +10,12 @@ const cleanLink = (link: string) => link.replaceAll(/^[\s"'“”‘’\[\]]+|[\
 
 <template>
   <u-form-field
-    :name="(field.key as string) ?? undefined"
+    :name="(field.key as string)"
     :error-pattern="field.errorPattern"
     :label="field.label"
     :required="field.required"
     :class="field.class"
+    :ui="{ label: 'text-xs' }"
   >
     <u-field-group
       v-if="!field.key && field.children"
@@ -51,25 +52,7 @@ const cleanLink = (link: string) => link.replaceAll(/^[\s"'“”‘’\[\]]+|[\
       </template>
     </u-field-group>
 
-    <u-checkbox-group
-      v-else-if="field.type === 'checkbox'"
-      v-model="modelValue[field.key]"
-      :items="field.items"
-      orientation="horizontal"
-    />
-
-    <u-radio-group
-      v-else-if="field.type === 'radio'"
-      v-model="modelValue[field.key]"
-      :items="field.items"
-      orientation="horizontal"
-    />
-
-    <form-textarea
-      v-else-if="field.type === 'textarea'"
-      v-model="modelValue[field.key]"
-      :placeholder="field.placeholder ?? `Enter ${field.label.toLowerCase()}`"
-    />
+    <slot v-else-if="field.type === 'slot'" />
 
     <form-input
       v-else-if="field.type === 'text'"
@@ -95,12 +78,32 @@ const cleanLink = (link: string) => link.replaceAll(/^[\s"'“”‘’\[\]]+|[\
       :multiple="field.multiple"
     />
 
+    <form-textarea
+      v-else-if="field.type === 'textarea'"
+      v-model="modelValue[field.key]"
+      :placeholder="field.placeholder ?? `Enter ${field.label.toLowerCase()}`"
+    />
+
     <form-input-tags
       v-else-if="field.type === 'tags'"
       v-model="modelValue[field.key]"
       :placeholder="field.placeholder ?? `Enter ${field.label.toLowerCase()}`"
       :max="field.max"
       :convert-value="field.key === 'links' ? cleanLink : undefined"
+    />
+
+    <u-radio-group
+      v-else-if="field.type === 'radio'"
+      v-model="modelValue[field.key]"
+      :items="field.items"
+      orientation="horizontal"
+    />
+
+    <u-checkbox-group
+      v-else-if="field.type === 'checkbox'"
+      v-model="modelValue[field.key]"
+      :items="field.items"
+      orientation="horizontal"
     />
 
     <form-date-picker
@@ -116,14 +119,15 @@ const cleanLink = (link: string) => link.replaceAll(/^[\s"'“”‘’\[\]]+|[\
     <form-search
       v-else-if="field.type === 'search'"
       v-model="modelValue[field.key]"
-      :key="typeof field.matchType === 'object' ? JSON.stringify(field.matchType) : field.matchType ?? field.key"
       :type="field.subType!"
       :icon="field.icon"
       :placeholder="field.placeholder"
       :multiple="field.multiple"
-      :id="field.id"
-      :tour="field.tour"
-      :match-type="typeof field.matchType === 'object' ? field.matchType.type : field.matchType"
     />
+
+    <!-- :key="typeof field.matchType === 'object' ? JSON.stringify(field.matchType) : field.matchType ?? field.key" -->
+    <!-- :id="field.id"
+      :tour="field.tour"
+      :match-type="typeof field.matchType === 'object' ? field.matchType.type : field.matchType" -->
   </u-form-field>
 </template>

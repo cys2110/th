@@ -1,5 +1,7 @@
 <script setup lang="ts">
-const relatedLinks = [
+import type { FooterColumn } from "@nuxt/ui"
+
+const relatedLinks: FooterColumn[] = [
   {
     label: "Governing Bodies",
     children: [

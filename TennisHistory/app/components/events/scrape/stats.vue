@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { type FormErrorEvent, type FormSubmitEvent } from "@nuxt/ui"
 
-const { tour } = defineProps<{
+const props = defineProps<{
   tour: keyof typeof tourEnum
 }>()
 
@@ -24,38 +24,29 @@ const initialState = {
 
 const state = ref<Partial<ScrapeFormInput>>({ ...initialState })
 
-const formFields = computed<FormFieldInterface<ScrapeFormSchema>[]>(
-  () =>
-    [
-      ...(tour === "WTA" ? [{ label: "WTA ID", key: "wid", type: "text", subType: "number", required: true }] : []),
-      { label: "Match Type", key: "type", type: "radio", items: ["Singles", "Doubles"], required: true },
-      ...(tour === "WTA" ? [{ label: "Draw", key: "draw", type: "radio", items: ["Main", "Qualifying"], required: true }] : []),
-      ...(tour === "WTA" ? [{ label: "Draw Range", key: "draw_range", type: "tags", max: 2, required: true }] : []),
-      ...(tour === "WTA" ? [{ label: "Matches to Skip", key: "skip", type: "tags" }] : []),
-      ...(tour === "ATP" ? [{ label: "Links", key: "links", type: "tags", class: "col-span-2", required: true }] : [])
-    ] as FormFieldInterface<ScrapeFormSchema>[]
-)
-
-const handleReset = () => set(state, { ...initialState })
+const handleReset = () => set(state, cloneDeep(initialState))
 
 const onError = (event: FormErrorEvent) => console.error(event.errors)
 
 const onSubmit = async (event: FormSubmitEvent<ScrapeFormSchema>) => {
   set(scraping, true)
   try {
-    const response = await $fetch(`${FLASK_ROUTE}/${tour.toLowerCase()}_stats`, {
+    const response = await $fetch(`${FLASK_ROUTE}/${props.tour.toLowerCase()}_stats`, {
       method: "POST",
       timeout: 120_000,
       "Content-Type": "application/json",
       body: JSON.stringify(event.data)
     })
-    if ((response as any).ok) {
+
+    if ((response as any).success) {
       toast.add({
         title: "Matches scraped",
         icon: icons.success,
         color: "success"
       })
+
       state.value.links = []
+
       set(open, false)
     } else {
       toast.add({
@@ -75,6 +66,23 @@ const onSubmit = async (event: FormSubmitEvent<ScrapeFormSchema>) => {
     set(scraping, false)
   }
 }
+
+const formFields = computed<FormFieldInterface<ScrapeFormSchema>[]>(() => {
+  if (props.tour === "WTA") {
+    return [
+      { label: "WTA ID", key: "wid", type: "text", subType: "number", required: true, class: "col-span-2" },
+      { label: "Match Type", key: "type", type: "radio", items: ["Singles", "Doubles"], required: true },
+      { label: "Draw", key: "draw", type: "radio", items: ["Main", "Qualifying"], required: true },
+      { label: "Draw Range", key: "draw_range", type: "tags", max: 2, required: true },
+      { label: "Matches to Skip", key: "skip", type: "tags" }
+    ]
+  } else {
+    return [
+      { label: "Match Type", key: "type", type: "radio", items: ["Singles", "Doubles"], required: true },
+      { label: "Links", key: "links", type: "tags", class: "col-span-2", required: true }
+    ]
+  }
+})
 </script>
 
 <template>
@@ -82,7 +90,10 @@ const onSubmit = async (event: FormSubmitEvent<ScrapeFormSchema>) => {
     title="Scrape matches"
     v-model:open="open"
   >
-    <u-button :icon="ICONS.stats" />
+    <u-button
+      :icon="ICONS.stats"
+      color="Doubles"
+    />
 
     <template #body>
       <u-form

@@ -18,22 +18,22 @@ const resetFilters = () => {
   surfaces.value = []
 }
 
-const { data: stats, status } = await useFetch<PlayerStatsType[]>("/api/players/stats", {
-  method: "POST",
-  body: {
-    id,
-    levels,
-    drawType,
-    years,
-    surfaces
-  },
-  default: () => []
-})
+// const { data: stats, status } = await useFetch<PlayerStatsType[]>("/api/players/stats", {
+//   method: "POST",
+//   body: {
+//     id,
+//     levels,
+//     drawType,
+//     years,
+//     surfaces
+//   },
+//   default: () => []
+// })
 </script>
 
 <template>
   <u-container>
-    <u-page>
+    <!-- <u-page>
       <template #left>
         <u-page-aside>
           <players-stats-chart
@@ -58,9 +58,9 @@ const { data: stats, status } = await useFetch<PlayerStatsType[]>("/api/players/
       </template>
 
       <players-wrapper>
-        <template #header-links>
-          <!--Filters for smaller screens-->
-          <u-slideover
+        <template #header-links>-->
+    <!--Filters for smaller screens-->
+    <!--<u-slideover
             title="Filters"
             class="ml-auto lg:hidden"
           >
@@ -85,7 +85,7 @@ const { data: stats, status } = await useFetch<PlayerStatsType[]>("/api/players/
           :columns="playerStatsColumns"
           :loading="status === 'pending'"
           sticky
-          :ui="{ root: 'w-fit min-w-1/3 mx-auto max-h-150', td: 'empty:p-0' }"
+          :ui="{ root: 'w-fit min-w-1/3 mx-auto max-h-150' }"
         >
           <template #loading>
             <loading-icon />
@@ -98,6 +98,6 @@ const { data: stats, status } = await useFetch<PlayerStatsType[]>("/api/players/
           </template>
         </u-table>
       </u-page-body>
-    </u-page>
+    </u-page> -->
   </u-container>
 </template>

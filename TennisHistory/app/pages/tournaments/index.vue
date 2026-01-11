@@ -1,28 +1,40 @@
 <script setup lang="ts">
-import type { TableRow } from "@nuxt/ui"
+import type { FetchError } from "ofetch"
 
 useHead({ title: "Tournaments" })
-const router = useRouter()
 
-const viewMode = ref(true)
+const viewModeStore = useViewModeStore()
+
+// Pagination
 const page = useRouteQuery("page", 1, { transform: Number })
 const itemsPerPage = ref(30)
 const skip = computed(() => (page.value - 1) * itemsPerPage.value)
 
-const [defineEmptyTemplate, reuseEmptyTemplate] = createReusableTemplate()
+// Filters
+const tours = useRouteQuery("tours", null, { transform: val => toArray(val) })
+const tournaments = useRouteQuery("tournaments", null, {
+  transform: {
+    get: (val: string | null): OptionType[] => parseOption(val),
+    set: (val: OptionType[]): string | null => serialiseOption(val)
+  }
+})
+const established = useRouteQuery("established", null, { transform: Number })
+const abolished = useRouteQuery("abolished", null, { transform: Number })
 
-const tours = ref([])
-const tournaments = ref([])
-const established = ref<number | undefined>()
-const abolished = ref<number | undefined>()
 const resetFilters = () => {
-  const arrayFilters = [tours, tournaments]
-  const undefinedFilters = [established, abolished]
-  arrayFilters.forEach(filter => set(filter, []))
-  undefinedFilters.forEach(filter => set(filter, undefined))
+  set(tours, null)
+  set(tournaments, null)
+  set(established, null)
+  set(abolished, null)
 }
 
-const sortField = ref<SortFieldType[]>([])
+// Sorting
+const sortField = useRouteQuery("sorting", null, {
+  transform: {
+    get: (val: string | null): SortFieldType[] => parseSort(val),
+    set: (val: SortFieldType[]): string | null => serialiseSort(val)
+  }
+})
 const sortFields = [
   { label: "Name", value: "name" },
   { label: "Established", value: "established" },
@@ -51,24 +63,32 @@ const { data, status } = await useFetch("/api/tournaments", {
     established,
     abolished
   },
-  default: () => ({ count: 0, tournaments: [] })
+  default: () => ({ count: 0, tournaments: [] as TournamentType[] }),
+  onResponseError: ({ error }) => {
+    if (typeof error === "object" && "statusMessage" in error) {
+      const err = error as FetchError<ValidationError>
+
+      if (err.statusMessage === "Invalid request body") {
+        console.error(
+          "Validation errors: ",
+          err.data?.validationErrors.map(e => `${e.path.join(".")}: ${e.message}`)
+        )
+      }
+    } else {
+      console.error(error)
+    }
+  }
 })
 
-const table = useTemplateRef<any>("table")
-const handleSelect = (e: Event, row: TableRow<TournamentType>) => {
-  router.push({
-    name: "tournament",
-    params: {
-      id: row.original.id,
-      name: kebabCase(row.original.name)
-    }
-  })
-}
+const tableRef = useTemplateRef("tableRef")
 </script>
 
 <template>
   <u-container class="min-h-screen flex flex-col">
-    <u-page class="flex-1">
+    <u-page
+      class="flex-1"
+      :ui="{ center: viewModeStore.isCardView ? 'lg:col-span-6' : 'lg:col-span-8' }"
+    >
       <template #left>
         <u-page-aside>
           <dev-only>
@@ -77,118 +97,112 @@ const handleSelect = (e: Event, row: TableRow<TournamentType>) => {
           </dev-only>
 
           <filters
-            :filters="['tours', 'established', 'abolished']"
             :reset-filters
             :reset-sorting
-            :table
-            v-model:tours="tours"
-            v-model:established="established"
-            v-model:abolished="abolished"
+            :table="tableRef?.table"
+            :sort-fields
             v-model:sorting="sortField"
-            :sort-fields="sortFields"
-          />
+          >
+            <filters-tours v-model="tours" />
+
+            <filters-years
+              v-model="established"
+              :year-options="Array.from({ length: new Date().getFullYear() - 1877 + 1 }, (_, i) => 1877 + i)"
+              placeholder="Established"
+            />
+
+            <filters-years
+              v-model="abolished"
+              :year-options="Array.from({ length: new Date().getFullYear() - 1877 + 1 }, (_, i) => 1877 + i)"
+              placeholder="Abolished"
+            />
+          </filters>
         </u-page-aside>
       </template>
 
-      <template #right>
+      <template
+        #right
+        v-if="viewModeStore.isCardView"
+      >
         <u-page-aside>
-          <form-command-palette-search
+          <filters-command-palette-search
             type="Tournament"
             v-model="tournaments"
-            :icon="ICONS.tournament"
+            :icon="ICONS.trophy"
           />
         </u-page-aside>
       </template>
 
       <u-page-header title="Tournaments">
         <template #links>
-          <view-switcher v-model="viewMode" />
+          <view-switcher />
 
           <!--Filters for smaller screens-->
           <u-slideover
             title="Filters"
-            class="ml-auto lg:hidden"
+            class="lg:hidden"
           >
             <u-button :icon="ICONS.filter" />
 
             <template #body>
               <filters
-                :filters="['tours', 'established', 'abolished', 'tournaments']"
                 :reset-filters
                 :reset-sorting
-                :table
-                v-model:tournaments="tournaments"
-                v-model:tours="tours"
-                v-model:established="established"
-                v-model:abolished="abolished"
+                :table="tableRef?.table"
+                :sort-fields
                 v-model:sorting="sortField"
-                :sort-fields="sortFields"
-              />
+              >
+                <filters-search
+                  type="Tournament"
+                  :icon="ICONS.trophy"
+                  v-model="tournaments"
+                />
+
+                <filters-tours v-model="tours" />
+
+                <filters-years
+                  v-model="established"
+                  :year-options="Array.from({ length: new Date().getFullYear() - 1877 + 1 }, (_, i) => 1877 + i)"
+                  placeholder="Established"
+                />
+
+                <filters-years
+                  v-model="abolished"
+                  :year-options="Array.from({ length: new Date().getFullYear() - 1877 + 1 }, (_, i) => 1877 + i)"
+                  placeholder="Abolished"
+                />
+              </filters>
             </template>
           </u-slideover>
         </template>
       </u-page-header>
 
       <u-page-body>
-        <!--Empty template-->
-        <define-empty-template>
-          <empty
-            message="No tournaments found"
-            :icon="ICONS.tournament"
-            class="mx-2"
-          >
-            <dev-only>
-              <tournaments-update />
-            </dev-only>
-          </empty>
-        </define-empty-template>
+        <!--Card view-->
+        <tournaments-grid
+          v-if="viewModeStore.isCardView"
+          :tournaments="data.tournaments"
+          :status
+        />
 
-        <template v-if="viewMode">
-          <u-page-grid v-if="data.count || status === 'pending'">
-            <tournaments-card
-              v-if="data.count"
-              v-for="tournament in data.tournaments"
-              :key="tournament.id.toString()"
-              :tournament
-            />
-
-            <loading-tournament
-              v-else
-              v-for="_ in 6"
-              :key="_"
-            />
-          </u-page-grid>
-
-          <reuse-empty-template v-else />
-        </template>
-
-        <u-table
+        <!--Table view-->
+        <tournaments-table
           v-else
-          ref="table"
-          :data="data.tournaments"
-          :columns="tournamentColumns"
-          :loading="status === 'pending'"
-          sticky
-          @select="handleSelect"
-          render-fallback-value="—"
-          :ui="{
-            root: 'max-h-150',
-            tbody: '[&>tr]:cursor-pointer'
-          }"
-        >
-          <template #loading>
-            <loading-icon />
-          </template>
-          <template #empty>
-            <reuse-empty-template />
-          </template>
-        </u-table>
+          ref="tableRef"
+          :tournaments="data.tournaments"
+          :status
+          v-model:tours="tours"
+          v-model:tournaments-filters="tournaments"
+          v-model:established="established"
+          v-model:abolished="abolished"
+          v-model:sort-field="sortField"
+        />
       </u-page-body>
     </u-page>
 
-    <counts
+    <pagination-footer
       :total="data.count"
-      type="tournament"
+      :placeholder="`tournament${data.count === 1 ? '' : 's'}`"
       v-model:page="page"
       v-model:items-per-page="itemsPerPage"
     />

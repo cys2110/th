@@ -5,17 +5,16 @@ const {
 } = useRoute("record")
 
 // API call
-const { data: results, status } = await useFetch<RecordType[]>("/api/players/record", {
-  query: { id },
-  default: () => []
-})
-
-const tour = computed(() => (isNaN(Number(id)) ? "ATP" : "WTA"))
+// const { data: results, status } = await useFetch<RecordType[]>("/api/players/record", {
+//   query: { id },
+//   default: () => []
+// })
+// const tour = useState<TourEnumType>("playerTour")
 </script>
 
 <template>
   <u-container class="max-w-7xl">
-    <u-page>
+    <!-- <u-page>
       <players-wrapper />
 
       <u-page-body>
@@ -37,6 +36,6 @@ const tour = computed(() => (isNaN(Number(id)) ? "ATP" : "WTA"))
           </template>
         </u-table>
       </u-page-body>
-    </u-page>
+    </u-page> -->
   </u-container>
 </template>

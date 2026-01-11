@@ -30,6 +30,25 @@ const details = computed(() => {
 
   return []
 })
+
+const rankings = computed(() => [
+  { value: "" },
+  { value: "Singles", class: "font-semibold text-muted text-center" },
+  { value: "Doubles", class: "font-semibold text-muted text-center" },
+  { value: "Current", class: "font-semibold text-muted" },
+  { value: player?.current_singles ?? "—" },
+  { value: player?.current_doubles ?? "—" },
+  { value: "Career High", class: "font-semibold text-muted" },
+  { value: player?.ch_singles ?? "—" },
+  { value: player?.ch_doubles ?? "—" },
+  { value: "Date", class: "font-semibold text-muted" },
+  {
+    value: player?.singles_ch_date ? useDateFormat(player.singles_ch_date as string, "DD MMMM YYYY") : "—"
+  },
+  {
+    value: player?.doubles_ch_date ? useDateFormat(player.doubles_ch_date as string, "DD MMMM YYYY") : "—"
+  }
+])
 </script>
 
 <template>
@@ -41,6 +60,7 @@ const details = computed(() => {
     >
       <div>{{ detail.label }}</div>
       <div v-if="detail.value">{{ detail.value }}</div>
+
       <template v-else-if="detail.label === 'Age'">
         <div>{{ player!.age }} years</div>
         <div>{{
@@ -52,21 +72,12 @@ const details = computed(() => {
 
       <div v-else-if="detail.label === 'Rankings'">
         <div class="grid grid-cols-3 gap-1 text-center">
-          <div></div>
-          <div class="text-muted font-semibold">Singles</div>
-          <div class="text-muted font-semibold">Doubles</div>
-          <div class="text-muted font-semibold">Current</div>
-          <div>{{ player!.current_singles ?? "—" }}</div>
-          <div>{{ player!.current_doubles ?? "—" }}</div>
-          <div class="text-muted font-semibold">Career High</div>
-          <div>{{ player!.ch_singles ?? "—" }}</div>
-          <div>{{ player!.ch_doubles ?? "—" }}</div>
-          <div class="text-muted font-semibold">Date</div>
-          <div>
-            {{ player!.singles_ch_date ? useDateFormat(player!.singles_ch_date as string, "DD MMMM YYYY") : "—" }}
-          </div>
-          <div>
-            {{ player!.doubles_ch_date ? useDateFormat(player!.doubles_ch_date as string, "DD MMMM YYYY") : "—" }}
+          <div
+            v-for="(item, index) in rankings"
+            :key="index"
+            :class="item.class"
+          >
+            {{ item.value }}
           </div>
         </div>
       </div>
@@ -133,7 +144,7 @@ const details = computed(() => {
         :key="country.id"
         class="flex items-center gap-2"
       >
-        <countries-link
+        <country-link
           :country
           class="mx-0"
         />

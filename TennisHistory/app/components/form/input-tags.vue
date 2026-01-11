@@ -4,6 +4,7 @@ defineProps<{
   max?: number
   convertValue?: (value: string) => string
 }>()
+
 const modelValue = defineModel<string[]>()
 </script>
 
