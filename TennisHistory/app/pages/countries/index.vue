@@ -1,13 +1,8 @@
 <script setup lang="ts">
-import type { TableRow } from "@nuxt/ui"
-import { getFacetedRowModel, getFacetedUniqueValues, getGroupedRowModel } from "@tanstack/vue-table"
-
 useHead({ title: "Countries" })
 
-const router = useRouter()
-const viewMode = useViewModeStore()
-const [defineEmptyTemplate, reuseEmptyTemplate] = createReusableTemplate()
-const table = useTemplateRef("table")
+const viewModeStore = useViewModeStore()
+const tableRef = useTemplateRef("tableRef")
 
 const countriesFilter = ref<string[]>([])
 const continentsFilter = ref<string[]>([])
@@ -43,20 +38,6 @@ const filteredCountries = computed(() => {
 
   return continentMatches
 })
-
-const handleSelectRow = (e: Event, row: TableRow<CountryType>) => {
-  if (row.getIsGrouped()) {
-    row.toggleExpanded()
-  } else {
-    router.push({
-      name: "country",
-      params: {
-        id: row.original.id,
-        name: kebabCase(row.original.name)
-      }
-    })
-  }
-}
 </script>
 
 <template>
@@ -65,7 +46,7 @@ const handleSelectRow = (e: Event, row: TableRow<CountryType>) => {
       <template #left>
         <u-page-aside>
           <!--Card global resets-->
-          <template v-if="viewMode.isCardView">
+          <template v-if="viewModeStore.isCardView">
             <u-form-field label="Filter by">
               <div class="*:my-2">
                 <u-input-menu
@@ -89,12 +70,12 @@ const handleSelectRow = (e: Event, row: TableRow<CountryType>) => {
           </template>
 
           <!--Table global resets-->
-          <template v-else-if="table">
-            <table-client-clear-filters :table="table" />
+          <template v-else-if="tableRef?.table">
+            <table-client-clear-filters :table="tableRef.table" />
 
-            <table-client-clear-sorting :table="table" />
+            <table-client-clear-sorting :table="tableRef.table" />
 
-            <table-client-clear-grouping :table="table" />
+            <table-client-clear-grouping :table="tableRef.table" />
           </template>
         </u-page-aside>
       </template>
@@ -106,67 +87,28 @@ const handleSelectRow = (e: Event, row: TableRow<CountryType>) => {
       </u-page-header>
 
       <u-page-body>
-        <!--Empty template-->
-        <define-empty-template>
-          <empty
-            message="No countries found"
-            :icon="ICONS.globeOff"
-          />
-        </define-empty-template>
-
         <!--Card view-->
-        <template v-if="viewMode.isCardView">
-          <u-page-grid v-if="filteredCountries.length || status === 'pending'">
-            <countries-card
-              v-if="filteredCountries.length"
-              v-for="country in filteredCountries"
-              :key="country.id"
-              :country="country"
-            />
-
-            <loading-card
-              v-else
-              v-for="_ in 6"
-              :key="_"
-            />
-          </u-page-grid>
-
-          <reuse-empty-template v-else />
-        </template>
+        <countries-grid
+          v-if="viewModeStore.isCardView"
+          :countries="filteredCountries"
+          :status="status"
+        />
 
         <!--Table view-->
-        <u-table
+        <countries-table
           v-else
-          ref="table"
-          :data="countries"
-          :columns="countriesColumns"
-          :loading="status === 'pending'"
-          sticky
-          @select="handleSelectRow"
-          :faceted-options="{
-            getFacetedRowModel: getFacetedRowModel(),
-            getFacetedUniqueValues: getFacetedUniqueValues()
-          }"
-          :grouping-options="{
-            getGroupedRowModel: getGroupedRowModel()
-          }"
-          :ui="{ root: 'max-w-2/3 mx-auto', td: 'empty:p-0' }"
-        >
-          <template #loading>
-            <loading-icon />
-          </template>
-          <template #empty>
-            <reuse-empty-template />
-          </template>
-        </u-table>
+          ref="tableRef"
+          :countries
+          :status
+        />
       </u-page-body>
     </u-page>
 
     <div class="sticky w-full z-50 bg-default bottom-0 mt-auto pt-3 pb-6 *:font-bold *:text-muted">
-      <div v-if="viewMode.isCardView"> {{ filteredCountries.length }} {{ filteredCountries.length === 1 ? "country" : "countries" }} </div>
+      <div v-if="viewModeStore.isCardView"> {{ filteredCountries.length }} {{ filteredCountries.length === 1 ? "country" : "countries" }} </div>
       <div v-else>
-        {{ table?.tableApi.getFilteredRowModel().rows.length }}
-        {{ table?.tableApi.getFilteredRowModel().rows.length === 1 ? "country" : "countries" }}
+        {{ tableRef?.table.tableApi.getFilteredRowModel().rows.length }}
+        {{ tableRef?.table.tableApi.getFilteredRowModel().rows.length === 1 ? "country" : "countries" }}
       </div>
     </div>
   </u-container>
