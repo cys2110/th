@@ -1,141 +1,156 @@
 <script setup lang="ts">
 import type { TableRow } from "@nuxt/ui"
+import { getFacetedRowModel, getFacetedUniqueValues, getGroupedRowModel } from "@tanstack/vue-table"
 
 useHead({ title: "Countries" })
+
 const router = useRouter()
-
-// Pagination / view
-const viewMode = ref(true)
-const page = useRouteQuery("page", 1, { transform: Number })
-const itemsPerPage = ref(40)
-const skip = computed(() => (page.value - 1) * itemsPerPage.value)
-
+const viewMode = useViewModeStore()
 const [defineEmptyTemplate, reuseEmptyTemplate] = createReusableTemplate()
+const table = useTemplateRef("table")
 
-const continents = ref<string[]>([])
-const countries = ref([])
-const resetFilters = () => {
-  continents.value = []
-  countries.value = []
+const countriesFilter = ref<string[]>([])
+const continentsFilter = ref<string[]>([])
+
+const { data: countries, status } = await useFetch("/api/countries", {
+  default: () => [],
+  onResponseError: ({ error }) => console.error("Error fetching countries:", error)
+})
+
+const uniqueContinents = computed(() => useArrayUnique(countries.value.map(c => c.continent)).value.sort())
+const uniqueCountries = computed(() =>
+  useArrayUnique(
+    countries.value.map(
+      c => ({
+        label: c.name,
+        icon: getFlagCode(c)
+      }),
+      (a: any, b: any) => a.label === b.label
+    )
+  ).value.sort((a, b) => a.label.localeCompare(b.label))
+)
+
+const filteredCountries = computed(() => {
+  const countryMatches = countries.value.filter(country => {
+    if (countriesFilter.value.length === 0) return true
+    return countriesFilter.value.includes(country.name)
+  })
+
+  const continentMatches = countryMatches.filter(country => {
+    if (continentsFilter.value.length === 0) return true
+    return continentsFilter.value.includes(country.continent)
+  })
+
+  return continentMatches
+})
+
+const handleSelectRow = (e: Event, row: TableRow<CountryType>) => {
+  if (row.getIsGrouped()) {
+    row.toggleExpanded()
+  } else {
+    router.push({
+      name: "country",
+      params: {
+        id: row.original.id,
+        name: kebabCase(row.original.name)
+      }
+    })
+  }
 }
-
-const sortField = ref<SortFieldType[]>([])
-const sortFields = [
-  { label: "Name", value: "name" },
-  { label: "Continent", value: "continent" }
-]
-
-const resetSorting = () => set(sortField, [])
-
-watchDeep([continents, countries, itemsPerPage, sortField], () => set(page, 1), { immediate: true })
-
-// const { data, status } = await useFetch("/api/countries", {
-//   method: "POST",
-//   body: { skip, countries, continents, offset: itemsPerPage, sortField },
-//   default: () => ({ count: 0, countries: [] })
-// })
-
-// // Table columns setup
-// const table = useTemplateRef<any>("table")
-
-// const handleSelectRow = (e: Event, row: TableRow<CountryType>) => {
-//   router.push({ name: "country", params: { id: row.original.id, name: kebabCase(row.original.name) } })
-// }
 </script>
 
 <template>
   <u-container class="min-h-screen flex flex-col">
-    <!-- <u-page class="flex-1">
+    <u-page class="flex-1">
       <template #left>
         <u-page-aside>
-          <filters
-            :filters="['continents']"
-            :reset-filters
-            :reset-sorting
-            :sort-fields="sortFields"
-            v-model:continents="continents"
-            v-model:sorting="sortField"
-            :table
-          />
-        </u-page-aside>
-      </template>
+          <!--Card global resets-->
+          <template v-if="viewMode.isCardView">
+            <u-form-field label="Filter by">
+              <div class="*:my-2">
+                <u-input-menu
+                  v-model="countriesFilter"
+                  value-key="label"
+                  placeholder="Select countries"
+                  multiple
+                  :icon="ICONS.globe"
+                  :items="uniqueCountries"
+                />
 
-      <template #right>
-        <u-page-aside>
-          <form-command-palette-search
-            type="Country"
-            v-model="countries"
-            placeholder="Countries"
-            :icon="ICONS.countries"
-          />
+                <u-input-menu
+                  v-model="continentsFilter"
+                  placeholder="Select continents"
+                  multiple
+                  icon="icon-park-twotone:globe"
+                  :items="uniqueContinents"
+                />
+              </div>
+            </u-form-field>
+          </template>
+
+          <!--Table global resets-->
+          <template v-else-if="table">
+            <table-client-clear-filters :table="table" />
+
+            <table-client-clear-sorting :table="table" />
+
+            <table-client-clear-grouping :table="table" />
+          </template>
         </u-page-aside>
       </template>
 
       <u-page-header title="Countries">
         <template #links>
-          <view-switcher v-model="viewMode" />-->
-
-    <!--Filters for smaller screens-->
-    <!--<u-slideover
-            title="Filters"
-            class="ml-auto lg:hidden"
-          >
-            <u-button :icon="ICONS.filter" />
-
-            <template #body>
-              <filters
-                :filters="['continents', 'countries']"
-                :reset-filters
-                :reset-sorting
-                :sort-fields="sortFields"
-                v-model:countries="countries"
-                v-model:continents="continents"
-                v-model:sorting="sortField"
-              />
-            </template>
-          </u-slideover>
+          <view-switcher />
         </template>
       </u-page-header>
 
-      <u-page-body>-->
-    <!--Empty template-->
-    <!--<define-empty-template>
+      <u-page-body>
+        <!--Empty template-->
+        <define-empty-template>
           <empty
             message="No countries found"
-            :icon="ICONS.noCountries"
-            class="mx-2"
+            :icon="ICONS.globeOff"
           />
-        </define-empty-template>-->
+        </define-empty-template>
 
-    <!--Card view-->
-    <!-- <template v-if="viewMode">
-          <u-page-grid v-if="data.count || status === 'pending'">
+        <!--Card view-->
+        <template v-if="viewMode.isCardView">
+          <u-page-grid v-if="filteredCountries.length || status === 'pending'">
             <countries-card
-              v-if="data.countries.length"
-              v-for="country in data.countries"
+              v-if="filteredCountries.length"
+              v-for="country in filteredCountries"
               :key="country.id"
-              :country
+              :country="country"
             />
 
-            <loading-tournament
+            <loading-card
               v-else
               v-for="_ in 6"
               :key="_"
             />
           </u-page-grid>
-          <reuse-empty-template v-else />
-        </template> -->
 
-    <!--Table view-->
-    <!--<u-table
+          <reuse-empty-template v-else />
+        </template>
+
+        <!--Table view-->
+        <u-table
           v-else
           ref="table"
-          :data="data.countries"
-          :columns="countryColumns"
+          :data="countries"
+          :columns="countriesColumns"
           :loading="status === 'pending'"
           sticky
           @select="handleSelectRow"
-          :ui="{ root: 'max-h-150 max-w-2/3 mx-auto', tbody: '[&>tr]:cursor-pointer' }"
+          :faceted-options="{
+            getFacetedRowModel: getFacetedRowModel(),
+            getFacetedUniqueValues: getFacetedUniqueValues()
+          }"
+          :grouping-options="{
+            getGroupedRowModel: getGroupedRowModel()
+          }"
+          :ui="{ root: 'max-w-2/3 mx-auto', td: 'empty:p-0' }"
         >
           <template #loading>
             <loading-icon />
@@ -147,11 +162,12 @@ watchDeep([continents, countries, itemsPerPage, sortField], () => set(page, 1), 
       </u-page-body>
     </u-page>
 
-    <counts
-      :total="data.count"
-      :placeholder="data.count === 1 ? 'country' : 'countries'"
-      v-model:page="page"
-      v-model:items-per-page="itemsPerPage"
-    /> -->
+    <div class="sticky w-full z-50 bg-default bottom-0 mt-auto pt-3 pb-6 *:font-bold *:text-muted">
+      <div v-if="viewMode.isCardView"> {{ filteredCountries.length }} {{ filteredCountries.length === 1 ? "country" : "countries" }} </div>
+      <div v-else>
+        {{ table?.tableApi.getFilteredRowModel().rows.length }}
+        {{ table?.tableApi.getFilteredRowModel().rows.length === 1 ? "country" : "countries" }}
+      </div>
+    </div>
   </u-container>
 </template>
