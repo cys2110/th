@@ -269,6 +269,12 @@ const getEventDetails = (event: EventType) => {
         />
 
         <dev-only>
+          <events-update
+            :event
+            :refresh
+            icon-only
+          />
+
           <events-scrape-draw
             v-if="['ATP', 'WTA'].includes(event.tour)"
             :tour="event.tour"

@@ -6,10 +6,18 @@ import { baseTournamentSchema } from "./tournamentSchemas"
 export const eventSchema = object({
   category: string().optional(),
   currency: CurrencyEnum.optional(),
+  d_draw: string().optional(),
+  d_link: url().optional(),
   end_date: neoDateToStringSchema.optional(),
   id: string(),
   level: LevelEnum,
   pm: intToNumberSchema.optional(),
+  qd_draw: string().optional(),
+  qd_link: url().optional(),
+  qs_draw: string().optional(),
+  qs_link: url().optional(),
+  s_draw: string().optional(),
+  s_link: url().optional(),
   site_link: url().optional(),
   sponsor_name: string().optional(),
   start_date: neoDateToStringSchema.optional(),
@@ -23,17 +31,6 @@ export const eventSchema = object({
   year: intToNumberSchema.optional()
 })
 
-// export const eventSchema = object({
-//   updated_at: neoDateToStringSchema,
-//   s_draw: string().optional(),
-//   d_draw: string().optional(),
-//   qs_draw: string().optional(),
-//   qd_draw: string().optional(),
-//   s_link: url().optional(),
-//   d_link: url().optional(),
-//   qs_link: url().optional(),
-//   qd_link: url().optional()
-// })
 export type EventType = z.infer<typeof eventSchema>
 
 export const awardSchema = object({

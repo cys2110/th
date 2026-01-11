@@ -133,6 +133,11 @@ export default defineAppConfig({
       slots: {
         base: "cursor-pointer",
         label: "cursor-pointer"
+      },
+      variants: {
+        orientation: {
+          vertical: { item: "ml-3" }
+        }
       }
     },
     select: {

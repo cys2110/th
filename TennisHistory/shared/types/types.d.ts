@@ -23,61 +23,57 @@ declare global {
     currency?: CurrencyEnumType
     max?: number
     icon?: string
-
-    // id?: string
-    // tour?: TourEnumType
-    // matchType?: MatchType
   }
 
-  // interface DrawInterface {
-  //   rounds: Round[]
-  //   matches?: Match[]
-  //   contestants?: {
-  //     [contestantId: string]: Contestant
-  //   }
-  // }
+  type DrawPlayer = {
+    id?: string
+    name: string
+    country?: CountryType
+  }
 
-  // type Round = {
-  //   name?: string
-  // }
+  type DrawContestant = {
+    status?: string
+    seed?: number
+    players: DrawPlayer[]
+  }
 
-  // type Match = {
-  //   roundIndex: number // 0-based
-  //   order: number // 0-based
-  //   sides?: Side[]
-  //   matchStatus?: string
-  //   isLive?: boolean
-  //   isBronzeMatch?: boolean
-  //   date?: string
-  //   umpire?: string
-  //   court?: string
-  //   duration?: string
-  // }
+  type DrawScore = {
+    mainScore: number
+    subScore?: number
+    isWinner?: boolean
+  }
 
-  // type Contestant = {
-  //   entryStatus?: string
-  //   players: Player[]
-  // }
+  type DrawSide = {
+    title?: string
+    contestantId?: string
+    scores?: DrawScore[]
+    isWinner?: boolean
+  }
 
-  // type Side = {
-  //   title?: string
-  //   contestantId?: string
-  //   scores?: Score[]
-  //   currentScore?: number | string
-  //   isServing?: boolean
-  //   isWinner?: boolean
-  // }
+  type DrawMatch = {
+    roundIndex: number
+    order: number
+    sides?: DrawSide[]
+    matchStatus?: string
+    isBronzeMatch?: boolean
+    date?: string
+    umpire?: string
+    court?: string
+    duration?: string
+  }
 
-  // type Score = {
-  //   mainScore: number | string
-  //   subscore?: number | string
-  //   isWinner?: boolean
-  // }
+  type DrawRound = {
+    name?: string
+  }
 
-  // type Player = {
-  //   title: string
-  //   nationality?: string
-  // }
+  type Draw = {
+    rounds: DrawRound[]
+    skippedLastRoundsCount?: number
+    matches?: DrawMatch[]
+    contestants?: {
+      [contestantId: string]: DrawContestant
+    }
+  }
 
   type PlayersResultsType = BasePlayerType & {
     subRows: PlayersResultsType[]

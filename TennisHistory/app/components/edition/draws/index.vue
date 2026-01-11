@@ -1,22 +1,26 @@
 <script setup lang="ts">
-const {
-  params: { edId }
-} = useRoute("draws")
 const tour = defineModel<keyof typeof tourEnum>("tour")
 const type = defineModel<MatchTypeEnumType>("type")
 const draw = defineModel<DrawEnumType>("draw")
 
+const {
+  params: { edId }
+} = useRoute("draws")
+const {
+  ui: { icons }
+} = useAppConfig()
+
 // API call
-const { data, execute } = await useFetch("/api/editions/draws", {
+const { data } = await useFetch("/api/edition/draws", {
   query: { edId, tour, type, draw },
-  default: () => [],
-  immediate: false
+  default: () => []
 })
 
-const formattedData = computed<DrawInterface>(() => {
-  const allData: any = get(data)
+const formattedData = computed<Draw>(() => {
+  const allData: DrawMatchType[] = data.value.filter(m => m.round !== "Round robin")
+
   const rounds = useArrayUnique(
-    allData.map((m: any) => {
+    allData.map((m: DrawMatchType) => {
       if (!["3rd Place Match", "Bronze Medal Match"].includes(m.round)) {
         return m.round
       } else {
@@ -26,8 +30,8 @@ const formattedData = computed<DrawInterface>(() => {
   )
   const usedIds = new Set()
 
-  const contestants: DrawInterface["contestants"] = {}
-  const matches: DrawInterface["matches"] = []
+  const contestants: Draw["contestants"] = {}
+  const matches: Draw["matches"] = []
 
   const matchIndexMapping = {
     Final: 1,
@@ -45,37 +49,30 @@ const formattedData = computed<DrawInterface>(() => {
     "Qualifying round 1": allData.filter((m: any) => m.round !== "Qualifying round 1").length + 1
   }
 
-  // console.log(allData.filter((m: any) => m.round === "Qualifying round 1"))
-
   for (const match of allData) {
     const team1Id = match.t1?.id ?? "Bye"
     const team2Id = match.t2?.id ?? "Bye"
 
     if (!usedIds.has(team1Id)) {
-      const object: Contestant =
+      const object: DrawContestant =
         team1Id === "Bye"
           ? {
-              players: [{ title: "Bye" }]
+              players: [{ name: "BYE" }]
             }
           : {
               players: match.t1!.team.map((p: any) => ({
-                title: `${p.first_name} ${p.last_name}`,
-                nationality: p.country.id
+                id: p.id,
+                name: `${p.first_name} ${p.last_name}`,
+                country: p.country
               }))
             }
 
-      if ((match.t1?.seed || match.t1?.status) && !match.round.includes("Qualifying")) {
-        if (match.t1.seed && match.t1.status) {
-          object["entryStatus"] = `${match.t1.seed} ${match.t1.status}`
-        } else {
-          object["entryStatus"] = match.t1.status || match.t1?.seed?.toString()
-        }
-      } else if ((match.t1?.q_seed || match.t1?.q_status) && match.round.includes("Qualifying")) {
-        if (match.t1.q_seed && match.t1.q_status) {
-          object["entryStatus"] = `${match.t1.q_seed} ${match.t1.q_status}`
-        } else {
-          object["entryStatus"] = match.t1.q_status || match.t1?.q_seed?.toString()
-        }
+      if (match.round.includes("Qualifying")) {
+        if (match.t1?.seed) object["seed"] = match.t1.seed
+        if (match.t1?.status) object["status"] = match.t1.status
+      } else {
+        if (match.t1?.q_seed) object["seed"] = match.t1.q_seed
+        if (match.t1?.q_status) object["status"] = match.t1.q_status
       }
 
       contestants[team1Id] = object
@@ -83,31 +80,27 @@ const formattedData = computed<DrawInterface>(() => {
     }
 
     if (!usedIds.has(team2Id)) {
-      const object: Contestant =
+      const object: DrawContestant =
         team2Id === "Bye"
           ? {
-              players: [{ title: "Bye" }]
+              players: [{ name: "BYE" }]
             }
           : {
               players: match.t2!.team.map((p: any) => ({
-                title: `${p.first_name} ${p.last_name}`,
-                nationality: p.country.id
+                id: p.id,
+                name: `${p.first_name} ${p.last_name}`,
+                country: p.country
               }))
             }
 
-      if ((match.t2?.seed || match.t2?.status) && !match.round.includes("Qualifying")) {
-        if (match.t2.seed && match.t2.status) {
-          object["entryStatus"] = `${match.t2.seed} ${match.t2.status}`
-        } else {
-          object["entryStatus"] = match.t2.status || match.t2?.seed?.toString()
-        }
-      } else if ((match.t2?.q_seed || match.t2?.q_status) && match.round.includes("Qualifying")) {
-        if (match.t2.q_seed && match.t2.q_status) {
-          object["entryStatus"] = `${match.t2.q_seed} ${match.t2.q_status}`
-        } else {
-          object["entryStatus"] = match.t2.q_status || match.t2?.q_seed?.toString()
-        }
+      if (match.round.includes("Qualifying")) {
+        if (match.t2?.seed) object["seed"] = match.t2.seed
+        if (match.t2?.status) object["status"] = match.t2.status
+      } else {
+        if (match.t2?.q_seed) object["seed"] = match.t2.q_seed
+        if (match.t2?.q_status) object["status"] = match.t2.q_status
       }
+
       contestants[team2Id] = object
       usedIds.add(team2Id)
     }
@@ -120,8 +113,8 @@ const formattedData = computed<DrawInterface>(() => {
       ? match.match_no - matchIndexMapping[match.round as keyof typeof matchIndexMapping]
       : match.match_no - qualifyingIndexMapping[match.round as keyof typeof qualifyingIndexMapping]
 
-    const side1Object: Side = {}
-    const side2Object: Side = {}
+    const side1Object: DrawSide = {}
+    const side2Object: DrawSide = {}
 
     if (match.winning_team === "t1") {
       side1Object.isWinner = true
@@ -134,15 +127,15 @@ const formattedData = computed<DrawInterface>(() => {
 
     for (let i = 1; i <= 5; i++) {
       if (isDefined(match.team1?.[`s${i}` as keyof typeof match.team1])) {
-        const s1Score: Score = {
+        const s1Score: DrawScore = {
           mainScore: match.team1[`s${i}` as keyof typeof match.team1]
         }
-        const s2Score: Score = {
+        const s2Score: DrawScore = {
           mainScore: match.team2![`s${i}` as keyof typeof match.team2]
         }
         if (isDefined(match.team1[`t${i}` as keyof typeof match.team1])) {
-          s1Score.subscore = match.team1[`t${i}` as keyof typeof match.team1] ?? match.team2![`t${i}` as keyof typeof match.team2] + 2
-          s2Score.subscore = match.team2![`t${i}` as keyof typeof match.team2] ?? match.team1[`t${i}` as keyof typeof match.team1] + 2
+          s1Score.subScore = match.team1[`t${i}` as keyof typeof match.team1] ?? match.team2![`t${i}` as keyof typeof match.team2] + 2
+          s2Score.subScore = match.team2![`t${i}` as keyof typeof match.team2] ?? match.team1[`t${i}` as keyof typeof match.team1] + 2
         }
 
         if (match.team1[`s${i}` as keyof typeof match.team1] > match.team2![`s${i}` as keyof typeof match.team2]) {
@@ -155,7 +148,7 @@ const formattedData = computed<DrawInterface>(() => {
       }
     }
 
-    const matchObject: Match = {
+    const matchObject: DrawMatch = {
       roundIndex,
       order: matchIndex,
       sides: [side1Object, side2Object]
@@ -183,106 +176,91 @@ const formattedData = computed<DrawInterface>(() => {
     }
 
     if (match.duration) {
-      matchObject.duration = match.duration
+      matchObject.duration = getDurationString(match.duration)
     }
 
     matches.push(matchObject)
   }
-
-  const lastRoundsCount = allData?.[0]?.round?.includes("Qualifying")
-    ? Object.keys(contestants).length > 32
-      ? 4
-      : Object.keys(contestants).length > 16
-      ? 3
-      : Object.keys(contestants).length > 8
-      ? 2
-      : 0
-    : 0
 
   return {
     rounds: rounds.value.map(round => ({
       name: round
     })),
     matches,
-    contestants,
-    skippedLastRoundsCount: lastRoundsCount
-  } as DrawInterface
+    contestants
+  } as Draw
 })
 
-const wrapper = useTemplateRef<HTMLElement | null>("wrapper")
-const raf = () => new Promise<void>(r => requestAnimationFrame(() => r()))
-
-const renderBracket = async () => {
-  if (!(data.value as any)?.length || !wrapper.value) return
-  const val = formattedData.value
-  if (!val?.matches?.length || !val?.rounds?.length) return
-
-  await nextTick()
-  await raf()
-  await raf()
-
-  // reset container before re-rendering
-  wrapper.value.innerHTML = ""
-
-  const { createBracket } = await import("bracketry")
-  createBracket(val, wrapper.value, {
-    getMatchTopHTML: match => {
-      let text = ""
-      if (match.isBronzeMatch) {
-        text += "Bronze Medal Match"
-        if (match.date || match.duration) {
-          text += " | "
-        }
-      }
-      if (match.date && match.duration) {
-        text += `Date: ${match.date} | Duration: ${match.duration}`
-      } else if (match.date) {
-        text += `Date: ${match.date}`
-      } else if (match.duration) {
-        text += `Duration: ${match.duration}`
-      }
-      return `<div class="text-[11px] mb-2 text-primary/80">${text}</div>`
-    },
-    getEntryStatusHTML: entryStatus => {
-      return `<div style="width: 24px; text-align: center">${entryStatus ?? ""}</div>`
-    },
-    getMatchBottomHTML: match => {
-      let text = ""
-      if (match.umpire && match.court) {
-        text += `Umpire: ${match.umpire} | Court: ${match.court}`
-      } else if (match.umpire || match.court) {
-        text += `${match.umpire ? "Umpire" : "Court"}: ${match.umpire ?? match.court}`
-      }
-      return `<div class="text-[11px] mt-2 text-primary/80">${text}</div>`
-    },
-    navButtonsPosition: "overTitles",
-    matchTextColor: "#64748b",
-    roundTitleColor: "#64748b",
-    connectionLinesWidth: 1,
-    connectionLinesColor: "#4b5563",
-    highlightedConnectionLinesColor: "#0ea5e9",
-    highlightedPlayerTitleColor: "#0ea5e9",
-    matchStatusBgColor: "#f97316",
-    rootBorderColor: "transparent",
-    navButtonSvgColor: "#4b5563",
-    roundTitlesFontSize: 20,
-    matchMinVerticalGap: 60
-  })
+const getMatches = (roundIndex: number) => {
+  return formattedData.value?.matches?.filter(m => m.roundIndex === roundIndex) || []
 }
 
-onMounted(() => {
-  execute()
-})
+const selectedContestantId = ref<string | null>(null)
 
-watchEffect(() => {
-  renderBracket()
-})
+const handleHighlightPath = (contestantId: string | null) => {
+  selectedContestantId.value = contestantId
+}
+
+const baseIndexValue = ref(0)
+watch(
+  () => formattedData.value,
+  () => {
+    set(baseIndexValue, formattedData.value?.rounds.length > 2 ? 1 : formattedData.value?.rounds.length - 2)
+  }
+)
+
+const isVisible = (index: number) => index >= baseIndexValue.value - 1 && index <= baseIndexValue.value + 1
 </script>
 
 <template>
   <div
-    v-show="formattedData?.rounds.length"
-    ref="wrapper"
-    class="max-h-200 overflow-y-auto"
-  />
+    v-if="formattedData"
+    class="flex items-center gap-5"
+  >
+    <u-button
+      :icon="icons.chevronLeft"
+      @click="baseIndexValue--"
+      :disabled="baseIndexValue <= 1"
+      block
+    />
+    <u-button
+      :icon="icons.chevronRight"
+      @click="baseIndexValue++"
+      :disabled="baseIndexValue >= formattedData.rounds.length - 1"
+      block
+    />
+  </div>
+
+  <div
+    v-if="formattedData?.rounds.length"
+    class="grid grid-cols-[auto_1fr_1fr_auto] grid-rows-[auto_auto_1fr_auto] min-w-65 min-h-62.5 max-w-full w-content h-full text-left"
+  >
+    <div class="w-0 min-w-full row-1 col-start-1 col-end-5 overflow-hidden pb-px border-b border-muted">
+      <div class="grid grid-flow-col auto-cols-fr h-full min-w-full">
+        <div
+          v-for="(round, index) in formattedData.rounds"
+          :key="round.name"
+          class="px-5 py-2 flex overflow-hidden justify-center whitespace-nowrap"
+          :class="{ hidden: !isVisible(index) }"
+        >
+          {{ round.name }}
+        </div>
+      </div>
+    </div>
+
+    <div class="col-start-1 col-end-5 row-2 overflow-y-hidden overflow-x-hidden pointer-events-none">
+      <div class="grid grid-flow-col auto-cols-fr relative z-2 min-w-full min-h-full grid-rows-1 overflow-hidden py-5 px-0">
+        <edition-draws-round-column
+          v-for="(round, index) in formattedData.rounds"
+          :key="index"
+          :round-index="index"
+          :matches="getMatches(index)"
+          :contestants="formattedData.contestants"
+          :selected-contestant-id
+          :base-index-value
+          :handle-highlight-path
+        />
+      </div>
+    </div>
+  </div>
 </template>

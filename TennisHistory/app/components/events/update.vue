@@ -3,10 +3,16 @@ import { parseDate } from "@internationalized/date"
 import type { FormErrorEvent, FormSubmitEvent } from "@nuxt/ui"
 import type { FetchError } from "ofetch"
 
-const props = defineProps<{
-  event?: EventType
-  refresh: () => void
-}>()
+const props = withDefaults(
+  defineProps<{
+    event?: EventType
+    refresh: () => void
+    iconOnly?: boolean
+  }>(),
+  {
+    iconOnly: false
+  }
+)
 
 const {
   params: { edId, year }
@@ -190,7 +196,7 @@ const formFields = computed<FormFieldInterface<EventFormSchema>[]>(
   >
     <u-button
       :icon="event ? ICONS.edit : icons.plus"
-      :label="event ? event.tour : 'Create Event'"
+      :label="iconOnly ? undefined : event ? event.tour : 'Create Event'"
       block
       color="Doubles"
     />
