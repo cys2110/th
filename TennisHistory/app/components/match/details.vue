@@ -1,18 +1,18 @@
 <script setup lang="ts">
 import { parseDate } from "@internationalized/date"
 
-const { match } = defineProps<{ match: RawMatchType }>()
+const props = defineProps<{ match: RawMatchType }>()
 const {
   ui: { icons }
 } = useAppConfig()
 
 const calendarDate = computed(() => {
-  if (match.date) {
-    return parseDate(match.date)
+  if (props.match.date) {
+    return parseDate(props.match.date)
   } else {
     return {
-      start: parseDate(match.start_date!),
-      end: parseDate(match.end_date!)
+      start: parseDate(props.match.start_date!),
+      end: parseDate(props.match.end_date!)
     }
   }
 })
@@ -27,6 +27,7 @@ const calendarDate = computed(() => {
         <div>Duration</div>
         <div>Court</div>
         <div>Umpire</div>
+        <div v-if="match.group">Group</div>
       </div>
       <div class="flex flex-col justify-evenly items-end gap-3 font-semibold">
         <span>{{ match.surface?.id ?? "—" }}</span>
@@ -45,6 +46,7 @@ const calendarDate = computed(() => {
             </template>
           </dev-only>
         </span>
+        <span v-if="match.group">{{ match.group }}</span>
       </div>
     </div>
 

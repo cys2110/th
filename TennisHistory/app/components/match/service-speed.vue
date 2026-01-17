@@ -1,17 +1,21 @@
 <script setup lang="ts">
+import type { AsyncDataRequestStatus } from "#app"
+
 defineProps<{
   stats: MatchStatsType["stats"]
   label?: string
   category: string
-  tournament: string
+  status: AsyncDataRequestStatus
 }>()
-const { params } = useRoute()
-const { year } = params as { year?: string }
+const {
+  params: { year }
+} = useRoute("match")
+const matchStore = useMatchStore()
 </script>
 
 <template>
   <u-modal
-    :title="`${tournament} ${year}`"
+    :title="`${matchStore.name} ${year}`"
     description="Service Speed"
     fullscreen
   >
@@ -24,10 +28,11 @@ const { year } = params as { year?: string }
 
     <template #body>
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-        <matches-speed-gauge
+        <match-speed-gauge
           v-for="stat in stats"
           :key="stat.label"
           :stat
+          :status
         />
       </div>
     </template>

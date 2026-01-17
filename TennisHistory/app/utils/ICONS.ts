@@ -7,7 +7,6 @@ export default {
   // supervisor: "solar:clipboard-bold-duotone",
   // tennis: "game-icons:tennis-racket",
   // toc: "line-md:list-indented",
-  // venue: "tabler:building-stadium",
   areaChart: "icon-park-twotone:area-map",
   awards: "game-icons:money-stack",
   awardsOff: "tabler:cash-banknote-off",
@@ -56,6 +55,7 @@ export default {
   trophyOff: "tabler:trophy-off",
   umpire: "game-icons:whistle",
   uploading: "line-md:uploading-loop",
+  venue: "tabler:building-stadium",
   wikipedia: "tabler:brand-wikipedia",
   years: "stash:calendar-duotone"
 }

@@ -12,15 +12,59 @@ interface FormType {
   groups: string[]
 }
 
+const uploading = ref(false)
+const toast = useToast()
+const open = ref(false)
+
 const state = ref<FormType>({
   id: `${edId}-Country`,
   rounds: [],
   groups: []
 })
+
+const onSubmit = async () => {
+  set(uploading, true)
+
+  try {
+    const response = await $fetch("/api/edition/awards/country", {
+      method: "POST",
+      body: state.value
+    })
+
+    if (response.success) {
+      toast.add({
+        title: "Rounds successfully created",
+        icon: icons.success,
+        color: "success"
+      })
+
+      set(open, false)
+    } else {
+      toast.add({
+        title: "Error creating rounds",
+        icon: icons.error,
+        color: "error"
+      })
+    }
+  } catch (e) {
+    console.error(e)
+
+    toast.add({
+      title: "Error creating rounds",
+      icon: icons.error,
+      color: "error"
+    })
+  } finally {
+    set(uploading, false)
+  }
+}
 </script>
 
 <template>
-  <u-modal title="Create Rounds">
+  <u-modal
+    title="Create Rounds"
+    v-model:open="open"
+  >
     <u-button
       :icon="icons.plus"
       label="Create Rounds"
@@ -51,6 +95,13 @@ const state = ref<FormType>({
     </template>
 
     <template #footer="{ close }">
+      <u-button
+        label="Save"
+        :icon="uploading ? ICONS.uploading : icons.upload"
+        @click="onSubmit"
+        block
+        color="success"
+      />
       <u-button
         label="Cancel"
         :icon="icons.error"

@@ -12,7 +12,7 @@ const props = defineProps<{
 }>()
 
 const {
-  params: { year }
+  params: { id, year }
 } = useRoute("results")
 
 const tournamentStore = useTournamentStore()
@@ -86,6 +86,15 @@ const filteredMatches = computed(() => {
     v-else
     :message="`No matches played in ${tournamentStore.name} ${year}`"
   >
-    <match-update :refresh />
+    <dev-only>
+      <match-country-update
+        v-if="COUNTRY_DRAWS.includes(id)"
+        :refresh
+      />
+      <match-update
+        v-else
+        :refresh
+      />
+    </dev-only>
   </empty>
 </template>

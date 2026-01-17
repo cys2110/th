@@ -4,32 +4,15 @@ export default defineEventHandler(async event => {
   try {
     const params = await readValidatedBody(event, body => entryFormSchema.parse(body))
 
-    const isCountryDraw = params.event.includes("Country")
+    let query = `/* cypher */
+      MATCH (p:Player {id: $id})-[t:ENTERED]->(f:Entry:$($type)) WHERE f.id STARTS WITH $event
+      SET f += $entry
+    `
 
-    let query = ""
-
-    if (isCountryDraw) {
-      query = `/* cypher */
-        MATCH (p:Player {id: $id})-[t:ENTERED]->(f:Entry:$($type)) WHERE f.id STARTS WITH $event
-        SET f += $entry
+    if ("rank" in params) {
+      query += `
+        SET t.rank = $rank
       `
-
-      if ("rank" in params) {
-        query += `
-          SET t.rank = $rank
-        `
-      }
-    } else {
-      query = `/* cypher */
-        MATCH (p:Player {id: $id})-[t:ENTERED]->(f:Entry:$($type)) WHERE f.id STARTS WITH $event
-        SET f += $entry
-      `
-
-      if ("rank" in params) {
-        query += `
-          SET t.rank = $rank
-        `
-      }
     }
 
     const { summary } = await useDriver().executeQuery(query, params)

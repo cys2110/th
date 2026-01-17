@@ -47,6 +47,8 @@ const toc = [
             <events-update :refresh />
 
             <edition-awards-country v-if="COUNTRY_DRAWS.includes(id)" />
+
+            <edition-awards-ties v-if="COUNTRY_DRAWS.includes(id)" />
           </dev-only>
 
           <u-separator v-if="!COUNTRY_DRAWS.includes(id)" />

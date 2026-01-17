@@ -20,24 +20,20 @@ type Schema = z.infer<typeof schema>
 const initialState = {}
 const state = ref<Schema>({ ...(initialState as Schema) })
 
-const formFields: FormFieldInterface<Schema>[] = [
-  { label: "ID", key: "id", type: "text" },
-  { label: "Tour", key: "tour", type: "radio", items: ["ATP", "WTA"] }
-]
-
 const handleReset = () => set(state, { ...(initialState as Schema) })
 
 const onError = (event: FormErrorEvent) => console.error(event.errors)
 
 const onSubmit = async (event: FormSubmitEvent<Schema>) => {
   set(uploading, true)
+
   const response = await $fetch("/api/players/create", {
     query: event.data
   })
 
-  if ((response as any).ok) {
+  if (response.success) {
     toast.add({
-      title: "Player created",
+      title: `${event.data.id} created successfully`,
       icon: icons.success,
       color: "success"
     })
@@ -49,24 +45,27 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
   } else {
     toast.add({
       title: "Error creating player",
-      description: (response as any).message,
       icon: icons.error,
       color: "error"
     })
   }
-
-  set(uploading, false)
 }
+
+const formFields: (FormFieldInterface<Schema> & { key: keyof Schema })[] = [
+  { label: "ID", key: "id", type: "text", required: true },
+  { label: "Tour", key: "tour", type: "radio", items: ["ATP", "WTA"], required: true }
+]
 </script>
 
 <template>
   <u-modal
-    title="Create Player"
+    :title="`Create ${state.id ?? 'Player'}`"
     v-model:open="open"
   >
     <u-button
       :icon="icons.plus"
       label="Create Player"
+      color="Doubles"
       block
     />
 
@@ -74,7 +73,7 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
       <u-form
         id="player-form"
         :schema="schema"
-        :state
+        :state="state"
         @submit="onSubmit"
         @error="onError"
       >
@@ -94,7 +93,7 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
         form="player-form"
         type="submit"
         label="Save"
-        :icon="uploading ? ICONS.uploading : icons.check"
+        :icon="uploading ? ICONS.uploading : icons.upload"
         block
       />
       <u-button

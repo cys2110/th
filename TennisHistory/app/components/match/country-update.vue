@@ -2,10 +2,10 @@
 // @ts-nocheck
 import { parseDate } from "@internationalized/date"
 import type { FormErrorEvent, FormSubmitEvent } from "@nuxt/ui"
-import { cloneDeep } from "lodash"
+import type { FetchError } from "ofetch"
 
 const { match } = defineProps<{
-  match?: RawMatchType
+  match?: RawCountryMatchType
 }>()
 const {
   params: { edId }
@@ -15,14 +15,24 @@ const {
 } = useAppConfig()
 const toast = useToast()
 
-const tour = useRouteQuery("tour")
-const draw = useRouteQuery("draw")
 const type = useRouteQuery("type")
 
 const uploading = ref(false)
 const open = ref(false)
 
-const initialState = computed(() => ({
+const { data: ties, status: tieStatus } = await useFetch("/api/edition/ties", {
+  query: { edId },
+  default: () => [],
+  onResponseError: ({ error }) => console.error("Error fetching ties:", error)
+})
+
+const { data: teams, status } = await useFetch("/api/edition/entries/team-list", {
+  query: { edId },
+  default: () => [],
+  onResponseError: ({ error }) => console.error("Error fetching teams:", error)
+})
+
+const initialState = computed<Partial<CountryMatchFormSchema>>(() => ({
   ...(match
     ? {
         ...match,
@@ -48,31 +58,21 @@ const initialState = computed(() => ({
         team2: {}
       }),
   edition: Number(edId),
-  tour: tour.value ?? undefined,
-  draw: draw.value ?? undefined,
   type: type.value ?? undefined
 }))
 
 const state = ref(cloneDeep(initialState.value))
 
-const formFields = computed<FormFieldInterface<MatchFormSchema>[]>(
+const formFields = computed<FormFieldInterface<CountryMatchFormSchema>[]>(
   () =>
     [
       { label: "S/D", key: "type", type: "radio", items: ["Singles", "Doubles"], required: true },
-      { label: "Draw", key: "draw", type: "radio", items: ["Main", "Qualifying"], required: true },
-      {
-        label: "No. of Sets",
-        key: "noOfSets",
-        type: "radio",
-        items: ["Best Of 3", "Best Of 5"]
-      },
-      { label: "Round", key: "round", type: "inputMenu", items: ROUND_OPTIONS, required: true },
+      { label: "Tie", key: "tie", type: "inputMenu", items: ties.value, required: true },
       { label: "Match No.", key: "match_no", type: "number", required: true },
       { label: "Date", key: "date", type: "date" },
       { label: "Court", key: "court", type: "text" },
       { label: "Duration", key: "duration", type: "text", placeholder: "HH:MM:SS" },
-      { label: "Umpire", key: "umpire", type: "search", subType: "Umpire" },
-      { label: "Group", key: "group", type: "text" },
+      { label: "Umpire", key: "umpire", type: "search", subType: "Umpire", class: "col-span-2" },
       {
         label: "Incomplete",
         key: "incomplete",
@@ -94,22 +94,14 @@ const formFields = computed<FormFieldInterface<MatchFormSchema>[]>(
       {
         label: state.value.type === "Doubles" ? "Team 1" : "Player 1",
         key: "t1",
-        type: "search",
-        subType: "Entry",
-        matchType: state.value.type ?? "Singles",
-        placeholder: state.value.type === "Doubles" ? "Team 1" : "Player 1",
-        id: `${edId}-${tour}`
+        type: "slot"
       },
       {
         label: state.value.type === "Doubles" ? "Team 2" : "Player 2",
         key: "t2",
-        type: "search",
-        subType: "Entry",
-        matchType: state.value.type ?? "Singles",
-        placeholder: state.value.type === "Doubles" ? "Team 2" : "Player 2",
-        id: `${edId}-${tour}`
+        type: "slot"
       }
-    ] as FormFieldInterface<MatchFormSchema>[]
+    ] as FormFieldInterface<CountryMatchFormSchema>[]
 )
 
 const scoreFormFields = [
@@ -150,32 +142,55 @@ const handleReset = () => {
 
 const onError = (event: FormErrorEvent) => console.error("Form Error:", event.errors)
 
-const onSubmit = async (event: FormSubmitEvent<MatchFormSchema>) => {
+const onSubmit = async (event: FormSubmitEvent<CountryMatchFormSchema>) => {
   set(uploading, true)
 
-  const response = await $fetch(`/api/matches/${match ? "update" : "create"}`, {
-    method: "POST",
-    body: event.data
-  })
-
-  if ((response as any).ok) {
-    toast.add({
-      title: `Match ${match ? "updated" : "created"} successfully`,
-      icon: icons.success,
-      color: "success"
+  try {
+    const response = await $fetch(`/api/matches/country-${match ? "update" : "create"}`, {
+      method: "POST",
+      body: event.data
     })
 
-    set(open, false)
-    reloadNuxtApp()
-  } else {
+    if (response?.success) {
+      toast.add({
+        title: `Match ${match ? "updated" : "created"} successfully`,
+        icon: icons.success,
+        color: "success"
+      })
+
+      set(open, false)
+      reloadNuxtApp()
+    } else {
+      toast.add({
+        title: `Error ${match ? "updating" : "creating"} match`,
+        icon: icons.error,
+        color: "error"
+      })
+    }
+  } catch (e) {
+    console.error("Error submitting form:", e)
+    if (typeof e === "object" && e && "statusMessage" in e) {
+      const err = e as FetchError<ValidationError>
+
+      if (err.statusMessage === "Invalid request body") {
+        console.error(
+          "Validation errors: ",
+          err.data?.validationErrors.map(e => `${e.path.join(".")}: ${e.message}`)
+        )
+      }
+    } else {
+      console.error(e)
+    }
+
     toast.add({
-      title: "Error updating match",
+      title: `Error ${match ? "updating" : "creating"} match`,
+      description: (e as Error).message,
       icon: icons.error,
       color: "error"
     })
+  } finally {
+    set(uploading, false)
   }
-
-  set(uploading, false)
 }
 </script>
 
@@ -188,13 +203,13 @@ const onSubmit = async (event: FormSubmitEvent<MatchFormSchema>) => {
       :icon="match ? ICONS.edit : icons.plus"
       :label="match ? 'Edit Match' : 'Create Match'"
       block
+      color="Doubles"
     />
 
     <template #body>
-      <!--@vue-expect-error-->
       <u-form
         id="match-form"
-        :schema="matchFormSchema"
+        :schema="countryMatchFormSchema"
         :state="state"
         @submit="onSubmit"
         @error="onError"
@@ -205,7 +220,15 @@ const onSubmit = async (event: FormSubmitEvent<MatchFormSchema>) => {
             :key="field.label"
             :field="field"
             v-model="state"
-          />
+          >
+            <u-input-menu
+              v-model="state[field.key]"
+              :items="teams"
+              :loading="status === 'pending'"
+              :placeholder="`Select ${state.type === 'Singles' ? 'Player' : 'Team'} ${field.key === 't1' ? '1' : '2'}`"
+              :icon="ICONS.player"
+            />
+          </form-field>
 
           <u-form-field
             v-for="field in scoreFormFields"
@@ -309,7 +332,7 @@ const onSubmit = async (event: FormSubmitEvent<MatchFormSchema>) => {
         form="match-form"
         type="submit"
         label="Save"
-        :icon="uploading ? ICONS.uploading : icons.check"
+        :icon="uploading ? ICONS.uploading : icons.upload"
         block
       />
       <u-button

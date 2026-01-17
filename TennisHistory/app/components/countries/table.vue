@@ -42,7 +42,7 @@ const handleSelectRow = (e: Event, row: TableRow<CountryType>) => {
     :grouping-options="{
       getGroupedRowModel: getGroupedRowModel()
     }"
-    :ui="{ root: 'max-w-2/3 mx-auto', td: 'empty:p-0' }"
+    :ui="{ root: 'max-w-1/2 mx-auto', td: 'empty:p-0' }"
   >
     <template #loading>
       <loading-icon />

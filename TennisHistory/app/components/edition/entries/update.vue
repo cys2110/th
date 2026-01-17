@@ -156,7 +156,7 @@ const formFields = computed<FormFieldInterface<EntryFormSchema>[]>(() => {
 
   if (!props.entry) {
     fields.push({
-      label: state.value.type === "Doubles" && !COUNTRY_DRAWS.includes(id) ? "Player 1" : "Player",
+      label: state.value.type === "Doubles" ? "Player 1" : "Player",
       type: "fieldGroup",
       required: true,
       class: state.value.type === "Doubles" && !COUNTRY_DRAWS.includes(id) ? "col-span-1" : "col-span-2",
@@ -166,7 +166,7 @@ const formFields = computed<FormFieldInterface<EntryFormSchema>[]>(() => {
       ]
     })
 
-    if (state.value.type === "Doubles" && !COUNTRY_DRAWS.includes(id)) {
+    if (state.value.type === "Doubles") {
       fields.push({
         label: "Player 2",
         type: "fieldGroup",
@@ -174,7 +174,8 @@ const formFields = computed<FormFieldInterface<EntryFormSchema>[]>(() => {
         children: [
           { label: "Name", key: "player2", type: "search", subType: "Player", icon: ICONS.player, placeholder: "player" },
           { label: "Rank", key: "rank2", type: "number" }
-        ]
+        ],
+        class: !COUNTRY_DRAWS.includes(id) ? "col-span-1" : "col-span-2"
       })
     }
   } else {

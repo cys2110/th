@@ -80,7 +80,7 @@ watchDeep(
 
 <template>
   <u-container class="min-h-screen flex flex-col">
-    <!-- <u-page class="flex-1">
+    <u-page class="flex-1">
       <template #left>
         <u-page-aside>
           <dev-only>
@@ -88,7 +88,7 @@ watchDeep(
             <u-separator />
           </dev-only>
 
-          <filters
+          <!-- <filters
             :filters="['tours', 'status', 'min_year', 'max_year', 'coaches', 'countries']"
             :reset-filters
             :reset-sorting
@@ -101,11 +101,11 @@ watchDeep(
             v-model:countries="countries"
             v-model:sorting="sortField"
             :sort-fields="sortFields"
-          />
+          /> -->
         </u-page-aside>
       </template>
 
-      <template #right>
+      <!-- <template #right>
         <u-page-aside>
           <form-command-palette-search
             type="Player"
@@ -113,17 +113,17 @@ watchDeep(
             :icon="ICONS.player"
           />
         </u-page-aside>
-      </template>
+      </template> -->
 
-      <u-page-header title="Players">
+      <!-- <u-page-header title="Players">
         <template #links>
           <view-switcher
             v-model="viewMode"
             class="hidden md:block"
-          />-->
+          /> -->
 
-    <!--Filters for smaller screens-->
-    <!-- <u-slideover
+      <!--Filters for smaller screens-->
+      <!-- <u-slideover
             title="Filters"
             class="ml-auto lg:hidden"
           >
@@ -151,8 +151,8 @@ watchDeep(
       </u-page-header>
 
       <u-page-body> -->
-    <!--Empty template-->
-    <!--<define-empty-template>
+      <!--Empty template-->
+      <!-- <define-empty-template>
           <empty
             message="No players found"
             :icon="ICONS.noPeople"
@@ -210,10 +210,10 @@ watchDeep(
             <reuse-empty-template />
           </template>
         </u-table>
-      </u-page-body>
+      </u-page-body> -->
     </u-page>
 
-    <counts
+    <!-- <counts
       :total="data.count"
       type="player"
       v-model:page="page"

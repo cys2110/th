@@ -16,7 +16,7 @@ declare global {
     errorPattern?: RegExp
     schema?: z.ZodType
     class?: string
-    type: string
+    type?: string
     subType?: string
     items?: any[]
     children?: FormFieldInterface<S[keyof S][keyof S[keyof S]]>[]

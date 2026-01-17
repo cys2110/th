@@ -8,7 +8,10 @@ defineProps<{
 </script>
 
 <template>
-  <u-page-grid v-if="countries.length || status === 'pending'">
+  <u-page-grid
+    v-if="countries.length || status === 'pending'"
+    class="xl:grid-cols-4"
+  >
     <countries-card
       v-if="countries.length"
       v-for="country in countries"

@@ -1,8 +1,9 @@
 export default defineEventHandler(async event => {
-  const { id } = getQuery(event)
+  try {
+    const params = getQuery(event)
 
-  const { records } = await useDriver().executeQuery(
-    `/* cypher */
+    const { records } = await useDriver().executeQuery(
+      `/* cypher */
       MATCH (p:Player {id: $id})
       OPTIONAL MATCH (p)-[t:REPRESENTS]->(c:Country)
       OPTIONAL MATCH (p)-[:ENTERED]->(:Entry)-[:SCORED]->(:Score)-[:SCORED]->(:Match)-[:PLAYED]->(:Round)-[:ROUND_OF]->(:Event)-[:EVENT_OF]->(:Edition)-[:IN_YEAR]->(y:Year)
@@ -27,10 +28,13 @@ export default defineEventHandler(async event => {
         [null]
       ) AS player
     `,
-    { id }
-  )
+      params
+    )
 
-  const player = records[0].get("player")
+    const player = records[0].get("player")
 
-  return playerOverviewSchema.parse(player)
+    return playerOverviewSchema.parse(player)
+  } catch (error) {
+    throw error
+  }
 })

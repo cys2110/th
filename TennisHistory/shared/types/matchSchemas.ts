@@ -98,6 +98,7 @@ export const matchSchema = object({
     .optional(),
   team1: scoreFormSchema.optional(),
   team2: scoreFormSchema.optional(),
+  tie: string(),
   tour: tourEnumTransform,
   type: MatchTypeEnum,
   umpire: personSchema
@@ -204,7 +205,8 @@ export const rawMatchSchema = matchSchema
     duration: true,
     date: true,
     court: true,
-    incomplete: true
+    incomplete: true,
+    group: true
   })
   .required({
     t1: true,
@@ -221,3 +223,36 @@ export const rawMatchSchema = matchSchema
   })
 
 export type RawMatchType = z.infer<typeof rawMatchSchema>
+
+export const rawCountryMatchSchema = matchSchema
+  .pick({
+    noOfSets: true,
+    umpire: true,
+    tie: true,
+    t1: true,
+    t2: true,
+    winning_team: true,
+    team1: true,
+    team2: true,
+    id: true,
+    match_no: true,
+    duration: true,
+    date: true,
+    court: true,
+    incomplete: true
+  })
+  .required({
+    t1: true,
+    t2: true,
+    team1: true,
+    team2: true,
+    winning_team: true
+  })
+  .extend({
+    surface: surfaceSchema,
+    start_date: neoDateToStringSchema,
+    end_date: neoDateToStringSchema,
+    tournament: string()
+  })
+
+export type RawCountryMatchType = z.infer<typeof rawCountryMatchSchema>

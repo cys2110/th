@@ -4,3 +4,7 @@ export const convertToFt = (height: number) => {
   const inches = Math.round((ftDecimal - ft) * 12)
   return `${ft}' ${inches}"`
 }
+
+export const convertKmhToMph = (kmh: number) => {
+  return Math.round(kmh * 0.621371)
+}

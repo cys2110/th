@@ -4,11 +4,11 @@ export default defineEventHandler(async event => {
   try {
     const params = await readValidatedBody(event, body => countryRoundsSchema.parse(body))
 
-    const query = `/* cypher */
+    let query = `/* cypher */
       UNWIND $rounds AS round
       MATCH (e:Event {id: $id})
       MERGE (r:Round:Main {id: round.id})
-      SET r += $round
+      SET r += round
       MERGE (r)-[:ROUND_OF]->(e)
     `
 

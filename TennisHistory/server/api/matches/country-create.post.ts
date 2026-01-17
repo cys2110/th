@@ -2,21 +2,22 @@ import { ZodError } from "zod"
 
 export default defineEventHandler(async event => {
   try {
-    const params = await readValidatedBody(event, body => matchFormSchema.parse(body))
+    const params = await readValidatedBody(event, body => countryMatchFormSchema.parse(body))
 
     let query = `/* cypher */
-      MATCH (e:Event {id: $event})<-[:ROUND_OF]-(r:Round:$($type) {round: $round})
-      WITH e, r, [x IN labels(e) WHERE x IN ['ATP', 'WTA', 'Men', 'Women']][0] AS tour
-      MERGE (m:Match:$($draw):$(tour):$($type):$($noOfSets) {id: $id, match_no: $match_no})
+      // MATCH (e:Event {id: $event})<-[:ROUND_OF]-(r:Round:$($type) {round: $round})
+      MATCH (t:Tie {id: $tie})-[:TIE_OF]->(r:Round)
+      MERGE (m:Match:Main:$($type):BestOf3 {id: $id, match_no: $match_no})
       MERGE (m)-[:PLAYED]->(r)
+      MERGE (m)-[:PLAYED]->(t)
       SET m += $match
     `
 
     if (params.t1) {
       query += `
-        WITH m, tour
+        WITH m
         MATCH (f1:Entry {id: $t1})
-        MERGE (s1:$(tour):$($draw):$($type):T1:Score {id: $team1.id})
+        MERGE (s1:Main:$($type):T1:Score {id: $team1.id})
         SET s1 += $team1
         MERGE (f1)-[:SCORED]->(s1)
         MERGE (s1)-[:SCORED]->(m)
@@ -36,9 +37,9 @@ export default defineEventHandler(async event => {
 
     if (params.team2) {
       query += `
-        WITH m, tour
+        WITH m
         MATCH (f2:Entry {id: $t2})
-        MERGE (s2:$(tour):$($draw):$($type):T2:Score {id: $team2.id})
+        MERGE (s2:Main:$($type):T2:Score {id: $team2.id})
         SET s2 += $team2
         MERGE (f2)-[:SCORED]->(s2)
         MERGE (s2)-[:SCORED]->(m)
@@ -69,10 +70,9 @@ export default defineEventHandler(async event => {
     if (Object.values(summary.counters.updates()).every(v => v === 0)) {
       throw createError({ statusCode: 400, statusMessage: "Match could not be created" })
     } else {
-      return { ok: true }
+      return { success: true }
     }
   } catch (error) {
-    console.error(error)
     const zodErr = error instanceof ZodError ? error : error instanceof Error && error.cause instanceof ZodError ? error.cause : null
 
     if (zodErr) {

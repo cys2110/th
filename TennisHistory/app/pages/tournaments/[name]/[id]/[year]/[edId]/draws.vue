@@ -4,7 +4,7 @@ import { keyBy } from "lodash"
 definePageMeta({ name: "draws" })
 
 const {
-  params: { edId }
+  params: { id, edId }
 } = useRoute("draws")
 
 const toast = useToast()
@@ -162,9 +162,11 @@ const updateTiebreaks = async () => {
               :icon="updating ? ICONS.uploading : icons.upload"
               label="Update tiebreaks"
               block
+              color="Doubles"
             />
 
-            <match-update />
+            <match-country-update v-if="COUNTRY_DRAWS.includes(id)" />
+            <match-update v-else />
 
             <u-separator />
           </dev-only>

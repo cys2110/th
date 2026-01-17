@@ -35,35 +35,6 @@ export const playerSchema = personSchema.extend({
   years: array(intToNumberSchema)
 })
 
-// export const playerSchema = personSchema.extend({
-//   age: intToNumberSchema.optional(),
-//   bh: literal(["One", "Two"]).optional(),
-//   ch_doubles: intToNumberSchema.optional(),
-//   ch_singles: intToNumberSchema.optional(),
-//   coaches: array(coachSchema),
-//   current_doubles: intToNumberSchema.optional(),
-//   current_singles: intToNumberSchema.optional(),
-//   dob: neoDateToStringSchema.optional(),
-//   dod: neoDateToStringSchema.optional(),
-//   doubles_ch_date: neoDateToStringSchema.optional(),
-//   former_coaches: array(coachSchema),
-//   former_countries: array(countrySchema),
-//   height: intToNumberSchema.optional(),
-//   hof: intToNumberSchema.optional(),
-//   max_year: intToNumberSchema,
-//   min_year: intToNumberSchema,
-//   official_link: url().optional(),
-//   pm: intToNumberSchema.optional(),
-//   retired: intToNumberSchema.optional(),
-//   rh: literal(["Right", "Left"]).optional(),
-//   singles_ch_date: neoDateToStringSchema.optional(),
-//   site_link: url().optional(),
-//   tour: TourEnum.transform(val => tourEnum[val]),
-//   turned_pro: intToNumberSchema.optional(),
-//   updated_at: neoDateToStringSchema,
-//   wiki_link: url().optional(),
-//   years: array(intToNumberSchema)
-// })
 export type PlayerType = z.infer<typeof playerSchema>
 
 export const basePlayerSchema = playerSchema.pick({

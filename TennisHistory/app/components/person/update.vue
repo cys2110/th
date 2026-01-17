@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import type { FormErrorEvent, FormSubmitEvent } from "@nuxt/ui"
-import { cloneDeep, isEqual } from "lodash"
 
-const { person, type, refresh } = defineProps<{
+const props = defineProps<{
   person?: PersonType
   type: "Umpire" | "Supervisor" | "Coach"
   refresh?: () => void
@@ -16,70 +15,53 @@ const open = ref(false)
 const uploading = ref(false)
 
 const initialState = {
-  ...person,
-  type
+  ...props.person,
+  type: props.type
 }
 
-const state = ref<Partial<PersonFormSchema>>({ ...initialState })
+const state = ref<Partial<PersonFormSchema>>(cloneDeep(initialState))
 
 const formFields: FormFieldInterface<PersonFormSchema>[] = [
   { label: "First Name", key: "first_name", type: "text", required: true },
   { label: "Last Name", key: "last_name", type: "text", required: true }
 ]
 
-const handleReset = () => set(state, { ...initialState })
+const handleReset = () => set(state, cloneDeep(initialState))
 
 const onError = (event: FormErrorEvent) => console.error(event.errors)
 
 const onSubmit = async (event: FormSubmitEvent<PersonFormSchema>) => {
   set(uploading, true)
 
-  // Get dirty fields from the form
-  const fields = Object.keys(event.data) as (keyof PersonFormSchema)[]
-  const dirtyFields: Partial<PersonFormSchema> = {}
-  fields.forEach(field => {
-    if (!isEqual(event.data[field], initialState[field])) {
-      // @ts-expect-error
-      dirtyFields[field] = event.data[field]
-    }
-  })
-
-  if (Object.keys(dirtyFields).length) {
-    dirtyFields["id"] = event.data.id // Always include the person ID
-    dirtyFields["type"] = event.data.type // Always include the person type
-
-    const response = await $fetch(`/api/person/${person ? "update" : "create"}`, {
+  try {
+    const response = await $fetch(`/api/person/${props.person ? "update" : "create"}`, {
       method: "POST",
-      body: dirtyFields
+      body: event.data
     })
 
-    if ((response as any).ok) {
+    if (response.success) {
       toast.add({
-        title: `${event.data.id} ${person ? "updated" : "created"}`,
+        title: `${event.data.id} ${props.person ? "updated" : "created"}`,
         icon: icons.success,
         color: "success"
       })
 
-      if (refresh) {
-        refresh() // Refresh person details
+      if (props.refresh) {
+        props.refresh() // Refresh person details
       }
 
-      handleReset() // Reset form
-      set(open, false) // Close modal
+      await nextTick(() => {
+        handleReset() // Reset form
+        set(open, false) // Close modal
+      })
     } else {
       toast.add({
-        title: `Error ${person ? "updating" : "creating"} person`,
+        title: `Error ${props.person ? "updating" : "creating"} ${event.data.id}`,
         icon: icons.error,
         color: "error"
       })
     }
-  } else {
-    toast.add({
-      title: "No changes to save",
-      icon: icons.caution,
-      color: "warning"
-    })
-  }
+  } catch (e) {}
 
   set(uploading, false)
 }
@@ -95,7 +77,7 @@ const onSubmit = async (event: FormSubmitEvent<PersonFormSchema>) => {
       :icon="person ? ICONS.edit : icons.plus"
       block
       :label="person ? (person.last_name ? `${person.first_name} ${person.last_name}` : person.id) : `Create ${type}`"
-      :color="person && !person.last_name ? 'warning' : undefined"
+      :color="person && !person.last_name ? 'warning' : 'Doubles'"
     />
 
     <template #body>
@@ -122,7 +104,7 @@ const onSubmit = async (event: FormSubmitEvent<PersonFormSchema>) => {
         form="person-form"
         type="submit"
         label="Save"
-        :icon="uploading ? ICONS.uploading : icons.check"
+        :icon="uploading ? ICONS.uploading : icons.upload"
         block
       />
       <u-button

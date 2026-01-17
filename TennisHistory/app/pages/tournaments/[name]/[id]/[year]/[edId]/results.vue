@@ -2,7 +2,7 @@
 definePageMeta({ name: "results" })
 
 const {
-  params: { edId }
+  params: { id, edId }
 } = useRoute("results")
 const {
   ui: { icons }
@@ -105,7 +105,14 @@ const tableRef = useTemplateRef("tableRef")
               color="Doubles"
             />
 
-            <match-update :refresh />
+            <match-country-update
+              v-if="COUNTRY_DRAWS.includes(id)"
+              :refresh
+            />
+            <match-update
+              v-else
+              :refresh
+            />
 
             <u-separator />
           </dev-only>

@@ -101,19 +101,40 @@ export const countryRoundsSchema = object({
     .map(round => ({
       id: `${id} ${roundEnum[round as keyof typeof roundEnum]}`,
       round,
-      number: roundMapping[round as keyof typeof roundMapping]
+      number: numberToIntSchema.parse(roundMapping[round as keyof typeof roundMapping])
     }))
 
   const groupRounds = groups.map((group, index) => ({
     id: `${id} G ${group}`,
     round: "Group stage",
     group: `Group ${group}`,
-    number: index + 4
+    number: numberToIntSchema.parse(index + 4)
   }))
 
   return {
     id,
     rounds: [...mappedRounds, ...groupRounds]
+  }
+})
+
+export const tieFormSchema = object({
+  event: string(),
+  round: string(),
+  country1: optionSchema,
+  country2: optionSchema,
+  venue: optionSchema.nullish(),
+  date: dateToNeoDateSchema.nullish()
+}).transform(data => {
+  const { event, round, country1, country2, venue, ...rest } = data
+
+  return {
+    round,
+    country1: `${data.event} ${data.country1}`,
+    country2: `${data.event} ${data.country2}`,
+    venue,
+    tie: {
+      ...rest
+    }
   }
 })
 

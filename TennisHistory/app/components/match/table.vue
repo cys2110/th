@@ -1,20 +1,19 @@
 <script setup lang="ts">
+import type { AsyncDataRequestStatus } from "#app"
 import type { TableColumn } from "@nuxt/ui"
 
-const { match } = defineProps<{
+const props = defineProps<{
   match: MatchStatsType | undefined
-  status: "pending" | "error" | "success" | "idle"
+  status: AsyncDataRequestStatus
 }>()
 
 const {
-  params: { name, year }
+  params: { year }
 } = useRoute("match")
-const {
-  ui: { icons }
-} = useAppConfig()
 
 const tour = useRouteQuery("tour")
 const matchNo = useRouteQuery("match_no")
+const matchStore = useMatchStore()
 
 const isBold = (row: MatchStatsType["stats"][number], player: string) => {
   const lowStats = ["Double faults", "Unforced errors"]
@@ -77,41 +76,30 @@ const columns: TableColumn<MatchStatsType["stats"][number]>[] = [
     :columns
     sticky
     :loading="status === 'pending'"
-    :empty="`No match stats available for ${match?.tournament ?? capitalCase(name as string)} ${year} ${tour} ${matchNo}`"
+    :empty="`No match stats available for ${matchStore.name} ${year} ${tour} ${matchNo}`"
   >
     <template #loading>
-      <u-icon
-        :name="icons.loading"
-        class="size-8"
-      />
+      <loading-icon />
     </template>
 
     <template #empty>
-      <empty
-        message="No match stats found"
-        :icon="icons.caution"
-        class="mx-2"
-      />
+      <empty message="No match stats found" />
     </template>
 
     <template #label-cell="{ row }">
-      <matches-chart
+      <match-chart
         v-if="match && row.original.category !== 'Service Speed'"
         :category="row.original.category"
         :label="row.original.label"
-        :t1="match.t1"
-        :t2="match.t2"
         :stats="match.stats.filter(s => s.category === row.original.category)"
-        :tournament="match?.tournament ?? capitalCase(name as string)"
+        :status
       />
-      <matches-service-speed
+      <match-service-speed
         v-else-if="match"
         :category="row.original.category"
         :label="row.original.label"
-        :p1="match.t1"
-        :p2="match.t2"
         :stats="match.stats.filter(s => s.category === row.original.category)"
-        :tournament="match?.tournament ?? capitalCase(name as string)"
+        :status
       />
     </template>
 
@@ -137,8 +125,8 @@ const columns: TableColumn<MatchStatsType["stats"][number]>[] = [
         :max="100"
         inverted
         :ui="{
-          base: 'bg-Inactive-300 dark:bg-Inactive-800',
-          indicator: 'bg-Inactive-600 dark:bg-Inactive-500'
+          base: 'bg-violet-300 dark:bg-violet-800',
+          indicator: 'bg-violet-600 dark:bg-violet-500'
         }"
       >
         <template #status="{ percent }">
@@ -147,7 +135,7 @@ const columns: TableColumn<MatchStatsType["stats"][number]>[] = [
               ["Aces", "Double faults", "Service games", "Return games", "Winners", "Unforced errors"].includes(row.original.label)
                 ? row.original.t1
                 : row.original.label.includes("speed")
-                ? `${row.original.t1}km/h (${Math.round(kmhToMph(Number(row.original.t1)))}mph)`
+                ? `${row.original.t1} km/h (${convertKmhToMph(Number(row.original.t1))} mph)`
                 : `${row.original.t1} (${percent}%)`
             }}
           </span>
@@ -176,8 +164,8 @@ const columns: TableColumn<MatchStatsType["stats"][number]>[] = [
         v-model="row.original.t2_pc"
         :max="100"
         :ui="{
-          base: 'bg-Doubles-300 dark:bg-Doubles-800',
-          indicator: 'bg-Doubles-600 dark:bg-Doubles-500'
+          base: 'bg-emerald-300 dark:bg-emerald-800',
+          indicator: 'bg-emerald-600 dark:bg-emerald-500'
         }"
       >
         <template #status="{ percent }">
@@ -186,7 +174,7 @@ const columns: TableColumn<MatchStatsType["stats"][number]>[] = [
               ["Aces", "Double faults", "Service games", "Return games", "Winners", "Unforced errors"].includes(row.original.label)
                 ? row.original.t2
                 : row.original.label.includes("speed")
-                ? `${row.original.t2}km/h (${Math.round(kmhToMph(Number(row.original.t2)))}mph)`
+                ? `${row.original.t2} km/h (${convertKmhToMph(Number(row.original.t2))} mph)`
                 : `${row.original.t2} (${percent}%)`
             }}
           </span>

@@ -1,4 +1,5 @@
 import { array, number, object, string, union, url, z } from "zod"
+import { CalendarDate } from "@internationalized/date"
 
 export const scrapeFormSchema = object({
   category: object({
@@ -171,3 +172,14 @@ export const countryEntryFormSchema = object({
 })
 
 export type CountryEntryFormSchema = z.infer<typeof countryEntryFormSchema>
+
+export const tieFormSchema = object({
+  event: string(),
+  round: string(),
+  country1: optionSchema,
+  country2: optionSchema,
+  date: z.instanceof(CalendarDate).optional(),
+  venue: optionSchema.optional()
+})
+
+export type TieFormSchema = z.infer<typeof tieFormSchema>

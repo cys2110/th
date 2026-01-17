@@ -13,20 +13,40 @@ export default defineEventHandler(async event => {
         MATCH (e:Event {id: $event})-[:EVENT_OF]->(ed:Edition)
         MATCH (p:Player {id: $player1})-[:REPRESENTS]->(c:Country)
         OPTIONAL MATCH (p)-[z:REPRESENTED WHERE z.start_date <= coalesce(e.start_date, ed.start_date) AND z.end_date > coalesce(e.start_date, ed.start_date)]->(c1:Country)
+      `
 
-        WITH p, coalesce(c1, c) AS country
-        MATCH (cf:CountryEntry {id: $event || ' ' || country.id})
-        MERGE (f:Entry:$($type) {id: $event || ' ' || substring($type, 0, 1) || ' ' || p.id})
+      if (params.player2) {
+        query += `/* cypher */
+          MATCH (p2:Player {id: $player2})
+          WITH p, p2, coalesce(c1, c) AS country
+          MATCH (cf:CountryEntry {id: $event || ' ' || country.id})
+          MERGE (f:Entry:$($type) {id: $event || ' ' || substring($type, 0, 1) || ' ' || p.id || ' ' || p2.id})
+          MERGE (p)-[t:ENTERED]->(f)
+          MERGE (p2)-[t2:ENTERED]->(f)
+        `
+      } else {
+        query += `/* cypher */
+          WITH p, coalesce(c1, c) AS country
+          MATCH (cf:CountryEntry {id: $event || ' ' || country.id})
+          MERGE (f:Entry:$($type) {id: $event || ' ' || substring($type, 0, 1) || ' ' || p.id})
+          MERGE (p)-[t:ENTERED]->(f)
+        `
+      }
 
-        MERGE (p)-[t:ENTERED]->(f)
+      query += `
         MERGE (f)-[:MEMBER_OF]->(cf)
-
         SET f += $entry
       `
 
       if (params.rank) {
         query += `
           SET t.rank = $rank
+        `
+      }
+
+      if (params.rank2) {
+        query += `
+          SET t2.rank = $rank2
         `
       }
     } else {

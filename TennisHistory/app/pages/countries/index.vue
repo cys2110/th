@@ -7,10 +7,27 @@ const tableRef = useTemplateRef("tableRef")
 const countriesFilter = ref<string[]>([])
 const continentsFilter = ref<string[]>([])
 
-const { data: countries, status } = await useFetch("/api/countries", {
-  default: () => [],
-  onResponseError: ({ error }) => console.error("Error fetching countries:", error)
+const {
+  data: countries,
+  status,
+  error
+} = await useFetch("/api/countries", {
+  default: () => []
 })
+
+watch(
+  error,
+  () => {
+    if (error.value) {
+      if (error.value.statusMessage === "Validation errors") {
+        console.error(error.value.statusMessage, error.value.data?.data.validationErrors)
+      } else {
+        console.error(error.value)
+      }
+    }
+  },
+  { immediate: true }
+)
 
 const uniqueContinents = computed(() => useArrayUnique(countries.value.map(c => c.continent)).value.sort())
 const uniqueCountries = computed(() =>
@@ -31,12 +48,12 @@ const filteredCountries = computed(() => {
     return countriesFilter.value.includes(country.name)
   })
 
-  const continentMatches = countryMatches.filter(country => {
+  const continentMatches = countries.value.filter(country => {
     if (continentsFilter.value.length === 0) return true
     return continentsFilter.value.includes(country.continent)
   })
 
-  return continentMatches
+  return continentMatches && countryMatches
 })
 </script>
 
@@ -104,6 +121,7 @@ const filteredCountries = computed(() => {
       </u-page-body>
     </u-page>
 
+    <!--Counts-->
     <div class="sticky w-full z-50 bg-default bottom-0 mt-auto pt-3 pb-6 *:font-bold *:text-muted">
       <div v-if="viewModeStore.isCardView"> {{ filteredCountries.length }} {{ filteredCountries.length === 1 ? "country" : "countries" }} </div>
       <div v-else>

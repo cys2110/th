@@ -1,37 +1,45 @@
 <script setup lang="ts">
-const { stat } = defineProps<{
+import type { AsyncDataRequestStatus } from "#app"
+
+const props = defineProps<{
   stat: MatchStatsType["stats"][number]
+  status: AsyncDataRequestStatus
 }>()
-const colorMode = useColorMode()
+
+// Chart configuration
+const themeKey = inject(THEME_KEY)
+
+const theme = computed(() => {
+  const key = themeKey as keyof typeof COLOURS
+  return COLOURS[key] ?? COLOURS.dark
+})
 
 const kmhData = [
   {
-    value: stat.t1,
-    name: stat.label,
+    value: props.stat.t1,
+    name: props.stat.label,
     title: {
-      offsetCenter: ["0%", "100%"],
-      color: colorMode.value === "dark" ? COLOURS.darkText : COLOURS.lightText
+      offsetCenter: ["0%", "100%"]
     },
     detail: {
       offsetCenter: ["-100%", "100%"],
-      color: COLOURS.indigo700,
-      borderColor: COLOURS.indigo700
+      color: theme.value.violet,
+      borderColor: theme.value.violet
     },
-    itemStyle: { color: COLOURS.indigo700 }
+    itemStyle: { color: theme.value.violet }
   },
   {
-    value: stat.t2,
-    itemStyle: { color: COLOURS.fuchsia600 },
+    value: props.stat.t2,
+    itemStyle: { color: theme.value.emerald },
     detail: {
       offsetCenter: ["100%", "100%"],
-      color: COLOURS.fuchsia600,
-      borderColor: COLOURS.fuchsia600
+      color: theme.value.emerald,
+      borderColor: theme.value.emerald
     }
   }
 ]
 
 const option = ref({
-  darkMode: colorMode.value === "dark",
   backgroundColor: "transparent",
   series: [
     {
@@ -40,8 +48,7 @@ const option = ref({
       max: 300,
       axisLine: { show: false },
       axisLabel: {
-        distance: 25,
-        color: colorMode.value === "dark" ? COLOURS.darkText : COLOURS.lightText
+        distance: 25
       },
       title: { fontSize: 14 },
       detail: {
@@ -54,7 +61,7 @@ const option = ref({
         borderRadius: 10,
         borderWidth: 1,
         formatter: function (value: any) {
-          const milesPerHour = kmhToMph(value).toFixed(0)
+          const milesPerHour = convertKmhToMph(value)
           return `${value} km/h\n${milesPerHour} mph`
         }
       }
@@ -65,8 +72,10 @@ const option = ref({
 
 <template>
   <v-chart
-    class="min-h-200 w-full"
-    :option
-    :autoresize="true"
+    class="min-h-100 w-full"
+    :theme="themeKey || 'dark'"
+    :option="option"
+    autoresize
+    :loading="status === 'pending'"
   />
 </template>

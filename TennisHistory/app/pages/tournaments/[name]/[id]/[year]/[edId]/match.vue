@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { DropdownMenuItem, PageLink } from "@nuxt/ui"
+import type { BreadcrumbItem, DropdownMenuItem, PageLink } from "@nuxt/ui"
 
 definePageMeta({ name: "match" })
 
@@ -7,13 +7,14 @@ const {
   ui: { icons }
 } = useAppConfig()
 const {
-  params: { edId, year, name }
+  params: { id, edId, year, name }
 } = useRoute("match")
 
 const tour = useRouteQuery("tour")
 const draw = useRouteQuery("draw")
 const type = useRouteQuery("type")
 const matchNo = useRouteQuery("match_no")
+const matchStore = useMatchStore()
 
 const categories: Record<string, string> = {
   "Service Stats": "text-Active",
@@ -23,76 +24,96 @@ const categories: Record<string, string> = {
 }
 
 // API call
-// const { data: match, status } = await useFetch("/api/matches", {
-//   query: { edId, tour, draw, type, matchNo }
-// })
+const { data: match, status } = await useFetch("/api/match", {
+  query: { edId, tour, draw, type, matchNo }
+})
 
-// const matchStats = computed(() => {
-//   if (match.value) {
-//     return transformMatchStats(match.value)
-//   }
-//   return undefined
-// })
+watch(
+  match,
+  () => {
+    if (match.value) {
+      matchStore.name = match.value.tournament
+      matchStore.team1Name = match.value.t1?.team.map(p => `${p.first_name} ${p.last_name}`).join(" / ") || ""
+      console.log(matchStore.team1Name)
+      matchStore.team2Name = match.value.t2?.team.map(p => `${p.first_name} ${p.last_name}`).join(" / ") || ""
+    } else {
+      matchStore.name = startCase(name)
+    }
+  },
+  { immediate: true }
+)
 
-// useHead({
-//   title: () => {
-//     if (match.value) {
-//       const { t1, t2, tournament } = match.value
-//       const t1Name = t1?.team.map((p: any) => `${p.first_name} ${p.last_name}`).join(" / ")
-//       const t2Name = t2?.team.map((p: any) => `${p.first_name} ${p.last_name}`).join(" / ")
+const matchStats = computed(() => {
+  if (match.value) {
+    return transformMatchStats(match.value)
+  }
+  return undefined
+})
 
-//       return `${t1Name} v ${t2Name} | ${tournament} ${year} ${tour}`
-//     }
+useHead({
+  title: () => (matchStore.team1Name && matchStore.team2Name ? `${matchStore.team1Name} v ${matchStore.team2Name}` : (matchNo.value as string)),
+  templateParams: {
+    category: `${matchStore.name} ${year}`
+  }
+})
 
-//     return `${capitalCase(name as string)} ${year} ${tour} ${matchNo}`
-//   }
-// })
+const additionalLinks = computed<PageLink[]>(() => {
+  if (match.value) {
+    const { t1, t2 } = match.value
+    const t1Links = t1?.team.map(p => ({
+      label: `${p.first_name} ${p.last_name}`,
+      icon: ICONS.player,
+      to: { name: "player", params: { id: p.id, name: kebabCase(`${p.first_name} ${p.last_name}`) } }
+    }))
+    const t2Links = t2?.team.map(p => ({
+      label: `${p.first_name} ${p.last_name}`,
+      icon: ICONS.player,
+      to: { name: "player", params: { id: p.id, name: kebabCase(`${p.first_name} ${p.last_name}`) } }
+    }))
+    const h2hLink = [
+      {
+        label: "H2H",
+        icon: ICONS.h2h,
+        to: {
+          name: "head-to-head",
+          params: {
+            p1Name: t1?.team.map(player => kebabCase(`${player.first_name} ${player.last_name}`)).join("+"),
+            p2Name: t2?.team.map(player => kebabCase(`${player.first_name} ${player.last_name}`)).join("+"),
+            p1Id: t1?.team.map(player => player.id).join("+"),
+            p2Id: t2?.team.map(player => player.id).join("+")
+          }
+        }
+      }
+    ]
+    return [...t1Links!, ...t2Links!, ...h2hLink] as PageLink[]
+  }
 
-// const additionalLinks = computed<PageLink[]>(() => {
-//   if (match.value) {
-//     const { t1, t2 } = match.value
-//     const t1Links = t1?.team.map(p => ({
-//       label: `${p.first_name} ${p.last_name}`,
-//       icon: ICONS.player,
-//       to: { name: "player", params: { id: p.id, name: kebabCase(`${p.first_name} ${p.last_name}`) } }
-//     }))
-//     const t2Links = t2?.team.map(p => ({
-//       label: `${p.first_name} ${p.last_name}`,
-//       icon: ICONS.player,
-//       to: { name: "player", params: { id: p.id, name: kebabCase(`${p.first_name} ${p.last_name}`) } }
-//     }))
-//     const h2hLink = [
-//       {
-//         label: "H2H",
-//         icon: ICONS.h2h,
-//         to: {
-//           name: "head-to-head",
-//           params: {
-//             p1Name: t1?.team.map(player => kebabCase(`${player.first_name} ${player.last_name}`)).join("+"),
-//             p2Name: t2?.team.map(player => kebabCase(`${player.first_name} ${player.last_name}`)).join("+"),
-//             p1Id: t1?.team.map(player => player.id).join("+"),
-//             p2Id: t2?.team.map(player => player.id).join("+")
-//           }
-//         }
-//       }
-//     ]
-//     return [...t1Links!, ...t2Links!, ...h2hLink] as PageLink[]
-//   }
+  return []
+})
 
-//   return []
-// })
+const breadcrumbs = computed<BreadcrumbItem[]>(
+  () =>
+    [
+      { icon: ICONS.trophy, to: { name: "tournaments" }, label: "Tournaments" },
+      { label: matchStore.name, to: { name: "tournament", params: { id, name } } },
+      { label: year as string, to: { name: "edition", params: { id, name, year, edId } } },
+      { label: type },
+      { label: draw },
+      ...(match.value ? [{ label: match.value.round }] : [])
+    ] as BreadcrumbItem[]
+)
 </script>
 
 <template>
   <u-container>
-    <!-- <u-page>
+    <u-page>
       <template #left>
         <u-page-aside>
           <dev-only>
-            <matches-update
-              v-if="match"
-              :match
-            />
+            <template v-if="match">
+              <match-country-update v-if="COUNTRY_DRAWS.includes(id)" />
+              <match-update v-else />
+            </template>
 
             <u-separator />
           </dev-only>
@@ -107,7 +128,7 @@ const categories: Record<string, string> = {
             class="flex items-center gap-2 text-muted"
           >
             <u-icon
-              :name="ICONS.colours"
+              :name="ICONS.colour"
               :class="className"
             />
             <span>{{ category }}</span>
@@ -117,16 +138,16 @@ const categories: Record<string, string> = {
 
       <u-page-header>
         <template #headline>
-          <breadcrumbs />
+          <u-breadcrumb :items="breadcrumbs" />
         </template>
 
         <template #title>
-          <div v-if="match">
-            {{ match.t1?.team.map(p => `${p.first_name} ${p.last_name}`).join(" / ") }} v
-            {{ match.t2?.team.map(p => `${p.first_name} ${p.last_name}`).join(" / ") }}
+          <div v-if="matchStore.team1Name && matchStore.team2Name">
+            {{ matchStore.team1Name }} v
+            {{ matchStore.team2Name }}
           </div>
 
-          <div v-else> {{ capitalCase(name) }} {{ year }} {{ tour }} {{ matchNo }} </div>
+          <div v-else> {{ matchStore.name }} {{ year }} {{ tour }} {{ matchNo }} </div>
         </template>
 
         <template #links>
@@ -145,16 +166,16 @@ const categories: Record<string, string> = {
           message="No match details available"
         />
 
-        <matches-details
+        <match-details
           v-else
           :match
         />
 
-        <matches-table
+        <match-table
           :match="matchStats"
           :status
         />
       </u-page-body>
-    </u-page> -->
+    </u-page>
   </u-container>
 </template>
