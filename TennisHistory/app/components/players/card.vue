@@ -36,7 +36,7 @@ const activeText = computed(() => {
 
 <template>
   <u-chip
-    :color="activeStatus ? 'success' : 'error'"
+    :color="activeStatus ? 'Active' : 'Inactive'"
     size="3xl"
     class="w-full"
   >

@@ -11,10 +11,27 @@ const {
 const playerStore = usePlayerStore()
 
 // API call
-const { data: player, status } = await useFetch("/api/player", {
-  query: { id },
-  onResponseError: ({ error }) => console.error(error)
+const {
+  data: player,
+  status,
+  error
+} = await useFetch("/api/player", {
+  query: { id }
 })
+
+watch(
+  error,
+  () => {
+    if (error.value) {
+      if (error.value.statusMessage === "Validation errors") {
+        console.error(error.value.statusMessage, error.value.data?.data.validationErrors)
+      } else {
+        console.error(error.value)
+      }
+    }
+  },
+  { immediate: true }
+)
 
 const scraping = ref(false)
 
@@ -35,37 +52,41 @@ const scrapeEnabled = computed(() => {
 
 const handleScrape = async () => {
   set(scraping, true)
-  try {
-    const apiSlug = isNaN(Number(id)) ? "atp_player" : "wta_player"
 
-    const response = await $fetch(`${FLASK_ROUTE}/${apiSlug}/` + id, {
-      method: "GET",
-      timeout: 120_000
+  const apiSlug = isNaN(Number(id)) ? "atp_player" : "wta_player"
+
+  await $fetch(`${FLASK_ROUTE}/${apiSlug}/` + id, {
+    method: "GET",
+    timeout: 120_000
+  })
+    .then(response => {
+      if ((response as any).success) {
+        toast.add({
+          title: `${id} updated`,
+          icon: icons.success,
+          color: "success"
+        })
+
+        reloadNuxtApp() // Must reload rather than just refetch in order to update the wrapper
+      } else {
+        toast.add({
+          title: `Error updating ${id}`,
+          icon: icons.error,
+          color: "error"
+        })
+      }
     })
-    if ((response as any).success) {
-      toast.add({
-        title: `${id} updated`,
-        icon: icons.success,
-        color: "success"
-      })
-    } else {
+    .catch(e => {
+      console.error(e)
       toast.add({
         title: `Error updating ${id}`,
         icon: icons.error,
         color: "error"
       })
-    }
-    reloadNuxtApp() // Must reload rather than just refetch in order to update the wrapper
-  } catch (e) {
-    console.error(e)
-    toast.add({
-      title: `Error updating ${id}`,
-      icon: icons.error,
-      color: "error"
     })
-  } finally {
-    set(scraping, false)
-  }
+    .finally(() => {
+      set(scraping, false)
+    })
 }
 </script>
 

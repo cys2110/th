@@ -13,30 +13,27 @@ export default defineEventHandler(async event => {
 
     if (summary.gqlStatusObjects.some(s => s.gqlStatus === "02000")) {
       throw createError({
-        statusCode: 400,
+        statusCode: 404,
         statusMessage: `${params.id} could not be found`
       })
     } else if (Object.values(summary.counters.updates()).every(v => v === 0)) {
       throw createError({
-        statusCode: 404,
+        statusCode: 400,
         statusMessage: `${params.id} could not be updated`
       })
     } else {
       return { success: true }
     }
   } catch (error) {
-    const zodErr = error instanceof ZodError ? error : error instanceof Error && error.cause instanceof ZodError ? error.cause : null
-
-    if (zodErr) {
+    if (error instanceof ZodError) {
       throw createError({
         statusCode: 400,
-        statusMessage: "Invalid request body",
-        data: {
-          validationErrors: zodErr.issues
-        }
+        statusMessage: "Validation errors",
+        data: { validationErrors: error.issues.map(i => `${i.path.join(".")}: ${i.message}`) }
       })
     }
 
+    console.error(error)
     throw error
   }
 })

@@ -4,11 +4,28 @@ const {
 } = useRoute("player")
 const playerStore = usePlayerStore()
 
-const { data: wlData, status } = await useFetch("/api/player/wl", {
+const {
+  data: wlData,
+  status,
+  error
+} = await useFetch("/api/player/wl", {
   query: { id },
-  default: () => [],
-  server: false
+  default: () => []
 })
+
+watch(
+  error,
+  () => {
+    if (error.value) {
+      if (error.value.statusMessage === "Validation errors") {
+        console.error(error.value.statusMessage, error.value.data?.data.validationErrors)
+      } else {
+        console.error(error.value)
+      }
+    }
+  },
+  { immediate: true }
+)
 </script>
 
 <template>

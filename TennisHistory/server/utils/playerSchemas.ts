@@ -98,6 +98,11 @@ export const playerFormSchema = object({
       delete newObject.player[key as keyof typeof newObject.player]
     }
   })
+  Object.keys(newObject).forEach(key => {
+    if (newObject[key as keyof typeof newObject] === undefined) {
+      delete newObject[key as keyof typeof newObject]
+    }
+  })
 
   return newObject
 })

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { parseDate } from "@internationalized/date"
 import type { FormErrorEvent, FormSubmitEvent } from "@nuxt/ui"
-import { cloneDeep, isEqual } from "lodash"
+import { FetchError } from "ofetch"
 
 const props = defineProps<{
   player: PlayerDetailsType
@@ -19,8 +19,9 @@ const playerStore = usePlayerStore()
 const initialState = {
   ...props.player,
   tour: playerStore.tour,
-  country: props.player.country
-    ? {
+  country:
+    props.player.country ?
+      {
         name: {
           value: props.player.country.id,
           label: props.player.country.name
@@ -28,8 +29,9 @@ const initialState = {
         start_date: props.player.country.start_date ? parseDate(props.player.country.start_date) : undefined
       }
     : undefined,
-  former_countries: props.player.former_countries?.length
-    ? props.player.former_countries.map(c => ({
+  former_countries:
+    props.player.former_countries?.length ?
+      props.player.former_countries.map(c => ({
         name: {
           value: c.id,
           label: c.name
@@ -42,14 +44,16 @@ const initialState = {
     : [],
   dob: props.player.dob ? parseDate(props.player.dob) : undefined,
   dod: props.player.dod ? parseDate(props.player.dod) : undefined,
-  coaches: props.player.coaches?.length
-    ? props.player.coaches.map(c => ({
+  coaches:
+    props.player.coaches?.length ?
+      props.player.coaches.map(c => ({
         name: { value: c.id, label: `${c.first_name} ${c.last_name}` },
         years: c.years
       }))
     : [],
-  former_coaches: props.player.former_coaches?.length
-    ? props.player.former_coaches.map(c => ({
+  former_coaches:
+    props.player.former_coaches?.length ?
+      props.player.former_coaches.map(c => ({
         name: { value: c.id, label: `${c.first_name} ${c.last_name}` },
         years: c.years
       }))
@@ -71,36 +75,50 @@ const onSubmit = async (event: FormSubmitEvent<PlayerFormSchema>) => {
 
   for (const field of fields) {
     // Always include ID as it's needed to identify the player
-    if (field === "id") continue
+    if (field === "id") dirtyFields[field] = event.data[field]
 
     if (!isEqual(event.data[field], initialState[field])) {
-      // @ts-expect-error
-      dirtyFields[field] = event.data[field] ?? null
+      dirtyFields[field] = (event.data[field] as any) ?? null
     }
   }
 
   if (Object.keys(dirtyFields).length) {
-    const response = await $fetch("/api/players/update", {
+    await $fetch("/api/players/update", {
       method: "POST",
       body: dirtyFields
     })
+      .then(response => {
+        if (response.success) {
+          toast.add({
+            title: `${event.data.first_name} ${event.data.last_name} updated`,
+            icon: icons.success,
+            color: "success"
+          })
 
-    if (response.success) {
-      toast.add({
-        title: `${event.data.first_name} ${event.data.last_name} updated`,
-        icon: icons.success,
-        color: "success"
+          set(open, false)
+          reloadNuxtApp() // Reload for wrapper to update
+        } else {
+          toast.add({
+            title: `Error updating ${event.data.first_name} ${event.data.last_name}`,
+            icon: icons.error,
+            color: "error"
+          })
+        }
       })
+      .catch((e: FetchError) => {
+        if (e.statusMessage === "Validation errors") {
+          console.error(e.statusMessage, e.data?.data.validationErrors)
+        } else {
+          console.error(e)
+        }
 
-      set(open, false)
-      reloadNuxtApp() // Reload for wrapper to update
-    } else {
-      toast.add({
-        title: `Error updating ${event.data.first_name} ${event.data.last_name}`,
-        icon: icons.error,
-        color: "error"
+        toast.add({
+          title: `Error updating ${event.data.first_name} ${event.data.last_name}`,
+          description: e.statusMessage ?? "An unknown error occurred",
+          icon: icons.error,
+          color: "error"
+        })
       })
-    }
   } else {
     toast.add({
       title: "No changes to save",
@@ -280,7 +298,6 @@ const formFields: FormFieldInterface<PlayerFormSchema>[] = [
               </u-form>
               <u-button
                 block
-                color="success"
                 @click=";(state[field.key as keyof typeof state] as any).push({})"
                 :label="`Add ${field.placeholder}`"
                 class="col-span-2"
@@ -305,6 +322,7 @@ const formFields: FormFieldInterface<PlayerFormSchema>[] = [
         label="Save"
         :icon="uploading ? ICONS.uploading : icons.upload"
         block
+        color="success"
       />
       <u-button
         label="Reset"

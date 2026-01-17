@@ -46,25 +46,42 @@ useHead({
   }
 })
 
-const { data: player } = await useFetch("/api/player/overview", {
-  query: { id },
-  onResponse: ({ response }) => {
-    if (response._data) {
-      const data = response._data
-      playerStore.tour = (data.tour as "ATP" | "WTA") || "ATP"
+const { data: player, error } = await useFetch("/api/player/overview", {
+  query: { id }
+})
 
-      if (data.first_name) playerStore.firstName = data.first_name
-      if (data.last_name) playerStore.lastName = data.last_name
+watch(
+  player,
+  () => {
+    if (player.value) {
+      if (player.value.first_name) playerStore.firstName = player.value.first_name
+      if (player.value.last_name) playerStore.lastName = player.value.last_name
+      playerStore.tour = player.value.tour as "ATP" | "WTA"
 
-      if (data.years) {
-        playerStore.activeYears = data.years
-        if (data.years.includes(currentYear)) {
+      if (player.value.years) {
+        playerStore.activeYears = player.value.years
+        if (player.value.years.includes(currentYear)) {
           playerStore.active = "Active"
         }
       }
     }
-  }
-})
+  },
+  { immediate: true }
+)
+
+watch(
+  error,
+  () => {
+    if (error.value) {
+      if (error.value.statusMessage === "Validation errors") {
+        console.error(error.value.statusMessage, error.value.data?.data.validationErrors)
+      } else {
+        console.error(error.value)
+      }
+    }
+  },
+  { immediate: true }
+)
 
 watch(
   player,
@@ -112,15 +129,12 @@ const years = computed(() => {
         icon-only
       />
 
-      <u-badge
-        :color="playerStore.active"
-        :label="playerStore.active"
-      />
-
-      <u-badge
-        :color="playerStore.tour"
-        :label="playerStore.tour"
-      />
+      <u-chip :color="playerStore.active">
+        <u-badge
+          :color="playerStore.tour"
+          :label="playerStore.tour"
+        />
+      </u-chip>
 
       <div> Years Active: {{ years.activeYears }} ({{ years.numberOfYears }} year{{ years.numberOfYears === 1 ? "" : "s" }}) </div>
     </template>

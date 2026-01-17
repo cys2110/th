@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { FormErrorEvent, FormSubmitEvent } from "@nuxt/ui"
+import { FetchError } from "ofetch"
 
 const props = defineProps<{
   person?: PersonType
@@ -33,50 +34,76 @@ const onError = (event: FormErrorEvent) => console.error(event.errors)
 const onSubmit = async (event: FormSubmitEvent<PersonFormSchema>) => {
   set(uploading, true)
 
-  try {
-    const response = await $fetch(`/api/person/${props.person ? "update" : "create"}`, {
-      method: "POST",
-      body: event.data
+  await $fetch(`/api/person/${props.person ? "update" : "create"}`, {
+    method: "POST",
+    body: event.data
+  })
+    .then(async response => {
+      if (response.success) {
+        toast.add({
+          title: `${event.data.id} ${props.person ? "updated" : "created"}`,
+          icon: icons.success,
+          color: "success"
+        })
+
+        if (props.refresh) {
+          props.refresh() // Refresh person details
+        }
+
+        await nextTick(() => {
+          handleReset() // Reset form
+          set(open, false) // Close modal
+        })
+      } else {
+        toast.add({
+          title: `Error ${props.person ? "updating" : "creating"} ${event.data.id}`,
+          icon: icons.error,
+          color: "error"
+        })
+      }
     })
-
-    if (response.success) {
-      toast.add({
-        title: `${event.data.id} ${props.person ? "updated" : "created"}`,
-        icon: icons.success,
-        color: "success"
-      })
-
-      if (props.refresh) {
-        props.refresh() // Refresh person details
+    .catch((e: FetchError) => {
+      if (e.statusMessage === "Validation errors") {
+        console.error(e.statusMessage, e.data?.data.validationErrors)
+      } else {
+        console.error(e)
       }
 
-      await nextTick(() => {
-        handleReset() // Reset form
-        set(open, false) // Close modal
-      })
-    } else {
       toast.add({
         title: `Error ${props.person ? "updating" : "creating"} ${event.data.id}`,
+        description: e.statusMessage ?? "An unknown error occurred",
         icon: icons.error,
         color: "error"
       })
-    }
-  } catch (e) {}
-
-  set(uploading, false)
+    })
+    .finally(() => {
+      set(uploading, false)
+    })
 }
 </script>
 
 <template>
   <u-modal
-    :title="person ? (person.first_name ? `${person.first_name} ${person.last_name}` : person.id) : `Create ${type}`"
+    :title="
+      person ?
+        person.first_name ?
+          `${person.first_name} ${person.last_name}`
+        : person.id
+      : `Create ${type}`
+    "
     v-model:open="open"
     :ui="{ footer: '**:rounded-md!' }"
   >
     <u-button
       :icon="person ? ICONS.edit : icons.plus"
       block
-      :label="person ? (person.last_name ? `${person.first_name} ${person.last_name}` : person.id) : `Create ${type}`"
+      :label="
+        person ?
+          person.last_name ?
+            `${person.first_name} ${person.last_name}`
+          : person.id
+        : `Create ${type}`
+      "
       :color="person && !person.last_name ? 'warning' : 'Doubles'"
     />
 
@@ -106,6 +133,7 @@ const onSubmit = async (event: FormSubmitEvent<PersonFormSchema>) => {
         label="Save"
         :icon="uploading ? ICONS.uploading : icons.upload"
         block
+        color="success"
       />
       <u-button
         label="Reset"

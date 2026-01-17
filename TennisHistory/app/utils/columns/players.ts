@@ -49,7 +49,7 @@ export const playerColumns = (
 
       if (!row.original.__group) {
         const status = row.getValue<string>("status")
-        return h(UChip, { color: status === "Active" ? "success" : "error" }, () => h(UBadge, { label: tour, color: tour }))
+        return h(UChip, { color: status as keyof typeof appConfig.ui.colors }, () => h(UBadge, { label: tour, color: tour }))
       }
     }
   },
@@ -415,29 +415,11 @@ export const playerH2HColumns: TableColumn<PlayerH2HType>[] = [
     id: "opponent",
     meta: { class: { th: "text-left" } },
     header: "Opponent",
-    cell: ({ row }) => {
-      if (row.original.opponent.country) {
-        return h(PlayerLink, {
-          player: row.original.opponent
-        })
-      } else {
-        return h(
-          ULink,
-          {
-            class: "hover-link default-link",
-            target: "_blank",
-            to: {
-              name: "player",
-              params: {
-                id: row.original.opponent.id,
-                name: "—"
-              }
-            }
-          },
-          () => row.original.opponent.id
-        )
-      }
-    }
+    cell: ({ row }) =>
+      h("div", { class: "flex items-center gap-2" }, [
+        row.original.opponent.country && h(UIcon, { name: getFlagCode(row.original.opponent.country) }),
+        row.original.opponent.last_name ? `${row.original.opponent.first_name} ${row.original.opponent.last_name}` : row.original.opponent.id
+      ])
   },
   {
     id: "wl",
@@ -451,18 +433,7 @@ export const recentEventColumns: TableColumn<PlayerRecentEventType>[] = [
   {
     accessorKey: "tournament.name",
     header: "Tournament",
-    cell: ({ row }) => {
-      const { tournament } = row.original
-
-      return h(
-        ULink,
-        {
-          class: "hover-link default-link",
-          to: { name: "tournament", params: { id: tournament.id, name: kebabCase(tournament.name) } }
-        },
-        () => tournament.name
-      )
-    }
+    cell: ({ cell }) => cell.renderValue()
   },
   {
     accessorKey: "start_date",

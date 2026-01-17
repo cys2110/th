@@ -46,7 +46,6 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
       } else {
         toast.add({
           title: `Error creating ${event.data.id}`,
-          description: response.error ?? "An unknown error occurred",
           icon: icons.error,
           color: "error"
         })
@@ -55,7 +54,16 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
     .catch((error: FetchError) => {
       if (error.statusMessage === "Validation errors") {
         console.error(error.statusMessage, error.data?.data.validationErrors)
+      } else {
+        console.error(error)
       }
+
+      toast.add({
+        title: `Error creating ${event.data.id}`,
+        description: error.statusMessage ?? "An unknown error occurred",
+        icon: icons.error,
+        color: "error"
+      })
     })
 }
 
