@@ -27,7 +27,7 @@ const features: PageFeatureProps[] = [
 ]
 
 // Screenshots
-const screenshots: string[] = []
+const screenshots: string[] = ["country.png"]
 </script>
 
 <template>
@@ -55,7 +55,7 @@ const screenshots: string[] = []
               <nuxt-img
                 v-for="screenshot in screenshots"
                 :key="screenshot"
-                :src="screenshot"
+                :src="`/pages/${screenshot}`"
                 width="460"
                 height="258"
                 class="aspect-video border border-default rounded-lg bg-white"

@@ -12,6 +12,7 @@ export * from "./columns/players"
 export * from "./columns/tournaments"
 export * from "./columns/editions"
 export * from "./columns/events"
+export * from "./columns/h2h"
 
 // Helpers
 export * from "./helpers"
