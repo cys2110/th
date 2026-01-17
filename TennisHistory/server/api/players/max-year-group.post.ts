@@ -4,52 +4,23 @@ export default defineEventHandler(async event => {
   try {
     const params = await readValidatedBody(event, body => playerQuerySchema.parse(body))
 
-    // Build dynamic count query to avoid overloading neo4j
-    let countQuery = "MATCH (p:Player)"
-
-    if (params.tours.length || params.players.length || params.coaches.length || params.countries.length) {
-      const whereClauses: string[] = []
-
-      if (params.tours.length) whereClauses.push("ANY(x IN $tours WHERE x IN labels(p))")
-
-      if (params.players.length) whereClauses.push("p.id IN $players")
-
-      if (params.coaches.length) whereClauses.push("EXISTS { MATCH (p)<-[:COACHES|COACHED]-(coach:Coach WHERE coach.id IN $coaches) }")
-
-      if (params.countries.length) whereClauses.push("EXISTS { MATCH (p)-[:REPRESENTS]->(c:Country WHERE c.id IN $countries) }")
-
-      countQuery += `
-        WHERE
-          ${whereClauses.join(" AND ")}
-      `
-    }
-
-    countQuery += `
-      RETURN COUNT(p) AS count
-    `
-
-    const { records: countRecords } = await useDriver().executeQuery(countQuery, params)
-
-    const count: number = countRecords[0]?.get("count").toInt() || 0
-
-    if (count === 0) {
-      return {
-        count: 0,
-        players: []
-      }
-    }
-
     let query = `/* cypher */
       MATCH (p:Player)-[:REPRESENTS]->(c:Country)
+      MATCH
+        (p)-[:ENTERED]->
+        (:Entry)-[:SCORED]->
+        (:Score)-[:SCORED]->
+        (:Match)-[:PLAYED]->
+        (:Round)-[:ROUND_OF]->
+        (:Event)-[:EVENT_OF]-(:Edition)-[:IN_YEAR]->
+        (y:Year)
     `
 
     if (params.tours.length || params.players.length || params.countries.length) {
       const whereClauses: string[] = []
 
       if (params.tours.length) whereClauses.push("ANY(x IN $tours WHERE x IN labels(p))")
-
       if (params.players.length) whereClauses.push("p.id IN $players")
-
       if (params.countries.length) whereClauses.push("c.id IN $countries")
 
       query += `
@@ -89,20 +60,8 @@ export default defineEventHandler(async event => {
           )) END AS coaches
       }
 
-      // Get player's first and last tournament years
-      CALL (p) {
-          OPTIONAL MATCH
-            (p)-[:ENTERED]->
-            (:Entry)-[:SCORED]->
-            (:Score)-[:SCORED]->
-            (:Match)-[:PLAYED]->
-            (:Round)-[:ROUND_OF]->
-            (:Event)-[:EVENT_OF]-(:Edition)-[:IN_YEAR]->
-            (y:Year)
-          RETURN min(y.id) AS min_year, max(y.id) AS max_year
-        }
-
-      WITH p, c, coaches, min_year, max_year, [x IN labels(p) WHERE NOT x IN ['Player', 'Coach']][0] AS tour
+      WITH p, c, coaches, min(y.id) AS min_year, max(y.id) AS max_year, [x IN labels(p) WHERE NOT x IN ['Player', 'Coach']][0] AS tour
+      WHERE max_year = $key
     `
 
     const SORT_FIELD_MAP: Record<string, string[]> = {
@@ -129,8 +88,6 @@ export default defineEventHandler(async event => {
     }
 
     query += `/* cypher */
-      SKIP $skip
-      LIMIT $offset
       RETURN
         apoc.map.clean(
           apoc.map.merge(
@@ -155,10 +112,7 @@ export default defineEventHandler(async event => {
       return basePlayerSchema.parse(player)
     })
 
-    return {
-      count,
-      results
-    }
+    return results
   } catch (error) {
     if (error instanceof ZodError) {
       throw createError({

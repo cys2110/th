@@ -24,12 +24,12 @@ import appConfig from "~/app.config"
 const currentYear = new Date().getFullYear()
 
 export const playerColumns = (
-  grouping: Ref<string[] | null>,
-  tours: Ref<string[] | null>,
-  players: Ref<OptionType[] | null>,
-  countries: Ref<OptionType[] | null>,
-  coaches: Ref<OptionType[] | null>,
-  sortField: Ref<SortFieldType[]>
+  grouping: Ref<string[] | null | undefined>,
+  tours: Ref<string[] | null | undefined>,
+  players: Ref<OptionType[] | null | undefined>,
+  countries: Ref<OptionType[] | null | undefined>,
+  coaches: Ref<OptionType[] | null | undefined>,
+  sortField: Ref<SortFieldType[] | undefined>
 ): TableColumn<PlayersResultsType>[] => [
   {
     accessorKey: "tour",
@@ -93,7 +93,7 @@ export const playerColumns = (
         })
       ]),
     cell: ({ row, table }) => {
-      if (row.original.__group && row.original.name) {
+      if (row.original.__group && row.original.group_key.name) {
         const isExpanded = (table.getState().expanded as Record<string, boolean>)[row.id]
 
         return h("div", { class: "flex items-center py-1" }, [
@@ -106,9 +106,9 @@ export const playerColumns = (
           }),
           h(CountryLink, {
             country: {
-              id: row.original.group_key.key as string,
-              name: row.original.name,
-              alpha2: row.original.alpha2,
+              id: row.original.group_key.id as string,
+              name: row.original.group_key.name,
+              alpha2: row.original.group_key.alpha2,
               continent: ""
             }
           })
@@ -174,7 +174,7 @@ export const playerColumns = (
       ])
     },
     cell: ({ cell, row, table }) => {
-      if (row.original.__group && row.original.min_year) {
+      if (row.original.__group && row.original.group_key.key) {
         const isExpanded = (table.getState().expanded as Record<string, boolean>)[row.id]
 
         return h("div", { class: "flex items-center py-1" }, [
@@ -214,7 +214,7 @@ export const playerColumns = (
         })
       ]),
     cell: ({ cell, row, table }) => {
-      if (row.original.__group && row.original.max_year) {
+      if (row.original.__group && row.original.group_key.key) {
         const isExpanded = (table.getState().expanded as Record<string, boolean>)[row.id]
 
         return h("div", { class: "flex items-center py-1" }, [
@@ -1540,11 +1540,9 @@ export const playerRecordColumns = (tour: "ATP" | "WTA"): TableColumn<RecordType
               {
                 class:
                   "hover-link " +
-                  (cell.getValue() === "Win"
-                    ? "uppercase success-link font-semibold"
-                    : cell.getValue() === "Final"
-                    ? "primary-link"
-                    : "default-link"),
+                  (cell.getValue() === "Win" ? "uppercase success-link font-semibold"
+                  : cell.getValue() === "Final" ? "primary-link"
+                  : "default-link"),
                 to: {
                   name: "edition",
                   params: {
@@ -1577,11 +1575,9 @@ export const playerRecordColumns = (tour: "ATP" | "WTA"): TableColumn<RecordType
               {
                 class:
                   "hover-link " +
-                  (cell.getValue() === "Win"
-                    ? "uppercase success-link font-semibold"
-                    : cell.getValue() === "Final"
-                    ? "primary-link"
-                    : "default-link"),
+                  (cell.getValue() === "Win" ? "uppercase success-link font-semibold"
+                  : cell.getValue() === "Final" ? "primary-link"
+                  : "default-link"),
                 to: {
                   name: "edition",
                   params: {
@@ -1628,11 +1624,9 @@ export const playerRecordColumns = (tour: "ATP" | "WTA"): TableColumn<RecordType
               {
                 class:
                   "hover-link " +
-                  (cell.getValue() === "Win"
-                    ? "uppercase success-link font-semibold"
-                    : cell.getValue() === "Final"
-                    ? "primary-link"
-                    : "default-link"),
+                  (cell.getValue() === "Win" ? "uppercase success-link font-semibold"
+                  : cell.getValue() === "Final" ? "primary-link"
+                  : "default-link"),
                 to: {
                   name: "edition",
                   params: {
@@ -1665,11 +1659,9 @@ export const playerRecordColumns = (tour: "ATP" | "WTA"): TableColumn<RecordType
               {
                 class:
                   "hover-link " +
-                  (cell.getValue() === "Win"
-                    ? "uppercase success-link font-semibold"
-                    : cell.getValue() === "Final"
-                    ? "primary-link"
-                    : "default-link"),
+                  (cell.getValue() === "Win" ? "uppercase success-link font-semibold"
+                  : cell.getValue() === "Final" ? "primary-link"
+                  : "default-link"),
                 to: {
                   name: "edition",
                   params: {
@@ -1716,11 +1708,9 @@ export const playerRecordColumns = (tour: "ATP" | "WTA"): TableColumn<RecordType
               {
                 class:
                   "hover-link " +
-                  (cell.getValue() === "Win"
-                    ? "uppercase success-link font-semibold"
-                    : cell.getValue() === "Final"
-                    ? "primary-link"
-                    : "default-link"),
+                  (cell.getValue() === "Win" ? "uppercase success-link font-semibold"
+                  : cell.getValue() === "Final" ? "primary-link"
+                  : "default-link"),
                 to: {
                   name: "edition",
                   params: {
@@ -1753,11 +1743,9 @@ export const playerRecordColumns = (tour: "ATP" | "WTA"): TableColumn<RecordType
               {
                 class:
                   "hover-link " +
-                  (cell.getValue() === "Win"
-                    ? "uppercase success-link font-semibold"
-                    : cell.getValue() === "Final"
-                    ? "primary-link"
-                    : "default-link"),
+                  (cell.getValue() === "Win" ? "uppercase success-link font-semibold"
+                  : cell.getValue() === "Final" ? "primary-link"
+                  : "default-link"),
                 to: {
                   name: "edition",
                   params: {
@@ -1804,11 +1792,9 @@ export const playerRecordColumns = (tour: "ATP" | "WTA"): TableColumn<RecordType
               {
                 class:
                   "hover-link " +
-                  (cell.getValue() === "Win"
-                    ? "uppercase success-link font-semibold"
-                    : cell.getValue() === "Final"
-                    ? "primary-link"
-                    : "default-link"),
+                  (cell.getValue() === "Win" ? "uppercase success-link font-semibold"
+                  : cell.getValue() === "Final" ? "primary-link"
+                  : "default-link"),
                 to: {
                   name: "edition",
                   params: {
@@ -1841,11 +1827,9 @@ export const playerRecordColumns = (tour: "ATP" | "WTA"): TableColumn<RecordType
               {
                 class:
                   "hover-link " +
-                  (cell.getValue() === "Win"
-                    ? "uppercase success-link font-semibold"
-                    : cell.getValue() === "Final"
-                    ? "primary-link"
-                    : "default-link"),
+                  (cell.getValue() === "Win" ? "uppercase success-link font-semibold"
+                  : cell.getValue() === "Final" ? "primary-link"
+                  : "default-link"),
                 to: {
                   name: "edition",
                   params: {
@@ -1892,11 +1876,9 @@ export const playerRecordColumns = (tour: "ATP" | "WTA"): TableColumn<RecordType
               {
                 class:
                   "hover-link " +
-                  (cell.getValue() === "Win"
-                    ? "uppercase success-link font-semibold"
-                    : cell.getValue() === "Final"
-                    ? "primary-link"
-                    : "default-link"),
+                  (cell.getValue() === "Win" ? "uppercase success-link font-semibold"
+                  : cell.getValue() === "Final" ? "primary-link"
+                  : "default-link"),
                 to: {
                   name: "edition",
                   params: {
@@ -1929,11 +1911,9 @@ export const playerRecordColumns = (tour: "ATP" | "WTA"): TableColumn<RecordType
               {
                 class:
                   "hover-link " +
-                  (cell.getValue() === "Win"
-                    ? "uppercase success-link font-semibold"
-                    : cell.getValue() === "Final"
-                    ? "primary-link"
-                    : "default-link"),
+                  (cell.getValue() === "Win" ? "uppercase success-link font-semibold"
+                  : cell.getValue() === "Final" ? "primary-link"
+                  : "default-link"),
                 to: {
                   name: "edition",
                   params: {
@@ -1980,11 +1960,9 @@ export const playerRecordColumns = (tour: "ATP" | "WTA"): TableColumn<RecordType
               {
                 class:
                   "hover-link " +
-                  (cell.getValue() === "Win"
-                    ? "uppercase success-link font-semibold"
-                    : cell.getValue() === "Final"
-                    ? "primary-link"
-                    : "default-link"),
+                  (cell.getValue() === "Win" ? "uppercase success-link font-semibold"
+                  : cell.getValue() === "Final" ? "primary-link"
+                  : "default-link"),
                 to: {
                   name: "edition",
                   params: {
@@ -2017,11 +1995,9 @@ export const playerRecordColumns = (tour: "ATP" | "WTA"): TableColumn<RecordType
               {
                 class:
                   "hover-link " +
-                  (cell.getValue() === "Win"
-                    ? "uppercase success-link font-semibold"
-                    : cell.getValue() === "Final"
-                    ? "primary-link"
-                    : "default-link"),
+                  (cell.getValue() === "Win" ? "uppercase success-link font-semibold"
+                  : cell.getValue() === "Final" ? "primary-link"
+                  : "default-link"),
                 to: {
                   name: "edition",
                   params: {

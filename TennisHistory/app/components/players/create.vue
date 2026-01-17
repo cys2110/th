@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { FormErrorEvent, FormSubmitEvent } from "@nuxt/ui"
 import * as z from "zod"
+import type { FetchError } from "ofetch"
 
 const {
   ui: { icons }
@@ -27,28 +28,35 @@ const onError = (event: FormErrorEvent) => console.error(event.errors)
 const onSubmit = async (event: FormSubmitEvent<Schema>) => {
   set(uploading, true)
 
-  const response = await $fetch("/api/players/create", {
+  await $fetch("/api/players/create", {
     query: event.data
   })
+    .then(response => {
+      if (response.success) {
+        toast.add({
+          title: `${event.data.id} created successfully`,
+          icon: icons.success,
+          color: "success"
+        })
 
-  if (response.success) {
-    toast.add({
-      title: `${event.data.id} created successfully`,
-      icon: icons.success,
-      color: "success"
+        handleReset()
+        set(open, false)
+
+        router.push({ name: "player", params: { id: event.data.id, name: "—" } })
+      } else {
+        toast.add({
+          title: `Error creating ${event.data.id}`,
+          description: response.error ?? "An unknown error occurred",
+          icon: icons.error,
+          color: "error"
+        })
+      }
     })
-
-    handleReset()
-    set(open, false)
-
-    router.push({ name: "player", params: { id: event.data.id, name: "—" } })
-  } else {
-    toast.add({
-      title: "Error creating player",
-      icon: icons.error,
-      color: "error"
+    .catch((error: FetchError) => {
+      if (error.statusMessage === "Validation errors") {
+        console.error(error.statusMessage, error.data?.data.validationErrors)
+      }
     })
-  }
 }
 
 const formFields: (FormFieldInterface<Schema> & { key: keyof Schema })[] = [
@@ -95,6 +103,7 @@ const formFields: (FormFieldInterface<Schema> & { key: keyof Schema })[] = [
         label="Save"
         :icon="uploading ? ICONS.uploading : icons.upload"
         block
+        color="success"
       />
       <u-button
         label="Reset"

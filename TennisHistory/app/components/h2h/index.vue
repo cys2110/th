@@ -8,11 +8,25 @@ const props = defineProps<{
 
 const apiKey = computed(() => `${props.team1Ids?.join("-")}-${props.team2Ids?.join("-")}`)
 
-const { data: teams } = await useFetch("/api/h2h/players", {
+const { data: teams, error: playersError } = await useFetch("/api/h2h/players", {
   key: apiKey,
   method: "POST",
   body: { team1Ids: props.team1Ids, team2Ids: props.team2Ids }
 })
+
+watch(
+  playersError,
+  () => {
+    if (playersError.value) {
+      if (playersError.value.statusMessage === "Validation errors") {
+        console.error(playersError.value.statusMessage, playersError.value.data?.data.validationErrors)
+      } else {
+        console.error(playersError.value)
+      }
+    }
+  },
+  { immediate: true }
+)
 
 const teamNames = computed(() => {
   const team1Name = teams.value ? teams.value.team1.players.map(p => `${p.first_name} ${p.last_name}`).join(" / ") : props.team1Names.join(" / ")

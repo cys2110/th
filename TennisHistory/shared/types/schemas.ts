@@ -1,4 +1,4 @@
-import { array, literal, number, object, string, z } from "zod"
+import { any, array, boolean, literal, number, object, record, string, union, z } from "zod"
 import { Integer, Date as NeoDate } from "neo4j-driver"
 import { EnvironmentEnum, SurfaceEnum } from "./enums"
 
@@ -10,7 +10,19 @@ export const sortFieldSchema = object({
   field: string(),
   direction: literal(["ASC", "DESC"])
 })
+
 export type SortFieldType = z.infer<typeof sortFieldSchema>
+
+export const groupedResultsSchema = object({
+  id: string(),
+  __group: boolean(),
+  count: intToNumberSchema,
+  has_children: boolean(),
+  group_key: record(string(), union([string(), intToNumberSchema])),
+  subRows: array(any())
+})
+
+export type GroupedResultsType = z.infer<typeof groupedResultsSchema>
 
 export const countrySchema = object({
   id: string(),

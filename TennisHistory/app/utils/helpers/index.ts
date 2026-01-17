@@ -133,13 +133,13 @@ export const transformMatchStats = (data: RawMatchType) => {
         t1: `${(team1?.serve_games ?? 0) - (team2?.bps_converted ?? 0)}/${team1?.serve_games ?? 0}`,
         t2: `${(team2?.serve_games ?? 0) - (team1?.bps_converted ?? 0)}/${team2?.serve_games ?? 0}`,
         t1_pc:
-          team1?.serve_games === 0 || team1?.serve_games === undefined
-            ? 0
-            : percentage((team1!.serve_games ?? 0) - (team2!.bps_converted ?? 0), team1!.serve_games ?? 0),
+          team1?.serve_games === 0 || team1?.serve_games === undefined ?
+            0
+          : percentage((team1!.serve_games ?? 0) - (team2!.bps_converted ?? 0), team1!.serve_games ?? 0),
         t2_pc:
-          team2?.serve_games === 0 || team2?.serve_games === undefined
-            ? 0
-            : percentage((team2!.serve_games ?? 0) - (team1!.bps_converted ?? 0), team2!.serve_games ?? 0)
+          team2?.serve_games === 0 || team2?.serve_games === undefined ?
+            0
+          : percentage((team2!.serve_games ?? 0) - (team1!.bps_converted ?? 0), team2!.serve_games ?? 0)
       },
       {
         label: "1st serve return points won",
@@ -212,13 +212,13 @@ export const transformMatchStats = (data: RawMatchType) => {
         t1: `${(team1?.serve1_w ?? 0) + (team1?.serve2_w ?? 0)}/${(team1?.serve1 ?? 0) + (team1?.serve2 ?? 0)}`,
         t2: `${(team2?.serve1_w ?? 0) + (team2?.serve2_w ?? 0)}/${(team2?.serve1 ?? 0) + (team2?.serve2 ?? 0)}`,
         t1_pc:
-          (team1?.serve1 ?? 0) + (team1?.serve2 ?? 0) === 0
-            ? 0
-            : percentage((team1?.serve1_w ?? 0) + (team1?.serve2_w ?? 0), (team1?.serve1 ?? 0) + (team1?.serve2 ?? 0)),
+          (team1?.serve1 ?? 0) + (team1?.serve2 ?? 0) === 0 ?
+            0
+          : percentage((team1?.serve1_w ?? 0) + (team1?.serve2_w ?? 0), (team1?.serve1 ?? 0) + (team1?.serve2 ?? 0)),
         t2_pc:
-          (team2?.serve1 ?? 0) + (team2?.serve2 ?? 0) === 0
-            ? 0
-            : percentage((team2?.serve1_w ?? 0) + (team2?.serve2_w ?? 0), (team2?.serve1 ?? 0) + (team2?.serve2 ?? 0))
+          (team2?.serve1 ?? 0) + (team2?.serve2 ?? 0) === 0 ?
+            0
+          : percentage((team2?.serve1_w ?? 0) + (team2?.serve2_w ?? 0), (team2?.serve1 ?? 0) + (team2?.serve2 ?? 0))
       },
       {
         label: "Return points won",
@@ -227,13 +227,13 @@ export const transformMatchStats = (data: RawMatchType) => {
         t1: `${(team1?.ret1_w ?? 0) + (team1?.ret2_w ?? 0)}/${(team1?.ret1 ?? 0) + (team1?.ret2 ?? 0)}`,
         t2: `${(team2?.ret1_w ?? 0) + (team2?.ret2_w ?? 0)}/${(team2?.ret1 ?? 0) + (team2?.ret2 ?? 0)}`,
         t1_pc:
-          (team1?.ret1 ?? 0) + (team1?.ret2 ?? 0) === 0
-            ? 0
-            : percentage((team1?.ret1_w ?? 0) + (team1?.ret2_w ?? 0), (team1?.ret1 ?? 0) + (team1?.ret2 ?? 0)),
+          (team1?.ret1 ?? 0) + (team1?.ret2 ?? 0) === 0 ?
+            0
+          : percentage((team1?.ret1_w ?? 0) + (team1?.ret2_w ?? 0), (team1?.ret1 ?? 0) + (team1?.ret2 ?? 0)),
         t2_pc:
-          (team2?.ret1 ?? 0) + (team2?.ret2 ?? 0) === 0
-            ? 0
-            : percentage((team2?.ret1_w ?? 0) + (team2?.ret2_w ?? 0), (team2?.ret1 ?? 0) + (team2?.ret2 ?? 0))
+          (team2?.ret1 ?? 0) + (team2?.ret2 ?? 0) === 0 ?
+            0
+          : percentage((team2?.ret1_w ?? 0) + (team2?.ret2_w ?? 0), (team2?.ret1 ?? 0) + (team2?.ret2 ?? 0))
       },
       {
         label: "Total points won",
@@ -246,19 +246,19 @@ export const transformMatchStats = (data: RawMatchType) => {
           (team2?.serve1 ?? 0) + (team2?.serve2 ?? 0) + (team2?.ret1 ?? 0) + (team2?.ret2 ?? 0)
         }`,
         t1_pc:
-          (team1?.serve1 ?? 0) + (team1?.serve2 ?? 0) + (team1?.ret1 ?? 0) + (team1?.ret2 ?? 0) === 0
-            ? 0
-            : percentage(
-                (team1?.serve1_w ?? 0) + (team1?.serve2_w ?? 0) + (team1?.ret1_w ?? 0) + (team1?.ret2_w ?? 0),
-                (team1?.serve1 ?? 0) + (team1?.serve2 ?? 0) + (team1?.ret1 ?? 0) + (team1?.ret2 ?? 0)
-              ),
+          (team1?.serve1 ?? 0) + (team1?.serve2 ?? 0) + (team1?.ret1 ?? 0) + (team1?.ret2 ?? 0) === 0 ?
+            0
+          : percentage(
+              (team1?.serve1_w ?? 0) + (team1?.serve2_w ?? 0) + (team1?.ret1_w ?? 0) + (team1?.ret2_w ?? 0),
+              (team1?.serve1 ?? 0) + (team1?.serve2 ?? 0) + (team1?.ret1 ?? 0) + (team1?.ret2 ?? 0)
+            ),
         t2_pc:
-          (team2?.serve1 ?? 0) + (team2?.serve2 ?? 0) + (team2?.ret1 ?? 0) + (team2?.ret2 ?? 0) === 0
-            ? 0
-            : percentage(
-                (team2?.serve1_w ?? 0) + (team2?.serve2_w ?? 0) + (team2?.ret1_w ?? 0) + (team2?.ret2_w ?? 0),
-                (team2?.serve1 ?? 0) + (team2?.serve2 ?? 0) + (team2?.ret1 ?? 0) + (team2?.ret2 ?? 0)
-              )
+          (team2?.serve1 ?? 0) + (team2?.serve2 ?? 0) + (team2?.ret1 ?? 0) + (team2?.ret2 ?? 0) === 0 ?
+            0
+          : percentage(
+              (team2?.serve1_w ?? 0) + (team2?.serve2_w ?? 0) + (team2?.ret1_w ?? 0) + (team2?.ret2_w ?? 0),
+              (team2?.serve1 ?? 0) + (team2?.serve2 ?? 0) + (team2?.ret1 ?? 0) + (team2?.ret2 ?? 0)
+            )
       },
       {
         label: "Max speed (km/h)",
@@ -266,13 +266,13 @@ export const transformMatchStats = (data: RawMatchType) => {
         t1: `${team1?.max_speed ?? 0}`,
         t2: `${team2?.max_speed ?? 0}`,
         t1_pc:
-          (team1?.max_speed ?? 0) + (team2?.max_speed ?? 0) === 0
-            ? 0
-            : percentage(team1?.max_speed ?? 0, (team1?.max_speed ?? 0) + (team2?.max_speed ?? 0)),
+          (team1?.max_speed ?? 0) + (team2?.max_speed ?? 0) === 0 ?
+            0
+          : percentage(team1?.max_speed ?? 0, (team1?.max_speed ?? 0) + (team2?.max_speed ?? 0)),
         t2_pc:
-          (team1?.max_speed ?? 0) + (team2?.max_speed ?? 0) === 0
-            ? 0
-            : percentage(team2?.max_speed ?? 0, (team1?.max_speed ?? 0) + (team2?.max_speed ?? 0))
+          (team1?.max_speed ?? 0) + (team2?.max_speed ?? 0) === 0 ?
+            0
+          : percentage(team2?.max_speed ?? 0, (team1?.max_speed ?? 0) + (team2?.max_speed ?? 0))
       },
       {
         label: "1st serve average speed (km/h)",
@@ -280,13 +280,13 @@ export const transformMatchStats = (data: RawMatchType) => {
         t1: `${team1?.avg1_speed ?? 0}`,
         t2: `${team2?.avg1_speed ?? 0}`,
         t1_pc:
-          (team1?.avg1_speed ?? 0) + (team2?.avg1_speed ?? 0) === 0
-            ? 0
-            : percentage(team1?.avg1_speed ?? 0, (team1?.avg1_speed ?? 0) + (team2?.avg1_speed ?? 0)),
+          (team1?.avg1_speed ?? 0) + (team2?.avg1_speed ?? 0) === 0 ?
+            0
+          : percentage(team1?.avg1_speed ?? 0, (team1?.avg1_speed ?? 0) + (team2?.avg1_speed ?? 0)),
         t2_pc:
-          (team1?.avg1_speed ?? 0) + (team2?.avg1_speed ?? 0) === 0
-            ? 0
-            : percentage(team2?.avg1_speed ?? 0, (team1?.avg1_speed ?? 0) + (team2?.avg1_speed ?? 0))
+          (team1?.avg1_speed ?? 0) + (team2?.avg1_speed ?? 0) === 0 ?
+            0
+          : percentage(team2?.avg1_speed ?? 0, (team1?.avg1_speed ?? 0) + (team2?.avg1_speed ?? 0))
       },
       {
         label: "2nd serve average speed (km/h)",
@@ -294,13 +294,13 @@ export const transformMatchStats = (data: RawMatchType) => {
         t1: `${team1?.avg2_speed ?? 0}`,
         t2: `${team2?.avg2_speed ?? 0}`,
         t1_pc:
-          (team1?.avg2_speed ?? 0) + (team2?.avg2_speed ?? 0) === 0
-            ? 0
-            : percentage(team1?.avg2_speed ?? 0, (team1?.avg2_speed ?? 0) + (team2?.avg2_speed ?? 0)),
+          (team1?.avg2_speed ?? 0) + (team2?.avg2_speed ?? 0) === 0 ?
+            0
+          : percentage(team1?.avg2_speed ?? 0, (team1?.avg2_speed ?? 0) + (team2?.avg2_speed ?? 0)),
         t2_pc:
-          (team1?.avg2_speed ?? 0) + (team2?.avg2_speed ?? 0) === 0
-            ? 0
-            : percentage(team2?.avg2_speed ?? 0, (team1?.avg2_speed ?? 0) + (team2?.avg2_speed ?? 0))
+          (team1?.avg2_speed ?? 0) + (team2?.avg2_speed ?? 0) === 0 ?
+            0
+          : percentage(team2?.avg2_speed ?? 0, (team1?.avg2_speed ?? 0) + (team2?.avg2_speed ?? 0))
       }
     ]
   }

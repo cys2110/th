@@ -82,12 +82,30 @@ watchDeep(
 
 const apiKey = computed(() => `${team1Ids.value?.join("-")}-${team2Ids.value?.join("-")}`)
 
-const { data: teams, execute } = await useFetch("/api/h2h/players", {
+const {
+  data: teams,
+  execute,
+  error
+} = await useFetch("/api/h2h/players", {
   key: apiKey,
   method: "POST",
   body: { team1Ids, team2Ids },
   immediate: false
 })
+
+watch(
+  error,
+  () => {
+    if (error.value) {
+      if (error.value.statusMessage === "Validation errors") {
+        console.error(error.value.statusMessage, error.value.data?.data.validationErrors)
+      } else {
+        console.error(error.value)
+      }
+    }
+  },
+  { immediate: true }
+)
 
 watch(
   [team1Ids, team2Ids],

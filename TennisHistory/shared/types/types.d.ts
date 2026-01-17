@@ -80,11 +80,7 @@ declare global {
     __group: boolean
     has_children: boolean
     count: number
-    group_key: { key: string | number }
-    name: string
-    alpha2?: string
-    min_year: number
-    max_year: number
+    group_key: Record<string, any>
   }
 
   type WLIndexType = {

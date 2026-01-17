@@ -1,3 +1,5 @@
+import { ZodError } from "zod"
+
 export default defineEventHandler(async event => {
   try {
     const params = getQuery(event)
@@ -10,9 +12,18 @@ export default defineEventHandler(async event => {
         error: `Player ${params.id} could not be created`
       }
     } else {
-      return { success: true }
+      return { success: true, error: null }
     }
   } catch (error) {
+    if (error instanceof ZodError) {
+      throw createError({
+        statusCode: 400,
+        statusMessage: "Validation errors",
+        data: { validationErrors: error.issues.map(i => `${i.path.join(".")}: ${i.message}`) }
+      })
+    }
+
+    console.error(error)
     throw error
   }
 })
