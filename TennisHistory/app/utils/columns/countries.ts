@@ -1,5 +1,3 @@
-
-
 import type { TableColumn } from "@nuxt/ui"
 import type { Column } from "@tanstack/vue-table"
 import {
@@ -12,7 +10,6 @@ import {
   UIcon
 } from "#components"
 import appConfig from "~/app.config"
-
 
 export const countriesColumns: TableColumn<CountryType>[] = [
   {
@@ -79,7 +76,6 @@ const levelBadgeMapping: Record<string, keyof typeof appConfig.ui.colors> = {
   Olympics: "warning"
 }
 
-
 export const countryTitlesColumns: TableColumn<CountryTitleType>[] = [
   {
     accessorKey: "tour",
@@ -113,14 +109,16 @@ export const countryTitlesColumns: TableColumn<CountryTitleType>[] = [
             }),
             h(UBadge, {
               label: tour,
-              color: tour
+              color: tour,
+              class: "w-full"
             })
           ])
         }
       } else if (!table.getState().grouping.includes("tour")) {
         return h(UBadge, {
           label: tour,
-          color: tour
+          color: tour,
+          class: "w-full"
         })
       }
     }
@@ -198,14 +196,16 @@ export const countryTitlesColumns: TableColumn<CountryTitleType>[] = [
             }),
             h(UBadge, {
               label: type,
-              color: type
+              color: type,
+              class: "w-full"
             })
           ])
         }
       } else if (!table.getState().grouping.includes("edition_type")) {
         return h(UBadge, {
           label: type,
-          color: type
+          color: type,
+          class: "w-full"
         })
       }
     }
@@ -252,14 +252,16 @@ export const countryTitlesColumns: TableColumn<CountryTitleType>[] = [
             }),
             h(UBadge, {
               label: category,
-              color: levelBadgeMapping[category]
+              color: levelBadgeMapping[category],
+              class: "w-full"
             })
           ])
         }
       } else if (!table.getState().grouping.includes("category")) {
         return h(UBadge, {
           label: category,
-          color: levelBadgeMapping[category]
+          color: levelBadgeMapping[category],
+          class: "w-full"
         })
       }
     }
