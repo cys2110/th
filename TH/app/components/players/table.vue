@@ -2,18 +2,30 @@
 import type { AsyncDataRequestStatus } from "#app"
 import type { TableRow } from "@nuxt/ui"
 
-const results = defineModel<TournamentsResultsType[]>("results")
+const results = defineModel<PlayersResultsType[]>("results")
 const status = defineModel<AsyncDataRequestStatus>("status")
 
 const tours = useRouteQuery("tours", null, { transform: toArray })
-const tournaments = useRouteQuery("tournaments", null, {
+const players = useRouteQuery("players", null, {
   transform: {
-    get: parseNumberOption,
+    get: parseOption,
     set: serialiseOption
   }
 })
-const established = useRouteQuery("established", null, { transform: Number })
-const abolished = useRouteQuery("abolished", null, { transform: Number })
+const countries = useRouteQuery("countries", null, {
+  transform: {
+    get: parseOption,
+    set: serialiseOption
+  }
+})
+const coaches = useRouteQuery("coaches", null, {
+  transform: {
+    get: parseOption,
+    set: serialiseOption
+  }
+})
+const min_year = useRouteQuery("min_year", null, { transform: Number })
+const max_year = useRouteQuery("max_year", null, { transform: Number })
 const grouping = useRouteQuery<string | null>("grouping", null)
 const sortField = useRouteQuery("sorting", null, {
   transform: {
@@ -28,13 +40,25 @@ defineExpose({ table })
 
 // Ensure that grouped column is always shown first
 const columnOrder = computed(() => {
-  const allColumns = ["tours", "name", "established", "abolished"]
+  const allColumns = ["tour", "status", "country", "name", "first_tournament_year", "last_tournament_year", "coaches"]
 
   if (grouping.value) {
+    if (grouping.value === "min_year") {
+      allColumns.splice(allColumns.indexOf("first_tournament_year"), 1)
+      return ["first_tournament_year", ...allColumns]
+    }
+    if (grouping.value === "max_year") {
+      allColumns.splice(allColumns.indexOf("last_tournament_year"), 1)
+      return ["last_tournament_year", ...allColumns]
+    }
     return [grouping.value, ...allColumns.filter(c => c !== grouping.value)]
   }
 
   return allColumns
+})
+
+const columnVisibility = ref({
+  status: false
 })
 
 // In grouped mode, only fetch data when row is expanded
@@ -55,7 +79,7 @@ watch(
 
     let keyToFetch: string | number = ""
 
-    const row = table.value?.tableApi.getRow(newlyOpenedId) as TableRow<TournamentsResultsType> | undefined
+    const row = table.value?.tableApi.getRow(newlyOpenedId) as TableRow<PlayersResultsType> | undefined
 
     if (!row) return
 
@@ -63,22 +87,24 @@ watch(
     const idx = results.value.findIndex(r => r.id === row.original.id)
     if (!dataRow || idx === -1) return
 
-    if (dataRow.has_children && dataRow.subRows.length === 0) keyToFetch = dataRow.group.year
+    if (dataRow.has_children && dataRow.subRows.length === 0) keyToFetch = "year" in dataRow.group ? dataRow.group.year : dataRow.group.id
 
     if (!keyToFetch) return
 
     set(status, "pending")
 
-    await $fetch<TournamentsResultsType[]>("/api/tournaments/group-row-results", {
+    await $fetch<PlayersResultsType[]>("/api/players/group-row-results", {
       method: "POST",
       body: {
         sortField: sortField.value,
         grouping: grouping.value,
         key: keyToFetch,
         tours: tours.value,
-        tournaments: tournaments.value,
-        established: established.value,
-        abolished: abolished.value
+        players: players.value,
+        countries: countries.value,
+        coaches: coaches.value,
+        min_year: min_year.value,
+        max_year: max_year.value
       }
     })
       .then(response => {
@@ -105,17 +131,15 @@ watch(
 )
 
 // Handle row selection
-const handleSelectRow = (_e: Event, row: TableRow<TournamentsResultsType>) => {
+const handleSelectRow = (_e: Event, row: TableRow<PlayersResultsType>) => {
   if (row.original.__group) {
     row.toggleExpanded()
   } else {
-    const { id, name } = row.original
-
     router.push({
-      name: "tournament",
+      name: "player",
       params: {
-        id,
-        name: kebabCase(name)
+        id: row.original.id,
+        name: row.original.first_name ? kebabCase(`${row.original.first_name}-${row.original.last_name}`) : "—"
       }
     })
   }
@@ -126,15 +150,16 @@ const handleSelectRow = (_e: Event, row: TableRow<TournamentsResultsType>) => {
   <u-table
     ref="table"
     :data="results"
-    :columns="tournamentColumns"
+    :columns="playerColumns"
     :loading="status === 'pending'"
     sticky
     render-fallback-value="—"
     @select="handleSelectRow"
     :column-order
+    :column-visibility
     :grouping="grouping ? [grouping] : []"
     :grouping-options="{ manualGrouping: true }"
-    :get-sub-rows="(row: TournamentsResultsType) => <TournamentsResultsType[]>row.subRows"
+    :get-sub-rows="(row: PlayersResultsType) => <PlayersResultsType[]>row.subRows"
     :ui="{ td: 'empty:p-0' }"
   >
     <template #loading>
@@ -143,11 +168,11 @@ const handleSelectRow = (_e: Event, row: TableRow<TournamentsResultsType>) => {
 
     <template #empty>
       <empty
-        message="No tournaments found"
-        :icon="ICONS.trophyOff"
+        message="No players found"
+        :icon="ICONS.peopleOff"
       >
         <dev-only>
-          <tournaments-update />
+          <players-create />
         </dev-only>
       </empty>
     </template>

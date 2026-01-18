@@ -18,7 +18,9 @@ declare global {
     icon?: string
   }
 
-  type TournamentsResultsType = TournamentType & TournamentsResultsType
+  type PlayersResultsType = BasePlayerType & GroupedPlayerResultsType
+
+  type TournamentsResultsType = TournamentType & GroupedTournamentResultsType
 }
 
 export {}

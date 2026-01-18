@@ -35,11 +35,21 @@ const cleanLink = (link: string) => link.replaceAll(/^[\s"'“”‘’\[\]]+|[\
       :placeholder="field.placeholder ?? `Enter ${field.label.toLowerCase()}`"
     />
 
+    <u-radio-group
+      v-else-if="field.type === 'radio'"
+      v-model="modelValue[field.key]"
+      :items="field.items"
+      orientation="horizontal"
+      loop
+    />
+
     <u-checkbox-group
       v-else-if="field.type === 'checkbox'"
       v-model="modelValue[field.key]"
       :items="field.items"
       orientation="horizontal"
+      :icon="field.icon"
+      loop
     />
   </u-form-field>
 </template>

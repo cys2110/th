@@ -1,7 +1,7 @@
 import type { TableColumn, TableRow } from "@nuxt/ui"
 import { TableRowToggle, TableServerFilterHeader, TableServerGroupHeader, TableServerSearchHeader, TableServerSortHeader, UBadge } from "#components"
 
-export const tournamentColumns = (): TableColumn<TournamentsResultsType>[] => [
+export const tournamentColumns: TableColumn<TournamentsResultsType>[] = [
   {
     accessorKey: "tours",
     header: () =>
@@ -35,7 +35,7 @@ export const tournamentColumns = (): TableColumn<TournamentsResultsType>[] => [
         h(TableServerSearchHeader, {
           label: "Tournament",
           type: "Tournament",
-          filterKey: "tournament",
+          filterKey: "tournaments",
           multiple: true,
           icon: ICONS.trophy
         }),
@@ -65,20 +65,20 @@ export const tournamentColumns = (): TableColumn<TournamentsResultsType>[] => [
       ]),
     cell: ({ cell, row, table }) => {
       if (row.original.__group) {
-        if (row.original.id.startsWith("g:established:")) {
+        if ((row.original.id as string).startsWith("g:established:")) {
           const isExpanded = (table.getState().expanded as Record<string, boolean>)[row.id]
 
           return h(
             TableRowToggle,
             {
-              row: row as TableRow<TournamentsResultsType>,
+              row: row as TableRow<unknown>,
               isExpanded,
               disabled: !row.original.has_children
             },
             () => row.original.group.year
           )
         }
-      } else {
+      } else if (!row.getParentRow() || !(row.getParentRow()!.original.id as string).startsWith("g:established:")) {
         return cell.renderValue()
       }
     }
@@ -104,20 +104,20 @@ export const tournamentColumns = (): TableColumn<TournamentsResultsType>[] => [
       ]),
     cell: ({ cell, row, table }) => {
       if (row.original.__group) {
-        if (row.original.id.startsWith("g:abolished:")) {
+        if ((row.original.id as string).startsWith("g:abolished:")) {
           const isExpanded = (table.getState().expanded as Record<string, boolean>)[row.id]
 
           return h(
             TableRowToggle,
             {
-              row: row as TableRow<TournamentsResultsType>,
+              row: row as TableRow<unknown>,
               isExpanded,
               disabled: !row.original.has_children
             },
             () => row.original.group.year
           )
         }
-      } else {
+      } else if (!row.getParentRow() || !(row.getParentRow()!.original.id as string).startsWith("g:abolished:")) {
         return cell.renderValue()
       }
     }

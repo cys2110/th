@@ -101,7 +101,7 @@ const onSubmit = async (event: FormSubmitEvent<TournamentFormSchema>) => {
 
 const formFields: FormFieldInterface<TournamentFormSchema>[] = [
   { label: "ID", key: "id", type: "text", subType: "number", required: true, disabled: !!props.tournament },
-  { label: "Tours", key: "tours", type: "checkbox", items: TOUR_OPTIONS, required: true },
+  { label: "Tours", key: "tours", type: "checkbox", items: TOUR_OPTIONS, required: true, icon: ICONS.tour },
   { label: "Name", key: "name", type: "text", required: true, class: "col-span-2" },
   { label: "Established", placeholder: "Enter year established", key: "established", type: "text", subType: "number" },
   { label: "Abolished", placeholder: "Enter year abolished", key: "abolished", type: "text", subType: "number" },

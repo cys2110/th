@@ -1,4 +1,4 @@
-import { boolean, literal, number, object, string, union, z } from "zod"
+import { array, boolean, literal, number, object, string, union, z } from "zod"
 import { Integer, Date as NeoDate } from "neo4j-driver"
 
 export const intToNumberSchema = z.instanceof(Integer, { error: "Invalid neo4j Integer object" }).transform(val => val.toInt())
@@ -42,3 +42,14 @@ export const personSchema = object({
 })
 
 export type PersonType = z.infer<typeof personSchema>
+
+export const coachSchema = personSchema
+  .omit({
+    country: true
+  })
+  .extend({
+    years: string().optional(),
+    labels: array(string())
+  })
+
+export type CoachType = z.infer<typeof coachSchema>
