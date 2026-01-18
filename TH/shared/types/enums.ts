@@ -1,4 +1,4 @@
-import { string } from "zod"
+import { string, z } from "zod"
 
 export const tourMapping = {
   ATP: "ATP",
@@ -9,8 +9,12 @@ export const tourMapping = {
   "ITF-W": "Women"
 } as const
 
+export const TourKey = z.enum(tourMapping)
+
 export const tourEnum = string()
   .refine(val => Object.keys(tourMapping).includes(val), {
     error: `Tour must be one of: ${Object.keys(tourMapping).join(", ")}`
   })
   .transform(val => tourMapping[val as keyof typeof tourMapping])
+
+export type TourEnumType = z.infer<typeof tourEnum>

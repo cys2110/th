@@ -7,7 +7,7 @@ useHead({ title: "Home" })
 const features: PageFeatureProps[] = [
   {
     title: "Results",
-    icon: ICONS.calendar,
+    icon: ICONS.years,
     description: "Explore tournament results starting from the Open Era",
     to: { name: "results-archive" }
   },

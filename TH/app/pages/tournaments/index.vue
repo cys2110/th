@@ -1,30 +1,229 @@
 <script setup lang="ts">
-import type { FetchError } from "ofetch"
-
 useHead({ title: "Tournaments" })
 
 const viewModeStore = useViewModeStore()
+const tableRef = useTemplateRef("tableRef")
 
 // Pagination
+const page = useRouteQuery("page", 1, { transform: Number })
+const itemsPerPage = useRouteQuery("itemsPerPage", 30, { transform: Number })
+const skip = computed(() => (get(page) - 1) * get(itemsPerPage))
+
+// Filters
+const tours = useRouteQuery("tours", null, { transform: toArray })
+const tournaments = useRouteQuery("tournaments", null, {
+  transform: {
+    get: parseNumberOption,
+    set: serialiseOption
+  }
+})
+const established = useRouteQuery("established", null, { transform: Number })
+const abolished = useRouteQuery("abolished", null, { transform: Number })
+
+const resetFilters = () => {
+  set(tours, null)
+  set(tournaments, null)
+  set(established, null)
+  set(abolished, null)
+}
+
+// Grouping
+const grouping = useRouteQuery<string | null>("grouping", null)
+
+const resetGrouping = () => set(grouping, null)
+
+// Sorting
+const sortField = useRouteQuery("sorting", null, {
+  transform: {
+    get: parseSort,
+    set: serialiseSort
+  }
+})
+const sortFields = [
+  { label: "Name", value: "name" },
+  { label: "Established", value: "established" },
+  { label: "Abolished", value: "abolished" }
+]
+
+const resetSorting = () => set(sortField, [])
+
+// Reset page on filter/sort change
+watchDeep(
+  [tours, tournaments, established, abolished, itemsPerPage, sortField, grouping],
+  () => {
+    set(page, 1)
+  },
+  { immediate: true }
+)
+
+// API call
+const apiRoute = computed(() => {
+  if (grouping.value && !viewModeStore.isCardView) {
+    return "/api/tournaments/groups"
+  }
+  return "/api/tournaments"
+})
+
+const { data, status, error } = await useFetch<{ count: number; results: TournamentsResultsType[] }>(apiRoute, {
+  method: "POST",
+  body: {
+    skip,
+    itemsPerPage,
+    sortField,
+    tournaments,
+    tours,
+    established,
+    abolished,
+    grouping
+  },
+  default: () => ({ count: 0, results: [] })
+})
+
+watch(
+  error,
+  () => {
+    if (error.value) {
+      if (error.value.statusMessage === "Validation errors") {
+        console.error(error.value.statusMessage, error.value.data?.data.validationErrors)
+      } else {
+        console.error(error.value)
+      }
+    }
+  },
+  { immediate: true }
+)
+
+const footerPlaceholder = computed(() => {
+  if (viewModeStore.isCardView || !grouping.value) {
+    return get(data).count === 1 ? "tournament" : "tournaments"
+  }
+  return get(data).count === 1 ? "group" : "groups"
+})
 </script>
 
 <template>
   <u-container class="min-h-screen flex flex-col">
-    <u-page>
+    <u-page
+      :ui="{
+        root: 'flex-1',
+        center: viewModeStore.isCardView ? 'lg:col-span-6' : 'lg:col-span-8'
+      }"
+    >
       <template #left>
-        <u-page-aside></u-page-aside>
+        <u-page-aside>
+          <dev-only>
+            <tournaments-update />
+
+            <u-separator />
+          </dev-only>
+
+          <filters
+            :reset-filters
+            :reset-sorting
+            :reset-grouping
+            :table="tableRef?.table"
+            :sort-fields
+            show-visibility
+            v-model:sorting="sortField"
+          >
+            <filters-tours v-model="tours" />
+
+            <filters-years
+              v-model="established"
+              :year-options="Array.from({ length: new Date().getFullYear() - 1877 + 1 }, (_, i) => 1877 + i)"
+              placeholder="Established"
+            />
+
+            <filters-years
+              v-model="abolished"
+              :year-options="Array.from({ length: new Date().getFullYear() - 1877 + 1 }, (_, i) => 1877 + i)"
+              placeholder="Abolished"
+            />
+          </filters>
+        </u-page-aside>
       </template>
 
       <template
         #right
         v-if="viewModeStore.isCardView"
       >
-        <u-page-aside></u-page-aside>
+        <u-page-aside>
+          <filters-command-palette
+            type="Tournament"
+            v-model="tournaments"
+            :icon="ICONS.trophy"
+          />
+        </u-page-aside>
       </template>
 
-      <u-page-header title="Tournaments"></u-page-header>
+      <u-page-header title="Tournaments">
+        <template #links>
+          <view-switcher />
 
-      <u-page-body></u-page-body>
+          <!--Filters for smaller screens-->
+          <u-slideover
+            title="Filters"
+            class="lg:hidden"
+          >
+            <u-button :icon="ICONS.filter" />
+
+            <template #body>
+              <filters
+                :reset-filters
+                :reset-sorting
+                :reset-grouping
+                :table="tableRef?.table"
+                :sort-fields
+                show-visibility
+                v-model:sorting="sortField"
+              >
+                <filters-search
+                  type="Tournament"
+                  v-model="tournaments"
+                  :icon="ICONS.trophy"
+                />
+
+                <filters-tours v-model="tours" />
+
+                <filters-years
+                  v-model="established"
+                  :year-options="Array.from({ length: new Date().getFullYear() - 1877 + 1 }, (_, i) => 1877 + i)"
+                  placeholder="Established"
+                />
+
+                <filters-years
+                  v-model="abolished"
+                  :year-options="Array.from({ length: new Date().getFullYear() - 1877 + 1 }, (_, i) => 1877 + i)"
+                  placeholder="Abolished"
+                />
+              </filters>
+            </template>
+          </u-slideover>
+        </template>
+      </u-page-header>
+
+      <u-page-body>
+        <tournaments-grid
+          v-if="viewModeStore.isCardView"
+          :tournaments="data.results"
+          :status
+        />
+
+        <tournaments-table
+          v-else
+          ref="tableRef"
+          v-model:results="data.results"
+          v-model:status="status"
+        />
+      </u-page-body>
     </u-page>
+
+    <pagination-footer
+      :total="data.count"
+      :placeholder="footerPlaceholder"
+      v-model:page="page"
+      v-model:items-per-page="itemsPerPage"
+      :show-pagination-controls="viewModeStore.isCardView || !grouping"
+    />
   </u-container>
 </template>

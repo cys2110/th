@@ -1,5 +1,5 @@
 import { array, object, string, url, z } from "zod"
-import { intToNumberSchema, neoDateToStringSchema } from "./schemas"
+import { groupedResultsSchema, intToNumberSchema, neoDateToStringSchema } from "./schemas"
 import { tourEnum } from "./enums"
 
 export const tournamentSchema = object({
@@ -13,6 +13,15 @@ export const tournamentSchema = object({
 })
 
 export type TournamentType = z.infer<typeof tournamentSchema>
+
+export const groupedTournamentResultsSchema = groupedResultsSchema.extend({
+  group: object({
+    year: intToNumberSchema
+  }),
+  subRows: array(tournamentSchema)
+})
+
+export type GroupedTournamentResultsType = z.infer<typeof groupedTournamentResultsSchema>
 
 export const baseTournamentSchema = tournamentSchema.pick({
   id: true,

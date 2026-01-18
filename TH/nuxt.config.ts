@@ -41,6 +41,7 @@ export default defineNuxtConfig({
           "useArrayFindLast",
           "useArraySome",
           "useArrayEvery",
+          "useLocalStorage",
           "watchDeep",
           "watchImmediate",
           "watchOnce"
