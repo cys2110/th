@@ -1,0 +1,69 @@
+@import "tailwindcss" theme(static);
+@import "@nuxt/ui";
+@plugin 'tailwind-scrollbar';
+
+/* Remove scrollbar appearance */
+::-webkit-scrollbar {
+  display: none;
+}
+
+/* Remove input number spinners */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+@theme {
+  --font-sans: "Jost", sans-serif;
+  --font-cursive: "Homemade Apple", cursive;
+  --container-8xl: 120rem;
+  --draw-width: "max-content";
+  --draw-heigth: 100%;
+  --main-vertical-padding: 20px;
+  --round-titles-vertical-padding: 8px;
+  --nav-button-padding: 4px;
+  --nav-buttons-top-distance: 50%;
+  --connection-lines-width: 2px;
+  --match-max-width: 1000px;
+  --match-min-vertical-gap: 25px;
+  --match-hor-margin: 20px;
+  --match-axis-margin: 4px;
+  --one-side-players-gap: 2px;
+  --distance-between-score-pairs: 14px;
+}
+
+:root {
+  --ui-bg: var(--ui-color-neutral-100);
+  --ui-container: var(--container-8xl);
+  --ui-bg-elevated: var(--ui-color-neutral-300);
+}
+
+.dark {
+  --ui-bg: var(--ui-color-neutral-950);
+  --ui-bg-elevated: var(--ui-color-neutral-800);
+}
+
+.hover-link {
+  @apply bg-linear-to-r bg-bottom bg-[length:0_1px] bg-no-repeat transition-[background-size] hover:bg-[length:100%_1px] w-fit duration-500 cursor-pointer;
+}
+
+.highlight-link {
+  @apply text-highlighted from-(--ui-text-highlighted) to-(--ui-text-highlighted);
+}
+
+.default-link {
+  @apply text-muted from-(--ui-text-muted) to-(--ui-text-muted);
+}
+
+.primary-link {
+  @apply text-primary from-primary to-primary;
+}
+
+.success-link {
+  @apply text-success from-success to-success;
+}
+
+.scrollbar {
+  @apply scrollbar-thin scrollbar-thumb-primary-600 scrollbar-track-transparent overflow-y-auto scroll-smooth max-h-200 2xl:max-h-150;
+}

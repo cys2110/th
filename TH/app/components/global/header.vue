@@ -20,11 +20,12 @@ const navLinks: NavigationMenuItem[] = [
 
 <template>
   <u-header
-    title="Tennis History"
+    title="TennisHistory"
     mode="drawer"
   >
     <template #right>
       <search />
+
       <u-color-mode-button />
     </template>
 
