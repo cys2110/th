@@ -1,151 +1,252 @@
 <script setup lang="ts">
-import type { TableRow } from "@nuxt/ui"
-import { getFacetedRowModel, getFacetedUniqueValues } from "@tanstack/vue-table"
-
 definePageMeta({ name: "titles-and-finals" })
 
 const {
   params: { id }
 } = useRoute("titles-and-finals")
-const router = useRouter()
+const playerStore = usePlayerStore()
+const viewModeStore = useViewModeStore()
 
-const viewMode = ref(true)
-const selection = ref(true)
-const [defineEmptyTemplate, reuseEmptyTemplate] = createReusableTemplate()
+const {
+  data: events,
+  status,
+  error
+} = await useFetch("/api/player/titles-and-finals", {
+  query: { id },
+  default: () => []
+})
 
-const playerName = useState("playerName")
+watch(
+  error,
+  () => {
+    if (error.value) {
+      if (error.value.statusMessage === "Validation errors") {
+        console.error(error.value.statusMessage, error.value.data?.data.validationErrors)
+      } else {
+        console.error(error.value)
+      }
+    }
+  },
+  { immediate: true }
+)
 
-// const { data: events, status } = await useFetch("/api/players/titles-and-finals", {
-//   query: { id, selection },
-//   default: () => []
-// })
+// Card
+const selection = ref<string[]>([])
+const selectionOptions = ["Titles", "Finals"]
 
-// const handleSelect = (e: Event, row: TableRow<TitlesAndFinalsType>) => {
-//   router.push({
-//     name: "edition",
-//     params: {
-//       id: row.original.tournament.id,
-//       name: kebabCase(row.original.tournament.name),
-//       edId: row.original.id,
-//       year: row.original.year
-//     }
-//   })
-// }
+const types = ref<MatchTypeEnumType[]>([])
+
+const levels = ref<LevelEnumType[]>([])
+
+const surfaces = ref<SurfaceEnumType[]>([])
+
+const years = ref<number[]>([])
+const yearOptions = computed(() => useSorted(useArrayUnique(events.value.map(e => e.year))).value)
+
+const categories = ref<string[]>([])
+const categoryOptions = computed(() => useSorted(useArrayUnique(events.value.map(e => e.category))).value)
+
+const tournaments = ref<OptionType[]>([])
+const tournamentOptions = computed(
+  () =>
+    useSorted(
+      useArrayUnique(
+        events.value.map(e => ({ value: e.tournament.id, label: e.tournament.name })),
+        (a, b) => a.value === b.value
+      ),
+      (a, b) => a.label.toLowerCase().localeCompare(b.label.toLowerCase())
+    ).value
+)
+
+const resetFilters = () => {
+  selection.value = []
+  types.value = []
+  levels.value = []
+  surfaces.value = []
+  years.value = []
+  categories.value = []
+  tournaments.value = []
+}
+
+const filteredEvents = computed(() =>
+  events.value.filter(event => {
+    const selectionMatch =
+      selection.value.length === 0 || (selection.value.includes("Titles") && event.title) || (selection.value.includes("Finals") && !event.title)
+    const typeMatch = types.value.length === 0 || types.value.includes(event.type)
+    const levelMatch = levels.value.length === 0 || levels.value.includes(event.level)
+    const surfaceMatch = surfaces.value.length === 0 || surfaces.value.includes(event.surface.surface)
+    const yearMatch = years.value.length === 0 || years.value.includes(event.year)
+    const categoryMatch = categories.value.length === 0 || (event.category && categories.value.includes(event.category))
+    const tournamentMatch = tournaments.value.length === 0 || tournaments.value.some(t => t.value === event.tournament.id)
+
+    return selectionMatch && typeMatch && levelMatch && surfaceMatch && yearMatch && categoryMatch && tournamentMatch
+  })
+)
+
+const tableRef = useTemplateRef("tableRef")
 </script>
 
 <template>
-  <u-container class="max-w-7xl">
-    <!-- <u-page>
-      <players-wrapper>
-        <template #header-links>
-          <view-switcher v-model="viewMode" />
+  <u-container>
+    <u-page>
+      <template #left>
+        <u-page-aside>
+          <template v-if="tableRef?.table">
+            <table-client-clear-filters :table="tableRef.table" />
 
-          <u-tooltip :text="selection ? 'Titles' : 'Finals'">
-            <div>
-              <u-switch
-                v-model="selection"
-                :checked-icon="ICONS.one"
-                :unchecked-icon="ICONS.noTournament"
-              />
-            </div>
-          </u-tooltip>
+            <table-client-clear-sorting :table="tableRef.table" />
+
+            <table-client-clear-grouping :table="tableRef.table" />
+          </template>
+
+          <filters
+            v-else
+            :reset-filters
+          >
+            <u-checkbox-group
+              v-model="selection"
+              legend="Titles / Finals"
+              :items="selectionOptions"
+            />
+
+            <u-checkbox-group
+              v-model="types"
+              legend="S/D"
+              :items="Object.values(MatchTypeEnum.enum)"
+            />
+
+            <u-checkbox-group
+              v-model="levels"
+              legend="Levels"
+              :items="Object.values(LevelEnum.enum)"
+            />
+
+            <u-checkbox-group
+              v-model="surfaces"
+              legend="Surfaces"
+              :items="Object.values(SurfaceEnum.enum)"
+            />
+
+            <filters-years
+              v-model="years"
+              :year-options
+              multiple
+            />
+
+            <filters-categories
+              v-model="categories"
+              :items="categoryOptions as string[]"
+            />
+
+            <filters-tournaments
+              v-model="tournaments"
+              :items="tournamentOptions"
+            />
+          </filters>
+        </u-page-aside>
+      </template>
+
+      <player-wrapper>
+        <template #header-links>
+          <view-switcher />
+
+          <u-slideover
+            class="lg:hidden"
+            title="Filters"
+          >
+            <u-button :icon="ICONS.filter" />
+
+            <template #body>
+              <template v-if="tableRef?.table">
+                <table-client-clear-filters :table="tableRef.table" />
+
+                <table-client-clear-sorting :table="tableRef.table" />
+
+                <table-client-clear-grouping :table="tableRef.table" />
+              </template>
+
+              <filters
+                v-else
+                :reset-filters
+              >
+                <u-checkbox-group
+                  v-model="selection"
+                  legend="Titles / Finals"
+                  :items="selectionOptions"
+                />
+
+                <u-checkbox-group
+                  v-model="types"
+                  legend="S/D"
+                  :items="Object.values(MatchTypeEnum.enum)"
+                />
+
+                <u-checkbox-group
+                  v-model="levels"
+                  legend="Levels"
+                  :items="Object.values(LevelEnum.enum)"
+                />
+
+                <u-checkbox-group
+                  v-model="surfaces"
+                  legend="Surfaces"
+                  :items="Object.values(SurfaceEnum.enum)"
+                />
+
+                <filters-years
+                  v-model="years"
+                  :year-options
+                  multiple
+                />
+
+                <form-input-menu
+                  v-model="categories"
+                  placeholder="Categories"
+                  :items="categories"
+                  multiple
+                  :icon="ICONS.category"
+                />
+
+                <form-input-menu
+                  v-model="tournaments"
+                  placeholder="Tournaments"
+                  :items="tournamentOptions"
+                  multiple
+                  :icon="ICONS.trophy"
+                />
+              </filters>
+            </template>
+          </u-slideover>
         </template>
-      </players-wrapper>
+      </player-wrapper>
 
       <u-page-body>
-        <define-empty-template>
-          <empty
-            :icon="ICONS.noTournament"
-            :message="`${playerName} has not ${selection ? 'won any titles' : 'played any finals'}.`"
-            class="mx-2"
+        <template v-if="viewModeStore.isCardView">
+          <player-titles-and-finals-timeline
+            v-if="filteredEvents.length"
+            :events="filteredEvents"
           />
-        </define-empty-template>
-        <template v-if="viewMode">
-          <div
-            v-if="events.length"
-            class="scrollbar-thin scrollbar-thumb-primary-600 scrollbar-track-transparent max-h-200 overflow-y-auto flex justify-center"
-          >
-            <u-timeline
-              :items="events"
-              :default-value="events.length - 1"
-              :ui="{
-                item: 'even:flex-row-reverse even:-translate-x-[calc(100%-2rem)] even:text-right'
-              }"
-            >
-              <template #title="{ item }">
-                <u-link
-                  :to="{ name: 'tournament', params: { id: item.tournament.id, name: kebabCase(item.tournament.name) } }"
-                  class="hover-link default-link"
-                >
-                  {{ item.tournament.name }}
-                </u-link>
-              </template>
-              <template #date="{ item }">
-                <u-link
-                  :to="{
-                    name: 'edition',
-                    params: { id: item.tournament.id, name: kebabCase(item.tournament.name), edId: item.id, year: item.year }
-                  }"
-                  class="hover-link default-link"
-                >
-                  {{ useDateFormat(item.date, "DD MMMM YYYY") }}
-                </u-link>
-              </template>
-              <template #description="{ item }">
-                <div class="flex flex-col gap-1">
-                  <div class="inline-flex items-center gap-1">
-                    <u-badge
-                      :label="item.type"
-                      :color="item.type"
-                      class="justify-center w-full"
-                    />
-                    <u-badge
-                      :label="item.level"
-                      :color="item.level"
-                      class="justify-center w-full"
-                    />
-                  </div>
-                  <div class="inline-flex justify-between items-center text-sm gap-1 w-full">
-                    <span v-if="item.category">
-                      {{ item.category }}
-                    </span>
-                    <u-separator
-                      v-if="item.category"
-                      class="h-4"
-                      orientation="vertical"
-                    />
-                    <span>
-                      {{ item.surface.id }}
-                    </span>
-                  </div>
-                </div>
-              </template>
-            </u-timeline>
-          </div>
-          <reuse-empty-template v-else />
+
+          <empty
+            v-else
+            :icon="ICONS.trophyOff"
+            :message="`${playerStore.fullName} has not ${selection.length === 1 && selection.includes('Titles') ? 'won' : 'played'} any ${
+              selection.length === 1 && selection.includes('Titles') ? 'titles' : 'finals'
+            }${
+              selection.length || types.length || levels.length || surfaces.length || years.length || categories.length || tournaments.length ?
+                ' for the selected filters'
+              : ''
+            }.`"
+          />
         </template>
-        <u-table
+
+        <player-titles-and-finals-table
           v-else
-          ref="table"
-          :data="events"
-          :columns="titlesAndFinalsColumns"
-          :loading="status === 'pending'"
-          :faceted-options="{
-            getFacetedRowModel: getFacetedRowModel(),
-            getFacetedUniqueValues: getFacetedUniqueValues()
-          }"
-          sticky
-          @select="handleSelect"
-          :ui="{ root: 'w-fit min-w-1/3 mx-auto', tbody: '[&>tr]:cursor-pointer', td: 'empty:p-0' }"
-        >
-          <template #loading>
-            <loading-icon />
-          </template>
-          <template #empty>
-            <reuse-empty-template />
-          </template>
-        </u-table>
+          ref="tableRef"
+          :events
+          :status
+        />
       </u-page-body>
-    </u-page> -->
+    </u-page>
   </u-container>
 </template>

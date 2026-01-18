@@ -188,7 +188,7 @@ def get_atp_player(player_id):
         with driver.session(database="neo4j") as session:
             records = session.execute_write(addPlayers)
 
-    return jsonify({"ok": True, "player_id": player_id})
+    return jsonify({"success": True, "player_id": player_id})
 
 # Endpoint to scrape ATP draw data
 @app.route("/atp_draw", methods=['POST'])
@@ -496,7 +496,7 @@ def get_atp_draw():
         with driver.session(database="neo4j") as session:
             records = session.execute_write(add_events)
 
-    return jsonify({"ok": True, "tid": tid, "year": year})
+    return jsonify({"success": True, "tid": tid, "year": year})
 
 # Endpoint to scrape ATP results data
 @app.route("/atp_results", methods=['POST'])
@@ -683,7 +683,7 @@ def get_atp_results():
         with driver.session(database="neo4j") as session:
             records = session.execute_write(add_results)
 
-    return jsonify({"ok": True, "links": links})
+    return jsonify({"success": True, "links": links})
 
 # Endpoint to scrape ATP match stats
 @app.route("/atp_stats", methods=['POST'])
@@ -796,7 +796,7 @@ def get_atp_stats():
         with driver.session(database="neo4j") as session:
             records = session.execute_write(add_stats)
 
-    return jsonify({"ok": True, "eid": eid, "matches": len(matches)})
+    return jsonify({"success": True, "eid": eid, "matches": len(matches)})
 
 # Endpoint to scrape ATP results data
 @app.route("/atp_activity", methods=['POST'])
@@ -821,6 +821,7 @@ def get_atp_activity():
         }
 
         WebDriverWait(driver, 10).until(EC.presence_of_all_elements_located((By.CLASS_NAME, 'atp_player-activity')))
+        time.sleep(2)
 
         layout = driver.find_element(By.CLASS_NAME, 'atp_player-activity').get_attribute('innerHTML')
         soup = BeautifulSoup(layout, 'html.parser')
@@ -891,7 +892,7 @@ def get_atp_activity():
         with driver.session(database="neo4j") as session:
             records = session.execute_write(add_activity)
 
-    return jsonify({"ok": True})
+    return jsonify({"success": True})
 
 if __name__ == "__main__":
     app.run(debug=True)

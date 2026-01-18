@@ -1,230 +1,260 @@
 <script setup lang="ts">
-import { CalendarDate } from "@internationalized/date"
-import type { TableRow } from "@nuxt/ui"
-
 definePageMeta({ name: "activity" })
+
 const {
-  params: { id, name }
+  params: { id }
 } = useRoute("activity")
-const router = useRouter()
 
-const [defineEmptyTemplate, reuseEmptyTemplate] = createReusableTemplate()
+const viewModeStore = useViewModeStore()
+const playerStore = usePlayerStore()
 
-const viewMode = ref(true)
-const playerName = useState("playerName")
-
-const { data: playerOverview } = await useFetch("/api/players/overview", {
-  query: { id }
+const years = useRouteQuery("year", null, {
+  transform: toNumberArray
 })
-
-const year = useRouteQuery("year", playerOverview.value?.years?.slice(-1)[0] || new Date().getFullYear(), { transform: Number })
-const tournaments = ref([])
-const categories = ref([])
-const levels = ref([])
-const matchType = ref("Singles")
-const dateRange = ref<{ start: CalendarDate | undefined; end: CalendarDate | undefined }>({
-  start: undefined,
-  end: undefined
+const tournaments = useRouteQuery("tournaments", null, {
+  transform: {
+    get: (val: string | null): OptionType[] => parseOption(val),
+    set: (val: OptionType[]): string | null => serialiseOption(val)
+  }
 })
-const surfaces = ref([])
+const categories = useRouteQuery("categories", null, { transform: val => toArray(val) })
+const levels = useRouteQuery("levels", null, { transform: val => toArray(val) })
+const matchType = useRouteQuery<"Singles" | "Doubles">("matchType", "Singles")
+const surfaces = useRouteQuery("surfaces", null, { transform: val => toArray(val) })
+
+onMounted(() => {
+  if (years.value.length === 0) {
+    set(years, [playerStore.activeYears.slice(-1)[0] || new Date().getFullYear()])
+  }
+})
 
 const resetFilters = () => {
-  tournaments.value = []
-  categories.value = []
-  levels.value = []
-  matchType.value = "Singles"
-  dateRange.value = { start: undefined, end: undefined }
-  surfaces.value = []
-  year.value = playerOverview.value?.years?.slice(-1)[0] || new Date().getFullYear()
+  set(years, [playerStore.activeYears.slice(-1)[0] || new Date().getFullYear()])
+  set(tournaments, null)
+  set(categories, null)
+  set(levels, null)
+  set(matchType, "Singles")
+  set(surfaces, null)
 }
 
-// const { data, status } = await useFetch("/api/players/activity", {
-//   method: "POST",
-//   body: {
-//     id,
-//     year,
-//     tournaments,
-//     categories,
-//     levels,
-//     matchType,
-//     dateRange,
-//     surfaces
-//   },
-//   default: () => ({
-//     stats: { singles_wins: 0, singles_losses: 0, doubles_wins: 0, doubles_losses: 0, singles_titles: 0, doubles_titles: 0 },
-//     events: []
-//   })
-// })
+// Get unique options
+const { data } = await useFetch("/api/player/activity/options", {
+  query: { id },
+  default: () => ({
+    tournaments: [] as OptionType[],
+    categories: [] as string[],
+    levels: [] as string[],
+    matchTypes: [] as string[],
+    surfaces: [] as string[]
+  })
+})
 
-// const consolidatedEvents = computed(() => {
-//   const uniqueEvents = useArrayUnique(data.value.events.map(e => e.id)).value
+watch(
+  () => data.value.matchTypes,
+  () => {
+    if (data.value.matchTypes.length === 1) {
+      set(matchType, data.value.matchTypes[0])
+    }
+  },
+  { immediate: true }
+)
 
-//   return uniqueEvents.map(eventId => {
-//     const matchingEvents = data.value.events.filter(e => e.id === eventId)
+const {
+  data: activityData,
+  status,
+  error
+} = await useFetch("/api/player/activity", {
+  method: "POST",
+  body: {
+    id,
+    years,
+    tournaments,
+    categories,
+    levels,
+    matchType,
+    surfaces
+  },
+  default: () => ({
+    stats: { singles_wins: 0, singles_losses: 0, doubles_wins: 0, doubles_losses: 0, singles_titles: 0, doubles_titles: 0 },
+    events: []
+  })
+})
 
-//     return {
-//       ...matchingEvents[0],
-//       match: matchingEvents.flatMap(e => e.match)
-//     } as ConsolidatedActivityType
-//   })
-// })
+watch(
+  error,
+  () => {
+    if (error.value) {
+      if (error.value.statusMessage === "Validation errors") {
+        console.error(error.value.statusMessage, error.value.data?.data.validationErrors)
+      } else {
+        console.error(error.value)
+      }
+    }
+  },
+  { immediate: true }
+)
 
-// const columnVisibility = computed(() => {
-//   if (matchType.value === "Singles") {
-//     return {
-//       partner: false
-//     }
-//   } else {
-//     return {
-//       partner: true
-//     }
-//   }
-// })
+const consolidatedEvents = computed(() => {
+  const uniqueEvents = useArrayUnique(activityData.value.events.map(e => e.id)).value
 
-// const handleSelect = (e: Event, row: TableRow<ActivityType>) => {
-//   if (row.original.match.stats) {
-//     router.push({
-//       name: "match",
-//       params: {
-//         id: row.original.tournament.id,
-//         name: kebabCase(row.original.tournament.name),
-//         year: row.original.year,
-//         edId: row.original.id
-//       },
-//       query: {
-//         tour: row.original.tour,
-//         type: row.original.type,
-//         draw: row.original.match.draw,
-//         match_no: row.original.match.match_no
-//       }
-//     })
-//   }
-// }
+  return uniqueEvents.map(eventId => {
+    const matchingEvents = activityData.value.events.filter(e => e.id === eventId)
+
+    return {
+      ...matchingEvents[0],
+      match: matchingEvents.flatMap(e => e.match)
+    } as ConsolidatedActivityType
+  })
+})
+
+// Table options
+const tableRef = useTemplateRef("tableRef")
+const resetSorting = () => tableRef.value?.table?.tableApi.resetSorting()
+const resetGrouping = () => tableRef.value?.table?.tableApi.setGrouping([])
+
+watch(
+  () => matchType.value,
+  () => {
+    if (tableRef.value?.table && matchType.value === "Singles" && tableRef.value?.table?.tableApi.getState().grouping.includes("partner_last_name")) {
+      resetGrouping()
+    }
+  },
+  { immediate: true }
+)
 </script>
 
 <template>
   <u-container>
-    <!-- <u-page>
+    <u-page>
       <template #left>
         <u-page-aside>
-          <filters
-            :filters="['tournaments', 'levels', 'categories', 'surfaces', 'dateRange', 'matchType']"
-            v-model:tournaments="tournaments"
-            v-model:levels="levels"
-            v-model:categories="categories"
-            v-model:surfaces="surfaces"
-            v-model:dateRange="dateRange"
-            v-model:matchType="matchType"
-            :reset-filters
+          <u-button
+            label="Reset Filters"
+            :icon="ICONS.filterOff"
+            @click="resetFilters"
+            block
           />
 
-          <form-input-menu
-            v-model="year"
-            placeholder="Filter by year"
-            :items="playerOverview?.years || []"
-            :icon="ICONS.event"
+          <u-button
+            v-if="!viewModeStore.isCardView"
+            label="Reset Sorting"
+            :icon="ICONS.sort"
+            @click="resetSorting"
+            block
           />
+
+          <u-button
+            v-if="!viewModeStore.isCardView"
+            label="Reset Grouping"
+            :icon="ICONS.groupOff"
+            @click="resetGrouping"
+            block
+          />
+
+          <u-separator />
+
+          <u-form-field label="Filter by">
+            <div class="*:my-2">
+              <filters-years
+                v-if="playerStore.activeYears.length > 1"
+                v-model="years"
+                :year-options="playerStore.activeYears"
+                multiple
+              />
+
+              <filters-levels
+                v-if="data.levels.length > 1"
+                v-model="levels as LevelEnumType[]"
+                :items="data.levels as LevelEnumType[]"
+              />
+
+              <filters-tournaments
+                v-if="data.tournaments.length > 1"
+                v-model="tournaments"
+                :items="data.tournaments"
+              />
+
+              <filters-categories
+                v-if="data.categories.length > 1"
+                v-model="categories as string[]"
+                :items="data.categories"
+              />
+
+              <filters-match-type
+                v-if="data.matchTypes.length > 1"
+                v-model="matchType as MatchTypeEnumType"
+              />
+
+              <filters-surfaces
+                v-if="data.surfaces.length > 1"
+                v-model="surfaces as SurfaceEnumType[]"
+                :items="data.surfaces as SurfaceEnumType[]"
+              />
+            </div>
+          </u-form-field>
         </u-page-aside>
       </template>
 
-      <players-wrapper>
+      <player-wrapper>
         <template #header-links>
-          <view-switcher v-model="viewMode" />-->
-
-    <!--Filters for smaller screens-->
-    <!-- <u-slideover
-            title="Filters"
-            class="ml-auto lg:hidden"
-          >
-            <u-button :icon="ICONS.filter" />
-
-            <template #body>
-              <filters
-                :filters="['tournaments', 'levels', 'categories', 'surfaces', 'dateRange', 'matchType']"
-                v-model:tournaments="tournaments"
-                v-model:levels="levels"
-                v-model:categories="categories"
-                v-model:surfaces="surfaces"
-                v-model:dateRange="dateRange"
-                v-model:matchType="matchType"
-                :reset-filters
-              />
-
-              <form-input-menu
-                v-model="year"
-                placeholder="Filter by year"
-                :items="playerOverview?.years || []"
-                :icon="ICONS.event"
-              />
-            </template>
-          </u-slideover>
+          <view-switcher />
         </template>
-      </players-wrapper>
+      </player-wrapper>
 
       <u-page-body>
-        <define-empty-template>
-          <empty :message="`${playerName} played no ${matchType} matches in this year`" />
-        </define-empty-template>
-
         <u-container class="my-5 flex items-center justify-stretch gap-5">
-          <u-container class="ring-2 ring-Singles p-5 rounded-lg text-center">
-            <div class="font-semibold text-muted">Singles</div>
+          <u-container
+            v-for="matchType in ['Singles', 'Doubles']"
+            :key="matchType"
+            class="ring-2 p-5 rounded-lg text-center"
+            :class="matchType === 'Singles' ? 'ring-Singles' : 'ring-Doubles'"
+          >
+            <div class="font-semibold text-muted">{{ matchType }}</div>
             <div class="text-sm">
-              <div> {{ data.stats.singles_wins }}-{{ data.stats.singles_losses }} </div>
-              <div> Titles: {{ data.stats.singles_titles }} </div>
-            </div>
-          </u-container>
-          <u-container class="ring-2 ring-Doubles p-5 rounded-lg text-center">
-            <div class="font-semibold text-muted">Doubles</div>
-            <div class="text-sm">
-              <div> {{ data.stats.doubles_wins }}-{{ data.stats.doubles_losses }} </div>
-              <div> Titles: {{ data.stats.doubles_titles }} </div>
+              <div>
+                {{ activityData.stats[`${matchType.toLowerCase()}_wins` as keyof typeof activityData.stats] }}-{{
+                  activityData.stats[`${matchType.toLowerCase()}_losses` as keyof typeof activityData.stats]
+                }}
+              </div>
+              <div>Titles {{ activityData.stats[`${matchType.toLowerCase()}_titles` as keyof typeof activityData.stats] }}</div>
             </div>
           </u-container>
         </u-container>
 
-        <template v-if="viewMode">
+        <template v-if="viewModeStore.isCardView">
           <u-page-list
-            v-if="data.events.length || status === 'pending'"
-            class="*:my-3"
+            v-if="activityData.events.length || status === 'pending'"
+            class="*:my-3 scrollbar p-5"
           >
-            <players-activity-card
-              v-if="data.events.length"
+            <player-activity-card
+              v-if="consolidatedEvents.length"
               v-for="event in consolidatedEvents"
               :key="event.id"
               :event
             />
-            <loading-base
+
+            <player-activity-loading
               v-else
               v-for="_ in 6"
               :key="_"
             />
           </u-page-list>
-          <reuse-empty-template v-else />
+
+          <empty
+            v-else
+            :message="`${playerStore.fullName} has not played any matches for the selected filters.`"
+            :icon="ICONS.calendarOff"
+          />
         </template>
-        <u-table
+
+        <player-activity-table
           v-else
-          :data="data.events"
-          :columns="activityColumns(id, name)"
-          :loading="status === 'pending'"
-          sticky
-          class="max-h-150"
-          v-model:column-visibility="columnVisibility"
-          @select="handleSelect"
-          :meta="{
-              class: {
-                  tr: (row: TableRow<ActivityType>) => `${row.original.match.draw === 'Main' ? '' : 'bg-elevated'} ${row.original.match.stats ? 'cursor-pointer' : ''}`
-              }
-            }"
-        >
-          <template #loading>
-            <loading-icon />
-          </template>
-          <template #empty>
-            <reuse-empty-template />
-          </template>
-        </u-table>
+          ref="tableRef"
+          :events="activityData.events"
+          :status
+          v-model="matchType"
+        />
       </u-page-body>
-    </u-page> -->
+    </u-page>
   </u-container>
 </template>

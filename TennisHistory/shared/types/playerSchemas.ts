@@ -103,6 +103,15 @@ export const playerH2HSchema = object({
 
 export type PlayerH2HType = z.infer<typeof playerH2HSchema>
 
+export const activityStatsSchema = object({
+  singles_wins: intToNumberSchema,
+  doubles_wins: intToNumberSchema,
+  singles_losses: intToNumberSchema,
+  doubles_losses: intToNumberSchema,
+  singles_titles: intToNumberSchema,
+  doubles_titles: intToNumberSchema
+})
+
 export const activityMatchSchema = matchSchema
   .pick({
     id: true,

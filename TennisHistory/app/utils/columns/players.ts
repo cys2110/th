@@ -1272,7 +1272,7 @@ export const titlesAndFinalsColumns: TableColumn<TitlesAndFinalsType>[] = [
       ]),
     cell: ({ row, table }) => {
       const {
-        tournament: { id, name }
+        tournament: { name }
       } = row.original
       if (row.getIsGrouped()) {
         if (row.groupingColumnId === "tournament_name") {
@@ -1283,7 +1283,7 @@ export const titlesAndFinalsColumns: TableColumn<TitlesAndFinalsType>[] = [
               icon: appConfig.ui.icons.chevronDoubleRight,
               onClick: () => row.toggleExpanded()
             }),
-            h(ULink, { class: "hover-link default-link", to: { name: "tournament", params: { id, name: kebabCase(name) } } }, () => name)
+            name
           ])
         } else {
           const currentGroupingIndex = table.getState().grouping.indexOf(row.groupingColumnId!)
@@ -1297,7 +1297,7 @@ export const titlesAndFinalsColumns: TableColumn<TitlesAndFinalsType>[] = [
           }
         }
       } else if (!table.getState().grouping.includes("tournament_name")) {
-        return h(ULink, { class: "hover-link default-link", to: { name: "tournament", params: { id, name: kebabCase(name) } } }, () => name)
+        return name
       }
     }
   },

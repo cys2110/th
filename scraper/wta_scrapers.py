@@ -116,7 +116,7 @@ def get_wta_player(player_id):
             MATCH (c:Country {{name: $country}})
             MATCH (p:Player:WTA {{id: $player.id}})
             MERGE (p)-[:REPRESENTS]->(c)
-            SET p.first_name = $player.first_name, p.last_name = $player.last_name, p.ch_singles = $player.ch_singles, p.ch_doubles = $player.ch_doubles, p.current_singles = $player.current_singles, p.current_doubles = $player.current_doubles, p.pm = $player.pm, p.wta_link = 'https://www.wtatennis.com/players/' || p.id || '/' || toLower($player.first_name) || '-' || toLower($player.last_name), p.singles_ch_date = date($player.singles_ch_date), p.doubles_ch_date = date($player.doubles_ch_date), p.updated_at = date()
+            SET p.first_name = $player.first_name, p.last_name = $player.last_name, p.ch_singles = $player.ch_singles, p.ch_doubles = $player.ch_doubles, p.current_singles = $player.current_singles, p.current_doubles = $player.current_doubles, p.pm = $player.pm, p.site_link = 'https://www.wtatennis.com/players/' || p.id || '/' || toLower($player.first_name) || '-' || toLower($player.last_name), p.singles_ch_date = date($player.singles_ch_date), p.doubles_ch_date = date($player.doubles_ch_date), p.updated_at = date()
         """
 
         if player.get('dob') is not None:
@@ -140,7 +140,7 @@ def get_wta_player(player_id):
         with driver.session(database="neo4j") as session:
             records = session.execute_write(addResults)
 
-    return jsonify({"ok": True, "player_id": player_id})
+    return jsonify({"success": True, "player_id": player_id})
 
 @app.route('/wta_draw', methods=['POST'])
 def get_draw():
@@ -352,7 +352,7 @@ def get_draw():
         with driver.session(database="neo4j") as session:
             records = session.execute_write(add_events)
 
-    return jsonify({"ok": True, 'tid': tid, 'year': year})
+    return jsonify({"success": True, 'tid': tid, 'year': year})
 
 @app.route('/wta_stats', methods=['POST'])
 def get_wta_stats():
@@ -492,7 +492,7 @@ def get_wta_stats():
         with driver.session(database="neo4j") as session:
             records = session.execute_write(add_stats)
 
-    return jsonify({"ok": True, 'wid': wid, 'year': year})
+    return jsonify({"success": True, 'wid': wid, 'year': year})
 
 if __name__ == '__main__':
     app.run(debug=True)

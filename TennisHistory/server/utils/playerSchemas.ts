@@ -42,7 +42,7 @@ export const playerFormSchema = object({
   country: object({
     name: optionSchema,
     start_date: dateToNeoDateSchema.optional()
-  }),
+  }).optional(),
   former_countries: array(
     object({
       name: optionSchema,
