@@ -3,20 +3,37 @@ export default defineNuxtConfig({
   compatibilityDate: "2025-07-15",
   devtools: { enabled: true },
 
-  modules: ["@nuxt/eslint", "@nuxt/image", "@nuxt/test-utils", "@pinia/nuxt", "@vueuse/nuxt", "nuxt-echarts", "nuxt-neo4j", "@nuxt/ui"],
+  modules: [
+    "@nuxt/eslint",
+    "@nuxt/image",
+    "@nuxt/test-utils",
+    "@pinia/nuxt",
+    "@vueuse/nuxt",
+    "nuxt-echarts",
+    "nuxt-neo4j",
+    "@nuxtjs/leaflet",
+    "@nuxt/ui"
+  ],
+
   // Set page transitions
   app: { pageTransition: { name: "page", mode: "out-in" } },
+
   // Set scroll behaviour
   router: { options: { scrollBehaviorType: "smooth" } },
+
   // CSS path
   css: ["~/assets/css/main.css"],
+
   // Turn on typed router
   experimental: { typedPages: true },
+
+  // Expose whether in dev mode
   runtimeConfig: {
     public: {
       devMode: process.env.NODE_ENV === "development" || false
     }
   },
+
   // Imports not required
   imports: {
     presets: [
@@ -61,6 +78,7 @@ export default defineNuxtConfig({
       }
     ]
   },
+
   // neo4j configuration
   neo4j: {
     uri: process.env.NEO4J_URI,
@@ -70,6 +88,7 @@ export default defineNuxtConfig({
       password: process.env.NEO4J_PASSWORD || "password"
     }
   },
+
   // Echarts configuration
   echarts: {
     renderer: "canvas",
@@ -85,6 +104,7 @@ export default defineNuxtConfig({
     ],
     features: ["UniversalTransition", "LabelLayout"]
   },
+
   // Nuxt UI configuration
   ui: {
     theme: {

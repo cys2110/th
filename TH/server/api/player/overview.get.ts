@@ -4,40 +4,20 @@ export default defineEventHandler(async event => {
   try {
     const params = getQuery(event)
 
-    const query = `/* cypher */
-      MATCH (p:Player {id: $id})
-      OPTIONAL MATCH (p)-[t:REPRESENTS]->(c:Country)
-      MATCH (p)-[:ENTERED]->(:Entry)-[:SCORED]->(:Score)-[:SCORED]->(:Match)-[:PLAYED]->(:Round)-[:ROUND_OF]->(:Event)-[:EVENT_OF]->(:Edition)-[:IN_YEAR]->(y:Year)
+    const query = `/* cypher */`
 
-      WITH *
-      ORDER BY y.id
+    const { records, summary } = await useDriver().executeQuery(query, params)
 
-      WITH p, properties(c) AS country, COLLECT(DISTINCT y.id) AS years
+    if (summary.gqlStatusObjects.some(s => s.gqlStatus === "02000")) {
+      throw createError({
+        statusCode: 404
+        // statusMessage: `${params.person.first_name} ${params.person.last_name} could not be found.`
+      })
+    }
 
-      RETURN apoc.map.clean(
-          apoc.map.merge(
-            apoc.map.submap(
-              p,
-              ['id', 'first_name', 'last_name', "official_link", "site_link", "wiki_link"],
-              null,
-              false
-            ),
-            {
-              tour: [x IN labels(p) WHERE x IN ['ATP', 'WTA']][0],
-              country: country,
-              years: years
-            }
-          ),
-          [],
-          [null]
-        ) AS player
-    `
+    const results = records.map(r => r.toObject())
 
-    const { records } = await useDriver().executeQuery(query, params)
-
-    const player = records[0].get("player")
-
-    return playerOverviewSchema.parse(player)
+    return results
   } catch (error) {
     if (error instanceof ZodError) {
       throw createError({

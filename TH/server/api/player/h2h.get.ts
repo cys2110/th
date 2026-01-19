@@ -4,44 +4,18 @@ export default defineEventHandler(async event => {
   try {
     const params = getQuery(event)
 
-    const query = `/* cypher */
-      OPTIONAL MATCH (p:Player {id: $id})-[:ENTERED]->
-        (:Entry)-[:SCORED]->
-        (s:Score)-[:SCORED]->
-        (m:Singles)<-[:SCORED]-
-        (:Score)<-[:SCORED]-
-        (:Entry)<-[:ENTERED]-
-        (opponent:Player)
-      OPTIONAL MATCH (opponent)-[:REPRESENTS]->(c:Country)
+    const query = `/* cypher */`
 
-      WITH apoc.map.clean(
-        apoc.map.merge(
-          apoc.map.submap(
-            opponent,
-            ['id', 'first_name', 'last_name'],
-            null,
-            false
-          ),
-          { country: properties(c) }
-        ),
-        [],
-        [null]
-      ) AS opponent,
-      COUNT(m) AS matches,
-      COUNT(CASE WHEN s:Winner THEN s END) AS wins
-      WHERE matches > 0
-      ORDER BY matches DESC, wins DESC
-      LIMIT 10
+    const { records, summary } = await useDriver().executeQuery(query, params)
 
-      RETURN opponent, matches - wins AS losses, wins
-    `
+    if (summary.gqlStatusObjects.some(s => s.gqlStatus === "02000")) {
+      throw createError({
+        statusCode: 404
+        // statusMessage: `${params.person.first_name} ${params.person.last_name} could not be found.`
+      })
+    }
 
-    const { records } = await useDriver().executeQuery(query, params)
-
-    const results = records.map(record => {
-      const result = record.toObject()
-      return playerH2HSchema.parse(result)
-    })
+    const results = records.map(r => r.toObject())
 
     return results
   } catch (error) {

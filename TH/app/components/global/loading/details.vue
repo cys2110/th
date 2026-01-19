@@ -1,9 +1,5 @@
-<template>
-  <details-grid>
-    <div>
-      <u-skeleton class="h-5 w-1/2" />
+<script setup lang="ts"></script>
 
-      <u-skeleton class="h-3 mt-3 w-3/4" />
-    </div>
-  </details-grid>
+<template>
+  <div> Component: global/loading/details </div>
 </template>

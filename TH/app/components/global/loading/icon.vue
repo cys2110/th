@@ -1,12 +1,5 @@
-<script setup lang="ts">
-const {
-  ui: { icons }
-} = useAppConfig()
-</script>
+<script setup lang="ts"></script>
 
 <template>
-  <u-icon
-    :name="icons.loading"
-    class="size-8"
-  />
+  <div> Component: global/loading/icon </div>
 </template>

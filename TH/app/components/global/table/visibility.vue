@@ -1,37 +1,5 @@
-<script setup lang="ts">
-import type { Table } from "@tanstack/vue-table"
-
-const props = defineProps<{
-  table: { tableApi: Table<any> } | null
-}>()
-
-const columns = computed(() =>
-  props.table?.tableApi
-    ?.getAllFlatColumns()
-    .filter(column => column.getCanHide())
-    .map(column => ({
-      label: startCase(column.id),
-      type: "checkbox" as const,
-      checked: column.getIsVisible(),
-      onUpdateChecked(checked: boolean) {
-        props.table?.tableApi?.getColumn(column.id)?.toggleVisibility(!!checked)
-      },
-      onSelect(e?: Event) {
-        e?.preventDefault()
-      }
-    }))
-)
-</script>
+<script setup lang="ts"></script>
 
 <template>
-  <u-dropdown-menu
-    :items="columns"
-    :content="{ align: 'end' }"
-  >
-    <u-button
-      label="Hide Columns"
-      :icon="ICONS.columnOff"
-      block
-    />
-  </u-dropdown-menu>
+  <div> Component: global/table/visibility </div>
 </template>

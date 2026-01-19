@@ -1,51 +1,5 @@
-<script setup lang="ts">
-const props = defineProps<{
-  tournament: TournamentType
-}>()
-
-const {
-  ui: { colors }
-} = useAppConfig()
-
-const getCardColour = () => {
-  if (props.tournament.tours?.length === 1) {
-    return props.tournament.tours[0] as keyof typeof colors
-  }
-  return "primary"
-}
-</script>
+<script setup lang="ts"></script>
 
 <template>
-  <u-page-card
-    :title="tournament.name"
-    :to="{
-      name: 'tournament',
-      params: {
-        id: tournament.id,
-        name: kebabCase(tournament.name)
-      }
-    }"
-    highlight
-    :highlight-color="getCardColour()"
-    :ui="{
-      root: 'h-full',
-      body: 'w-full',
-      leading: 'space-x-1'
-    }"
-  >
-    <template #leading>
-      <u-badge
-        v-for="tour in tournament.tours"
-        :key="tour"
-        :color="<keyof typeof colors>tour"
-        :label="tour"
-      />
-    </template>
-
-    <template #description>
-      <span v-if="tournament.established">{{ tournament.established }}</span>
-      <span v-if="tournament.established && !tournament.abolished"> - present</span>
-      <span v-if="tournament.abolished && tournament.abolished !== tournament.established"> - {{ tournament.abolished }}</span>
-    </template>
-  </u-page-card>
+  <div> Component: tournaments/card </div>
 </template>
