@@ -1,3 +1,5 @@
+const cleanLink = (link: string) => link.replaceAll(/^[\s"'“”‘’\[\]]+|[\s"'“”‘’\[\]]+$/g, "").replace("https://www.atptour.com", "")
+
 export const dateTimeFormat = new Intl.DateTimeFormat("en-GB", {
   day: "2-digit",
   month: "long",

@@ -56,7 +56,12 @@ export default defineEventHandler(async event => {
       throw createError({
         statusCode: 400,
         statusMessage: "Validation errors",
-        data: { validationErrors: error.issues.map(i => `${i.path.join(".")}: ${i.message}. Received ${i.input}.`) }
+        data: error.issues.map(i => ({
+          [i.path.join(".")]: {
+            message: i.message,
+            received: i.input
+          }
+        }))
       })
     }
 

@@ -65,7 +65,7 @@ watch(
   () => {
     if (error.value) {
       if (error.value.statusMessage === "Validation errors") {
-        console.error(error.value.statusMessage, error.value.data?.data.validationErrors)
+        console.error(error.value.statusMessage, error.value.data?.data)
       } else {
         console.error(error.value)
       }

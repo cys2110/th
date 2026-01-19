@@ -1,4 +1,4 @@
-import { object, string, z } from "zod"
+import { array, boolean, literal, object, string, z } from "zod"
 import { Integer, Date as NeoDate } from "neo4j-driver"
 
 export const intToNumberSchema = z
@@ -6,6 +6,20 @@ export const intToNumberSchema = z
     error: issue => `Invalid neo4j Integer object at ${issue.path?.join(",")}: ${issue.input}.`
   })
   .transform(val => val.toInt())
+
+export const sortFieldSchema = object({
+  field: string("Sort field is required."),
+  direction: literal(["ASC", "DESC"], { error: "Sort direction must be either 'ASC' or 'DESC'" })
+})
+
+export type SortFieldType = z.infer<typeof sortFieldSchema>
+
+export const groupedResultsSchema = object({
+  id: string("Group ID is required."),
+  __group: boolean("Group flag is required."),
+  count: intToNumberSchema,
+  has_children: boolean("Has children flag is required.")
+})
 
 export const countrySchema = object(
   {
@@ -44,3 +58,14 @@ export const personSchema = object(
 )
 
 export type PersonType = z.infer<typeof personSchema>
+
+export const coachSchema = personSchema
+  .omit({
+    country: true
+  })
+  .extend({
+    labels: array(string()),
+    years: string().optional()
+  })
+
+export type CoachType = z.infer<typeof coachSchema>

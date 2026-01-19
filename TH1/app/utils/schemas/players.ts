@@ -1,11 +1,6 @@
 import { array, literal, number, object, string, url, z } from "zod"
 import { CalendarDate } from "@internationalized/date"
 
-export const playerCreateSchema = object({
-  id: string("Player ID is required."),
-  tour: TourKey
-})
-
 export type PlayerCreateSchema = z.infer<typeof playerCreateSchema>
 
 export const countryFormSchema = object({

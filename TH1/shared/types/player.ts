@@ -20,8 +20,6 @@ export const playerSchema = personSchema.extend({
   former_countries: array(countrySchema).default([]),
   height: intToNumberSchema.optional(),
   hof: intToNumberSchema.optional(),
-  max_year: intToNumberSchema.optional(),
-  min_year: intToNumberSchema.optional(),
   official_link: url().optional(),
   pm: intToNumberSchema.optional(),
   retired: intToNumberSchema.optional(),
@@ -35,26 +33,6 @@ export const playerSchema = personSchema.extend({
 })
 
 export type PlayerType = z.infer<typeof playerSchema>
-
-export const basePlayerSchema = playerSchema.pick({
-  id: true,
-  first_name: true,
-  last_name: true,
-  country: true,
-  coaches: true,
-  max_year: true,
-  min_year: true,
-  tour: true
-})
-
-export type BasePlayerType = z.infer<typeof basePlayerSchema>
-
-export const groupedPlayerResultsSchema = groupedResultsSchema.extend({
-  group: union([countrySchema, object({ year: intToNumberSchema })]),
-  subRows: array(basePlayerSchema)
-})
-
-export type GroupedPlayerResultsType = z.infer<typeof groupedPlayerResultsSchema>
 
 export const playerOverviewSchema = playerSchema.pick({
   id: true,

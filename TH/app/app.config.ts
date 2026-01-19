@@ -66,6 +66,15 @@ export default defineAppConfig({
     },
     button: {
       slots: { base: "cursor-pointer" },
+      compoundVariants: [
+        {
+          loading: true,
+          leading: true,
+          class: {
+            leadingIcon: "animate-none"
+          }
+        }
+      ],
       defaultVariants: { variant: "subtle", size: "xs" }
     },
     calendar: {
@@ -104,6 +113,7 @@ export default defineAppConfig({
       }
     },
     empty: { slots: { actions: "flex-nowrap" } },
+    fieldGroup: { base: "w-full" },
     footerColumns: { slots: { center: "xl:col-span-3" } },
     formField: { slots: { label: "font-semibold text-muted text-sm" } },
     header: { slots: { title: "font-cursive" } },
