@@ -5,10 +5,6 @@ const props = withDefaults(
     type: string
     icon?: string
     multiple?: boolean
-    //   id?: string
-    // tour?: TourEnumType
-    // matchType?: MatchTypeEnumType
-    // max?: number
   }>(),
   {
     multiple: false
@@ -68,7 +64,7 @@ const handleClear = () => {
           />
           <person-update
             v-else-if="['Supervisor', 'Coach', 'Umpire'].includes(type)"
-            :type="(type as 'Supervisor' | 'Coach' | 'Umpire')"
+            :type="type as 'Supervisor' | 'Coach' | 'Umpire'"
             :refresh
           />
         </dev-only>

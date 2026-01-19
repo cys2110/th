@@ -2,7 +2,7 @@
 
 <template>
   <div>
-    Component: global/search
+    Component: edition/seeds/country
   </div>
 </template>
 
