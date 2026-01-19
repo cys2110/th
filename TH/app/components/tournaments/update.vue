@@ -41,7 +41,7 @@ const onSubmit = async (event: FormSubmitEvent<TournamentFormSchema>) => {
     }
   }
 
-  if (Object.keys(dirtyFields).length) {
+  if (Object.keys(dirtyFields).length > 2) {
     await $fetch(`/api/tournaments/${props.tournament ? "update" : "create"}`, {
       method: "POST",
       body: dirtyFields

@@ -16,6 +16,7 @@ const cleanLink = (link: string) => link.replaceAll(/^[\s"'“”‘’\[\]]+|[\
     :error-pattern="field.errorPattern"
     :label="field.label"
     :required="field.required"
+    :description="field.help"
     :class="field.class"
     :ui="{ label: 'text-xs' }"
   >
@@ -26,6 +27,14 @@ const cleanLink = (link: string) => link.replaceAll(/^[\s"'“”‘’\[\]]+|[\
       v-model="modelValue[field.key]"
       :placeholder="field.placeholder ?? `Enter ${field.label.toLowerCase()}`"
       :type="field.subType"
+      :disabled="field.disabled"
+    />
+
+    <form-input-number
+      v-else-if="field.type === 'number'"
+      v-model="modelValue[field.key]"
+      :placeholder="field.placeholder ?? `Enter ${field.label.toLowerCase()}`"
+      :currency="field.currency"
       :disabled="field.disabled"
     />
 
@@ -50,6 +59,11 @@ const cleanLink = (link: string) => link.replaceAll(/^[\s"'“”‘’\[\]]+|[\
       orientation="horizontal"
       :icon="field.icon"
       loop
+    />
+
+    <form-date-picker
+      v-else-if="field.type === 'date'"
+      v-model="modelValue[field.key]"
     />
   </u-form-field>
 </template>

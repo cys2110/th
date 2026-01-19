@@ -2,6 +2,7 @@ declare global {
   interface FormFieldInterface<S> {
     label: string
     placeholder?: string
+    help?: string
     key?: keyof S
     required?: boolean
     disabled?: boolean

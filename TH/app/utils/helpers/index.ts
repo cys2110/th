@@ -1,3 +1,10 @@
+export const dateTimeFormat = new Intl.DateTimeFormat("en-GB", {
+  day: "numeric",
+  month: "long",
+  year: "numeric",
+  timeZone: "UTC"
+})
+
 export const getFlagCode = (country: CountryType) => {
   const circleFlagsMapping: Record<typeof country.id, string> = {
     URS: "soviet-union",
@@ -18,3 +25,10 @@ export const getFlagCode = (country: CountryType) => {
   }
   return `flag:${country.alpha2}-4x3`
 }
+
+export const shortDateFormat = new Intl.DateTimeFormat("en-GB", {
+  day: "numeric",
+  month: "numeric",
+  year: "2-digit",
+  timeZone: "UTC"
+})
