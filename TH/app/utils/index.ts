@@ -6,7 +6,7 @@ export * from "./columns/players/index"
 export * from "./columns/players/wl"
 export * from "./columns/players/h2h"
 export * from "./columns/players/recent-events"
-// export * from "./columns/tournaments"
+export * from "./columns/tournaments/index"
 
 // helpers
 export * from "./helpers/index"
@@ -20,7 +20,7 @@ export * from "./schemas/index"
 // export * from "./schemas/events"
 // export * from "./schemas/matches"
 export * from "./schemas/players"
-// export * from "./schemas/tournaments"
+export * from "./schemas/tournaments"
 
 // variables
 export * from "./variables/index"

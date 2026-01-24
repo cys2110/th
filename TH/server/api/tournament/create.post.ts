@@ -2,16 +2,35 @@ import { ZodError } from "zod"
 
 export default defineEventHandler(async event => {
   try {
-    const params = await readValidatedBody(event, body => body)
+    const params = await readValidatedBody(event, body => tournamentFormSchema.parse(body))
 
-    const query = `/* cypher */`
+    let query = `/* cypher */
+      MERGE (t:Tournament:$($tours) { id: $id, updated_at: date() })
+      SET t += $tournament
+    `
+
+    if (params.established) {
+      query += `/* cypher */
+        WITH t
+        MATCH (y:Year {id: $established})
+        MERGE (t)-[:ESTABLISHED]->(y)
+      `
+    }
+
+    if (params.abolished) {
+      query += `/* cypher */
+        WITH t
+        MATCH (y:Year {id: $abolished})
+        MERGE (t)-[:ABOLISHED]->(y)
+      `
+    }
 
     const { summary } = await useDriver().executeQuery(query, params)
 
     if (Object.values(summary.counters.updates()).every(v => v === 0)) {
       throw createError({
-        statusCode: 400
-        // statusMessage: `${params.person.first_name} ${params.person.last_name} could not be created`
+        statusCode: 400,
+        statusMessage: `${params.tournament.name} could not be created`
       })
     } else {
       return true
@@ -21,7 +40,12 @@ export default defineEventHandler(async event => {
       throw createError({
         statusCode: 400,
         statusMessage: "Validation errors",
-        data: { validationErrors: error.issues.map(i => `${i.path.join(".")}: ${i.message}`) }
+        data: error.issues.map(i => ({
+          [i.path.join(".")]: {
+            message: i.message,
+            received: i.input
+          }
+        }))
       })
     }
 

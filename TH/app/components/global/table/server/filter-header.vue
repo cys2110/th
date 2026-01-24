@@ -25,6 +25,20 @@ const modelValue = useRouteQuery<any>(props.filterKey, null, {
         set: serialiseOption
       }
 })
+
+const safeModelValue = computed({
+  get: () => {
+    if (modelValue.value) return modelValue.value
+    return props.multiple ? [] : null
+  },
+  set: (val: any) => {
+    if (val) {
+      modelValue.value = val
+    } else {
+      modelValue.value = props.multiple ? [] : null
+    }
+  }
+})
 </script>
 
 <template>
@@ -35,7 +49,7 @@ const modelValue = useRouteQuery<any>(props.filterKey, null, {
     :items
     :multiple
     :icon
-    v-model="modelValue"
+    v-model="safeModelValue"
     class="min-w-30"
   />
 </template>

@@ -1,11 +1,25 @@
-import { object, string, z } from "zod"
+import { array, object, string, url, z } from "zod"
 
 export const tournamentSchema = object({
+  abolished: intToNumberSchema.optional(),
+  established: intToNumberSchema.optional(),
   id: intToNumberSchema,
-  name: string("Tournament name is required.")
+  name: string("Tournament name is required."),
+  tours: array(TourEnum),
+  updated_at: neoDateToStringSchema.optional(),
+  website: url("Tournament website must be a valid url.").optional()
 })
 
 export type TournamentType = z.infer<typeof tournamentSchema>
+
+export const groupedTournamentResultsSchema = groupedResultsSchema.extend({
+  group: object({
+    year: intToNumberSchema
+  }),
+  subRows: array(tournamentSchema)
+})
+
+export type GroupedTournamentResultsType = z.infer<typeof groupedTournamentResultsSchema>
 
 export const baseTournamentSchema = tournamentSchema.pick({
   id: true,

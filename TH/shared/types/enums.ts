@@ -1,5 +1,17 @@
 import { string, z } from "zod"
 
+export const CurrencyEnum = z.enum(["USD", "EUR", "GBP", "AUD", "FRF"], "Please select a valid currency")
+
+export type CurrencyEnumType = z.infer<typeof CurrencyEnum>
+
+export const currencyEnum: Record<CurrencyEnumType, string> = {
+  USD: "$",
+  EUR: "€",
+  GBP: "£",
+  AUD: "A$",
+  FRF: "\u20A3"
+}
+
 export const EnvironmentEnum = z.enum(["Indoor", "Outdoor"], "Please select a valid environment")
 
 export type EnvironmentEnumType = z.infer<typeof EnvironmentEnum>

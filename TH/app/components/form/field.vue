@@ -42,6 +42,15 @@ const modelValue = defineModel<any>()
       loop
     />
 
+    <u-checkbox-group
+      v-else-if="field.type === 'checkbox'"
+      :items="field.items"
+      v-model="modelValue[field.key]"
+      orientation="horizontal"
+      loop
+      :icon="field.icon"
+    />
+
     <form-date-picker
       v-else-if="field.type === 'date'"
       v-model="modelValue[field.key]"
