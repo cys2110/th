@@ -20,8 +20,8 @@ export const playerFormSchema = playerSchema
   })
   .extend({
     country: object({
-      id: optionSchema,
-      start_date: z.instanceof(CalendarDate).optional()
+      id: optionSchema.nullable(),
+      start_date: z.instanceof(CalendarDate).nullable()
     }),
     former_countries: array(
       object({

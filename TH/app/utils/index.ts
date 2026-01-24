@@ -2,7 +2,10 @@
 // export * from "./columns/countries"
 // export * from "./columns/editions"
 // export * from "./columns/events"
-export * from "./columns/players"
+export * from "./columns/players/index"
+export * from "./columns/players/wl"
+export * from "./columns/players/h2h"
+export * from "./columns/players/recent-events"
 // export * from "./columns/tournaments"
 
 // helpers

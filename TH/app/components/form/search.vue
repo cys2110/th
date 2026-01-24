@@ -51,12 +51,12 @@ const { data, status, refresh } = await useFetch<OptionType[] & { icon?: Country
       <dev-only>
         <venue-update
           v-if="type === 'Venue'"
-          :refresh
+          @refresh="refresh"
         />
         <person-update
           v-else-if="['Supervisor', 'Coach', 'Umpire'].includes(type)"
           :type="<'Supervisor' | 'Coach' | 'Umpire'>type"
-          :refresh
+          @refresh="refresh"
         />
       </dev-only>
     </template>

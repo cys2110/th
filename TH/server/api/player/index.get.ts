@@ -111,7 +111,7 @@ export default defineEventHandler(async event => {
       })
     }
 
-    const player = records[0].get("player")
+    const player = records[0]!.get("player")
 
     return playerDetailsSchema.parse(player)
   } catch (error) {

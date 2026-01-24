@@ -1,4 +1,4 @@
-import { array, literal, object, union, url, z } from "zod"
+import { array, literal, number, object, string, union, url, z } from "zod"
 
 export const playerSchema = personSchema.extend({
   age: intToNumberSchema.optional(),
@@ -59,3 +59,75 @@ export const groupedPlayerResultsSchema = groupedResultsSchema.extend({
 })
 
 export type GroupedPlayerResultsType = z.infer<typeof groupedPlayerResultsSchema>
+
+export const playerOverviewSchema = playerSchema
+  .pick({
+    id: true,
+    first_name: true,
+    last_name: true,
+    official_link: true,
+    site_link: true,
+    wiki_link: true,
+    tour: true,
+    country: true,
+    years: true
+  })
+  .partial({
+    first_name: true,
+    last_name: true,
+    site_link: true,
+    country: true
+  })
+
+export type PlayerOverviewType = z.infer<typeof playerOverviewSchema>
+
+export const playerDetailsSchema = playerSchema
+  .omit({
+    max_year: true,
+    min_year: true,
+    years: true
+  })
+  .partial({
+    first_name: true,
+    last_name: true,
+    country: true,
+    updated_at: true,
+    site_link: true
+  })
+
+export type PlayerDetailsType = z.infer<typeof playerDetailsSchema>
+
+const wlMainSchema = object({
+  singles: object({
+    wl: string(),
+    titles: number()
+  }),
+  doubles: object({
+    wl: string(),
+    titles: number()
+  })
+})
+
+export const wlSchema = object({
+  label: string(),
+  total: wlMainSchema,
+  main: wlMainSchema,
+  qualifying: object({
+    singles: string(),
+    doubles: string()
+  })
+})
+
+export type wlType = z.infer<typeof wlSchema>
+
+export const playerH2HSchema = object({
+  opponent: personSchema.partial({
+    first_name: true,
+    last_name: true,
+    country: true
+  }),
+  wins: intToNumberSchema,
+  losses: intToNumberSchema
+})
+
+export type PlayerH2HType = z.infer<typeof playerH2HSchema>

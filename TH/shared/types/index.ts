@@ -87,3 +87,12 @@ export const surfaceSchema = object({
 })
 
 export type SurfaceType = z.infer<typeof surfaceSchema>
+
+export const venueSchema = object({
+  id: string("Venue ID is required."),
+  name: string().optional(),
+  city: string("City is required."),
+  country: countrySchema
+})
+
+export type VenueType = z.infer<typeof venueSchema>

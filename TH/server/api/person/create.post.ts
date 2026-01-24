@@ -2,16 +2,19 @@ import { ZodError } from "zod"
 
 export default defineEventHandler(async event => {
   try {
-    const params = await readValidatedBody(event, body => body)
+    const params = await readValidatedBody(event, body => personFormSchema.parse(body))
 
-    const query = `/* cypher */`
+    const query = `/* cypher */
+      MERGE (n:$($type) { id: $id })
+      SET n += $person
+    `
 
     const { summary } = await useDriver().executeQuery(query, params)
 
     if (Object.values(summary.counters.updates()).every(v => v === 0)) {
       throw createError({
-        statusCode: 400
-        // statusMessage: `${params.person.first_name} ${params.person.last_name} could not be created`
+        statusCode: 400,
+        statusMessage: `${params.person.first_name} ${params.person.last_name} could not be created`
       })
     } else {
       return true
