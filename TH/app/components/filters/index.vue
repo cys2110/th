@@ -1,20 +1,9 @@
 <script setup lang="ts">
-import type { Table } from "@tanstack/vue-table"
-
-const props = defineProps<{
-  resetFilters?: () => void
+defineProps<{
   showResetFilters: boolean
-  table?: { tableApi: Table<any> } | null
 }>()
 
-const handleResetFilters = () => {
-  if (props.resetFilters) {
-    props.resetFilters()
-  } else {
-    props.table?.tableApi.resetColumnFilters()
-    props.table?.tableApi.resetGlobalFilter()
-  }
-}
+defineEmits(["reset-filters"])
 </script>
 
 <template>
@@ -28,7 +17,7 @@ const handleResetFilters = () => {
       label="Reset Filters"
       block
       :icon="ICONS.filterOff"
-      @click="handleResetFilters"
+      @click="$emit('reset-filters')"
     />
   </u-form-field>
 </template>

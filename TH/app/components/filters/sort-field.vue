@@ -1,13 +1,16 @@
 <script setup lang="ts">
-import type { Table } from "@tanstack/vue-table"
-
 const props = defineProps<{
-  resetSorting?: () => void
   sortFields: OptionType[]
-  table?: { tableApi: Table<any> }
 }>()
 
-const sortField = defineModel<SortFieldType[]>()
+const sortField = useRouteQuery("sorting", null, {
+  transform: {
+    get: parseSort,
+    set: serialiseSort
+  }
+})
+
+const emit = defineEmits(["reset-sorting"])
 
 const {
   ui: { icons }
@@ -19,20 +22,22 @@ const direction = ref<"ASC" | "DESC">("ASC")
 
 const handleResetSorting = (e: Event) => {
   e.stopPropagation()
-
-  if (props.resetSorting) {
-    props.resetSorting()
-  } else {
-    props.table?.tableApi.resetSorting()
-  }
+  emit("reset-sorting")
 }
 
 const handleAddSortField = () => {
   if (field.value) {
-    sortField.value!.push({ field: field.value, direction: direction.value })
+    const next = { field: field.value, direction: direction.value }
+    sortField.value = Array.isArray(sortField.value) ? [...sortField.value, next] : [next]
     set(field, "")
     set(direction, "ASC")
     set(isOpen, false)
+  }
+}
+
+const handleRemoveSortField = (index: number) => {
+  if (sortField.value) {
+    sortField.value = sortField.value.filter((_, i) => i !== index)
   }
 }
 </script>
@@ -62,7 +67,7 @@ const handleAddSortField = () => {
       <u-button
         color="error"
         :icon="icons.close"
-        @click="sortField!.splice(index, 1)"
+        @click="handleRemoveSortField(index)"
       />
     </u-field-group>
 

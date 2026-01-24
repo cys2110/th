@@ -1,12 +1,33 @@
-import { array, object, union, z } from "zod"
-import { TourEnum } from "./enums"
-import { coachSchema, countrySchema, groupedResultsSchema, intToNumberSchema, personSchema } from "./schemas"
+import { array, literal, object, union, url, z } from "zod"
 
 export const playerSchema = personSchema.extend({
+  age: intToNumberSchema.optional(),
+  bh: literal(["One", "Two"], "Backhand has be one of: One or Two").optional(),
+  ch_doubles: intToNumberSchema.optional(),
+  ch_singles: intToNumberSchema.optional(),
   coaches: array(coachSchema).default([]),
+  current_doubles: intToNumberSchema.optional(),
+  current_singles: intToNumberSchema.optional(),
+  dob: neoDateToStringSchema.optional(),
+  dod: neoDateToStringSchema.optional(),
+  doubles_ch_date: neoDateToStringSchema.optional(),
+  former_coaches: array(coachSchema).default([]),
+  former_countries: array(countrySchema).default([]),
+  height: intToNumberSchema.optional(),
+  hof: intToNumberSchema.optional(),
   max_year: intToNumberSchema.optional(),
   min_year: intToNumberSchema.optional(),
-  tour: TourEnum
+  official_link: url("Official link must be a valid URL").optional(),
+  pm: intToNumberSchema.optional(),
+  retired: intToNumberSchema.optional(),
+  rh: literal(["Right", "Left"], "Handedness has be one of: Right or Left").optional(),
+  singles_ch_date: neoDateToStringSchema.optional(),
+  site_link: url("Site link must be a valid URL"),
+  tour: TourEnum,
+  turned_pro: intToNumberSchema.optional(),
+  updated_at: neoDateToStringSchema,
+  wiki_link: url("Wiki link must be a valid URL").optional(),
+  years: array(intToNumberSchema)
 })
 
 export const playerSearchSchema = playerSchema.pick({

@@ -64,7 +64,7 @@ watch(
   error,
   () => {
     if (error.value) {
-      if (error.value.statusMessage === "Validation errors") {
+      if (error.value.statusMessage) {
         console.error(error.value.statusMessage, error.value.data?.data)
       } else {
         console.error(error.value)

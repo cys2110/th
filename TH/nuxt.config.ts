@@ -16,16 +16,27 @@ export default defineNuxtConfig({
   ],
 
   // Set page transitions
-  app: { pageTransition: { name: "page", mode: "out-in" } },
+  app: {
+    pageTransition: {
+      name: "page",
+      mode: "out-in"
+    }
+  },
 
   // Set scroll behaviour
-  router: { options: { scrollBehaviorType: "smooth" } },
+  router: {
+    options: {
+      scrollBehaviorType: "smooth"
+    }
+  },
 
   // CSS path
   css: ["~/assets/css/main.css"],
 
   // Turn on typed router
-  experimental: { typedPages: true },
+  experimental: {
+    typedPages: true
+  },
 
   // Expose whether in dev mode
   runtimeConfig: {

@@ -1,18 +1,5 @@
 <script setup lang="ts">
-import type { Table } from "@tanstack/vue-table"
-
-const props = defineProps<{
-  resetGrouping?: () => void
-  table?: { tableApi: Table<any> }
-}>()
-
-const handleResetGrouping = () => {
-  if (props.resetGrouping) {
-    props.resetGrouping()
-  } else {
-    props.table?.tableApi.resetGrouping()
-  }
-}
+defineEmits(["reset-grouping"])
 </script>
 
 <template>
@@ -20,6 +7,6 @@ const handleResetGrouping = () => {
     label="Reset Grouping"
     block
     :icon="ICONS.groupOff"
-    @click="handleResetGrouping"
+    @click="$emit('reset-grouping')"
   />
 </template>

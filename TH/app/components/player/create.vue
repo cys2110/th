@@ -39,7 +39,7 @@ const onSubmit = async (event: FormSubmitEvent<PlayerCreateSchema>) => {
       })
     })
     .catch(error => {
-      if (error.statusMessage === "Validation errors") {
+      if (error.statusMessage) {
         console.error(error.statusMessage, error.data?.data)
       } else {
         console.error(error)
@@ -95,32 +95,32 @@ const formFields: FormFieldInterface<PlayerCreateSchema>[] = [
     </template>
 
     <template #footer="{ close }">
-      <u-button
-        label="Save"
-        color="success"
-        block
-        :icon="icons.upload"
-        :loading="isUploading"
-        :loading-icon="ICONS.uploading"
-        type="submit"
-        form="player-form"
-      />
-
-      <u-button
-        label="Reset"
-        color="warning"
-        block
-        :icon="icons.reload"
-        @click="handleReset"
-      />
-
-      <u-button
-        label="Cancel"
-        color="error"
-        block
-        :icon="icons.close"
-        @click="close"
-      />
+      <u-field-group>
+        <u-button
+          label="Save"
+          color="success"
+          block
+          :icon="icons.upload"
+          :loading="isUploading"
+          :loading-icon="ICONS.uploading"
+          type="submit"
+          form="player-form"
+        />
+        <u-button
+          label="Reset"
+          color="warning"
+          block
+          :icon="icons.reload"
+          @click="handleReset"
+        />
+        <u-button
+          label="Cancel"
+          color="error"
+          block
+          :icon="icons.close"
+          @click="close"
+        />
+      </u-field-group>
     </template>
   </u-modal>
 </template>

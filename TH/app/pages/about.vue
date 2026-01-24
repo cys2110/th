@@ -5,11 +5,10 @@ useHead({ title: "About" })
 <template>
   <u-container class="max-w-7xl">
     <u-page>
-      <u-page-header title="About">
-        <template #description>
-          DISCLAIMER: This website is not intended to infringe on any copyright. It is not intended for any monetary or any other disallowed purpose.
-        </template>
-      </u-page-header>
+      <u-page-header
+        title="About"
+        description="DISCLAIMER: This website is not intended to infringe on any copyright. It is not intended for any monetary or any other disallowed purpose."
+      />
 
       <u-page-body>
         <div>

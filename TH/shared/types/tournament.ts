@@ -1,5 +1,4 @@
 import { object, string, z } from "zod"
-import { intToNumberSchema } from "./schemas"
 
 export const tournamentSchema = object({
   id: intToNumberSchema,

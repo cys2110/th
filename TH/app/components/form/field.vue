@@ -11,7 +11,10 @@ const modelValue = defineModel<any>()
     :name="<string>field.key"
     :label="field.label"
     :required="field.required"
-    :ui="{ label: 'text-xs' }"
+    :ui="{
+      root: field.class,
+      label: 'text-xs'
+    }"
   >
     <slot v-if="field.type === 'slot'" />
 
@@ -24,12 +27,24 @@ const modelValue = defineModel<any>()
       :icon="field.icon"
     />
 
+    <form-textarea
+      v-else-if="field.type === 'textarea'"
+      v-model="modelValue[field.key]"
+      :placeholder="field.placeholder ?? `Enter ${field.label.toLowerCase()}`"
+      :icon="field.icon"
+    />
+
     <u-radio-group
       v-else-if="field.type === 'radio'"
       :items="field.items"
       v-model="modelValue[field.key]"
       orientation="horizontal"
       loop
+    />
+
+    <form-date-picker
+      v-else-if="field.type === 'date'"
+      v-model="modelValue[field.key]"
     />
   </u-form-field>
 </template>

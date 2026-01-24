@@ -25,23 +25,6 @@ const modelValue = useRouteQuery<any>(props.filterKey, null, {
         set: serialiseOption
       }
 })
-
-const parsedModelValue = computed({
-  get: () => {
-    if (modelValue.value) {
-      return modelValue.value
-    } else {
-      return undefined
-    }
-  },
-  set: (val: any) => {
-    if (val) {
-      modelValue.value = val
-    } else {
-      modelValue.value = props.multiple ? [] : null
-    }
-  }
-})
 </script>
 
 <template>
@@ -52,7 +35,7 @@ const parsedModelValue = computed({
     :items
     :multiple
     :icon
-    v-model="parsedModelValue"
+    v-model="modelValue"
     class="min-w-30"
   />
 </template>

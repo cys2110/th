@@ -2,9 +2,17 @@
 import type { AsyncDataRequestStatus } from "#app"
 import type { TableRow } from "@nuxt/ui"
 
+const router = useRouter()
+
+// Expose table ref
+const table = useTemplateRef("table")
+defineExpose({ table })
+
+// Models
 const results = defineModel<PlayersResultsType[]>("results")
 const status = defineModel<AsyncDataRequestStatus>("status")
 
+// Filters
 const tours = useRouteQuery("tours", null, { transform: toArray })
 const players = useRouteQuery("players", null, {
   transform: {
@@ -26,17 +34,17 @@ const coaches = useRouteQuery("coaches", null, {
 })
 const min_year = useRouteQuery("min_year", null, { transform: Number })
 const max_year = useRouteQuery("max_year", null, { transform: Number })
+
+// Grouping
 const grouping = useRouteQuery<string | null>("grouping", null)
+
+// Sorting
 const sortField = useRouteQuery("sorting", null, {
   transform: {
     get: parseSort,
     set: serialiseSort
   }
 })
-
-const router = useRouter()
-const table = useTemplateRef("table")
-defineExpose({ table })
 
 // Ensure that grouped column is always shown first
 const columnOrder = computed(() => {
@@ -119,7 +127,7 @@ watch(
         set(status, "success")
       })
       .catch(error => {
-        if (error.statusMessage === "Validation errors") {
+        if (error.statusMessage) {
           console.error(error.statusMessage, error.data?.data.validationErrors)
         } else {
           console.error(error)

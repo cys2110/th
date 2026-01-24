@@ -119,7 +119,7 @@ export default defineEventHandler(async event => {
 
     if (params.sortField.length) {
       for (const field of params.sortField) {
-        sortClauses.push(`${sortFieldMap[field.field as keyof typeof sortFieldMap].join(", ")} ${field.direction}`)
+        sortClauses.push(`${sortFieldMap[field.field as keyof typeof sortFieldMap]!.join(", ")} ${field.direction}`)
       }
     }
 

@@ -1,7 +1,10 @@
 <script setup lang="ts">
 useHead({ title: "Players" })
 
+// Stores
 const viewModeStore = useViewModeStore()
+
+// Template refs
 const tableRef = useTemplateRef("tableRef")
 
 // Pagination
@@ -41,6 +44,19 @@ const resetFilters = () => {
   set(max_year, null)
 }
 
+const showResetFilters = computed(() => {
+  return (
+    get(page) > 1 ||
+    get(itemsPerPage) !== 30 ||
+    !!tours.value?.length ||
+    !!players.value?.length ||
+    !!countries.value?.length ||
+    !!coaches.value?.length ||
+    !!min_year.value ||
+    !!max_year.value
+  )
+})
+
 // Grouping
 const grouping = useRouteQuery<string | null>("grouping", null)
 
@@ -72,19 +88,6 @@ watchDeep(
   { immediate: true }
 )
 
-const showResetFilters = computed(() => {
-  return (
-    get(page) > 1 ||
-    get(itemsPerPage) !== 30 ||
-    !!tours.value?.length ||
-    !!players.value?.length ||
-    !!countries.value?.length ||
-    !!coaches.value?.length ||
-    !!min_year.value ||
-    !!max_year.value
-  )
-})
-
 // API call
 const apiRoute = computed(() => {
   if (grouping.value && !viewModeStore.isCardView) {
@@ -110,19 +113,15 @@ const { data, status, error } = await useFetch<{ count: number; results: Players
   default: () => ({ count: 0, results: [] })
 })
 
-watch(
-  error,
-  () => {
-    if (error.value) {
-      if (error.value.statusMessage === "Validation errors") {
-        console.error(error.value.statusMessage, error.value.data?.data)
-      } else {
-        console.error(error.value)
-      }
+watch(error, () => {
+  if (error.value) {
+    if (error.value.statusMessage) {
+      console.error(error.value.statusMessage, error.value.data?.data)
+    } else {
+      console.error(error.value)
     }
-  },
-  { immediate: true }
-)
+  }
+})
 
 const footerPlaceholder = computed(() => {
   if (viewModeStore.isCardView || !grouping.value) {
@@ -153,8 +152,8 @@ const footerPlaceholder = computed(() => {
 
           <template v-if="viewModeStore.isCardView">
             <filters
-              :reset-filters
               :show-reset-filters
+              @reset-filters="resetFilters"
             >
               <filters-tours
                 v-model="tours"
@@ -179,16 +178,16 @@ const footerPlaceholder = computed(() => {
             <u-separator />
 
             <filters-sort-field
-              :reset-sorting
               :sort-fields
               v-model="sortField"
+              @reset-sorting="resetSorting"
             />
           </template>
 
           <template v-else>
             <table-reset-grouping
               v-if="grouping"
-              :reset-grouping
+              @reset-grouping="resetGrouping"
             />
             <table-visibility
               v-if="tableRef?.table"

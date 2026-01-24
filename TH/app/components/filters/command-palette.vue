@@ -14,6 +14,16 @@ const { data, status, error } = await useLazyFetch<(OptionType & { country?: Cou
   default: () => []
 })
 
+watch(error, () => {
+  if (error.value) {
+    if (error.value.statusMessage) {
+      console.error(error.value.statusMessage, error.value.data?.data)
+    } else {
+      console.error(error.value)
+    }
+  }
+})
+
 const groups = computed(() => [
   {
     id: "results",
