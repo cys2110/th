@@ -1,4 +1,4 @@
-import { boolean, object, string, z } from "zod"
+import { array, boolean, object, string, union, z } from "zod"
 
 export const editionSchema = object({
   category: string().optional(),
@@ -7,6 +7,16 @@ export const editionSchema = object({
   start_date: neoDateToStringSchema.optional(),
   surface: surfaceSchema.optional(),
   tournament: baseTournamentSchema,
+  tours: array(TourEnum),
+  winner: union([
+    countrySchema,
+    laverEntrySchema,
+    object({
+      type: MatchTypeEnum,
+      tour: TourEnum,
+      team: array(personSchema)
+    })
+  ]).optional(),
   year: intToNumberSchema
 })
 
@@ -34,3 +44,12 @@ export const playerRecentEventSchema = editionSchema
   })
 
 export type PlayerRecentEventType = z.infer<typeof playerRecentEventSchema>
+
+export const baseEditionSchema = editionSchema.pick({
+  id: true,
+  year: true,
+  tours: true,
+  winner: true
+})
+
+export type BaseEditionType = z.infer<typeof baseEditionSchema>

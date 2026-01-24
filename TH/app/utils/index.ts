@@ -1,12 +1,17 @@
 // columns
 // export * from "./columns/countries"
-// export * from "./columns/editions"
+export * from "./columns/editions/index"
 // export * from "./columns/events"
 export * from "./columns/players/index"
 export * from "./columns/players/wl"
 export * from "./columns/players/h2h"
 export * from "./columns/players/recent-events"
 export * from "./columns/tournaments/index"
+export * from "./columns/tournaments/pm"
+export * from "./columns/tournaments/finalists"
+export * from "./columns/tournaments/country"
+export * from "./columns/tournaments/age"
+export * from "./columns/tournaments/scores-stats"
 
 // helpers
 export * from "./helpers/index"

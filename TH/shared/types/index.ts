@@ -96,3 +96,9 @@ export const venueSchema = object({
 })
 
 export type VenueType = z.infer<typeof venueSchema>
+
+export const laverEntrySchema = object({
+  id: string(),
+  team: literal(["Europe", "World"]),
+  points: intToNumberSchema
+})

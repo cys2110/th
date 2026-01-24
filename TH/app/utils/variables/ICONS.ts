@@ -22,6 +22,7 @@ export default {
   downloading: "line-md:downloading-loop",
   draw: "game-icons:family-tree",
   edit: "line-md:edit-full-twotone",
+  europe: "flag:eu-4x3",
   filter: "line-md:filter-twotone",
   filterOff: "line-md:filter-off-twotone",
   gauge: "line-md:gauge-twotone-loop",

@@ -16,6 +16,10 @@ export const EnvironmentEnum = z.enum(["Indoor", "Outdoor"], "Please select a va
 
 export type EnvironmentEnumType = z.infer<typeof EnvironmentEnum>
 
+export const MatchTypeEnum = z.enum(["Singles", "Doubles"], "Please select a valid match type")
+
+export type MatchTypeEnumType = z.infer<typeof MatchTypeEnum>
+
 export const RoundEnum = z.enum([
   "Win",
   "Final",
@@ -60,6 +64,22 @@ export const roundEnum: Record<RoundEnumType, string> = {
   Semifinals: "SF",
   Final: "F",
   Win: "W"
+}
+
+export const StatusEnum = z.enum(["AL", "CO", "JR", "LL", "NG", "Q", "PR", "SE", "WC"])
+
+export type StatusEnumType = z.infer<typeof StatusEnum>
+
+export const statusEnum: Record<StatusEnumType, string> = {
+  AL: "Alternate",
+  CO: "Collegian",
+  JR: "Junior Reserved",
+  LL: "Lucky Loser",
+  NG: "Next Gen",
+  Q: "Qualifier",
+  PR: "Protected Ranking",
+  SE: "Special Exempt",
+  WC: "Wild Card"
 }
 
 export const SurfaceEnum = z.enum(["Clay", "Grass", "Hard", "Carpet", "Carpet (Indoor)"], "Please select a valid surface")
