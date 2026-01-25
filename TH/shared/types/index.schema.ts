@@ -7,11 +7,18 @@ export const intToNumberSchema = z
   })
   .transform(val => val.toInt())
 
+export const neoDateToStringSchema = z
+  .instanceof(NeoDate, {
+    error: issue => `Invalid neo4j Date object at ${issue.path?.join(".")}: ${issue.input}.`
+  })
+  .transform(val => val.toStandardDate().toISOString().slice(0, 10))
+
 export const countrySchema = object(
   {
-    id: string("ID is required"),
+    id: string("ID is required").toUpperCase(),
     name: string("Name is required"),
     alpha2: string()
+      .toLowerCase()
       .refine(val => val.length === 2, "Alpha-2 code must be 2 characters")
       .optional(),
     continent: ContinentEnum

@@ -1,6 +1,10 @@
 import { z } from "zod"
 
 export const playerSchema = personSchema.extend({
+  ch_doubles: intToNumberSchema.optional(),
+  ch_singles: intToNumberSchema.optional(),
+  doubles_ch_date: neoDateToStringSchema.optional(),
+  singles_ch_date: neoDateToStringSchema.optional(),
   tour: TourEnum
 })
 

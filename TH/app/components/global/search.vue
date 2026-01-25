@@ -102,54 +102,21 @@ watch([isOpen, searchTerm], () => {
     />
 
     <template #content>
-      <dev-only>
-        <u-alert
-          v-if="data.statusObjects.length"
-          color="info"
-          :icon="icons.info"
-          title="neo4j Statuses"
-        >
-          <template #description>
-            <div
-              v-for="(object, index) in data.statusObjects"
-              :key="index"
-              >{{ object }}</div
-            >
-          </template>
-        </u-alert>
+      <api-alerts :error />
 
-        <u-alert
-          v-if="error"
-          color="error"
-          :icon="icons.error"
-          :title="`Error fetching results for ${searchTerm}`"
-        >
-          <template #description>
-            <div
-              v-if="Array.isArray(error.data?.data)"
-              v-for="(item, index) in error.data.data"
-              :key="index"
-            >
-              {{ item }}
-            </div>
-            <div v-else>{{ error.data.data }}</div>
-          </template>
-        </u-alert>
-
-        <u-command-palette
-          :groups
-          :loading="status === 'pending'"
-          v-model:search-term="searchTerm"
-        >
-          <template #player-trailing="{ item }">
-            <u-badge
-              :label="item.tour"
-              :color="item.tour"
-              size="sm"
-            />
-          </template>
-        </u-command-palette>
-      </dev-only>
+      <u-command-palette
+        :groups
+        :loading="status === 'pending'"
+        v-model:search-term="searchTerm"
+      >
+        <template #player-trailing="{ item }">
+          <u-badge
+            :label="item.tour"
+            :color="item.tour"
+            size="sm"
+          />
+        </template>
+      </u-command-palette>
     </template>
   </u-modal>
 </template>

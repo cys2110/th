@@ -12,6 +12,10 @@ export const ContinentEnum = z.enum(["Africa", "Asia", "Europe", "North America"
 
 export type ContinentEnumType = z.infer<typeof ContinentEnum>
 
+export const MatchTypeEnum = z.enum(["Singles", "Doubles"], "Please select a valid match type")
+
+export type MatchTypeEnumType = z.infer<typeof MatchTypeEnum>
+
 export const tourMapping = {
   ATP: "ATP",
   WTA: "WTA",
