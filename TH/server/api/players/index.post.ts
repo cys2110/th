@@ -151,15 +151,23 @@ export default defineEventHandler(async event => {
 
     const { records, summary } = await useDriver().executeQuery(query, params)
 
-    const results = records.map(record => {
-      const player = record.get("player")
-      return basePlayerSchema.parse(player)
-    })
+    if (summary.gqlStatusObjects.some(s => s.gqlStatus === "00000")) {
+      const results = records.map(record => {
+        const player = record.get("player")
+        return basePlayerSchema.parse(player)
+      })
 
-    return {
-      count,
-      results
+      return {
+        count,
+        results
+      }
     }
+
+    throw createError({
+      statusCode: 400,
+      statusMessage: "Database query error",
+      data: summary.gqlStatusObjects.map(s => `${s.gqlStatus}: ${s.statusDescription}`)
+    })
   } catch (error) {
     if (error instanceof ZodError) {
       throw createError({

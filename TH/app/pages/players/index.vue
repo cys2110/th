@@ -113,15 +113,19 @@ const { data, status, error } = await useFetch<{ count: number; results: Players
   default: () => ({ count: 0, results: [] })
 })
 
-watch(error, () => {
-  if (error.value) {
-    if (error.value.statusMessage) {
-      console.error(error.value.statusMessage, error.value.data?.data)
-    } else {
-      console.error(error.value)
+watch(
+  error,
+  () => {
+    if (error.value) {
+      if (error.value.statusMessage) {
+        console.error(error.value.statusMessage, error.value.data?.data)
+      } else {
+        console.error(error.value)
+      }
     }
-  }
-})
+  },
+  { immediate: true }
+)
 
 const footerPlaceholder = computed(() => {
   if (viewModeStore.isCardView || !grouping.value) {

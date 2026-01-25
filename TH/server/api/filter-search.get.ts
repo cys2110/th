@@ -71,18 +71,39 @@ export default defineEventHandler(async event => {
 
     const { records, summary } = await useDriver().executeQuery(query, params)
 
-    const results = records.map(record => {
-      const result = record.get("result")
+    if (summary.gqlStatusObjects.some(s => s.gqlStatus === "00000")) {
+      const results = records.map(record => {
+        const result = record.get("result")
 
-      if (!result) return null
+        if (!result) return null
 
-      result["value"] = params.type === "Tournament" ? result["value"].toInt() : result["value"]
+        result["value"] = params.type === "Tournament" ? result["value"].toInt() : result["value"]
 
-      return result
+        return result
+      })
+
+      return results.filter(Boolean)
+    }
+
+    throw createError({
+      statusCode: 400,
+      statusMessage: "Database query error",
+      data: summary.gqlStatusObjects.map(s => `${s.gqlStatus}: ${s.statusDescription}`)
     })
-
-    return results.filter(Boolean)
   } catch (error) {
+    if (error instanceof ZodError) {
+      throw createError({
+        statusCode: 400,
+        statusMessage: "Validation errors",
+        data: error.issues.map(i => ({
+          [i.path.join(".")]: {
+            message: i.message,
+            received: i.input
+          }
+        }))
+      })
+    }
+
     console.error(error)
     throw error
   }

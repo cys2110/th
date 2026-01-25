@@ -88,7 +88,7 @@ export default defineEventHandler(async event => {
 
     if (params.sortField.length) {
       for (const field of params.sortField) {
-        sortClauses.push(`${sortFieldMap[field.field as keyof typeof sortFieldMap].join(", ")} ${field.direction}`)
+        sortClauses.push(`${sortFieldMap[field.field as keyof typeof sortFieldMap]!.join(", ")} ${field.direction}`)
       }
     }
 
@@ -118,19 +118,20 @@ export default defineEventHandler(async event => {
 
     const { records, summary } = await useDriver().executeQuery(query, params)
 
-    if (summary.gqlStatusObjects.some(s => s.gqlStatus === "02000")) {
-      throw createError({
-        statusCode: 404,
-        statusMessage: `${params.key} could not be found.`
+    if (summary.gqlStatusObjects.some(s => s.gqlStatus === "00000")) {
+      const results = records.map(record => {
+        const player = record.get("player")
+        return basePlayerSchema.parse(player)
       })
+
+      return results
     }
 
-    const results = records.map(record => {
-      const player = record.get("player")
-      return basePlayerSchema.parse(player)
+    throw createError({
+      statusCode: 400,
+      statusMessage: "Database query error",
+      data: summary.gqlStatusObjects.map(s => `${s.gqlStatus}: ${s.statusDescription}`)
     })
-
-    return results
   } catch (error) {
     if (error instanceof ZodError) {
       throw createError({
