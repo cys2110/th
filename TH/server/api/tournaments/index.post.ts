@@ -105,7 +105,7 @@ export default defineEventHandler(async event => {
       ) AS tournament
     `
 
-    const { records } = await useDriver().executeQuery(query, params)
+    const { records, summary } = await useDriver().executeQuery(query, params)
 
     const results = records.map(record => {
       const result = record.get("tournament")

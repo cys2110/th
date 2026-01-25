@@ -9,7 +9,7 @@ export const intToNumberSchema = z
 
 export const neoDateToStringSchema = z
   .instanceof(NeoDate, {
-    error: issue => `Invalid neo4j Date object at ${issue.path?.join(",")}: ${issue.input}.`
+    error: issue => `Invalid neo4j Date object at ${issue.path?.join(".")}: ${issue.input}.`
   })
   .transform(val => val.toStandardDate().toISOString().slice(0, 10))
 
@@ -39,12 +39,7 @@ export const countrySchema = object(
     end_date: neoDateToStringSchema.optional()
   },
   {
-    error: iss => {
-      if (iss.code === "invalid_type") {
-        return `Country must be an object. Received: ${iss.input}.`
-      }
-      return `${iss.code}: ${iss.input}.`
-    }
+    error: iss => `${iss.code}: ${iss.input}.`
   }
 )
 

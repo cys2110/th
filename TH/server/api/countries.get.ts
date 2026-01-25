@@ -2,28 +2,39 @@ import { ZodError } from "zod"
 
 export default defineEventHandler(async event => {
   try {
-    const params = getQuery(event)
+    const query = `/* cypher */
+      MATCH (c:Country)
+      RETURN properties(c) AS country
+      ORDER BY toLower(c.name)
+    `
 
-    const query = `/* cypher */`
+    const { records, summary } = await useDriver().executeQuery(query)
 
-    const { records, summary } = await useDriver().executeQuery(query, params)
-
-    if (summary.gqlStatusObjects.some(s => s.gqlStatus === "02000")) {
-      throw createError({
-        statusCode: 404
-        // statusMessage: `${params.person.first_name} ${params.person.last_name} could not be found.`
+    if (summary.gqlStatusObjects.some(s => s.gqlStatus === "00000")) {
+      const results = records.map(record => {
+        const country = record.get("country")
+        return countrySchema.parse(country)
       })
+
+      return results
     }
 
-    const results = records.map(r => r.toObject())
-
-    return results
+    throw createError({
+      statusCode: 400,
+      statusMessage: "Database query error",
+      data: summary.gqlStatusObjects.map(s => `${s.gqlStatus}: ${s.statusDescription}`)
+    })
   } catch (error) {
     if (error instanceof ZodError) {
       throw createError({
         statusCode: 400,
         statusMessage: "Validation errors",
-        data: { validationErrors: error.issues.map(i => `${i.path.join(".")}: ${i.message}`) }
+        data: error.issues.map(i => ({
+          [i.path.join(".")]: {
+            message: i.message,
+            received: i.input
+          }
+        }))
       })
     }
 

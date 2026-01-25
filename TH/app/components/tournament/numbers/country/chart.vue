@@ -11,7 +11,6 @@ const {
 } = useRoute("tournament")
 
 const tournamentStore = useTournamentStore()
-const router = useRouter()
 const toast = useToast()
 const open = ref(false)
 

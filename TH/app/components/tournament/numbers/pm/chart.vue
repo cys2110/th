@@ -7,7 +7,6 @@ const props = defineProps<{
 }>()
 
 const tournamentStore = useTournamentStore()
-const router = useRouter()
 
 const selectedTour = ref(tournamentStore.tours[0] ?? "ATP")
 const selectedType = ref<MatchTypeEnumType>("Singles")
@@ -149,8 +148,10 @@ const option = computed(() => ({
         orientation="horizontal"
       />
 
-      <filters-match-type
+      <u-radio-group
+        legend="S/D"
         v-model="selectedType"
+        :items="['Singles', 'Doubles']"
         orientation="horizontal"
       />
     </template>
