@@ -36,5 +36,13 @@ const modelValue = defineModel<any>()
       :multiple="field.multiple"
       :icon="field.icon"
     />
+
+    <u-radio-group
+      v-else-if="field.type === 'radio'"
+      :items="field.items"
+      v-model="modelValue[field.key]"
+      orientation="horizontal"
+      loop
+    />
   </u-form-field>
 </template>

@@ -5,16 +5,24 @@ const { devMode } = useRuntimeConfig().public
 
 const viewModeStore = useViewModeStore()
 
+const tableRef = useTemplateRef("tableRef")
+
 // Filters
 const countries = ref<string[]>([])
 const continents = ref<string[]>([])
 
 const resetFilters = () => {
-  set(countries, [])
-  set(continents, [])
+  if (tableRef.value?.table) {
+    tableRef.value.table.tableApi.resetColumnFilters()
+  } else {
+    set(countries, [])
+    set(continents, [])
+  }
 }
 
-const showResetFilters = computed(() => !!countries.value?.length || !!continents.value?.length)
+const showResetFilters = computed<boolean>(() : boolean =>
+  !!countries.value?.length || !!continents.value?.length || !!tableRef.value?.table?.tableApi.getState().columnFilters.length
+)
 
 // API call
 const { data, status, refresh, error } = await useFetch("/api/countries", {
@@ -75,7 +83,6 @@ const filteredCountries = computed(() =>
 
           <!--Filters-->
           <filters
-            v-if="viewModeStore.isCardView"
             :show-reset-filters
             @reset-filters="resetFilters"
           >

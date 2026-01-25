@@ -28,7 +28,7 @@ const onSubmit = async (event: FormSubmitEvent<CountryType>) => {
     body: event.data
   })
     .then(async response => {
-      console.log(response.statusObjects)
+      console.info(response.statusObjects)
 
       toast.add({
         title: response.message,

@@ -13,3 +13,4 @@ export * from "./schemas/index.schema"
 // columns
 export * from "./columns/countries/index"
 export * from "./columns/countries/titles"
+export * from "./columns/players/index"

@@ -1,5 +1,7 @@
-import { object, string, z } from "zod"
+import { array, boolean, literal, number, object, string, z } from "zod"
 import { Integer, Date as NeoDate } from "neo4j-driver"
+
+export const yearSchema = number("Please enter a valid year.").int("Please enter a valid year.").positive("Please enter a valid year.")
 
 export const intToNumberSchema = z
   .instanceof(Integer, {
@@ -12,6 +14,20 @@ export const neoDateToStringSchema = z
     error: issue => `Invalid neo4j Date object at ${issue.path?.join(".")}: ${issue.input}.`
   })
   .transform(val => val.toStandardDate().toISOString().slice(0, 10))
+
+export const sortFieldSchema = object({
+  field: string("Sort field is required."),
+  direction: literal(["ASC", "DESC"], { error: "Sort direction must be either 'ASC' or 'DESC'" })
+})
+
+export type SortFieldType = z.infer<typeof sortFieldSchema>
+
+export const groupedResultsSchema = object({
+  id: string("Group ID is required"),
+  __group: boolean("Group flag is required"),
+  count: intToNumberSchema,
+  has_children: boolean("Has children flag is required")
+})
 
 export const countrySchema = object(
   {
@@ -55,3 +71,14 @@ export const personSchema = object(
 )
 
 export type PersonType = z.infer<typeof personSchema>
+
+export const coachSchema = personSchema
+  .omit({
+    country: true
+  })
+  .extend({
+    labels: array(string()),
+    years: string().optional()
+  })
+
+export type CoachType = z.infer<typeof coachSchema>

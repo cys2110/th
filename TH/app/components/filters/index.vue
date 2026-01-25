@@ -4,20 +4,25 @@ defineProps<{
 }>()
 
 defineEmits(["reset-filters"])
+
+const viewModeStore = useViewModeStore()
 </script>
 
 <template>
-  <u-form-field label="Filter by">
+  <u-form-field
+    v-if="viewModeStore.isCardView"
+    label="Filter by"
+  >
     <div class="*:my-2">
       <slot />
     </div>
-
-    <u-button
-      v-if="showResetFilters"
-      label="Reset Filters"
-      block
-      :icon="ICONS.filterOff"
-      @click="$emit('reset-filters')"
-    />
   </u-form-field>
+
+  <u-button
+    v-if="showResetFilters"
+    label="Reset Filters"
+    block
+    :icon="ICONS.filterOff"
+    @click="$emit('reset-filters')"
+  />
 </template>

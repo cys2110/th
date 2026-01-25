@@ -2,6 +2,8 @@ export default {
   calendar: "solar:calendar-line-duotone",
   cards: "icon-park-twotone:view-grid-card",
   category: "material-symbols:category-outline-rounded",
+  coach: "icon-park-twotone:brain",
+  columnVisibility: "material-symbols:table-eye-outline",
   filter: "line-md:filter-twotone",
   filterOff: "line-md:filter-off-twotone",
   globe: "solar:earth-bold-duotone",

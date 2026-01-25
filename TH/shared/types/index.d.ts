@@ -11,7 +11,7 @@ declare global {
     key: keyof S
     type: string
     required?: boolean
-    icon: string
+    icon?: string
     description?: string
     items?: any
     class?: string
@@ -19,7 +19,10 @@ declare global {
     multiple?: boolean
     placeholder?: string
     subType?: string
+    max?: number
   }
+
+  type PlayersResultsType = BasePlayerType & GroupedPlayerResultsType
 }
 
 export {}

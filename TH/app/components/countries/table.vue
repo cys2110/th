@@ -10,6 +10,9 @@ defineProps<{
 
 const router = useRouter()
 
+const table = useTemplateRef("table")
+defineExpose({ table })
+
 const handleSelectRow = (_e: Event, row: TableRow<CountryType>) => {
   if (row.getIsGrouped()) {
     row.toggleExpanded()
@@ -29,6 +32,7 @@ const handleSelectRow = (_e: Event, row: TableRow<CountryType>) => {
 
 <template>
   <u-table
+    ref="table"
     :data="countries"
     :columns="countriesColumns"
     :loading="status === 'pending'"
