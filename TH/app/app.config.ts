@@ -23,7 +23,7 @@ export default defineAppConfig({
       arrowLeft: "line-md:arrow-left-circle-twotone",
       arrowRight: "line-md:arrow-right-circle-twotone",
       caution: "line-md:alert-circle-twotone-loop",
-      check: "stash:check-duotone",
+      check: "material-symbols:check-small",
       chevronDoubleLeft: "line-md:chevron-small-double-left",
       chevronDoubleRight: "line-md:chevron-small-double-right",
       chevronDown: "line-md:chevron-small-down",
@@ -51,7 +51,7 @@ export default defineAppConfig({
       panelClose: "icon-park-twotone:expand-right",
       panelOpen: "icon-park-twotone:expand-left",
       plus: "line-md:plus-square-twotone",
-      reload: "stash:arrows-switch-duotone",
+      reload: "icon-park-twotone:update-rotation",
       search: "line-md:search-twotone",
       success: "line-md:circle-to-confirm-circle-twotone-transition",
       system: "line-md:monitor-twotone",
@@ -59,7 +59,7 @@ export default defineAppConfig({
       upload: "line-md:uploading",
       warning: "line-md:alert-twotone-loop"
     },
-    // alert: { defaultVariants: { variant: "subtle" } },
+    alert: { defaultVariants: { variant: "subtle" } },
     badge: {
       slots: { base: "justify-center" },
       defaultVariants: { variant: "subtle", size: "md" }

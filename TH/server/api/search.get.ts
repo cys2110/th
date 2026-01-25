@@ -1,11 +1,11 @@
 import { ZodError } from "zod"
 
 export default defineEventHandler(async event => {
-  try {
-    const params = getQuery(event)
+  const params = getQuery(event)
 
+  try {
     const query = `/* cypher */
-      OPTIONAL MATCH (p:Player) WHERE p.first_name || ' ' || p.last_name =~ '(?i).*' + $searchTerm + '(?i).*'
+      OPTIONAL MATCH (p:Player) WHERE p.first_name || ' ' || p.last_name =~ '(?i).*' + $searchTerm + '.*'
       MATCH (p)-[:REPRESENTS]->(c:Country)
 
       RETURN
@@ -25,7 +25,7 @@ export default defineEventHandler(async event => {
 
       UNION
 
-      OPTIONAL MATCH (t:Tournament) WHERE t.name =~ '(?i).*' + $searchTerm + '(?i).*'
+      OPTIONAL MATCH (t:Tournament) WHERE t.name =~ '(?i).*' + $searchTerm + '.*'
 
       RETURN properties(t) AS result
 
@@ -35,12 +35,7 @@ export default defineEventHandler(async event => {
 
     const { records, summary } = await useDriver().executeQuery(query, params)
 
-    if (summary.gqlStatusObjects.some(s => s.gqlStatus === "02000")) {
-      throw createError({
-        statusCode: 404,
-        statusMessage: `No results found for ${params.searchTerm}.`
-      })
-    }
+    const statusObjects = formatGqlStatusObjects(summary.gqlStatusObjects)
 
     const results = records.map(record => {
       const result = record.get("result")
@@ -50,22 +45,23 @@ export default defineEventHandler(async event => {
       return searchResultsSchema.parse(result)
     })
 
-    return results.filter(Boolean) as SearchResultsType[]
+    return {
+      results: results.filter(Boolean) as SearchResultsType[],
+      statusObjects
+    }
   } catch (error) {
     if (error instanceof ZodError) {
       throw createError({
         statusCode: 400,
         statusMessage: "Validation errors",
-        data: error.issues.map(i => ({
-          [i.path.join(".")]: {
-            message: i.message,
-            received: i.input
-          }
-        }))
+        data: formatZodError(error)
       })
     }
 
-    console.error(error)
-    throw error
+    throw createError({
+      statusCode: 500,
+      statusMessage: `Error fetching search results for ${params.searchTerm}`,
+      data: [error instanceof Error ? error.message : String(error)]
+    })
   }
 })

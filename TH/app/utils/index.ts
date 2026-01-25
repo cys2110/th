@@ -1,34 +1,6 @@
-// columns
-export * from "./columns/countries/index"
-export * from "./columns/countries/titles"
-export * from "./columns/editions/index"
-// export * from "./columns/events"
-export * from "./columns/players/index"
-export * from "./columns/players/wl"
-export * from "./columns/players/h2h"
-export * from "./columns/players/recent-events"
-export * from "./columns/tournaments/index"
-export * from "./columns/tournaments/pm"
-export * from "./columns/tournaments/finalists"
-export * from "./columns/tournaments/country"
-export * from "./columns/tournaments/age"
-export * from "./columns/tournaments/scores-stats"
-
 // helpers
 export * from "./helpers/index"
-export * from "./helpers/conversion"
-export * from "./helpers/draws"
-export * from "./helpers/route-query"
-
-// schemas
-export * from "./schemas/index"
-// export * from "./schemas/editions"
-// export * from "./schemas/events"
-// export * from "./schemas/matches"
-export * from "./schemas/players"
-export * from "./schemas/tournaments"
 
 // variables
-export * from "./variables/index"
 export * from "./variables/COLOURS"
 export * from "./variables/ICONS"

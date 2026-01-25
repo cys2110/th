@@ -4,14 +4,17 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
 
   modules: [
+    "@nuxt/content",
     "@nuxt/eslint",
+    "@nuxt/hints",
     "@nuxt/image",
     "@nuxt/test-utils",
-    "@pinia/nuxt",
     "@vueuse/nuxt",
+    "nuxt-qrcode",
+    "@pinia/nuxt",
     "nuxt-echarts",
-    "nuxt-neo4j",
     "@nuxtjs/leaflet",
+    "nuxt-neo4j",
     "@nuxt/ui"
   ],
 

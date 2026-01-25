@@ -7,7 +7,7 @@ const {
 
 // Navigation menu items
 const navLinks: NavigationMenuItem[] = [
-  { label: "Results Archive", icon: ICONS.years, to: { name: "results-archive" } },
+  { label: "Results Archive", icon: ICONS.calendar, to: { name: "results-archive" } },
   { label: "Tournaments", icon: ICONS.trophy, to: { name: "tournaments" } },
   { label: "Players", icon: ICONS.player, to: { name: "players" } },
   { label: "Head to Head", icon: ICONS.h2h, to: { name: "h2h" } },

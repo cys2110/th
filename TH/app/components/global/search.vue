@@ -4,23 +4,22 @@ import type { CommandPaletteGroup } from "@nuxt/ui"
 const {
   ui: { icons }
 } = useAppConfig()
+const { devMode } = useRuntimeConfig().public
 
 const isOpen = ref(false)
 const searchTerm = ref<string>("")
 
-const {
-  data: groups,
-  status,
-  refresh,
-  error
-} = useLazyFetch("/api/search", {
+const { data, status, refresh, error } = useLazyFetch("/api/search", {
   query: { searchTerm },
   server: false,
   immediate: false,
-  default: () => [] as CommandPaletteGroup[],
-  transform: data => {
-    const players = data.filter(item => "tour" in item)
-    const tournaments = data.filter(item => "name" in item)
+  default: () => ({ statusObjects: [], results: [] as CommandPaletteGroup[] })
+})
+
+const groups = computed<CommandPaletteGroup[]>(() => {
+  if (data.value) {
+    const players = data.value.results.filter(item => "tour" in item)
+    const tournaments = data.value.results.filter(item => "name" in item)
 
     const results = [
       {
@@ -57,17 +56,29 @@ const {
     ]
 
     return results as CommandPaletteGroup[]
+  } else {
+    return [] as CommandPaletteGroup[]
   }
 })
 
 watch(
-  error,
+  () => data.value.statusObjects,
   () => {
-    if (error.value) {
-      if (error.value.statusMessage) {
-        console.error(error.value.statusMessage, error.value.data?.data)
+    if (data.value?.statusObjects.length && devMode) {
+      console.info("Search API Status Objects:", data.value.statusObjects)
+    }
+  },
+  { immediate: true }
+)
+
+watch(
+  error,
+  newError => {
+    if (newError) {
+      if (newError.statusMessage) {
+        console.error(newError.statusMessage, newError.data?.data)
       } else {
-        console.error(error.value)
+        console.error(newError)
       }
     }
   },
@@ -91,19 +102,54 @@ watch([isOpen, searchTerm], () => {
     />
 
     <template #content>
-      <u-command-palette
-        :groups
-        :loading="status === 'pending'"
-        v-model:search-term="searchTerm"
-      >
-        <template #player-trailing="{ item }">
-          <u-badge
-            :label="item.tour"
-            :color="item.tour"
-            size="sm"
-          />
-        </template>
-      </u-command-palette>
+      <dev-only>
+        <u-alert
+          v-if="data.statusObjects.length"
+          color="info"
+          :icon="icons.info"
+          title="neo4j Statuses"
+        >
+          <template #description>
+            <div
+              v-for="(object, index) in data.statusObjects"
+              :key="index"
+              >{{ object }}</div
+            >
+          </template>
+        </u-alert>
+
+        <u-alert
+          v-if="error"
+          color="error"
+          :icon="icons.error"
+          :title="`Error fetching results for ${searchTerm}`"
+        >
+          <template #description>
+            <div
+              v-if="Array.isArray(error.data?.data)"
+              v-for="(item, index) in error.data.data"
+              :key="index"
+            >
+              {{ item }}
+            </div>
+            <div v-else>{{ error.data.data }}</div>
+          </template>
+        </u-alert>
+
+        <u-command-palette
+          :groups
+          :loading="status === 'pending'"
+          v-model:search-term="searchTerm"
+        >
+          <template #player-trailing="{ item }">
+            <u-badge
+              :label="item.tour"
+              :color="item.tour"
+              size="sm"
+            />
+          </template>
+        </u-command-palette>
+      </dev-only>
     </template>
   </u-modal>
 </template>
