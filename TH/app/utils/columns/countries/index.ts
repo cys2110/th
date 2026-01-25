@@ -37,7 +37,7 @@ export const countriesColumns: TableColumn<CountryType>[] = [
         h(TableClientFilterHeader, {
           column: column as Column<unknown>,
           label: "Continent",
-          icon: "icon-park-twotone:globe"
+          icon: ICONS.continent
         }),
         h(TableClientSortHeader, {
           column: column as Column<unknown>

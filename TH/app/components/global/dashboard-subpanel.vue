@@ -12,9 +12,9 @@ defineProps<{
         <u-icon
           v-if="icon"
           :name="icon"
-          class="text-xl"
+          class="text-xl shrink-0"
         />
-        <h1 class="flex items-center gap-1.5 font-semibold text-highlighted truncate">
+        <h1 class="flex items-center gap-1.5 font-semibold text-highlighted text-wrap">
           <template v-if="!$slots.title">{{ title }}</template>
           <slot
             v-else

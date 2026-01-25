@@ -2,17 +2,17 @@ import { ZodError } from "zod"
 
 export default defineEventHandler(async event => {
   try {
-    const params = getQuery(event)
+    const params = await readValidatedBody(event, body => countryFormSchema.parse(body))
 
     const query = `/* cypher */
-      MATCH (c:Country { id: $id })
-      RETURN properties(c) AS country
+      MERGE (c:Country {id: $id})
+      SET c += $country
     `
 
-    const { records, summary } = await useDriver().executeQuery(query, params)
+    const { summary } = await useDriver().executeQuery(query, params)
 
-    if (summary.gqlStatusObjects.some(s => s.gqlStatus === "00000")) {
-      return countrySchema.parse(records[0]?.get("country"))
+    if (summary.gqlStatusObjects.some(s => s.gqlStatus === "00001")) {
+      return true
     }
 
     throw createError({

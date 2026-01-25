@@ -17,6 +17,7 @@ export default {
   coach: "icon-park-twotone:brain",
   colour: "solar:palette-round-bold-duotone",
   columnOff: "tabler:table-minus",
+  continent: "icon-park-twotone:globe",
   court: "game-icons:tennis-court",
   download: "line-md:downloading",
   downloading: "line-md:downloading-loop",

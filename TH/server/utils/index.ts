@@ -26,6 +26,21 @@ export const paginationSchema = object({
   sortField: array(sortFieldSchema).default([])
 })
 
+export const countryFormSchema = object({
+  id: string("Country ID is required"),
+  name: string("Country name is required"),
+  continent: string("Continent is required"),
+  alpha2: string()
+    .optional()
+    .refine(val => !val || val.length === 2, "Alpha-2 code must be 2 characters")
+}).transform(data => {
+  const { id, ...rest } = data
+  return {
+    id: id.toUpperCase(),
+    country: { ...rest }
+  }
+})
+
 export const personFormSchema = personSchema
   .pick({
     first_name: true,

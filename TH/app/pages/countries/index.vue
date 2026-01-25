@@ -19,17 +19,23 @@ const showResetFilters = computed(() => {
 })
 
 // API call
-const { data, status, error } = await useFetch("/api/countries", {
+const { data, status, refresh, error } = await useFetch("/api/countries", {
   default: () => []
 })
 
-watch(error, newError => {
-  if (newError?.statusMessage) {
-    console.error(newError.statusMessage, newError.data?.data)
-  } else {
-    console.error(newError)
-  }
-})
+watch(
+  error,
+  newError => {
+    if (newError) {
+      if (newError.statusMessage) {
+        console.error(newError.statusMessage, newError.data?.data)
+      } else {
+        console.error(newError)
+      }
+    }
+  },
+  { immediate: true }
+)
 
 const countryOptions = computed<OptionType[]>(() =>
   data.value.map(c => ({
@@ -68,6 +74,10 @@ const total = computed(() => {
             class="w-full font-semibold"
           />
 
+          <dev-only>
+            <country-create @refresh="refresh" />
+          </dev-only>
+
           <!--Filters-->
           <filters
             v-if="viewModeStore.isCardView"
@@ -85,7 +95,7 @@ const total = computed(() => {
               v-model="<string[]>continents"
               placeholder="Select continents"
               multiple
-              icon="icon-park-twotone:globe"
+              :icon="ICONS.continent"
               :items="CONTINENTS"
             />
           </filters>

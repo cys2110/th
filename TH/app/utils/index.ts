@@ -1,5 +1,6 @@
 // columns
 export * from "./columns/countries/index"
+export * from "./columns/countries/titles"
 export * from "./columns/editions/index"
 // export * from "./columns/events"
 export * from "./columns/players/index"
