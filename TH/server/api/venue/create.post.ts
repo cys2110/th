@@ -2,10 +2,13 @@ import { ZodError } from "zod"
 
 export default defineEventHandler(async event => {
   try {
-    const params = await readValidatedBody(event, body => playerCreateSchema.parse(body))
+    const params = await readValidatedBody(event, body => venueFormSchema.parse(body))
 
     const query = `/* cypher */
-      MERGE (p:Player:$($tour) { id: $id, updated_at: date() })
+      MATCH (c:Country { id: $country })
+      MERGE (v:Venue { id: $id })
+      MERGE (v)-[:LOCATED_IN]->(c)
+      SET v += $venue
     `
 
     const { summary } = await useDriver().executeQuery(query, params)
@@ -36,7 +39,7 @@ export default defineEventHandler(async event => {
 
     throw createError({
       statusCode: 500,
-      statusMessage: "Error creating player",
+      statusMessage: "Error creating venue",
       data: [error instanceof Error ? error.message : String(error)]
     })
   }

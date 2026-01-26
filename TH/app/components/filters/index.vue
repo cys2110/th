@@ -3,7 +3,9 @@ defineProps<{
   showResetFilters: boolean
 }>()
 
-defineEmits(["reset-filters"])
+defineEmits<{
+  (e: "reset-filters"): void
+}>()
 
 const viewModeStore = useViewModeStore()
 </script>

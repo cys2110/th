@@ -1,5 +1,7 @@
 <script setup lang="ts">
-defineEmits(["reset-grouping"])
+defineEmits<{
+  (e: "reset-grouping"): void
+}>()
 </script>
 
 <template>

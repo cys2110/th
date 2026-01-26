@@ -2,10 +2,19 @@ import { ZodError } from "zod"
 
 export default defineEventHandler(async event => {
   try {
-    const params = await readValidatedBody(event, body => playerCreateSchema.parse(body))
+    const params = await readValidatedBody(event, body => venueFormSchema.parse(body))
 
     const query = `/* cypher */
-      MERGE (p:Player:$($tour) { id: $id, updated_at: date() })
+      MATCH (v:Venue { id: $id })
+      SET v += $venue
+
+      WITH v
+      MATCH (v)-[t:LOCATED_IN]->(:Country)
+      DELETE t
+
+      WITH v
+      MATCH (c:Country { id: $country })
+      MERGE (v)-[:LOCATED_IN]->(c)
     `
 
     const { summary } = await useDriver().executeQuery(query, params)
@@ -15,14 +24,14 @@ export default defineEventHandler(async event => {
     if (Object.values(summary.counters.updates()).every(v => v === 0)) {
       return {
         success: false,
-        message: `${params.id} could not be created.`,
+        message: `${params.id} could not be updated.`,
         statusObjects
       }
     }
 
     return {
       success: true,
-      message: `${params.id} created successfully.`,
+      message: `${params.id} updated successfully.`,
       statusObjects
     }
   } catch (error) {
@@ -36,7 +45,7 @@ export default defineEventHandler(async event => {
 
     throw createError({
       statusCode: 500,
-      statusMessage: "Error creating player",
+      statusMessage: "Error updating venue",
       data: [error instanceof Error ? error.message : String(error)]
     })
   }

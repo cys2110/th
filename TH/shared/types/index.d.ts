@@ -1,3 +1,5 @@
+import type z from "zod"
+
 declare global {
   interface ValidationErrors {
     [key: string]: {
@@ -20,6 +22,10 @@ declare global {
     placeholder?: string
     subType?: string
     max?: number
+    errorPattern?: RegExp
+    schema?: z.ZodType
+    currency?: CurrencyEnumType
+    children?: FormFieldInterface<S[keyof S][keyof S[keyof S]]>[]
   }
 
   type PlayersResultsType = BasePlayerType & GroupedPlayerResultsType

@@ -82,3 +82,26 @@ export const coachSchema = personSchema
   })
 
 export type CoachType = z.infer<typeof coachSchema>
+
+export const surfaceSchema = object({
+  id: string("ID is required"),
+  environment: EnvironmentEnum,
+  surface: SurfaceEnum
+})
+
+export type SurfaceType = z.infer<typeof surfaceSchema>
+
+export const venueSchema = object({
+  id: string("Venue ID is required"),
+  name: string().optional(),
+  city: string("City is required"),
+  country: countrySchema
+})
+
+export type VenueType = z.infer<typeof venueSchema>
+
+export const laverEntrySchema = object({
+  id: string(),
+  team: literal(["Europe", "World"]),
+  points: intToNumberSchema
+})

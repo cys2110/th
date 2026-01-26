@@ -10,7 +10,9 @@ const sortField = useRouteQuery("sorting", null, {
   }
 })
 
-const emit = defineEmits(["reset-sorting"])
+const emit = defineEmits<{
+  (e: "reset-sorting"): void
+}>()
 
 const {
   ui: { icons }

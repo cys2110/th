@@ -25,3 +25,48 @@ export const paginationSchema = object({
   skip: numberToIntSchema.default(int(0)),
   sortField: array(sortFieldSchema).default([])
 })
+
+export const personFormSchema = personSchema
+  .pick({
+    first_name: true,
+    last_name: true
+  })
+  .extend({
+    id: string().optional(),
+    type: literal(["Supervisor", "Coach", "Umpire"])
+  })
+  .transform(data => {
+    const { id, type, ...rest } = data
+
+    return {
+      id: id ?? `${data.first_name} ${data.last_name}`.trim(),
+      type,
+      person: { ...rest }
+    }
+  })
+
+export const venueFormSchema = venueSchema
+  .pick({
+    name: true,
+    city: true,
+    id: true
+  })
+  .partial({
+    id: true
+  })
+  .extend({
+    country: optionSchema
+  })
+  .transform(data => {
+    const { id, country, ...rest } = data
+
+    return {
+      id:
+        id ??
+        (data.name && data.name.includes(data.city) ? data.name
+        : data.name ? `${data.name}, ${data.city}`
+        : data.city),
+      country,
+      venue: { ...rest }
+    }
+  })
