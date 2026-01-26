@@ -59,6 +59,8 @@ const handleSelectRow = (_e: Event, row: TableRow<PlayerH2HType>) => {
     :icon="ICONS.h2h"
     class="scroll-mt-70"
   >
+    <api-alerts :error />
+
     <u-table
       :data="data.results"
       :columns="playerH2HColumns"

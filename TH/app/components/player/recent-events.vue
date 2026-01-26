@@ -61,6 +61,8 @@ const handleSelectRow = (_e: Event, row: TableRow<PlayerRecentEventType>) => {
     :icon="ICONS.racquet"
     class="lg:col-span-2 scroll-mt-70"
   >
+    <api-alerts :error />
+
     <u-table
       :data="data.results"
       :columns="recentEventColumns"

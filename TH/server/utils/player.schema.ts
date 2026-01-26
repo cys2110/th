@@ -101,3 +101,9 @@ export const playerFormSchema = object({
 
   return newObject
 })
+
+export const playerRecordSchema = object({
+  tournament: baseTournamentSchema,
+  round: RoundEnum,
+  year: intToNumberSchema
+})

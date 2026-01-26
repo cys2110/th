@@ -143,6 +143,8 @@ const handleScrape = async () => {
       <player-wrapper />
 
       <u-page-body>
+        <api-alerts :error />
+
         <player-details
           v-if="data.results"
           :player="data.results"

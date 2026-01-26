@@ -44,6 +44,8 @@ watch(
     :icon="ICONS.stats"
     class="scroll-mt-70"
   >
+    <api-alerts :error />
+
     <u-table
       :data="data.results"
       :columns="playerWLColumns"

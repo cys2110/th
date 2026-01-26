@@ -29,6 +29,15 @@ declare global {
   }
 
   type PlayersResultsType = BasePlayerType & GroupedPlayerResultsType
+
+  type RecordType = {
+    year: number
+  } & {
+    [tournament: string]: {
+      singles?: RoundEnumType
+      doubles?: RoundEnumType
+    }
+  }
 }
 
 export {}
