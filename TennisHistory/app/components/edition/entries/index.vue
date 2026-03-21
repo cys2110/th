@@ -2,49 +2,53 @@
 const {
   params: { id, edId }
 } = useRoute("edition")
+
 const {
   ui: { icons }
 } = useAppConfig()
+
 const toast = useToast()
+
+const supabase = useSupabaseClient()
+
 const tournamentStore = useTournamentStore()
 
 const viewType = ref("By Player")
 const refresh = ref(0)
-// const updating = ref(false)
+const isUpdating = ref(false)
 
-// const updateActivityInfo = async () => {
-//   set(updating, true)
+const updateActivityInfo = async () => {
+  set(isUpdating, true)
 
-//   try {
-//     const response = await $fetch("/api/player/activity/update", {
-//       query: { id: edId }
-//     })
-//     if (response?.success) {
-//       toast.add({
-//         title: "Activity updated successfully",
-//         icon: icons.check,
-//         color: "success"
-//       })
-//       refresh.value++
-//     } else {
-//       toast.add({
-//         title: "Error updating activity",
-//         icon: icons.error,
-//         color: "error"
-//       })
-//     }
-//   } catch (e) {
-//     console.error(e)
+  try {
+    const { error } = await supabase.rpc("update_activity", { edition_id: Number(edId) })
 
-//     toast.add({
-//       title: "Error updating activity",
-//       icon: icons.error,
-//       color: "error"
-//     })
-//   }
+    if (error) {
+      console.error("Error updating activity:", error)
+      toast.add({
+        title: "Error updating activity",
+        icon: icons.error,
+        color: "error"
+      })
+    } else {
+      toast.add({
+        title: "Activity updated successfully",
+        icon: icons.check,
+        color: "success"
+      })
+    }
+  } catch (e) {
+    console.error(e)
 
-//   set(updating, false)
-// }
+    toast.add({
+      title: "Error updating activity",
+      icon: icons.error,
+      color: "error"
+    })
+  } finally {
+    set(isUpdating, false)
+  }
+}
 </script>
 
 <template>
@@ -54,17 +58,17 @@ const refresh = ref(0)
   >
     <template #right>
       <dev-only>
-        <!-- <edition-entries-activity
+        <edition-entries-activity
           v-if="tournamentStore.tours.includes('ATP')"
-          v-model="refresh"
-        /> -->
+          @refresh="refresh++"
+        />
 
-        <!-- <u-button
+        <u-button
           v-if="!COUNTRY_DRAWS.includes(id)"
           @click="updateActivityInfo"
-          :icon="updating ? ICONS.uploading : icons.upload"
-          color="Doubles"
-        /> -->
+          :icon="isUpdating ? ICONS.uploading : icons.upload"
+          color="warning"
+        />
 
         <edition-entries-country-create
           v-if="COUNTRY_DRAWS.includes(id)"
@@ -87,17 +91,18 @@ const refresh = ref(0)
       />
     </template>
 
-    <!-- <edition-entries-players
+    <edition-entries-players
       v-if="viewType === 'By Player'"
-      v-model:refresh-count="refresh"
-    /> -->
-
-    <!-- <template v-else> -->
-    <edition-entries-country-teams
-      v-if="COUNTRY_DRAWS.includes(id)"
       :refresh
     />
-    <!-- <edition-entries-teams v-else /> -->
-    <!-- </template> -->
+
+    <template v-else>
+      <edition-entries-country-teams
+        v-if="COUNTRY_DRAWS.includes(id)"
+        :refresh
+      />
+
+      <edition-entries-teams v-else />
+    </template>
   </dashboard-subpanel>
 </template>

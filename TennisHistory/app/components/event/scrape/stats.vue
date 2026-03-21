@@ -7,7 +7,7 @@ const props = defineProps<{
 }>()
 
 const {
-  params: { year }
+  params: { id, year }
 } = useRoute("edition")
 
 const {
@@ -34,8 +34,10 @@ const onError = (event: FormErrorEvent) => console.error(event.errors)
 const onSubmit = async (event: FormSubmitEvent<ScrapeMatchesType>) => {
   set(isScraping, true)
 
+  const url = COUNTRY_DRAWS.includes(id) ? "atp/old-matches" : `${props.tour.toLowerCase()}/stats`
+
   try {
-    await $fetch(`${FLASK_ROUTE}/${props.tour.toLowerCase()}/stats`, {
+    await $fetch(`${FLASK_ROUTE}/${url}`, {
       method: "POST",
       timeout: 120_000,
       "Content-Type": "application/json",
@@ -73,7 +75,7 @@ const onSubmit = async (event: FormSubmitEvent<ScrapeMatchesType>) => {
 }
 
 const formFields = computed<FormFieldInterface<ScrapeMatchesType>[]>(() => {
-  if (props.tour === "ATP") {
+  if (props.tour === "ATP" || COUNTRY_DRAWS.includes(id)) {
     return [{ label: "Links", key: "links", type: "tags", class: "col-span-2", required: true, icon: ICONS.group }]
   } else {
     return [

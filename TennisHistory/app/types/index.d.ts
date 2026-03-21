@@ -60,6 +60,8 @@ declare global {
     tours: Array<TourType>
     players: Array<string>
     countries: Array<string>
+    turned_pro?: number
+    retired?: number
   }
 
   interface CountryFiltersInterface {

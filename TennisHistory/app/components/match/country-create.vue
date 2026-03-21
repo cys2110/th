@@ -2,6 +2,10 @@
 import { CalendarDate } from "@internationalized/date"
 import type { FormErrorEvent, FormSubmitEvent } from "@nuxt/ui"
 
+const emit = defineEmits<{
+  refresh: []
+}>()
+
 const {
   params: { edId }
 } = useRoute("edition")
@@ -272,9 +276,9 @@ const onSubmit = async (event: FormSubmitEvent<CountryMatchType>) => {
     color: "success"
   })
 
+  emit("refresh")
   handleReset()
   set(isOpen, false)
-
   set(isUploading, false)
 }
 </script>

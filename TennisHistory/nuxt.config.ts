@@ -19,6 +19,12 @@ export default defineNuxtConfig({
     }
   },
 
+  runtimeConfig: {
+    public: {
+      dev: process.env.NODE_ENV === "development" || false
+    }
+  },
+
   // CSS path
   css: ["~/assets/css/main.css"],
 

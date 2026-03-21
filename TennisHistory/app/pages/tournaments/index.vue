@@ -16,17 +16,6 @@ const filters = ref<TournamentFiltersInterface>({
   abolished: undefined
 })
 
-watch(
-  tournamentFilters,
-  newFilters => {
-    filters.value = {
-      ...filters.value,
-      tournaments: newFilters.map(t => t.id)
-    }
-  },
-  { deep: true }
-)
-
 const sorting = ref<Array<SortingInterface>>([{ field: "name", direction: true }])
 
 const handleSorting = (field: string) => {
@@ -145,6 +134,7 @@ const loadMore = () => {
                 clear
                 :items="results"
                 v-model="tournamentFilters"
+                @update:model-value="filters.tournaments = tournamentFilters.map(t => t.id)"
                 multiple
                 :icon="ICONS.trophy"
                 :loading

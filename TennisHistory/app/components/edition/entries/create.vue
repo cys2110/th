@@ -26,8 +26,20 @@ const eventId = computed(() => {
   } else if (id === "9210") {
     return `${edId}-LC`
   } else {
-    return edId
+    return
   }
+})
+
+// Get events
+const { data: events } = await useAsyncData("seed-events", async () => {
+  const { data, error } = await supabase.from("events").select("id, tour").eq("edition_id", Number(edId))
+
+  if (error) {
+    console.error("Error fetching events:", error)
+    return []
+  }
+
+  return data
 })
 
 const state = ref<Partial<EntryType>>({
@@ -102,10 +114,18 @@ const onSubmit = async (event: FormSubmitEvent<EntryType>) => {
 }
 
 const formFields = computed<FormFieldInterface<EntryType>[]>(() => {
-  const fields: FormFieldInterface<EntryType>[] = [
-    { label: "S/D", key: "match_type", type: "radio", items: ["Singles", "Doubles"], required: true },
-    { label: state.value.match_type === "Doubles" ? "Player 1" : "Player", type: "slot", errorPattern: /^(player_id|rank)$/, required: true }
-  ]
+  const fields: FormFieldInterface<EntryType>[] = [{ label: "S/D", key: "match_type", type: "radio", items: ["Singles", "Doubles"], required: true }]
+
+  if (!COUNTRY_DRAWS.includes(id) && id !== "9210") {
+    fields.push({ label: "Tour", key: "event_id", type: "radio", items: events.value, required: true, valueKey: "id", labelKey: "tour" })
+  }
+
+  fields.push({
+    label: state.value.match_type === "Doubles" ? "Player 1" : "Player",
+    type: "slot",
+    errorPattern: /^(player_id|rank)$/,
+    required: true
+  })
 
   if (state.value.match_type === "Doubles") {
     fields.push({

@@ -129,6 +129,17 @@ const formFields = computed<FormFieldInterface<SeedType>[]>(() => [
           />
         </div>
       </u-form>
+
+      <u-alert
+        v-if="errors"
+        color="error"
+        title="Error saving round"
+        class="mt-5"
+      >
+        <template #description>
+          {{ errors }}
+        </template>
+      </u-alert>
     </template>
 
     <template #footer="{ close }">

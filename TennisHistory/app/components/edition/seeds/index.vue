@@ -28,7 +28,9 @@ const {
   async () => {
     const { data, error } = await supabase
       .from("seeds")
-      .select("*, events!inner(edition_id), entries(withdrawals(id), player_entry_mapping(countries(*), players(id, first_name, last_name, tour)))")
+      .select(
+        "*, events!inner(edition_id), entries(withdrawals(id, draw), player_entry_mapping(countries(*), players(id, first_name, last_name, tour)))"
+      )
       .eq("events.edition_id", Number(edId))
       .order("event_id", { ascending: true })
       .order("draw", { ascending: true })
@@ -49,7 +51,7 @@ const {
           match_type: seed.match_type,
           rank: seed.rank,
           tour: seed.entries.player_entry_mapping[0]?.players.tour,
-          withdrew: !!seed.entries.withdrawals.length,
+          withdrew: !!seed.entries.withdrawals.find(w => w.draw === seed.draw),
           team: seed.entries.player_entry_mapping.map(entry => ({
             id: entry.players.id,
             first_name: entry.players.first_name,

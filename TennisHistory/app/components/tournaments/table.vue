@@ -15,8 +15,6 @@ const emits = defineEmits<{
 
 const filters = defineModel<TournamentFiltersInterface>("filters")
 
-const tournamentStore = useTournamentStore()
-
 const { results, loading, searchTerm, tournamentFilters } = useTournamentSearch()
 
 const router = useRouter()
@@ -59,6 +57,12 @@ const handleSelectRow = (_e: Event, row: TableRow<TournamentType>) => {
       name: kebabCase(name)
     }
   })
+}
+
+const handleUpdateTournamentFilter = (value: any) => {
+  if (filters.value) {
+    filters.value.tournaments = value.map((v: any) => v.id)
+  }
 }
 </script>
 
@@ -149,6 +153,7 @@ const handleSelectRow = (_e: Event, row: TableRow<TournamentType>) => {
             clear
             :items="results"
             v-model="tournamentFilters"
+            @update:model-value="(value: any) => handleUpdateTournamentFilter(value)"
             multiple
             :icon="ICONS.trophy"
             :loading

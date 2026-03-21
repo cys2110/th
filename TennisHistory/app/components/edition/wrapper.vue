@@ -98,14 +98,6 @@ watch(
         :href="edition.wiki_link"
         target="_blank"
       />
-
-      <event-create v-if="route.name === 'edition'" />
-
-      <template v-else-if="route.name === 'results' || route.name === 'draws'">
-        <match-country-create v-if="COUNTRY_DRAWS.includes(route.params.id)" />
-
-        <match-create v-else />
-      </template>
     </template>
   </u-page-header>
 </template>

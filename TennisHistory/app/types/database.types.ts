@@ -35,6 +35,55 @@ export type Database = {
         }
         Relationships: []
       }
+      defaults: {
+        Row: {
+          draw: Database["public"]["Enums"]["draw_enum"] | null
+          entry_id: string
+          event_id: string
+          id: string
+          player_id: string | null
+          reason: string | null
+        }
+        Insert: {
+          draw?: Database["public"]["Enums"]["draw_enum"] | null
+          entry_id: string
+          event_id: string
+          id?: string
+          player_id?: string | null
+          reason?: string | null
+        }
+        Update: {
+          draw?: Database["public"]["Enums"]["draw_enum"] | null
+          entry_id?: string
+          event_id?: string
+          id?: string
+          player_id?: string | null
+          reason?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "defaults_entry_id_fkey"
+            columns: ["entry_id"]
+            isOneToOne: false
+            referencedRelation: "entries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "defaults_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "defaults_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       editions: {
         Row: {
           category: string | null
@@ -1334,6 +1383,7 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      update_activity: { Args: { edition_id: number }; Returns: undefined }
     }
     Enums: {
       continent_enum:

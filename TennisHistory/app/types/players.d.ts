@@ -43,6 +43,8 @@ declare global {
     rh: "Right" | "Left" | null
     updated_at: string
   }
+
+  type PlayersItemType = Pick<PlayerInterface, "id" | "first_name" | "last_name" | "tour" | "turned_pro" | "retired" | "country">
 }
 
 export {}

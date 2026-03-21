@@ -169,6 +169,23 @@ export const ScrapeMatchesSchema = object({
 
 export type ScrapeMatchesType = z.infer<typeof ScrapeMatchesSchema>
 
+export const ScrapeActivitySchema = object({
+  tournament_id: string(),
+  year: string(),
+  match_type: MatchTypeEnum,
+  category: string(),
+  players: array(
+    object({
+      entry_id: string(),
+      player_id: string(),
+      icon: string(),
+      name: string()
+    })
+  )
+})
+
+export type ScrapeActivityType = z.infer<typeof ScrapeActivitySchema>
+
 export const AwardSchema = object({
   round: RoundEnum,
   points: number().nullable().default(null),
@@ -189,6 +206,19 @@ export const SeedSchema = object({
 })
 
 export type SeedType = z.infer<typeof SeedSchema>
+
+export const EntryInfoSchema = object({
+  relationship: string(),
+  entry_id: string(),
+  event_id: string(),
+  draw: DrawEnum,
+  status: StatusEnum.optional(),
+  rank: number().optional(),
+  reason: string().optional(),
+  player_id: string().optional()
+})
+
+export type EntryInfoType = z.infer<typeof EntryInfoSchema>
 
 export const EntrySchema = object({
   points: number().nullable().default(null),

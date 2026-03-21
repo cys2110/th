@@ -15,17 +15,6 @@ const filters = ref<PlayerFiltersInterface>({
   countries: []
 })
 
-watch(
-  selectedPlayers,
-  newPlayers => {
-    filters.value = {
-      ...filters.value,
-      players: newPlayers.map(player => player.id)
-    }
-  },
-  { deep: true }
-)
-
 const sorting = ref<Array<SortingInterface>>([
   { field: "last_name", direction: true },
   { field: "first_name", direction: true }
@@ -65,7 +54,7 @@ const handleSorting = (field: string) => {
   }
 }
 
-const players = ref<Array<Pick<PlayerInterface, "id" | "first_name" | "last_name" | "tour" | "turned_pro" | "retired" | "country">>>([])
+const players = ref<Array<PlayersItemType>>([])
 const canLoadMore = ref(false)
 
 const { data: countries, pending: countriesPending } = await useAsyncData(
@@ -103,7 +92,7 @@ const { pending, execute, refresh } = await useAsyncData(
       `,
         { count: "exact" }
       )
-      .is("countries.end_date", null)
+      .is("country.end_date", null)
       .range(offset.value, offset.value + 29)
 
     if (filters.value.players.length) query = query.in("id", filters.value.players)
@@ -111,6 +100,17 @@ const { pending, execute, refresh } = await useAsyncData(
     if (filters.value.tours.length) query = query.in("tour", filters.value.tours)
 
     if (filters.value.countries.length) query = query.in("country.id", filters.value.countries)
+
+    if (filters.value.turned_pro) query = query.gte("turned_pro", filters.value.turned_pro)
+
+    if (filters.value.retired) query = query.gte("retired", filters.value.retired)
+
+    if (sorting.value.length) {
+      sorting.value.forEach(s => query.order(s.field, { ascending: s.direction }))
+    } else {
+      query.order("last_name", { ascending: true })
+      query.order("first_name", { ascending: true })
+    }
 
     const { data, count, error } = await query
 
@@ -127,10 +127,13 @@ const { pending, execute, refresh } = await useAsyncData(
 
     players.value = [
       ...players.value,
-      ...data.map(player => ({
-        ...player,
-        country: player.country[0]?.countries as CountryType
-      }))
+      ...data.map(
+        player =>
+          ({
+            ...player,
+            country: player.country[0]?.countries as CountryType
+          }) as PlayersItemType
+      )
     ]
 
     return data
@@ -171,7 +174,7 @@ const loadMore = () => {
           #description
           v-if="!viewModeStore.isTableView"
         >
-          <!-- <u-theme
+          <u-theme
             :ui="{
               select: {
                 base: 'w-fit max-w-1/3'
@@ -203,26 +206,30 @@ const loadMore = () => {
                 clear
               />
 
-              <filters-search
-                label="Filter by Player"
-                type="Player"
+              <u-select-menu
+                placeholder="Filter by Player"
+                clear
+                :items="results"
+                v-model="selectedPlayers"
+                @update:model-value="filters.players = selectedPlayers.map(player => player.id)"
                 multiple
                 :icon="ICONS.player"
-                v-model="playerStore.filters.players"
+                :loading
+                v-model:search-term="searchTerm"
               />
             </div>
-          </u-theme> -->
+          </u-theme>
         </template>
       </u-page-header>
 
       <u-page-body>
-        <!-- <players-table
+        <players-table
           v-if="viewModeStore.isTableView"
           :players
-          :status
+          :pending
           :can-load-more
           :countries
-          :countries-status
+          :countries-pending
           :sorting
           @load-more="loadMore"
           @handle-sorting="handleSorting"
@@ -232,10 +239,10 @@ const loadMore = () => {
         <players-grid
           v-else
           :players
-          :status
+          :pending
           :can-load-more
           @load-more="loadMore"
-        /> -->
+        />
       </u-page-body>
     </u-page>
   </u-container>

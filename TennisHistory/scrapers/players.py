@@ -3,7 +3,7 @@ import re
 import time
 import json
 from server import app
-from flask import jsonify
+from flask import jsonify, request
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -185,6 +185,93 @@ def get_atp_player(player_id):
         raise
 
     return jsonify({"success": True, "player": params})
+
+@app.route("/atp/activity", methods=['POST'])
+def get_atp_activity():
+    data = request.json
+    tournament_id = data.get('tournament_id')
+    year = data.get('year')
+    match_type = data.get('match_type')
+    category = data.get('category')
+    players = data.get('players')
+    activity = []
+
+    driver = webdriver.Chrome()
+
+    for player in players:
+        driver.get(f"https://www.atptour.com/en/players/x/{player['player_id']}/player-activity?matchType={match_type}&year={year}&tournament={tournament_id}_{category}")
+
+        player_activity = {
+            'entry_id': player['entry_id'],
+            'player_id': player['player_id']
+        }
+
+        WebDriverWait(driver, 10).until(EC.presence_of_all_elements_located((By.CLASS_NAME, 'atp_player-activity')))
+        time.sleep(2)
+
+        layout = driver.find_element(By.CLASS_NAME, 'atp_player-activity').get_attribute('innerHTML')
+        soup = BeautifulSoup(layout, 'html.parser')
+
+        tournament_rows = soup.find_all('div', class_='tournament')
+
+        if len(tournament_rows) == 1:
+            row = tournament_rows[0]
+        elif len(tournament_rows) > 1:
+            target_row = None
+            for row in tournament_rows:
+                a_tag = row.find('a', href=True)
+                if a_tag and f"/{tournament_id}/overview" in a_tag['href']:
+                    target_row = row
+                    break
+
+            if not target_row:
+                print(f"No activity found for {player}")
+                continue
+
+            row = target_row
+        else:
+            print(f"No activity found for {player}")
+            continue
+
+        footer = row.next_sibling
+
+        if not footer or footer == "":
+            print(f"No activity found for {player}")
+            continue
+
+        footer_text = footer.get_text(strip=True).split(', ')
+        for text in footer_text:
+            label, value = text.split(':')
+            if label == 'Points':
+                player_activity['points'] = int(value.strip())
+            elif label == 'ATP Ranking':
+                player_activity['rank'] = int(value.strip())
+            elif label == 'Prize Money':
+                for prefix in [' $', ' €', ' £', ' A$']:
+                    if value.startswith(prefix):
+                        value = value.removeprefix(prefix)
+                        break
+                player_activity['pm'] = int(value.strip().replace(',', ''))
+
+        activity.append(player_activity)
+
+    driver.quit()
+
+    for item in activity:
+        try:
+            supabase.table("entries").update({
+                'points': item['points'],
+                'pm': item['pm']
+            }).eq("id", item['entry_id'])
+
+            supabase.table("player_entry_mapping").update({
+                'rank': item['rank']
+            }).eq("entry_id", item['entry_id']).eq("player_id", item['player_id'])
+        except Exception as e:
+            print(item['player_id'], e)
+            continue
+
+    return jsonify({"success": True})
 
 @app.route("/wta/player/<player_id>", methods=['GET'])
 def get_wta_player(player_id):

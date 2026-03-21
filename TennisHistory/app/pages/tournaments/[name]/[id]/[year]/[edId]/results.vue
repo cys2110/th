@@ -11,33 +11,10 @@ const {
 
 const toast = useToast()
 
-const viewMode = useViewModeStore()
+const supabase = useSupabaseClient()
+
+const viewModeStore = useViewModeStore()
 const tournamentStore = useTournamentStore()
-
-const data = {
-  event_id: "99002026-Country",
-  links: [
-    "/en/scores/match-stats/archive/2026/9900/ms421",
-    "/en/scores/match-stats/archive/2026/9900/ms231",
-    "/en/scores/match-stats/archive/2026/9900/ms331",
-    "/en/scores/match-stats/archive/2026/9900/ms131"
-  ]
-}
-
-const fetchStats = async () => {
-  try {
-    await $fetch(`${FLASK_ROUTE}/atp/old-matches`, {
-      method: "POST",
-      timeout: 120_000,
-      "Content-Type": "application/json",
-      body: JSON.stringify(data)
-    })
-  } catch (e) {
-    console.error(e)
-  }
-}
-
-// const updating = ref(false)
 
 // const players = ref<string[]>([])
 // const tour = ref<keyof typeof tourEnum>()
@@ -50,15 +27,53 @@ const fetchStats = async () => {
 //   draw.value = undefined
 // }
 
-// const {
-//   data: matches,
-//   status,
-//   refresh
-// } = await useFetch("/api/edition/results", {
-//   query: { edId },
-//   default: () => [],
-//   onResponseError: ({ error }) => console.error("Error fetching edition results:", error)
-// })
+const {
+  data: matches,
+  pending,
+  refresh
+} = await useAsyncData(
+  "results",
+  async () => {
+    const { data: eventsData, error: eventsError } = await supabase.from("events").select("id").eq("edition_id", Number(edId))
+
+    if (eventsError || !eventsData) {
+      console.error("Error fetching events:", eventsError)
+      return
+    }
+    const { data, error } = await supabase
+      .from("matches")
+      .select(
+        `
+      *,
+      rounds!inner(*),
+      people(*),
+      winner:winner_id(
+        player_entry_mapping(countries(*), players(id, first_name, last_name)),
+        entry_status(status, draw),
+        seeds(seed, draw)
+      ),
+      loser:loser_id(
+        player_entry_mapping(countries(*), players(id, first_name, last_name)),
+        entry_status(status, draw),
+        seeds(seed, draw)
+      )
+    `
+      )
+      .in(
+        "rounds.event_id",
+        eventsData.map(e => e.id)
+      )
+      .neq("incomplete", "B")
+
+    if (error || !data) {
+      console.error("Error fetching matches:", error)
+      return
+    }
+
+    return data
+  },
+  { default: () => [] }
+)
 
 // const playerOptions = computed(() => {
 //   const uniqueWinners = matches.value.map(m => m.winner.team).flat()
@@ -81,69 +96,13 @@ const fetchStats = async () => {
 //   ).value
 // })
 
-// const updateTiebreaks = async () => {
-//   set(updating, true)
-//   try {
-//     const response = await $fetch("/api/matches/tiebreaks", {
-//       query: { id: edId }
-//     })
-//     if (response.success) {
-//       toast.add({
-//         title: "Tiebreaks updated successfully",
-//         icon: icons.check,
-//         color: "success"
-//       })
-//       refresh()
-//     } else {
-//       toast.add({
-//         title: "Error updating tiebreaks",
-//         description: (response as any).message,
-//         icon: icons.error,
-//         color: "error"
-//       })
-//     }
-//   } catch (e) {
-//     toast.add({
-//       title: "Error updating tiebreaks",
-//       description: (e as Error).message,
-//       icon: icons.error,
-//       color: "error"
-//     })
-//   } finally {
-//     set(updating, false)
-//   }
-// }
-
 // const tableRef = useTemplateRef("tableRef")
 </script>
 
 <template>
-  <u-container>
+  <u-container class="max-w-7xl">
     <u-page>
-      <template #left>
-        <u-page-aside>
-          <!-- <dev-only>
-            <u-button
-              @click="updateTiebreaks"
-              :icon="updating ? ICONS.uploading : icons.upload"
-              label="Update tiebreaks"
-              block
-              color="Doubles"
-            />
-
-            <match-country-update
-              v-if="COUNTRY_DRAWS.includes(id)"
-              :refresh
-            />
-            <match-update
-              v-else
-              :refresh
-            />
-
-            <u-separator />
-          </dev-only> -->
-
-          <!-- <template v-if="tableRef?.table">
+      <!-- <template v-if="tableRef?.table">
             <table-client-clear-filters :table="tableRef.table" />
 
             <table-client-clear-sorting :table="tableRef.table" />
@@ -192,34 +151,35 @@ const fetchStats = async () => {
               </div>
             </u-form-field>
           </template> -->
-        </u-page-aside>
-      </template>
 
-      <edition-wrapper />
+      <edition-wrapper>
+        <template #header-links>
+          <dev-only>
+            <match-country-create
+              v-if="COUNTRY_DRAWS.includes(id)"
+              @refresh="refresh"
+            />
+
+            <match-create
+              v-else
+              @refresh="refresh"
+            />
+          </dev-only>
+        </template>
+      </edition-wrapper>
 
       <u-page-body>
-        <u-button
-          label="Scrape Stats"
-          @click="fetchStats"
-        />
-        <!-- <edition-results-stepper
-          v-if="viewMode.isCardView"
+        <edition-results-table
+          v-if="viewModeStore.isTableView"
           :matches
-          :status
-          :refresh
-          :players
-          :tour
-          :draw
-          :type="matchType"
+          :pending
         />
 
-        <edition-results-table
+        <edition-results-stepper
           v-else
-          ref="tableRef"
           :matches
-          :status
-          :refresh
-        /> -->
+          :pending
+        />
       </u-page-body>
     </u-page>
   </u-container>

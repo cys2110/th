@@ -4,7 +4,7 @@ import type { PageAnchor } from "@nuxt/ui"
 definePageMeta({ name: "edition" })
 
 const {
-  params: { id }
+  params: { id, edId }
 } = useRoute("edition")
 
 const {
@@ -37,9 +37,21 @@ const pageAnchors = computed<Array<PageAnchor>>(() => {
         </u-page-aside>
       </template>
 
-      <edition-wrapper />
+      <edition-wrapper>
+        <template #header-links>
+          <dev-only>
+            <event-create />
+          </dev-only>
+        </template>
+      </edition-wrapper>
 
       <u-page-body>
+        <div v-if="COUNTRY_DRAWS.includes(id)">
+          <event-scrape-stats
+            tour="ITF-M"
+            :event_id="`${edId}-Country`"
+          />
+        </div>
         <u-page-list class="space-y-5">
           <edition-details id="details" />
 

@@ -23,7 +23,7 @@ const navLinks: NavigationMenuItem[] = [
 
 const showViewSwitcher = computed(() => {
   const currentRouteName = route.name
-  const viewSwitcherRoutes = ["tournaments", "tournament", "players", "countries"]
+  const viewSwitcherRoutes = ["tournaments", "tournament", "results", "players", "countries"]
   return viewSwitcherRoutes.includes(currentRouteName)
 })
 </script>
