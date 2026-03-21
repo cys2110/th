@@ -1,10 +1,16 @@
 <script setup lang="ts" generic="T">
 import type { Column } from "@tanstack/vue-table"
 
-const props = defineProps<{
-  column: Column<T>
-  label: string
-}>()
+const props = withDefaults(
+  defineProps<{
+    column: Column<T>
+    label: string
+    icon?: string
+  }>(),
+  {
+    icon: "line-md:filter-twotone"
+  }
+)
 
 const sortedUniqueValues = computed(() => {
   const uniqueValues = Array.from(props.column.getFacetedUniqueValues().keys()).filter(Boolean).sort()
@@ -40,14 +46,15 @@ const modelValue = computed({
 </script>
 
 <template>
-  <u-input-menu
-    v-model="modelValue"
+  <u-select-menu
+    :placeholder="label"
+    variant="none"
+    clear
     value-key="value"
     label-key="label"
-    :placeholder="label"
     :items="sortedUniqueValues"
-    variant="none"
-    :icon="ICONS.filter"
+    v-model="modelValue"
     multiple
+    :icon
   />
 </template>

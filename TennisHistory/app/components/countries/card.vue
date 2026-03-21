@@ -9,7 +9,13 @@ defineProps<{
     :icon="getFlagCode(country)"
     :title="country.name"
     :description="country.continent"
-    :to="{ name: 'country', params: { id: country.id, name: kebabCase(country.name) } }"
+    :to="{
+      name: 'country',
+      params: {
+        id: country.id,
+        name: kebabCase(country.name)
+      }
+    }"
     highlight
   />
 </template>

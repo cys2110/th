@@ -4,91 +4,117 @@ definePageMeta({ name: "results" })
 const {
   params: { id, edId }
 } = useRoute("results")
+
 const {
   ui: { icons }
 } = useAppConfig()
+
 const toast = useToast()
+
 const viewMode = useViewModeStore()
 const tournamentStore = useTournamentStore()
 
-const updating = ref(false)
-
-const players = ref<string[]>([])
-const tour = ref<keyof typeof tourEnum>()
-const draw = ref<DrawEnumType>()
-const matchType = ref<MatchTypeEnumType>()
-
-const resetFilters = () => {
-  players.value = []
-  tour.value = undefined
-  draw.value = undefined
+const data = {
+  event_id: "99002026-Country",
+  links: [
+    "/en/scores/match-stats/archive/2026/9900/ms421",
+    "/en/scores/match-stats/archive/2026/9900/ms231",
+    "/en/scores/match-stats/archive/2026/9900/ms331",
+    "/en/scores/match-stats/archive/2026/9900/ms131"
+  ]
 }
 
-const {
-  data: matches,
-  status,
-  refresh
-} = await useFetch("/api/edition/results", {
-  query: { edId },
-  default: () => [],
-  onResponseError: ({ error }) => console.error("Error fetching edition results:", error)
-})
-
-const playerOptions = computed(() => {
-  const uniqueWinners = matches.value.map(m => m.winner.team).flat()
-
-  const uniqueLosers = matches.value.map(m => m.loser.team).flat()
-
-  const uniquePlayers = [...uniqueWinners, ...uniqueLosers].sort((a, b) => {
-    if (a.last_name === b.last_name) {
-      return a.first_name!.localeCompare(b.first_name!)
-    }
-    return a.last_name!.localeCompare(b.last_name!)
-  })
-
-  return useArrayUnique(
-    uniquePlayers.map(p => ({
-      label: `${p.first_name ?? ""} ${p.last_name ?? ""}`.trim(),
-      value: p.id
-    })),
-    (a, b) => a.value === b.value
-  ).value
-})
-
-const updateTiebreaks = async () => {
-  set(updating, true)
+const fetchStats = async () => {
   try {
-    const response = await $fetch("/api/matches/tiebreaks", {
-      query: { id: edId }
+    await $fetch(`${FLASK_ROUTE}/atp/old-matches`, {
+      method: "POST",
+      timeout: 120_000,
+      "Content-Type": "application/json",
+      body: JSON.stringify(data)
     })
-    if (response.success) {
-      toast.add({
-        title: "Tiebreaks updated successfully",
-        icon: icons.check,
-        color: "success"
-      })
-      refresh()
-    } else {
-      toast.add({
-        title: "Error updating tiebreaks",
-        description: (response as any).message,
-        icon: icons.error,
-        color: "error"
-      })
-    }
   } catch (e) {
-    toast.add({
-      title: "Error updating tiebreaks",
-      description: (e as Error).message,
-      icon: icons.error,
-      color: "error"
-    })
-  } finally {
-    set(updating, false)
+    console.error(e)
   }
 }
 
-const tableRef = useTemplateRef("tableRef")
+// const updating = ref(false)
+
+// const players = ref<string[]>([])
+// const tour = ref<keyof typeof tourEnum>()
+// const draw = ref<DrawEnumType>()
+// const matchType = ref<MatchTypeEnumType>()
+
+// const resetFilters = () => {
+//   players.value = []
+//   tour.value = undefined
+//   draw.value = undefined
+// }
+
+// const {
+//   data: matches,
+//   status,
+//   refresh
+// } = await useFetch("/api/edition/results", {
+//   query: { edId },
+//   default: () => [],
+//   onResponseError: ({ error }) => console.error("Error fetching edition results:", error)
+// })
+
+// const playerOptions = computed(() => {
+//   const uniqueWinners = matches.value.map(m => m.winner.team).flat()
+
+//   const uniqueLosers = matches.value.map(m => m.loser.team).flat()
+
+//   const uniquePlayers = [...uniqueWinners, ...uniqueLosers].sort((a, b) => {
+//     if (a.last_name === b.last_name) {
+//       return a.first_name!.localeCompare(b.first_name!)
+//     }
+//     return a.last_name!.localeCompare(b.last_name!)
+//   })
+
+//   return useArrayUnique(
+//     uniquePlayers.map(p => ({
+//       label: `${p.first_name ?? ""} ${p.last_name ?? ""}`.trim(),
+//       value: p.id
+//     })),
+//     (a, b) => a.value === b.value
+//   ).value
+// })
+
+// const updateTiebreaks = async () => {
+//   set(updating, true)
+//   try {
+//     const response = await $fetch("/api/matches/tiebreaks", {
+//       query: { id: edId }
+//     })
+//     if (response.success) {
+//       toast.add({
+//         title: "Tiebreaks updated successfully",
+//         icon: icons.check,
+//         color: "success"
+//       })
+//       refresh()
+//     } else {
+//       toast.add({
+//         title: "Error updating tiebreaks",
+//         description: (response as any).message,
+//         icon: icons.error,
+//         color: "error"
+//       })
+//     }
+//   } catch (e) {
+//     toast.add({
+//       title: "Error updating tiebreaks",
+//       description: (e as Error).message,
+//       icon: icons.error,
+//       color: "error"
+//     })
+//   } finally {
+//     set(updating, false)
+//   }
+// }
+
+// const tableRef = useTemplateRef("tableRef")
 </script>
 
 <template>
@@ -96,7 +122,7 @@ const tableRef = useTemplateRef("tableRef")
     <u-page>
       <template #left>
         <u-page-aside>
-          <dev-only>
+          <!-- <dev-only>
             <u-button
               @click="updateTiebreaks"
               :icon="updating ? ICONS.uploading : icons.upload"
@@ -115,9 +141,9 @@ const tableRef = useTemplateRef("tableRef")
             />
 
             <u-separator />
-          </dev-only>
+          </dev-only> -->
 
-          <template v-if="tableRef?.table">
+          <!-- <template v-if="tableRef?.table">
             <table-client-clear-filters :table="tableRef.table" />
 
             <table-client-clear-sorting :table="tableRef.table" />
@@ -165,18 +191,18 @@ const tableRef = useTemplateRef("tableRef")
                 />
               </div>
             </u-form-field>
-          </template>
+          </template> -->
         </u-page-aside>
       </template>
 
-      <edition-wrapper>
-        <template #header-links>
-          <view-switcher />
-        </template>
-      </edition-wrapper>
+      <edition-wrapper />
 
       <u-page-body>
-        <edition-results-stepper
+        <u-button
+          label="Scrape Stats"
+          @click="fetchStats"
+        />
+        <!-- <edition-results-stepper
           v-if="viewMode.isCardView"
           :matches
           :status
@@ -193,7 +219,7 @@ const tableRef = useTemplateRef("tableRef")
           :matches
           :status
           :refresh
-        />
+        /> -->
       </u-page-body>
     </u-page>
   </u-container>

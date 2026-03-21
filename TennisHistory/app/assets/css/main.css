@@ -18,7 +18,7 @@ input::-webkit-inner-spin-button {
   --font-sans: "Jost", sans-serif;
   --font-cursive: "Homemade Apple", cursive;
   --container-8xl: 120rem;
-  --draw-width: "max-content";
+  /* --draw-width: "max-content";
   --draw-heigth: 100%;
   --main-vertical-padding: 20px;
   --round-titles-vertical-padding: 8px;
@@ -30,7 +30,7 @@ input::-webkit-inner-spin-button {
   --match-hor-margin: 20px;
   --match-axis-margin: 4px;
   --one-side-players-gap: 2px;
-  --distance-between-score-pairs: 14px;
+  --distance-between-score-pairs: 14px; */
 }
 
 :root {
@@ -65,5 +65,5 @@ input::-webkit-inner-spin-button {
 }
 
 .scrollbar {
-  @apply scrollbar-thin scrollbar-thumb-primary-600 scrollbar-track-transparent overflow-y-auto scroll-smooth max-h-200 2xl:max-h-150;
+  @apply scrollbar-thin scrollbar-thumb-primary-600 scrollbar-track-transparent overflow-y-auto scroll-smooth max-h-[calc(100vh-18rem)];
 }

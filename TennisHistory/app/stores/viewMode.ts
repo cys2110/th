@@ -1,7 +1,12 @@
+import { useStorage } from "@vueuse/core"
+
 export const useViewModeStore = defineStore("viewMode", () => {
-  const isCardView = ref(true)
+  const isTableView = useLocalStorage("isTableView", true)
 
-  const toggleViewMode = () => set(isCardView, !isCardView.value)
+  const toggleViewMode = () => {
+    set(isTableView, !isTableView.value)
+    useStorage("isTableView", isTableView.value)
+  }
 
-  return { isCardView, toggleViewMode }
+  return { isTableView, toggleViewMode }
 })

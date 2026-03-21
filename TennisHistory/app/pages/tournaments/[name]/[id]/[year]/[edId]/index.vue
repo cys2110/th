@@ -1,30 +1,31 @@
 <script setup lang="ts">
+import type { PageAnchor } from "@nuxt/ui"
+
 definePageMeta({ name: "edition" })
 
 const {
-  params: { id, edId }
+  params: { id }
 } = useRoute("edition")
+
 const {
   ui: { icons }
 } = useAppConfig()
 
-const {
-  data: edition,
-  status,
-  refresh
-} = await useFetch("/api/edition", {
-  key: edId,
-  query: { edId },
-  onResponseError: ({ error }) => console.error("Error fetching edition:", error)
-})
+const pageAnchors = computed<Array<PageAnchor>>(() => {
+  const anchors: Array<PageAnchor> = [{ label: "Details", to: "#details", icon: ICONS.cards }]
 
-const toc = [
-  { label: "Details", to: "#details", icon: ICONS.cards },
-  { label: "Awards", to: "#awards", icon: ICONS.awards },
-  { label: "Seeds", to: "#seeds", icon: ICONS.seeds },
-  { label: "Entry Information", to: "#entry-info", icon: icons.info },
-  { label: "Entries", to: "#entries", icon: ICONS.player }
-]
+  if (!COUNTRY_DRAWS.includes(id) && id !== "9210") {
+    anchors.push({ label: "Awards", to: "#awards", icon: ICONS.money })
+  }
+
+  if (id !== "9210") anchors.push({ label: "Seeds", to: "#seeds", icon: ICONS.ranking })
+
+  if (!COUNTRY_DRAWS.includes(id)) anchors.push({ label: "Entry Information", to: "#entry-info", icon: icons.info })
+
+  anchors.push({ label: "Entries", to: "#entries", icon: COUNTRY_DRAWS.includes(id) ? ICONS.globe : ICONS.player })
+
+  return anchors
+})
 </script>
 
 <template>
@@ -32,47 +33,18 @@ const toc = [
     <u-page>
       <template #left>
         <u-page-aside>
-          <u-badge
-            color="success"
-            :label="`Updated: ${useDateFormat(edition?.updated_at, 'DD MMMM YYYY').value}`"
-            class="w-full justify-center"
-          />
-
-          <dev-only>
-            <editions-update
-              :edition
-              :refresh
-            />
-
-            <events-update :refresh />
-
-            <edition-awards-country v-if="COUNTRY_DRAWS.includes(id)" />
-
-            <edition-awards-ties v-if="COUNTRY_DRAWS.includes(id)" />
-          </dev-only>
-
-          <u-separator v-if="!COUNTRY_DRAWS.includes(id)" />
-
-          <u-page-links
-            v-if="!COUNTRY_DRAWS.includes(id)"
-            :links="toc"
-          />
+          <u-page-anchors :links="pageAnchors" />
         </u-page-aside>
       </template>
 
       <edition-wrapper />
 
-      <u-page-body class="mt-0">
-        <u-page-list class="*:my-5">
-          <edition-details
-            id="details"
-            :edition
-            :status
-            :refresh
-          />
+      <u-page-body>
+        <u-page-list class="space-y-5">
+          <edition-details id="details" />
 
           <edition-awards
-            v-if="!COUNTRY_DRAWS.includes(id)"
+            v-if="id !== '9210' && !COUNTRY_DRAWS.includes(id)"
             id="awards"
           />
 
@@ -82,12 +54,12 @@ const toc = [
           />
 
           <edition-seeds
-            v-else
+            v-else-if="id !== '9210'"
             id="seeds"
           />
 
           <edition-entry-info
-            v-if="!COUNTRY_DRAWS.includes(id)"
+            v-if="!COUNTRY_DRAWS.includes(id) && id !== '9210'"
             id="entry-info"
           />
 

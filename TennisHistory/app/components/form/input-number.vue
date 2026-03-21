@@ -2,15 +2,17 @@
 withDefaults(
   defineProps<{
     placeholder: string
-    currency?: CurrencyEnumType
+    currency?: string
     disabled?: boolean
+    icon?: string
   }>(),
   {
     disabled: false
   }
 )
 
-const modelValue = defineModel<number>()
+const modelValue = defineModel<number | undefined | null>()
+
 const {
   ui: { icons }
 } = useAppConfig()
@@ -20,16 +22,17 @@ const {
   <u-input-number
     v-model="modelValue"
     :placeholder
-    :decrement="false"
     :step="currency ? 0.01 : undefined"
     :disabled
+    :icon
+    :decrement="!!icon"
     :format-options="
-      currency
-        ? {
-            style: 'currency',
-            currency: currency
-          }
-        : undefined
+      currency ?
+        {
+          style: 'currency',
+          currency: currency
+        }
+      : undefined
     "
   >
     <template #increment>
@@ -41,7 +44,14 @@ const {
         aria-label="Clear input"
         @click="modelValue = undefined"
       />
-      <template v-else>{{ "" }}</template>
+      <template v-else>{{ " " }}</template>
+    </template>
+
+    <template #decrement>
+      <u-icon
+        :name="icon"
+        class="text-base"
+      />
     </template>
   </u-input-number>
 </template>

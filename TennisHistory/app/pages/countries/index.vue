@@ -1,133 +1,89 @@
 <script setup lang="ts">
 useHead({ title: "Countries" })
 
-const viewModeStore = useViewModeStore()
-const tableRef = useTemplateRef("tableRef")
+const supabase = useSupabaseClient()
 
-const countriesFilter = ref<string[]>([])
-const continentsFilter = ref<string[]>([])
+const viewModeStore = useViewModeStore()
 
 const {
   data: countries,
-  status,
-  error
-} = await useFetch("/api/countries", {
-  default: () => []
-})
+  pending,
+  refresh
+} = await useAsyncData(
+  "countries",
+  async () => {
+    const { data, error } = await supabase.from("countries").select("*").order("name", { ascending: true })
 
-watch(
-  error,
-  () => {
-    if (error.value) {
-      if (error.value.statusMessage === "Validation errors") {
-        console.error(error.value.statusMessage, error.value.data?.data.validationErrors)
-      } else {
-        console.error(error.value)
-      }
+    if (error || !data) {
+      console.error("Error fetching countries:", error)
+      return []
     }
+
+    return data
   },
-  { immediate: true }
+  { default: () => [] }
 )
 
-const uniqueContinents = computed(() => useArrayUnique(countries.value.map(c => c.continent)).value.sort())
-const uniqueCountries = computed(() =>
-  useArrayUnique(
-    countries.value.map(
-      c => ({
-        label: c.name,
-        icon: getFlagCode(c)
-      }),
-      (a: any, b: any) => a.label === b.label
-    )
-  ).value.sort((a, b) => a.label.localeCompare(b.label))
-)
-
-const filteredCountries = computed(() => {
-  const countryMatches = countries.value.filter(country => {
-    if (countriesFilter.value.length === 0) return true
-    return countriesFilter.value.includes(country.name)
-  })
-
-  const continentMatches = countries.value.filter(country => {
-    if (continentsFilter.value.length === 0) return true
-    return continentsFilter.value.includes(country.continent)
-  })
-
-  return continentMatches && countryMatches
+const filters = ref<CountryFiltersInterface>({
+  countries: [],
+  continents: []
 })
 </script>
 
 <template>
-  <u-container class="min-h-screen flex flex-col">
-    <u-page class="flex-1">
-      <template #left>
-        <u-page-aside>
-          <!--Card global resets-->
-          <template v-if="viewModeStore.isCardView">
-            <u-form-field label="Filter by">
-              <div class="*:my-2">
-                <u-input-menu
-                  v-model="countriesFilter"
-                  value-key="label"
-                  placeholder="Select countries"
-                  multiple
-                  :icon="ICONS.globe"
-                  :items="uniqueCountries"
-                />
-
-                <u-input-menu
-                  v-model="continentsFilter"
-                  placeholder="Select continents"
-                  multiple
-                  icon="icon-park-twotone:globe"
-                  :items="uniqueContinents"
-                />
-              </div>
-            </u-form-field>
-          </template>
-
-          <!--Table global resets-->
-          <template v-else-if="tableRef?.table">
-            <table-client-clear-filters :table="tableRef.table" />
-
-            <table-client-clear-sorting :table="tableRef.table" />
-
-            <table-client-clear-grouping :table="tableRef.table" />
-          </template>
-        </u-page-aside>
-      </template>
-
+  <u-container class="xl:max-w-7xl">
+    <u-page>
       <u-page-header title="Countries">
         <template #links>
-          <view-switcher />
+          <dev-only>
+            <country-create @refresh="refresh" />
+          </dev-only>
+        </template>
+
+        <template
+          #description
+          v-if="!viewModeStore.isTableView"
+        >
+          <div class="flex justify-end gap-2">
+            <u-select-menu
+              v-model="filters.countries"
+              value-key="id"
+              label-key="name"
+              placeholder="Filter by country"
+              multiple
+              :icon="ICONS.globe"
+              :items="countries"
+              class="w-fit max-w-1/2"
+              clear
+            />
+
+            <u-select-menu
+              v-model="filters.continents"
+              placeholder="Filter by continent"
+              multiple
+              :icon="ICONS.world"
+              :items="[...CONTINENTS]"
+              class="w-fit max-w-1/2"
+              clear
+            />
+          </div>
         </template>
       </u-page-header>
 
       <u-page-body>
-        <!--Card view-->
-        <countries-grid
-          v-if="viewModeStore.isCardView"
-          :countries="filteredCountries"
-          :status="status"
+        <countries-table
+          v-if="viewModeStore.isTableView"
+          :countries
+          :pending
         />
 
-        <!--Table view-->
-        <countries-table
+        <countries-grid
           v-else
-          ref="tableRef"
           :countries
-          :status
+          :pending
+          :filters
         />
       </u-page-body>
     </u-page>
-
-    <!--Counts-->
-    <div class="sticky w-full z-50 bg-default bottom-0 mt-auto pt-3 pb-6 *:font-bold *:text-muted">
-      <div v-if="viewModeStore.isCardView"> {{ filteredCountries.length }} {{ filteredCountries.length === 1 ? "country" : "countries" }} </div>
-      <div v-else>
-        {{ tableRef?.table.tableApi.getFilteredRowModel().rows.length }}
-        {{ tableRef?.table.tableApi.getFilteredRowModel().rows.length === 1 ? "country" : "countries" }}
-      </div>
-    </div>
   </u-container>
 </template>

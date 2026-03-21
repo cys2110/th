@@ -1,9 +1,7 @@
 <script setup lang="ts">
-import type { AsyncDataRequestStatus } from "#app"
-
 const props = defineProps<{
-  seeds: SeedType[]
-  status: AsyncDataRequestStatus
+  seeds: SeedInterface[]
+  pending: boolean
 }>()
 
 const {
@@ -12,6 +10,7 @@ const {
 const toast = useToast()
 
 const tournamentStore = useTournamentStore()
+
 const open = ref(false)
 
 // Chart configuration
@@ -39,7 +38,7 @@ const option = computed(() => ({
   dataset: [
     {
       source: props.seeds,
-      dimensions: ["draw", "seed", "rank", "team", "type", "tour", "q_seed"]
+      dimensions: ["draw", "seed", "rank", "team", "match_type", "tour", "q_seed"]
     },
     ...tournamentStore.tours
       .map(tour => [
@@ -48,7 +47,7 @@ const option = computed(() => ({
             type: "filter",
             config: {
               and: [
-                { dimension: "type", value: "Singles" },
+                { dimension: "match_type", value: "Singles" },
                 { dimension: "draw", value: "Main" },
                 { dimension: "tour", value: tour }
               ]
@@ -60,7 +59,7 @@ const option = computed(() => ({
             type: "filter",
             config: {
               and: [
-                { dimension: "type", value: "Doubles" },
+                { dimension: "match_type", value: "Doubles" },
                 { dimension: "draw", value: "Main" },
                 { dimension: "tour", value: tour }
               ]
@@ -72,7 +71,7 @@ const option = computed(() => ({
             type: "filter",
             config: {
               and: [
-                { dimension: "type", value: "Singles" },
+                { dimension: "match_type", value: "Singles" },
                 { dimension: "draw", value: "Qualifying" },
                 { dimension: "tour", value: tour }
               ]
@@ -84,7 +83,7 @@ const option = computed(() => ({
             type: "filter",
             config: {
               and: [
-                { dimension: "type", value: "Doubles" },
+                { dimension: "match_type", value: "Doubles" },
                 { dimension: "draw", value: "Qualifying" },
                 { dimension: "tour", value: tour }
               ]
@@ -96,9 +95,6 @@ const option = computed(() => ({
   ],
   tooltip: {
     trigger: "axis"
-    // formatter: (params: any) => {
-    //   console.log(params)
-    // }
   },
   legend: {
     top: "middle",
@@ -132,14 +128,14 @@ const option = computed(() => ({
         name: `Singles Qualifying (${tour})`,
         type: "bar",
         stack: `${tour}-singles`,
-        encode: { x: "q_seed", y: "rank" },
+        encode: { x: "seed", y: "rank" },
         datasetIndex: index * 4 + 3
       },
       {
         name: `Doubles Qualifying (${tour})`,
         type: "bar",
         stack: `${tour}-doubles`,
-        encode: { x: "q_seed", y: "rank" },
+        encode: { x: "seed", y: "rank" },
         datasetIndex: index * 4 + 4
       }
     ])
@@ -153,9 +149,9 @@ const handleClick = (params: any) => {
     title: "Go to...",
     duration: Infinity,
     progress: false,
-    actions: params.data.team.map((player: PersonType) => ({
+    actions: params.data.team.map((player: BasePlayerType) => ({
       label: `${player.first_name} ${player.last_name}`,
-      icon: ICONS.person,
+      icon: ICONS.player,
       to: {
         name: "player",
         params: { id: player.id, name: kebabCase(`${player.first_name} ${player.last_name}`) }
@@ -182,7 +178,7 @@ onUnmounted(() => {
     fullscreen
     v-model:open="open"
   >
-    <u-button :icon="ICONS.barChart" />
+    <u-button :icon="ICONS.stackedBarChart" />
 
     <template #body>
       <v-chart
@@ -190,7 +186,7 @@ onUnmounted(() => {
         :theme="themeKey || 'dark'"
         :option="option"
         autoresize
-        :loading="status === 'pending'"
+        :loading="pending"
         @click="handleClick"
       >
         <template #tooltip="params">

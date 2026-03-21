@@ -1,249 +1,242 @@
 <script setup lang="ts">
 useHead({ title: "Players" })
+
+const supabase = useSupabaseClient()
+
 const viewModeStore = useViewModeStore()
-const tourOptions = ["ATP", "WTA"]
-const tableRef = useTemplateRef("tableRef")
 
-// Pagination
-const page = useRouteQuery("page", 1, { transform: Number })
-const offset = useRouteQuery("pageSize", 30, { transform: Number })
-const skip = computed(() => (page.value - 1) * offset.value)
+const { results, loading, searchTerm, selectedPlayers } = usePlayerSearch()
 
-// Filters
-const players = useRouteQuery("players", null, {
-  transform: {
-    get: (val: string | null): OptionType[] => parseOption(val),
-    set: (val: OptionType[]): string | null => serialiseOption(val)
-  }
-})
-const countries = useRouteQuery("countries", null, {
-  transform: {
-    get: (val: string | null): OptionType[] => parseOption(val),
-    set: (val: OptionType[]): string | null => serialiseOption(val)
-  }
-})
-const tours = useRouteQuery("tours", null, { transform: val => toArray(val) })
-const coaches = useRouteQuery("coaches", null, {
-  transform: {
-    get: (val: string | null): OptionType[] => parseOption(val),
-    set: (val: OptionType[]): string | null => serialiseOption(val)
-  }
-})
+const offset = ref(0)
 
-const resetFilters = () => {
-  set(players, null)
-  set(countries, null)
-  set(tours, null)
-  set(coaches, null)
-}
-
-// Grouping
-const grouping = useRouteQuery("grouping", null, { transform: val => toArray(val) })
-const resetGrouping = () => set(grouping, null)
-
-// Sorting
-const sortField = useRouteQuery("sorting", null, {
-  transform: {
-    get: (val: string | null): SortFieldType[] => parseSort(val),
-    set: (val: SortFieldType[]): string | null => serialiseSort(val)
-  }
-})
-const sortFields = [
-  { label: "Name", value: "name" },
-  { label: "Country", value: "country" },
-  { label: "Year of First Tournament", value: "min_year" },
-  { label: "Year of Last Tournament", value: "max_year" }
-]
-const resetSorting = () => set(sortField, null)
-
-// Reset page on filter/sort change
-watchDeep(
-  [tours, players, countries, coaches, offset, sortField, grouping],
-  () => {
-    set(page, 1)
-  },
-  { immediate: true }
-)
-
-// API call
-const apiDetails = computed(() => {
-  if (grouping.value?.length && !viewModeStore.isCardView) {
-    return "/api/players/groups"
-  }
-  return "/api/players"
-})
-
-const { data, status, error } = await useFetch<{ count: number; results: PlayersResultsType[] }>(apiDetails, {
-  method: "POST",
-  body: {
-    skip,
-    offset,
-    sortField,
-    players,
-    tours,
-    countries,
-    coaches,
-    grouping
-  },
-  default: () => ({ count: 0, results: [] })
+const filters = ref<PlayerFiltersInterface>({
+  tours: [],
+  players: [],
+  countries: []
 })
 
 watch(
-  error,
-  () => {
-    if (error.value) {
-      if (error.value.statusMessage === "Validation errors") {
-        console.error(error.value.statusMessage, error.value.data?.data.validationErrors)
-      } else {
-        console.error(error.value)
-      }
+  selectedPlayers,
+  newPlayers => {
+    filters.value = {
+      ...filters.value,
+      players: newPlayers.map(player => player.id)
     }
   },
-  { immediate: true }
+  { deep: true }
 )
 
-const footerPlaceholder = computed(() => {
-  if (viewModeStore.isCardView || !grouping.value?.length) {
-    return data.value.count === 1 ? "player" : "players"
-  } else if (grouping.value.includes("country")) {
-    return data.value.count === 1 ? "country" : "countries"
+const sorting = ref<Array<SortingInterface>>([
+  { field: "last_name", direction: true },
+  { field: "first_name", direction: true }
+])
+
+const handleSorting = (field: string) => {
+  const currentSort = sorting.value?.find(sort => {
+    const sortField = field === "name" ? "last_name" : field
+
+    return sort.field === sortField
+  })
+
+  const secondarySort = field === "name" ? sorting.value?.find(sort => sort.field === "first_name") : null
+
+  if (currentSort) {
+    if (currentSort.direction) {
+      currentSort.direction = false
+
+      if (secondarySort) {
+        secondarySort.direction = false
+      }
+    } else {
+      sorting.value = sorting.value?.filter(sort => {
+        if (field === "name") {
+          return sort.field !== "last_name" && sort.field !== "first_name"
+        } else {
+          return sort.field !== field
+        }
+      })
+    }
   } else {
-    return data.value.count === 1 ? "year" : "years"
+    if (field === "name") {
+      sorting.value.push({ field: "last_name", direction: true }, { field: "first_name", direction: true })
+    } else {
+      sorting.value.push({ field, direction: true })
+    }
   }
+}
+
+const players = ref<Array<Pick<PlayerInterface, "id" | "first_name" | "last_name" | "tour" | "turned_pro" | "retired" | "country">>>([])
+const canLoadMore = ref(false)
+
+const { data: countries, pending: countriesPending } = await useAsyncData(
+  "countries",
+  async () => {
+    const { data, error } = await supabase.from("countries").select("*").order("name", { ascending: true })
+
+    if (error || !data) {
+      console.error("Error fetching countries:", error)
+      return []
+    }
+
+    return data.map(country => ({
+      ...country,
+      icon: getFlagCode(country)
+    }))
+  },
+  { default: () => [] }
+)
+
+const { pending, execute, refresh } = await useAsyncData(
+  "players",
+  async () => {
+    let query = supabase
+      .from("players")
+      .select(
+        `
+        id,
+        first_name,
+        last_name,
+        tour,
+        turned_pro,
+        retired,
+        country:player_country_mapping(*, countries(*))
+      `,
+        { count: "exact" }
+      )
+      .is("countries.end_date", null)
+      .range(offset.value, offset.value + 29)
+
+    if (filters.value.players.length) query = query.in("id", filters.value.players)
+
+    if (filters.value.tours.length) query = query.in("tour", filters.value.tours)
+
+    if (filters.value.countries.length) query = query.in("country.id", filters.value.countries)
+
+    const { data, count, error } = await query
+
+    if (error || !data) {
+      console.error("Error fetching players:", error)
+      return []
+    }
+
+    if (data.length + players.value.length < (count || 0)) {
+      canLoadMore.value = true
+    } else {
+      canLoadMore.value = false
+    }
+
+    players.value = [
+      ...players.value,
+      ...data.map(player => ({
+        ...player,
+        country: player.country[0]?.countries as CountryType
+      }))
+    ]
+
+    return data
+  },
+  {
+    lazy: true,
+    immediate: false,
+    default: () => []
+  }
+)
+
+execute()
+
+watchDeep([filters, sorting], () => {
+  set(players, [])
+  set(offset, 0)
+  refresh()
 })
+
+const loadMore = () => {
+  if (pending.value) return
+
+  offset.value += 30
+}
 </script>
 
 <template>
-  <u-container class="min-h-screen flex flex-col">
-    <u-page :ui="{ root: 'flex-1', center: viewModeStore.isCardView ? 'lg:col-span-6' : 'lg:col-span-8' }">
-      <template #left>
-        <u-page-aside>
-          <dev-only>
-            <players-create />
-
-            <u-separator />
-          </dev-only>
-
-          <filters
-            :reset-filters
-            :reset-sorting
-            :reset-grouping
-            :sort-fields
-            :table="tableRef?.table"
-            v-model:sorting="sortField"
-          >
-            <filters-tours
-              v-model="tours"
-              :tour-options
-            />
-
-            <filters-search
-              type="Country"
-              placeholder="Countries"
-              :icon="ICONS.globe"
-              v-model="countries"
-            />
-
-            <filters-search
-              type="Coach"
-              placeholder="Coaches"
-              :icon="ICONS.coach"
-              v-model="coaches"
-            />
-          </filters>
-        </u-page-aside>
-      </template>
-
-      <template
-        #right
-        v-if="viewModeStore.isCardView"
-      >
-        <u-page-aside>
-          <filters-command-palette-search
-            type="Player"
-            v-model="players"
-            :icon="ICONS.player"
-          />
-        </u-page-aside>
-      </template>
-
+  <u-container class="xl:max-w-7xl">
+    <u-page>
       <u-page-header title="Players">
         <template #links>
-          <view-switcher />
+          <dev-only>
+            <player-create />
+          </dev-only>
+        </template>
 
-          <!--Filters for smaller screens-->
-          <u-slideover
-            title="Filters"
-            class="lg:hidden"
+        <template
+          #description
+          v-if="!viewModeStore.isTableView"
+        >
+          <!-- <u-theme
+            :ui="{
+              select: {
+                base: 'w-fit max-w-1/3'
+              },
+              selectMenu: {
+                base: 'w-fit max-w-1/3'
+              }
+            }"
           >
-            <u-button :icon="ICONS.filter" />
+            <div class="flex justify-end gap-4">
+              <u-select
+                v-if="filters"
+                v-model="filters.tours"
+                :items="['ATP', 'WTA']"
+                placeholder="Filter by Tour"
+                multiple
+                :icon="ICONS.tour"
+              />
 
-            <template #body>
-              <filters
-                :reset-filters
-                :reset-sorting
-                :sort-fields
-                :table="tableRef?.table"
-                v-model:sorting="sortField"
-              >
-                <filters-search
-                  type="Player"
-                  :icon="ICONS.player"
-                  v-model="players"
-                />
+              <u-select-menu
+                v-if="filters"
+                v-model="filters.countries"
+                :items="countries"
+                value-key="id"
+                label-key="name"
+                placeholder="Filter by Country"
+                multiple
+                :icon="ICONS.globe"
+                clear
+              />
 
-                <filters-tours
-                  v-model="tours"
-                  :tour-options
-                />
-
-                <filters-search
-                  type="Country"
-                  placeholder="Countries"
-                  :icon="ICONS.globe"
-                  v-model="countries"
-                />
-
-                <filters-search
-                  type="Coach"
-                  placeholder="Coaches"
-                  :icon="ICONS.coach"
-                  v-model="coaches"
-                />
-              </filters>
-            </template>
-          </u-slideover>
+              <filters-search
+                label="Filter by Player"
+                type="Player"
+                multiple
+                :icon="ICONS.player"
+                v-model="playerStore.filters.players"
+              />
+            </div>
+          </u-theme> -->
         </template>
       </u-page-header>
 
       <u-page-body>
-        <players-grid
-          v-if="viewModeStore.isCardView"
-          :players="data.results"
+        <!-- <players-table
+          v-if="viewModeStore.isTableView"
+          :players
           :status
+          :can-load-more
+          :countries
+          :countries-status
+          :sorting
+          @load-more="loadMore"
+          @handle-sorting="handleSorting"
+          v-model:filters="filters"
         />
 
-        <players-table
+        <players-grid
           v-else
-          ref="tableRef"
-          v-model:results="data.results"
-          v-model:status="status"
-          v-model:grouping="grouping"
-          v-model:tours="tours"
-          v-model:players="players"
-          v-model:countries="countries"
-          v-model:coaches="coaches"
-          v-model:sort-field="sortField"
-        />
+          :players
+          :status
+          :can-load-more
+          @load-more="loadMore"
+        /> -->
       </u-page-body>
     </u-page>
-
-    <pagination-footer
-      :total="data.count"
-      :placeholder="footerPlaceholder"
-      v-model:page="page"
-      v-model:offset="offset"
-      :show-pagination-controls="viewModeStore.isCardView || !grouping?.length"
-    />
   </u-container>
 </template>

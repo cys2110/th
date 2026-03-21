@@ -1,7 +1,7 @@
 <script setup lang="ts">
 withDefaults(
   defineProps<{
-    player: PersonType
+    player: BasePlayerType
     strikethrough?: boolean
   }>(),
   {
@@ -18,8 +18,7 @@ withDefaults(
     />
     <u-link
       :to="{ name: 'player', params: { id: player.id, name: kebabCase(`${player.first_name}-${player.last_name}`) } }"
-      class="hover-link default-link"
-      :class="{ 'line-through': strikethrough }"
+      :class="['hover-link default-link', strikethrough && 'line-through']"
     >
       {{ player.first_name ? `${player.first_name} ${player.last_name}` : player.id }}
     </u-link>

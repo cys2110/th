@@ -1,46 +1,56 @@
 <script setup lang="ts">
-import type { AsyncDataRequestStatus } from "#app"
-
 const props = defineProps<{
-  editions: BaseEditionType[]
-  status: AsyncDataRequestStatus
+  editions: Array<EditionWinnersInterface>
+  pending: boolean
 }>()
 
 const tournamentStore = useTournamentStore()
 
-const consolidatedEditions = computed<Record<string, BaseEditionType[]>>(() => groupBy(props.editions, "id"))
+interface GroupedWinnersInterface {
+  id: number
+  year: number
+  events: Array<EditionWinnersInterface>
+}
 
-const editionIds = computed(() => Object.keys(consolidatedEditions.value))
+const groupedEditions = computed(() => {
+  const uniqueYears = useArrayUnique(props.editions.map(ed => ed.year)).value
+
+  const array: Array<GroupedWinnersInterface> = []
+
+  uniqueYears.forEach(year => {
+    const filtered = props.editions.filter(ed => ed.year === year)
+
+    array.push({
+      year,
+      id: filtered[0]!.id,
+      events: filtered
+    })
+  })
+
+  return array
+})
 </script>
 
 <template>
-  <div
-    v-if="editions.length || status === 'pending'"
-    class="scrollbar p-5"
-  >
-    <u-page-columns>
-      <tournament-winners-card
-        v-if="editionIds.length"
-        v-for="editionId in editionIds"
-        :key="editionId"
-        :editions="consolidatedEditions[editionId] || []"
-      />
-      <tournament-winners-loading
-        v-else
-        v-for="_ in 6"
-        :key="_"
-      />
-    </u-page-columns>
-  </div>
+  <u-page-columns v-if="groupedEditions.length || pending">
+    <tournament-winners-card
+      v-if="editions.length"
+      v-for="edition in groupedEditions"
+      :key="edition.id"
+      :edition
+    />
+
+    <tournament-winners-loading
+      v-else
+      v-for="_ in 6"
+      :key="_"
+    />
+  </u-page-columns>
 
   <empty
     v-else
-    :message="`No editions have been played for ${tournamentStore.name}.`"
+    :message="`No editions have been played for ${tournamentStore.name}`"
     :icon="ICONS.calendarOff"
     class="m-5"
-  >
-    <dev-only>
-      <editions-update />
-    </dev-only>
-  </empty>
+  />
 </template>

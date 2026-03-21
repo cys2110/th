@@ -1,9 +1,7 @@
 <script setup lang="ts">
-import type { AsyncDataRequestStatus } from "#app"
-
 const props = defineProps<{
-  awards: AwardType[]
-  status: AsyncDataRequestStatus
+  awards: Array<AwardInterface>
+  pending: boolean
 }>()
 
 const {
@@ -31,22 +29,22 @@ const option = computed(() => ({
   textStyle: { color: theme.value.slate },
   color: [
     theme.value.orange,
-    oppositeTheme.value.orange,
+    theme.value.orange,
     theme.value.indigo,
-    oppositeTheme.value.indigo,
+    theme.value.indigo,
     theme.value.emerald,
-    oppositeTheme.value.emerald,
+    theme.value.emerald,
     theme.value.yellow,
-    oppositeTheme.value.yellow,
+    theme.value.yellow,
     theme.value.violet,
-    oppositeTheme.value.violet,
+    theme.value.violet,
     theme.value.fuchsia,
-    oppositeTheme.value.fuchsia
+    theme.value.fuchsia
   ],
   dataset: [
     {
       source: props.awards,
-      dimensions: ["round", "points", "pm", "currency", "type", "tour"]
+      dimensions: ["round", "points", "pm", "currency", "match_type", "tour"]
     },
     ...tournamentStore.tours
       .map(tour => [
@@ -56,7 +54,7 @@ const option = computed(() => ({
             config: {
               and: [
                 { dimension: "tour", value: tour },
-                { dimension: "type", value: "Singles" }
+                { dimension: "match_type", value: "Singles" }
               ]
             }
           }
@@ -67,7 +65,7 @@ const option = computed(() => ({
             config: {
               and: [
                 { dimension: "tour", value: tour },
-                { dimension: "type", value: "Doubles" }
+                { dimension: "match_type", value: "Doubles" }
               ]
             }
           }
@@ -75,9 +73,7 @@ const option = computed(() => ({
       ])
       .flat()
   ],
-  tooltip: {
-    trigger: "axis"
-  },
+  tooltip: { trigger: "axis" },
   legend: {
     right: "right",
     top: "middle"
@@ -90,9 +86,9 @@ const option = computed(() => ({
   yAxis: [
     {
       type: "value",
-      name: `Prize Money (${props.awards[0]?.currency || "$"})`,
+      name: `Prize Money`,
       axisLabel: {
-        formatter: (value: number) => value.toLocaleString("en-GB", { style: "currency", currency: props.awards[0]?.currency || "USD" })
+        formatter: (value: number) => value.toLocaleString()
       }
     },
     {
@@ -111,10 +107,7 @@ const option = computed(() => ({
         type: "line",
         encode: { x: "round", y: "pm" },
         yAxisIndex: 0,
-        datasetIndex: index * 2 + 1,
-        tooltip: {
-          valueFormatter: (value: number) => value.toLocaleString("en-GB", { style: "currency", currency: props.awards[0]?.currency || "USD" })
-        }
+        datasetIndex: index * 2 + 1
       },
       {
         name: `Singles Points (${tour})`,
@@ -129,10 +122,7 @@ const option = computed(() => ({
         type: "line",
         encode: { x: "round", y: "pm" },
         yAxisIndex: 0,
-        datasetIndex: index * 2 + 2,
-        tooltip: {
-          valueFormatter: (value: number) => value.toLocaleString("en-GB", { style: "currency", currency: props.awards[0]?.currency || "USD" })
-        }
+        datasetIndex: index * 2 + 2
       },
       {
         name: `Doubles Points (${tour})`,
@@ -161,8 +151,34 @@ const option = computed(() => ({
         :theme="themeKey || 'dark'"
         :option="option"
         autoresize
-        :loading="status === 'pending'"
-      />
+        :loading="pending"
+      >
+        <template #tooltip="params">
+          <div class="*:grid *:grid-cols-3 *:text-center *:gap-6 divide-y">
+            <div class="font-semibold">
+              <div>{{ (params as any)[0].data.round }}</div>
+              <div>PM</div>
+              <div>Points</div>
+            </div>
+
+            <template
+              v-for="(param, index) in params"
+              :key="index"
+            >
+              <div v-if="(index as number) % 2 === 0">
+                <div class="flex items-center gap-2">
+                  <span v-html="(param as any).marker" />
+                  <div>{{ (param as any).data.tour }} - {{ (param as any).data.match_type }}</div>
+                </div>
+
+                <div>{{ (param as any).data.pm.toLocaleString("en-GB", { style: "currency", currency: (param as any).data.currency }) }}</div>
+
+                <div>{{ (param as any).data.points.toLocaleString() }}</div>
+              </div>
+            </template>
+          </div>
+        </template>
+      </v-chart>
     </template>
   </u-modal>
 </template>

@@ -16,8 +16,8 @@ const {
 
 <template>
   <u-empty
+    :icon
     :title="message"
-    :icon="icon"
     description="If you think this is an error, refresh the page. Otherwise, please be patient as we continue to add more data."
     class="mx-2"
   >

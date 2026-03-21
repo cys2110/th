@@ -1,16 +1,15 @@
 <script setup lang="ts" generic="T">
-
-
 import type { Column } from "@tanstack/vue-table"
 
 const props = defineProps<{
   column: Column<T>
   label?: string
+  icon?: string
 }>()
 
 const isSorted = computed(() => props.column.getIsSorted())
 
-const icon = computed(() => {
+const sortIcon = computed(() => {
   switch (get(isSorted)) {
     case "asc":
       return ICONS.sortAsc
@@ -38,10 +37,12 @@ const handleClick = () => {
 
 <template>
   <u-button
-    :label="label"
-    :trailing-icon="icon"
-    variant="ghost"
+    :label
     color="neutral"
+    variant="ghost"
+    :icon
+    :trailing-icon="sortIcon"
     @click="handleClick"
+    :ui="{ trailingIcon: 'size-5' }"
   />
 </template>

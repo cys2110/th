@@ -17,7 +17,8 @@ export default {
     slate: "#334155",
     teal: "#0f766e",
     violet: "#5b21b6",
-    yellow: "#a16207"
+    yellow: "#a16207",
+    mauve: "#2a212c"
   },
   dark: {
     amber: "#fbbf24",
@@ -37,6 +38,7 @@ export default {
     slate: "#cbd5e1",
     teal: "#5eead4",
     violet: "#a78bfa",
-    yellow: "#fde047"
+    yellow: "#fde047",
+    mauve: "#79697b"
   }
 }

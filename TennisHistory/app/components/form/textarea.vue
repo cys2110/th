@@ -1,9 +1,16 @@
 <script setup lang="ts">
-defineProps<{
-  placeholder: string
-}>()
+withDefaults(
+  defineProps<{
+    placeholder: string
+    icon?: string
+    rows?: number
+  }>(),
+  {
+    rows: 2
+  }
+)
 
-const modelValue = defineModel<string>()
+const modelValue = defineModel<string | undefined>()
 
 const {
   ui: { icons }
@@ -14,7 +21,8 @@ const {
   <u-textarea
     v-model="modelValue"
     :placeholder
-    :rows="2"
+    :icon
+    :rows
   >
     <template
       v-if="isDefined(modelValue)"
@@ -24,7 +32,6 @@ const {
         color="neutral"
         variant="link"
         :icon="icons.close"
-        aria-label="Clear input"
         @click="modelValue = undefined"
       />
     </template>

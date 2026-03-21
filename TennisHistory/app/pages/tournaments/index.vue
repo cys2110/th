@@ -1,210 +1,180 @@
 <script setup lang="ts">
-import type { FetchError } from "ofetch"
-
 useHead({ title: "Tournaments" })
+
+const supabase = useSupabaseClient()
 
 const viewModeStore = useViewModeStore()
 
-// Pagination
-const page = useRouteQuery("page", 1, { transform: Number })
-const itemsPerPage = ref(30)
-const skip = computed(() => (page.value - 1) * itemsPerPage.value)
+const { results, loading, searchTerm, tournamentFilters } = useTournamentSearch()
 
-// Filters
-const tours = useRouteQuery("tours", null, { transform: val => toArray(val) })
-const tournaments = useRouteQuery("tournaments", null, {
-  transform: {
-    get: (val: string | null): OptionType[] => parseOption(val),
-    set: (val: OptionType[]): string | null => serialiseOption(val)
-  }
+const offset = ref(0)
+
+const filters = ref<TournamentFiltersInterface>({
+  tours: [],
+  tournaments: [],
+  established: undefined,
+  abolished: undefined
 })
-const established = useRouteQuery("established", null, { transform: Number })
-const abolished = useRouteQuery("abolished", null, { transform: Number })
 
-const resetFilters = () => {
-  set(tours, null)
-  set(tournaments, null)
-  set(established, null)
-  set(abolished, null)
-}
-
-// Sorting
-const sortField = useRouteQuery("sorting", null, {
-  transform: {
-    get: (val: string | null): SortFieldType[] => parseSort(val),
-    set: (val: SortFieldType[]): string | null => serialiseSort(val)
-  }
-})
-const sortFields = [
-  { label: "Name", value: "name" },
-  { label: "Established", value: "established" },
-  { label: "Abolished", value: "abolished" }
-]
-const resetSorting = () => set(sortField, [])
-
-// Reset page on filter/sort change
-watchDeep(
-  [tours, tournaments, established, abolished, itemsPerPage, sortField],
-  () => {
-    set(page, 1)
+watch(
+  tournamentFilters,
+  newFilters => {
+    filters.value = {
+      ...filters.value,
+      tournaments: newFilters.map(t => t.id)
+    }
   },
-  { immediate: true }
+  { deep: true }
 )
 
-// API call
-const { data, status } = await useFetch("/api/tournaments", {
-  method: "POST",
-  body: {
-    skip,
-    offset: itemsPerPage,
-    sortField,
-    tournaments,
-    tours,
-    established,
-    abolished
-  },
-  default: () => ({ count: 0, tournaments: [] as TournamentType[] }),
-  onResponseError: ({ error }) => {
-    if (typeof error === "object" && "statusMessage" in error) {
-      const err = error as FetchError<ValidationError>
+const sorting = ref<Array<SortingInterface>>([{ field: "name", direction: true }])
 
-      if (err.statusMessage === "Invalid request body") {
-        console.error(
-          "Validation errors: ",
-          err.data?.validationErrors.map(e => `${e.path.join(".")}: ${e.message}`)
-        )
-      }
+const handleSorting = (field: string) => {
+  const currentSort = sorting.value?.find(sort => sort.field === field)
+
+  if (currentSort) {
+    if (currentSort.direction) {
+      currentSort.direction = false
     } else {
-      console.error(error)
+      sorting.value = sorting.value?.filter(sort => sort.field !== field)
     }
+  } else {
+    sorting.value.push({ field, direction: true })
   }
+}
+
+const tournaments = ref<Array<TournamentType>>([])
+const canLoadMore = ref(false)
+
+const { pending, execute, refresh } = await useAsyncData(
+  "tournaments",
+  async () => {
+    const query = supabase
+      .from("tournaments")
+      .select("*", { count: "exact" })
+      .range(offset.value, offset.value + 29)
+
+    if (filters.value.tournaments.length) query.in("id", filters.value.tournaments)
+
+    if (filters.value.tours.length) query.contains("tours", filters.value.tours)
+
+    if (filters.value.established) query.gte("established", filters.value.established)
+
+    if (filters.value.abolished) query.lte("abolished", filters.value.abolished)
+
+    if (sorting.value.length) {
+      sorting.value.forEach(s => query.order(s.field, { ascending: s.direction }))
+    } else {
+      query.order("id", { ascending: true })
+    }
+
+    const { data, count, error } = await query
+
+    if (error || !data) {
+      console.error("Error fetching tournaments:", error)
+      return []
+    }
+
+    if (data.length + tournaments.value.length < (count || 0)) {
+      set(canLoadMore, true)
+    } else {
+      set(canLoadMore, false)
+    }
+
+    tournaments.value = [...tournaments.value, ...data]
+
+    return data
+  },
+  {
+    immediate: false,
+    lazy: true,
+    default: () => []
+  }
+)
+
+execute()
+
+watchDeep([filters, sorting], () => {
+  set(tournaments, [])
+  set(offset, 0)
+  refresh()
 })
 
-const tableRef = useTemplateRef("tableRef")
+const loadMore = () => {
+  if (pending.value) return
+
+  offset.value += 30
+}
 </script>
 
 <template>
-  <u-container class="min-h-screen flex flex-col">
-    <u-page
-      class="flex-1"
-      :ui="{ center: viewModeStore.isCardView ? 'lg:col-span-6' : 'lg:col-span-8' }"
-    >
-      <template #left>
-        <u-page-aside>
-          <dev-only>
-            <tournaments-update />
-            <u-separator />
-          </dev-only>
-
-          <filters
-            :reset-filters
-            :reset-sorting
-            :table="tableRef?.table"
-            :sort-fields
-            v-model:sorting="sortField"
-          >
-            <filters-tours v-model="tours" />
-
-            <filters-years
-              v-model="established"
-              :year-options="Array.from({ length: new Date().getFullYear() - 1877 + 1 }, (_, i) => 1877 + i)"
-              placeholder="Established"
-            />
-
-            <filters-years
-              v-model="abolished"
-              :year-options="Array.from({ length: new Date().getFullYear() - 1877 + 1 }, (_, i) => 1877 + i)"
-              placeholder="Abolished"
-            />
-          </filters>
-        </u-page-aside>
-      </template>
-
-      <template
-        #right
-        v-if="viewModeStore.isCardView"
-      >
-        <u-page-aside>
-          <filters-command-palette-search
-            type="Tournament"
-            v-model="tournaments"
-            :icon="ICONS.trophy"
-          />
-        </u-page-aside>
-      </template>
-
+  <u-container class="xl:max-w-7xl">
+    <u-page>
       <u-page-header title="Tournaments">
         <template #links>
-          <view-switcher />
+          <dev-only>
+            <lazy-tournament-create hydrate-on-idle />
+          </dev-only>
+        </template>
 
-          <!--Filters for smaller screens-->
-          <u-slideover
-            title="Filters"
-            class="lg:hidden"
+        <template
+          #description
+          v-if="!viewModeStore.isTableView"
+        >
+          <u-theme
+            :ui="{
+              select: {
+                base: 'w-fit max-w-1/4'
+              },
+              selectMenu: {
+                base: 'w-fit max-w-3/4'
+              }
+            }"
           >
-            <u-button :icon="ICONS.filter" />
+            <div class="flex justify-end gap-4">
+              <u-select
+                v-model="filters.tours"
+                :items="[...TOUR_OPTIONS]"
+                placeholder="Filter by Tour"
+                multiple
+                :icon="ICONS.tour"
+              />
 
-            <template #body>
-              <filters
-                :reset-filters
-                :reset-sorting
-                :table="tableRef?.table"
-                :sort-fields
-                v-model:sorting="sortField"
-              >
-                <filters-search
-                  type="Tournament"
-                  :icon="ICONS.trophy"
-                  v-model="tournaments"
-                />
-
-                <filters-tours v-model="tours" />
-
-                <filters-years
-                  v-model="established"
-                  :year-options="Array.from({ length: new Date().getFullYear() - 1877 + 1 }, (_, i) => 1877 + i)"
-                  placeholder="Established"
-                />
-
-                <filters-years
-                  v-model="abolished"
-                  :year-options="Array.from({ length: new Date().getFullYear() - 1877 + 1 }, (_, i) => 1877 + i)"
-                  placeholder="Abolished"
-                />
-              </filters>
-            </template>
-          </u-slideover>
+              <u-select-menu
+                placeholder="Filter by Tournament"
+                clear
+                :items="results"
+                v-model="tournamentFilters"
+                multiple
+                :icon="ICONS.trophy"
+                :loading
+                v-model:search-term="searchTerm"
+              />
+            </div>
+          </u-theme>
         </template>
       </u-page-header>
 
       <u-page-body>
-        <!--Card view-->
-        <tournaments-grid
-          v-if="viewModeStore.isCardView"
-          :tournaments="data.tournaments"
-          :status
+        <tournaments-table
+          v-if="viewModeStore.isTableView"
+          :tournaments
+          :pending
+          :can-load-more
+          :sorting
+          @load-more="loadMore"
+          @handle-sorting="handleSorting"
+          v-model:filters="filters"
         />
 
-        <!--Table view-->
-        <tournaments-table
+        <tournaments-grid
           v-else
-          ref="tableRef"
-          :tournaments="data.tournaments"
-          :status
-          v-model:tours="tours"
-          v-model:tournaments-filters="tournaments"
-          v-model:established="established"
-          v-model:abolished="abolished"
-          v-model:sort-field="sortField"
+          :tournaments
+          :pending
+          :can-load-more
+          @load-more="loadMore"
         />
       </u-page-body>
     </u-page>
-
-    <pagination-footer
-      :total="data.count"
-      :placeholder="`tournament${data.count === 1 ? '' : 's'}`"
-      v-model:page="page"
-      v-model:items-per-page="itemsPerPage"
-    />
   </u-container>
 </template>

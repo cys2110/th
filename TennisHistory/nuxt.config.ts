@@ -3,21 +3,34 @@ export default defineNuxtConfig({
   compatibilityDate: "2025-07-15",
   devtools: { enabled: true },
 
-  modules: ["@nuxt/eslint", "@nuxt/image", "@pinia/nuxt", "@vueuse/nuxt", "nuxt-echarts", "nuxt-neo4j", "@nuxt/ui"],
-
+  modules: ["@nuxt/eslint", "@nuxt/image", "@nuxtjs/supabase", "@pinia/nuxt", "@vueuse/nuxt", "nuxt-echarts", "@nuxt/ui"],
   // Set page transitions
-  app: { pageTransition: { name: "page", mode: "out-in" } },
-  // Set scroll behaviour
-  router: { options: { scrollBehaviorType: "smooth" } },
-  // CSS path
-  css: ["~/assets/css/main.css"],
-  // Turn on typed router
-  experimental: { typedPages: true },
-  runtimeConfig: {
-    public: {
-      devMode: process.env.NODE_ENV === "development" || false
+  app: {
+    pageTransition: {
+      name: "page",
+      mode: "out-in"
     }
   },
+
+  // Set scroll behaviour
+  router: {
+    options: {
+      scrollBehaviorType: "smooth"
+    }
+  },
+
+  // CSS path
+  css: ["~/assets/css/main.css"],
+
+  // Turn on typed router
+  experimental: {
+    typedPages: true
+  },
+
+  supabase: {
+    redirect: false
+  },
+
   // Imports not required
   imports: {
     presets: [
@@ -42,6 +55,7 @@ export default defineNuxtConfig({
           "useArrayFindLast",
           "useArraySome",
           "useArrayEvery",
+          "useLocalStorage",
           "watchDeep",
           "watchImmediate",
           "watchOnce"
@@ -57,19 +71,11 @@ export default defineNuxtConfig({
       },
       {
         from: "lodash",
-        imports: ["kebabCase", "startCase", "groupBy", "isEqual", "cloneDeep"]
+        imports: ["kebabCase", "startCase", "groupBy", "isEqual", "cloneDeep", "toArray"]
       }
     ]
   },
-  // neo4j configuration
-  neo4j: {
-    uri: process.env.NEO4J_URI,
-    auth: {
-      type: "basic",
-      username: process.env.NEO4J_USERNAME || "neo4j",
-      password: process.env.NEO4J_PASSWORD || "password"
-    }
-  },
+
   // Echarts configuration
   echarts: {
     renderer: "canvas",
@@ -85,6 +91,7 @@ export default defineNuxtConfig({
     ],
     features: ["UniversalTransition", "LabelLayout"]
   },
+
   // Nuxt UI configuration
   ui: {
     theme: {
@@ -113,15 +120,5 @@ export default defineNuxtConfig({
         size: "sm"
       }
     }
-  },
-  // Custom icons
-  icon: {
-    customCollections: [
-      {
-        prefix: "flags",
-        dir: "~/assets/flags",
-        normalizeIconName: false
-      }
-    ]
   }
 })

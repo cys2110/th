@@ -6,6 +6,10 @@ defineProps<{
   max?: string
 }>()
 
+const breakpoints = useBreakpoints(breakpointsTailwind, { ssrWidth: useSSRWidth() })
+const mdAndDown = breakpoints.smallerOrEqual("md")
+const xlAndUp = breakpoints.greaterOrEqual("xl")
+
 const date = defineModel<CalendarDate>()
 
 const inputDateRef = useTemplateRef("inputDateRef")
@@ -32,12 +36,16 @@ const inputDateRef = useTemplateRef("inputDateRef")
         <template #content>
           <u-calendar
             v-model="date"
-            class="px-2"
-            :week-starts-on="1"
-            weekday-format="long"
-            :min-value="min ? parseDate(min) : undefined"
-            :max-value="max ? parseDate(max) : undefined"
             :placeholder="min ? parseDate(min) : undefined"
+            :week-starts-on="1"
+            :weekday-format="
+              mdAndDown ? 'narrow'
+              : xlAndUp ? 'long'
+              : 'short'
+            "
+            :max-value="max ? parseDate(max) : undefined"
+            :min-value="min ? parseDate(min) : undefined"
+            class="px-2"
           />
         </template>
       </u-popover>

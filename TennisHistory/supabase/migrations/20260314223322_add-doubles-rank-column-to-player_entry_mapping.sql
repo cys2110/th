@@ -1,0 +1,1 @@
+ALTER TABLE player_entry_mapping ADD COLUMN doubles_rank integer;

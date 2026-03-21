@@ -4,8 +4,7 @@ import type { PageFeatureProps } from "@nuxt/ui"
 definePageMeta({ name: "home" })
 useHead({ title: "Home" })
 
-// Features
-const features: PageFeatureProps[] = [
+const features: Array<PageFeatureProps> = [
   {
     title: "Results",
     icon: ICONS.calendar,
@@ -27,11 +26,11 @@ const features: PageFeatureProps[] = [
 ]
 
 // Screenshots
-const screenshots: string[] = ["country.png", "h2h.png"]
+const screenshots: Array<string> = ["country", "h2h", "player", "event", "awards"]
 </script>
 
 <template>
-  <u-container class="max-w-6xl">
+  <u-container class="max-w-7xl">
     <u-page>
       <u-page-body>
         <u-page-section
@@ -39,7 +38,7 @@ const screenshots: string[] = ["country.png", "h2h.png"]
           description="Explore tennis since 1968"
           icon="twemoji:tennis"
           orientation="vertical"
-          :features="features"
+          :features
         >
           <div class="relative w-full h-100 overflow-hidden rounded-lg">
             <u-marquee
@@ -52,7 +51,7 @@ const screenshots: string[] = ["country.png", "h2h.png"]
               <nuxt-img
                 v-for="screenshot in screenshots"
                 :key="screenshot"
-                :src="`/pages/${screenshot}`"
+                :src="`/pages/dark-${screenshot}.png`"
                 width="460"
                 height="258"
                 class="aspect-video border border-default rounded-lg bg-white"
@@ -69,7 +68,7 @@ const screenshots: string[] = ["country.png", "h2h.png"]
               <nuxt-img
                 v-for="screenshot in screenshots"
                 :key="screenshot"
-                :src="`/pages/${screenshot}`"
+                :src="`/pages/light-${screenshot}.png`"
                 width="460"
                 height="258"
                 class="aspect-video border border-default rounded-lg bg-white"
@@ -86,7 +85,7 @@ const screenshots: string[] = ["country.png", "h2h.png"]
               <nuxt-img
                 v-for="screenshot in screenshots"
                 :key="screenshot"
-                :src="`/pages/${screenshot}`"
+                :src="`/pages/dark-${screenshot}.png`"
                 width="460"
                 height="258"
                 class="aspect-video border border-default rounded-lg bg-white"

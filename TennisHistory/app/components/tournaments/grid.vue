@@ -1,35 +1,47 @@
 <script setup lang="ts">
-import type { AsyncDataRequestStatus } from "#app"
-
-defineProps<{
-  tournaments: TournamentType[]
-  status: AsyncDataRequestStatus
+const props = defineProps<{
+  tournaments: Array<TournamentType>
+  pending: boolean
+  canLoadMore: boolean
 }>()
+
+const emits = defineEmits<{
+  "load-more": []
+}>()
+
+const el = useTemplateRef("el")
+
+useInfiniteScroll(el, () => emits("load-more"), {
+  distance: 10,
+  canLoadMore: () => props.canLoadMore
+})
 </script>
 
 <template>
-  <u-page-grid v-if="tournaments.length || status === 'pending'">
-    <tournaments-card
-      v-if="tournaments.length"
-      v-for="tournament in tournaments"
-      :key="tournament.id.toString()"
-      :tournament
-    />
+  <div
+    ref="el"
+    v-if="tournaments.length || pending"
+    class="scrollbar"
+  >
+    <u-page-grid class="2xl:grid-cols-4">
+      <tournaments-card
+        v-if="tournaments.length"
+        v-for="tournament in tournaments"
+        :key="tournament.id"
+        :tournament
+      />
 
-    <loading-card
-      v-else
-      v-for="_ in 6"
-      :key="_"
-    />
-  </u-page-grid>
+      <loading-card
+        v-if="pending"
+        v-for="_ in 6"
+        :key="_"
+      />
+    </u-page-grid>
+  </div>
 
   <empty
     v-else
     message="No tournaments found"
     :icon="ICONS.trophyOff"
-  >
-    <dev-only>
-      <tournaments-update />
-    </dev-only>
-  </empty>
+  />
 </template>

@@ -1,57 +1,64 @@
 <script setup lang="ts">
+import type { TableColumn } from "@nuxt/ui"
+
 const {
   params: { edId, year }
 } = useRoute("edition")
-const tournamentStore = useTournamentStore()
 
-const { data: seeds, status } = await useFetch("/api/edition/seeds/country", {
-  query: { edId },
-  default: () => [],
-  onResponseError: ({ error }) => console.error("Error fetching edition country seeds:", error)
-})
+const tournamentStore = useTournamentStore()
+const supabase = useSupabaseClient()
+
+const { data: seeds, pending } = await useAsyncData(
+  "country-seeds",
+  async () => {
+    const { data, error } = await supabase
+      .from("seeds")
+      .select("seed, ...entries(countries(*))")
+      .eq("event_id", `${edId}-Country`)
+      .order("seed", { ascending: true })
+
+    if (error || !data) {
+      console.error("Error fetching seeds:", error)
+      return []
+    }
+
+    return data as Array<CountrySeedInterface>
+  },
+  { default: () => [] }
+)
+
+const columns: TableColumn<CountrySeedInterface>[] = [
+  { accessorKey: "seed", header: "Seed" },
+  { id: "country", header: "Country" }
+]
 </script>
 
 <template>
   <dashboard-subpanel
     title="Seeds"
-    :icon="ICONS.seeds"
+    :icon="ICONS.ranking"
   >
-    <table
-      v-if="seeds.length || status === 'pending'"
-      class="min-w-1/3 mx-auto [&_td]:px-2"
+    <u-table
+      :data="seeds"
+      :columns
+      :loading="pending"
+      sticky
+      :ui="{ root: 'max-w-1/2 mx-auto', th: 'text-center', td: 'text-center' }"
     >
-      <thead>
-        <tr>
-          <th class="text-center">Seed</th>
-          <th class="text-left">Country</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr
-          v-if="seeds.length"
-          v-for="seed in seeds"
-          :key="seed.id"
-        >
-          <td class="text-center">{{ seed.seed }}</td>
-          <td>
-            <country-link :country="seed" />
-          </td>
-        </tr>
-        <tr v-else>
-          <td>
-            <u-skeleton class="w-sm h-3" />
-          </td>
-          <td>
-            <u-skeleton class="w-12 h-3" />
-          </td>
-        </tr>
-      </tbody>
-    </table>
+      <template #loading>
+        <loading-icon />
+      </template>
 
-    <empty
-      v-else
-      :message="`No countries were seeded for ${tournamentStore.name} ${year}`"
-      :icon="ICONS.globeOff"
-    />
+      <template #empty>
+        <empty
+          :message="`No seeds found for ${tournamentStore.name} ${year}`"
+          :icon="ICONS.trophyOff"
+        />
+      </template>
+
+      <template #country-cell="{ row }">
+        <country-link :country="row.original.countries" />
+      </template>
+    </u-table>
   </dashboard-subpanel>
 </template>

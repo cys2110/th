@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { CalendarDate } from "@internationalized/date"
 
-defineProps<{ placeholder?: string }>()
+const breakpoints = useBreakpoints(breakpointsTailwind, { ssrWidth: useSSRWidth() })
+const mdAndDown = breakpoints.smallerOrEqual("md")
+const xlAndUp = breakpoints.greaterOrEqual("xl")
 
 const dateRange = defineModel<{ start: CalendarDate | undefined; end: CalendarDate | undefined }>()
 
@@ -27,11 +29,15 @@ const inputDateRef = useTemplateRef("inputDateRef")
 
         <template #content>
           <u-calendar
-            v-model="dateRange"
-            class="p-2"
             range
+            v-model="dateRange"
             :week-starts-on="1"
-            weekday-format="long"
+            :weekday-format="
+              mdAndDown ? 'narrow'
+              : xlAndUp ? 'long'
+              : 'short'
+            "
+            class="p-2"
           />
         </template>
       </u-popover>

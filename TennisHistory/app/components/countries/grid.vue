@@ -1,26 +1,33 @@
 <script setup lang="ts">
-import type { AsyncDataRequestStatus } from "#app"
-
-defineProps<{
-  countries: CountryType[]
-  status: AsyncDataRequestStatus
+const props = defineProps<{
+  countries: Array<CountryType>
+  pending: boolean
+  filters: CountryFiltersInterface
 }>()
+
+const filteredCountries = computed(() =>
+  (props.countries || []).filter(country => {
+    const isCountryMatch = !props.filters.countries.length || props.filters.countries.some(c => c === country.id)
+    const isContinentMatch = !props.filters.continents.length || props.filters.continents.some(c => c === country.continent)
+    return isCountryMatch && isContinentMatch
+  })
+)
 </script>
 
 <template>
   <u-page-grid
-    v-if="countries.length || status === 'pending'"
+    v-if="filteredCountries.length || pending"
     class="xl:grid-cols-4"
   >
     <countries-card
-      v-if="countries.length"
-      v-for="country in countries"
+      v-if="filteredCountries.length"
+      v-for="country in filteredCountries"
       :key="country.id"
-      :country="country"
+      :country
     />
 
     <loading-card
-      v-else
+      v-if="pending"
       v-for="_ in 6"
       :key="_"
     />

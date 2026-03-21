@@ -29,9 +29,13 @@ provide(LOADING_OPTIONS_KEY, {
   >
     <nuxt-loading-indicator color="repeating-linear-gradient(to right,#e0f2fe 0%,#0ea5e9 50%,#0c4a6e 100%)" />
 
+    <Header />
+
     <u-main>
       <nuxt-page />
     </u-main>
+
+    <Footer />
   </u-app>
 </template>
 
