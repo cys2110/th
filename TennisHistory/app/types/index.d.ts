@@ -49,6 +49,11 @@ declare global {
     surface: "Clay" | "Grass" | "Hard" | "Carpet"
   }
 
+  type ArchiveEditionType = Pick<EditionInterface, "id" | "category" | "end_date" | "sponsor_name" | "start_date" | "tours" | "year"> & {
+    tournament: Pick<TournamentInterface, "id" | "name">
+    events: Array<Pick<EventInterface, "category" | "end_date" | "level" | "sponsor_name" | "surfaces" | "start_date" | "tour" | "venues">>
+  }
+
   interface TournamentFiltersInterface {
     tours: Array<TourType>
     established?: number

@@ -1,3 +1,5 @@
+import { type Row } from "@tanstack/vue-table"
+
 export const cleanLink = (link: string) => link.replaceAll(/^[\s"'“”‘’\[\]]+|[\s"'“”‘’\[\]]+$/g, "").replace("https://www.atptour.com", "")
 
 export const dateFormat = new Intl.DateTimeFormat("en-GB", {
@@ -99,3 +101,12 @@ export const getFlagCode = (country: CountryType) => {
 }
 
 export const percentage = (value1: number, value2: number) => (value2 === 0 ? 0 : Math.round((value1 / value2) * 100))
+
+export const arrayFilter = (row: Row<any>, columnId: string, filterValue: string[]) => {
+  const values = (row.getValue(columnId) as string[]) || []
+
+  if (!filterValue.length) return true
+  if (values.some(v => filterValue.includes(v))) return true
+
+  return false
+}

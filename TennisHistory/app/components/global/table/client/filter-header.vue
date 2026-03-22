@@ -40,5 +40,6 @@ const modelValue = computed({
     class="w-fit"
     :value-key="mapping ? 'value' : undefined"
     :label-key="mapping ? 'label' : undefined"
+    multiple
   />
 </template>

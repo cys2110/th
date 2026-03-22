@@ -28,6 +28,7 @@ export default {
   id: "icon-park-twotone:tag-one",
   level: "solar:server-minimalistic-bold-duotone",
   lineChart: "material-symbols-light:stacked-line-chart-rounded",
+  location: "material-symbols-light:globe-location-pin-rounded",
   merge: "icon-park-twotone:nested-arrows",
   money: "material-symbols-light:attach-money-rounded",
   moneyOff: "material-symbols-light:money-off-rounded",
