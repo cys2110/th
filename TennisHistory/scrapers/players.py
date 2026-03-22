@@ -153,9 +153,7 @@ def get_atp_player(player_id):
         .eq("id", player_id)
         .execute())
 
-        print(response)
-
-        if params.get("country") is not None:
+        if params.get("country"):
             countryData = (supabase.table("countries").select("id").eq("name", params.get("country")).single().execute())
 
             if countryData.data.get('id') is not None:
@@ -262,11 +260,11 @@ def get_atp_activity():
             supabase.table("entries").update({
                 'points': item['points'],
                 'pm': item['pm']
-            }).eq("id", item['entry_id'])
+            }).eq("id", item['entry_id']).execute()
 
             supabase.table("player_entry_mapping").update({
                 'rank': item['rank']
-            }).eq("entry_id", item['entry_id']).eq("player_id", item['player_id'])
+            }).eq("entry_id", item['entry_id']).eq("player_id", item['player_id']).execute()
         except Exception as e:
             print(item['player_id'], e)
             continue

@@ -1352,38 +1352,12 @@ export type Database = {
       search_players: {
         Args: { search_term: string }
         Returns: {
-          bh: string | null
-          ch_doubles: number | null
-          ch_doubles_date: string | null
-          ch_singles: number | null
-          ch_singles_date: string | null
-          current_doubles: number | null
-          current_singles: number | null
-          dob: string | null
-          dod: string | null
-          first_name: string | null
-          height: number | null
-          hof: number | null
+          country: Json
+          first_name: string
           id: string
-          last_name: string | null
-          official_link: string | null
-          pm: number | null
-          retired: number | null
-          rh: string | null
-          site_link: string | null
-          tour: Database["public"]["Enums"]["tour_enum"] | null
-          turned_pro: number | null
-          updated_at: string
-          wiki_link: string | null
+          last_name: string
         }[]
-        SetofOptions: {
-          from: "*"
-          to: "players"
-          isOneToOne: false
-          isSetofReturn: true
-        }
       }
-      update_activity: { Args: { edition_id: number }; Returns: undefined }
     }
     Enums: {
       continent_enum:

@@ -52,6 +52,7 @@ export default {
   stats: "icon-park-twotone:market-analysis",
   supervisor: "solar:clipboard-bold-duotone",
   table: "icon-park-twotone:table-file",
+  timer: "icon-park-twotone:timer",
   tour: "icon-park-twotone:public-toilet",
   trophy: "icon-park-twotone:trophy",
   trophyOff: "pepicons-pencil:trophy-circle-off",

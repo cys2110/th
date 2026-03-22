@@ -62,7 +62,7 @@ const onSubmit = async (event: FormSubmitEvent<EditionCreateType>) => {
     name: "edition",
     params: {
       id: tournamentStore.id,
-      name: tournamentStore.paramName,
+      name: kebabCase(tournamentStore.paramName),
       year: event.data.year,
       edId: event.data.id
     }

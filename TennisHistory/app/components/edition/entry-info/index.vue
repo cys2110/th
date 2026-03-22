@@ -20,7 +20,7 @@ const { data, pending, refresh } = await useAsyncData<Array<EntryInfoInterface>>
       .select(
         `
       id,
-      events(edition_id, tour),
+      events!inner(edition_id, tour),
       entry_status(status, draw),
       ldas(rank, draw),
       retirements(reason, draw, players(id, first_name, last_name)),
@@ -236,6 +236,11 @@ const { data, pending, refresh } = await useAsyncData<Array<EntryInfoInterface>>
   >
     <template #right>
       <dev-only>
+        <u-button
+          color="warning"
+          :icon="icons.reload"
+          @click="() => refresh()"
+        />
         <edition-entry-info-create @refresh="refresh" />
       </dev-only>
     </template>

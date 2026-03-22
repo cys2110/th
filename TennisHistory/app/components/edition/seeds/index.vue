@@ -108,6 +108,8 @@ const handleSave = async () => {
           color="warning"
           :icon="ICONS.save"
           @click="handleSave"
+          :loading="isSaving"
+          :loading-icon="ICONS.uploading"
         />
       </dev-only>
 

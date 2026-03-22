@@ -53,7 +53,6 @@ const state = ref<Partial<EntryInfoType>>({})
 
 const handleEntrySelect = () => {
   const entry = entries.value.find(entry => entry.id === state.value.entry_id)
-  console.log(entry)
   state.value.event_id = entry!.event_id
   playerOptions.value = entry!.players
 }

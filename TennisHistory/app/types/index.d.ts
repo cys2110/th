@@ -68,6 +68,58 @@ declare global {
     countries: Array<string>
     continents: Array<ContinentType>
   }
+
+  interface MatchInterface {
+    court: string | null
+    date: string | null
+    tour: TourType | null
+    match_type: MatchEnumType
+    group_name: string | null
+    draw: DrawType
+    format: 3 | 5
+    incomplete: IncompleteType | null
+    duration: string | null
+    umpire: PersonInterface | null
+    round: RoundType
+    category: CategoryType | null
+    start_date: string | null
+    end_date: string | null
+    level: LevelType
+    sponsor_name: string | null
+    tournament: string | null
+    scores: Array<ScoreInterface>
+    team1: EditionResultSideInterface
+    team2: EditionResultSideInterface
+    winner_id: string
+    surfaces: SurfaceInterface[]
+    stats: Array<{
+      match_id: string
+      entry_id: string
+      serve1_w: number
+      serve1: number
+      serve2_w: number
+      serve2: number
+      ret1_w: number
+      ret1: number
+      ret2_w: number
+      ret2: number
+      winners: number | null
+      ues: number | null
+      bps_converted: number
+      bp_opps: number
+      bps_saved: number
+      bps_faced: number
+      net_w: number | null
+      net: number | null
+      aces: number
+      dfs: number
+      serve_games: number | null
+      return_games: number | null
+      avg1_speed: number | null
+      avg2_speed: number | null
+      max_speed: number | null
+    }>
+  }
 }
 
 export {}

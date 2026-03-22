@@ -131,6 +131,13 @@ declare global {
     draws: Array<DrawType | null>
   }
 
+  interface ScoreInterface {
+    entry_id: string
+    set_no: number
+    set: number
+    tb: number | null
+  }
+
   interface ResultsMatchInterface {
     id: string
     match_no: number
@@ -156,6 +163,7 @@ declare global {
       last_name: string
     } | null
     winner: {
+      id: string
       entry_status: Array<{
         status: StatusType
         draw: DrawType
@@ -163,6 +171,7 @@ declare global {
       player_entry_mapping: Array<{
         players: Pick<PlayerInterface, "first_name" | "last_name" | "id">
         countries: CountryType
+        rank: number | null
       }>
       seeds: Array<{
         seed: number
@@ -170,6 +179,7 @@ declare global {
       }>
     }
     loser: {
+      id: string
       entry_status: Array<{
         status: StatusType
         draw: DrawType
@@ -177,12 +187,57 @@ declare global {
       player_entry_mapping: Array<{
         players: Pick<PlayerInterface, "first_name" | "last_name" | "id">
         countries: CountryType
+        rank: number | null
       }>
       seeds: Array<{
         seed: number
         draw: DrawType
       }>
     }
+    match_stats: Array<{
+      count: number
+    }>
+    match_scores: Array<ScoreInterface>
+  }
+
+  interface EditionResultTeamPlayerInterface {
+    id: string
+    first_name: string
+    last_name: string
+    country: CountryType
+    rank: number | null
+  }
+
+  interface EditionResultSideInterface {
+    id: string
+    status?: StatusType
+    seed?: number
+    team: Array<EditionResultTeamPlayerInterface>
+    rank?: number | null
+  }
+
+  interface EditionResultMatchInterface {
+    id: string
+    court: string | null
+    date: string | null
+    tour: TourType | null
+    match_type: MatchEnumType
+    format: 3 | 5
+    incomplete: IncompleteType | null
+    duration: string | null
+    umpire: {
+      first_name: string
+      last_name: string
+    } | null
+    stats: boolean
+    winner: EditionResultSideInterface
+    loser: EditionResultSideInterface
+    scores: Array<ScoreInterface>
+  }
+
+  interface EditionResultStepperItemInterface {
+    title: RoundType
+    matches: Array<EditionResultMatchInterface>
   }
 }
 

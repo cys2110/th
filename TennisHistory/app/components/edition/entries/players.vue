@@ -19,7 +19,10 @@ const runtimeConfig = useRuntimeConfig()
 
 const router = useRouter()
 
+const toast = useToast()
+
 const supabase = useSupabaseClient()
+const isSaving = ref(false)
 
 const updatedEntries = ref<Record<string, any>>({})
 
@@ -286,6 +289,7 @@ const handleSelectRow = (_e: Event, row: TableRow<IndividualPlayerEntryInterface
 }
 
 const handleSave = async () => {
+  set(isSaving, true)
   for (const [id, entry] of Object.entries(updatedEntries.value)) {
     if ("rank" in entry.singles) {
       const { error } = await supabase.from("player_entry_mapping").update({ rank: entry.singles.rank }).eq("id", entry.singles.pem_id)
@@ -328,9 +332,15 @@ const handleSave = async () => {
         console.error(`Error updating points/pm for ${id}:`, error)
       }
     }
-
-    refreshEntries()
   }
+
+  set(isSaving, false)
+  toast.add({
+    title: "Entries updated successfully",
+    icon: icons.success,
+    color: "success"
+  })
+  refreshEntries()
 }
 </script>
 
@@ -341,6 +351,8 @@ const handleSave = async () => {
         :icon="ICONS.save"
         color="warning"
         @click="handleSave"
+        :loading="isSaving"
+        :loading-icon="ICONS.uploading"
       />
     </div>
   </dev-only>
@@ -443,7 +455,7 @@ const handleSave = async () => {
     <template #singles_rank-cell="{ row }">
       <dev-only>
         <u-input-number
-          :default-value="row.original.singles?.rank || undefined"
+          :default-value="row.original.singles?.rank ?? undefined"
           :model-value="updatedEntries[row.original.id].singles.rank"
           @update:model-value="updatedEntries[row.original.id].singles.rank = $event"
           placeholder="Enter rank"
@@ -471,7 +483,7 @@ const handleSave = async () => {
 
     <template #singles_points-cell="{ row }">
       <u-input-number
-        :default-value="row.original.singles?.points || undefined"
+        :default-value="row.original.singles?.points ?? undefined"
         :model-value="updatedEntries[row.original.id].singles.points"
         @update:model-value="updatedEntries[row.original.id].singles.points = $event"
         placeholder="Enter points"
@@ -494,7 +506,7 @@ const handleSave = async () => {
 
     <template #singles_pm-cell="{ row }">
       <u-input-number
-        :default-value="row.original.singles?.pm || undefined"
+        :default-value="row.original.singles?.pm ?? undefined"
         :model-value="updatedEntries[row.original.id].singles.pm"
         @update:model-value="updatedEntries[row.original.id].singles.pm = $event"
         placeholder="Enter pm"
@@ -563,7 +575,7 @@ const handleSave = async () => {
     <template #doubles_rank-cell="{ row }">
       <dev-only>
         <u-input-number
-          :default-value="row.original.doubles?.rank || undefined"
+          :default-value="row.original.doubles?.rank ?? undefined"
           :model-value="updatedEntries[row.original.id].doubles.rank"
           @update:model-value="updatedEntries[row.original.id].doubles.rank = $event"
           placeholder="Enter rank"
@@ -591,7 +603,7 @@ const handleSave = async () => {
 
     <template #doubles_points-cell="{ row }">
       <u-input-number
-        :default-value="row.original.doubles?.points || undefined"
+        :default-value="row.original.doubles?.points ?? undefined"
         :model-value="updatedEntries[row.original.id].doubles.points"
         @update:model-value="updatedEntries[row.original.id].doubles.points = $event"
         placeholder="Enter points"
@@ -614,7 +626,7 @@ const handleSave = async () => {
 
     <template #doubles_pm-cell="{ row }">
       <u-input-number
-        :default-value="row.original.doubles?.pm || undefined"
+        :default-value="row.original.doubles?.pm ?? undefined"
         :model-value="updatedEntries[row.original.id].doubles.pm"
         @update:model-value="updatedEntries[row.original.id].doubles.pm = $event"
         placeholder="Enter pm"

@@ -1,6 +1,7 @@
 <script setup lang="ts">
+import { TableClientFilterHeader, TableClientGroupHeader, TableClientSortHeader, TableRowToggle, UIcon } from "#components"
 import type { TableColumn, TableRow } from "@nuxt/ui"
-import { getFacetedRowModel, getFacetedUniqueValues, getGroupedRowModel } from "@tanstack/vue-table"
+import { getFacetedRowModel, getFacetedUniqueValues, getGroupedRowModel, type Column, type Row } from "@tanstack/vue-table"
 
 defineProps<{
   countries: Array<CountryType>
@@ -10,9 +11,52 @@ defineProps<{
 const router = useRouter()
 
 const columns: TableColumn<CountryType>[] = [
-  { id: "flag", header: "Flag" },
-  { accessorKey: "name", aggregationFn: "uniqueCount" },
-  { accessorKey: "continent" }
+  { id: "flag", header: "Flag", cell: ({ row }) => h(UIcon, { name: getFlagCode(row.original) }) },
+  {
+    accessorKey: "name",
+    aggregationFn: "uniqueCount",
+    header: ({ column }) =>
+      h("div", { class: "flex justify-center items-center gap-0.5" }, [
+        h(TableClientFilterHeader, {
+          column: column as Column<unknown>,
+          label: "Country",
+          icon: ICONS.globe
+        }),
+        h(TableClientSortHeader, {
+          column: column as Column<unknown>
+        })
+      ])
+  },
+  {
+    accessorKey: "continent",
+    header: ({ column }) =>
+      h("div", { class: "flex justify-center items-center gap-0.5" }, [
+        h(TableClientGroupHeader, {
+          column: column as Column<unknown>
+        }),
+        h(TableClientFilterHeader, {
+          column: column as Column<unknown>,
+          label: "Continent",
+          icon: ICONS.world
+        }),
+        h(TableClientSortHeader, {
+          column: column as Column<unknown>
+        })
+      ]),
+    cell: ({ row, table }) => {
+      if (row.getIsGrouped()) {
+        return h(
+          TableRowToggle,
+          {
+            row: row as Row<unknown>
+          },
+          () => row.original.continent
+        )
+      } else if (!table.getState().grouping.length) {
+        return row.original.continent
+      }
+    }
+  }
 ]
 
 const handleSelectRow = (_e: Event, row: TableRow<CountryType>) => {
@@ -60,51 +104,6 @@ const handleSelectRow = (_e: Event, row: TableRow<CountryType>) => {
         message="No countries found"
         :icon="ICONS.globeOff"
       />
-    </template>
-
-    <template #flag-cell="{ row }">
-      <u-icon
-        v-if="!row.getIsGrouped()"
-        :name="getFlagCode(row.original)"
-      />
-    </template>
-
-    <template #name-header="{ column }">
-      <div class="flex justify-center items-center gap-0.5">
-        <table-client-filter-header
-          :column
-          label="Country"
-          :icon="ICONS.globe"
-        />
-        <table-client-sort-header :column />
-      </div>
-    </template>
-
-    <template #continent-header="{ column }">
-      <div class="flex justify-center items-center gap-0.5">
-        <table-client-group-header :column />
-        <table-client-filter-header
-          :column
-          label="Continent"
-          :icon="ICONS.world"
-        />
-        <table-client-sort-header :column />
-      </div>
-    </template>
-
-    <template #continent-cell="{ row }">
-      <table-row-toggle
-        v-if="row.getIsGrouped()"
-        :row
-      >
-        {{ row.original.continent }}
-      </table-row-toggle>
-
-      <template v-else-if="row.depth < 1">
-        {{ row.original.continent }}
-      </template>
-
-      <template v-else>{{ " " }}</template>
     </template>
   </u-table>
 </template>

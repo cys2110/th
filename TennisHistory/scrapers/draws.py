@@ -207,6 +207,8 @@ def get_atp_draw():
     seeds_to_insert = list(seeds.values())
     statuses_to_insert = list(statuses.values())
 
+    print(statuses_to_insert)
+
     # Insert entries
     try:
         entries_response = (
@@ -246,7 +248,7 @@ def get_atp_draw():
     try:
         statuses_response = (
             supabase
-            .table("statuses")
+            .table("entry_status")
             .insert(statuses_to_insert)
             .execute()
         )

@@ -20,26 +20,35 @@ const isOpen = ref(false)
 const isUploading = ref(false)
 const errors = ref()
 
-const { data: players, pending } = await useAsyncData("entries-individual-players", async () => {
-  const { data, error } = await supabase
-    .from("entries")
-    .select("id, player_entry_mapping(players(id, first_name, last_name), countries(*)), events!inner(edition_id)")
-    .eq("events.edition_id", Number(edId))
+const {
+  data: players,
+  pending,
+  refresh
+} = await useAsyncData(
+  "entries-individual-players",
+  async () => {
+    const { data, error } = await supabase
+      .from("entries")
+      .select("id, match_type, player_entry_mapping(players(id, first_name, last_name), countries(*)), events!inner(edition_id)")
+      .eq("events.edition_id", Number(edId))
 
-  if (error || !data) {
-    console.error("Error fetching players:", error)
-    return []
-  }
+    if (error || !data) {
+      console.error("Error fetching players:", error)
+      return []
+    }
 
-  return data.flatMap(entry =>
-    entry.player_entry_mapping.map(pem => ({
-      entry_id: entry.id,
-      player_id: pem.players.id,
-      name: `${pem.players.first_name} ${pem.players.last_name}`,
-      icon: getFlagCode(pem.countries!)
-    }))
-  )
-})
+    return data.flatMap(entry =>
+      entry.player_entry_mapping.map(pem => ({
+        entry_id: entry.id,
+        player_id: pem.players.id,
+        name: `${pem.players.first_name} ${pem.players.last_name}`,
+        icon: getFlagCode(pem.countries!),
+        match_type: entry.match_type
+      }))
+    )
+  },
+  { default: () => [] }
+)
 
 const initialState = {
   tournament_id: id,
@@ -95,7 +104,7 @@ const onSubmit = async (event: FormSubmitEvent<ScrapeActivityType>) => {
   }
 }
 
-const formFields: FormFieldInterface<ScrapeActivityType>[] = [
+const formFields = computed<FormFieldInterface<ScrapeActivityType>[]>(() => [
   { label: "Tournament ID", key: "tournament_id", type: "text" },
   { label: "Match Type", key: "match_type", type: "radio", items: MATCH_TYPES, required: true },
   {
@@ -119,13 +128,14 @@ const formFields: FormFieldInterface<ScrapeActivityType>[] = [
     label: "Players",
     key: "players",
     type: "inputMenu",
-    items: players.value,
+    items: players.value?.filter(p => p.match_type === state.value.match_type) || [],
     loading: pending.value,
     class: "col-span-2",
     required: true,
-    labelKey: "name"
+    labelKey: "name",
+    multiple: true
   }
-]
+])
 </script>
 
 <template>
@@ -139,6 +149,14 @@ const formFields: FormFieldInterface<ScrapeActivityType>[] = [
     />
 
     <template #body>
+      <div class="flex justify-end">
+        <u-button
+          :icon="icons.reload"
+          color="warning"
+          @click="() => refresh()"
+        />
+      </div>
+
       <u-form
         id="activity-form"
         :schema="ScrapeActivitySchema"

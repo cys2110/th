@@ -37,7 +37,6 @@ const screenshots: Array<string> = ["country", "h2h", "player", "event", "awards
           title="Tennis History in the Open Era"
           description="Explore tennis since 1968"
           icon="twemoji:tennis"
-          orientation="vertical"
           :features
         >
           <div class="relative w-full h-100 overflow-hidden rounded-lg">
