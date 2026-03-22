@@ -23,8 +23,6 @@ const {
       return []
     }
 
-    console.log(eventsData)
-
     const { data, error } = await supabase
       .from("matches")
       .select(
