@@ -41,7 +41,7 @@ declare global {
     id: string
     name: string | null
     city: string
-    country: CountryType
+    country: CountryInterface
   }
 
   interface PersonInterface {

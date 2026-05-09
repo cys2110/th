@@ -20,10 +20,6 @@ const props = withDefaults(
 const sortedUniqueValues = computed(() => {
   const uniqueAndSortedValues = useArrayUnique(Array.from(props.column.getFacetedUniqueValues().keys()).filter(Boolean).flat()).value.sort()
 
-  // if (props.mapping) {
-  //   uniqueValues.forEach((value, index) => (uniqueValues[index] = { value, label: props.mapping![value] }))
-  // }
-
   return uniqueAndSortedValues.map((value, index) => {
     if (props.type === "name") {
       const [last_name, first_name] = value.split(", ")
@@ -31,6 +27,11 @@ const sortedUniqueValues = computed(() => {
       return {
         value,
         label: `${first_name} ${last_name}`
+      }
+    } else if (props.mapping) {
+      return {
+        value,
+        label: props.mapping[value.toString()]
       }
     } else {
       return value
@@ -52,9 +53,9 @@ const modelValue = computed({
     :items="sortedUniqueValues"
     v-model="modelValue"
     :icon
-    class="w-fit"
-    :value-key="type === 'name' ? 'value' : undefined"
-    :label-key="type === 'name' ? 'label' : undefined"
+    class="w-fit max-w-50"
+    :value-key="type === 'name' || mapping ? 'value' : undefined"
+    :label-key="type === 'name' || mapping ? 'label' : undefined"
     :multiple
   />
 </template>

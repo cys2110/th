@@ -1,90 +1,91 @@
 <script setup lang="ts">
 import type { FormErrorEvent, FormSubmitEvent } from "@nuxt/ui"
+import { PostgrestError } from "@supabase/supabase-js"
+import { object, string, z } from "zod"
 
-withDefaults(
-  defineProps<{
-    iconOnly?: boolean
-  }>(),
-  {
-    iconOnly: false
-  }
-)
+const schema = object({
+  first_name: string(),
+  last_name: string()
+})
+type Schema = z.infer<typeof schema>
+
+const emits = defineEmits<{
+  refresh: []
+}>()
 
 const {
   ui: { icons }
 } = useAppConfig()
 
 const toast = useToast()
-
-const emit = defineEmits<{
-  refresh: []
-}>()
-
 const supabase = useSupabaseClient()
 
 const isOpen = ref(false)
 const isUploading = ref(false)
 const errors = ref()
 
-const state = ref<Partial<PersonType>>({})
+const state = ref<Partial<Schema>>({})
 
 const handleReset = () => {
   set(state, {})
-  errors.value = undefined
+  set(errors, undefined)
 }
 
-const onError = (event: FormErrorEvent) => (errors.value = event.errors)
+const onError = (event: FormErrorEvent) => {
+  set(errors, event.errors)
+}
 
-const onSubmit = async (event: FormSubmitEvent<PersonType>) => {
+const onSubmit = async (event: FormSubmitEvent<Schema>) => {
   set(isUploading, true)
 
-  const { error } = await supabase.from("people").insert(event.data)
+  try {
+    const { error } = await supabase.from("people").insert(event.data)
 
-  if (error) {
-    errors.value = error
+    if (error) throw error
+
+    toast.add({
+      title: `${event.data.first_name} ${event.data.last_name} successfully created!`,
+      icon: icons.success,
+      color: "success"
+    })
+
+    emits("refresh")
+    handleReset()
+    set(isOpen, false)
+  } catch (error) {
+    set(errors, error instanceof PostgrestError ? error.details : (error as any).message)
+
+    toast.add({
+      title: `Error creating ${event.data.first_name} ${event.data.last_name}`,
+      icon: icons.error,
+      color: "error"
+    })
+  } finally {
     set(isUploading, false)
-    return
   }
-
-  toast.add({
-    title: `${event.data.first_name} ${event.data.last_name} successfully created!`,
-    description: JSON.stringify(event.data),
-    icon: icons.success,
-    color: "success"
-  })
-
-  emit("refresh")
-  handleReset()
-  set(isOpen, false)
-
-  set(isUploading, false)
 }
 
-const formFields: FormFieldInterface<PersonType>[] = [
+const formFields = computed<FormFieldInterface<Schema>[]>(() => [
   { label: "First Name", key: "first_name", type: "text", required: true },
   { label: "Last Name", key: "last_name", type: "text", required: true }
-]
+])
 </script>
 
 <template>
   <u-modal
     title="Create Person"
     v-model:open="isOpen"
-    :ui="{
-      footer: '*:rounded-md!'
-    }"
   >
     <u-button
-      color="warning"
       :icon="icons.plus"
-      :label="iconOnly ? undefined : 'Create Person'"
+      label="Create Person"
       block
     />
 
     <template #body>
       <u-form
         id="person-form"
-        :schema="PersonSchema"
+        :schema
         :state
         @submit="onSubmit"
         @error="onError"
@@ -102,18 +103,15 @@ const formFields: FormFieldInterface<PersonType>[] = [
         v-if="errors"
         color="error"
         :title="`Error saving ${state.first_name} ${state.last_name}`"
+        :description="errors"
         class="mt-5"
-      >
-        <template #description>
-          {{ errors }}
-        </template>
-      </u-alert>
+      />
     </template>
 
     <template #footer="{ close }">
       <form-footer
         form="person-form"
-        :is-uploading
+        :loading="isUploading"
         @reset="handleReset"
         @close="close"
       />

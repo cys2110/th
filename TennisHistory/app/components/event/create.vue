@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import type { FormErrorEvent, FormSubmitEvent } from "@nuxt/ui"
+import { PostgrestError } from "@supabase/supabase-js"
 import { any, array, number, object, string, url, z } from "zod"
 
 const schema = object({
-  id: string(),
   level: LevelEnum,
   tour: TourEnum.optional(),
   site_link: url(),
@@ -16,9 +16,9 @@ const schema = object({
   tfc: number().optional(),
   venues: array(
     object({
-      id: string,
-      label: string,
-      icon: string
+      id: string(),
+      label: string(),
+      icon: string()
     })
   ).default([]),
   surfaces: array(string()).default([]),
@@ -39,8 +39,10 @@ const schema = object({
 })
 type Schema = z.infer<typeof schema>
 
+const emits = defineEmits<{ refresh: [] }>()
+
 const {
-  params: { edId, year }
+  params: { id, edId, year }
 } = useRoute("edition")
 
 const {
@@ -76,7 +78,84 @@ const onError = (event: FormErrorEvent) => {
   set(errors, event.errors)
 }
 
-const onSubmit = async (event: FormSubmitEvent<Schema>) => {}
+const onSubmit = async (event: FormSubmitEvent<Schema>) => {
+  set(isUploading, true)
+
+  try {
+    const { surfaces, supervisors, venues, tour, dates, ...rest } = event.data
+
+    const eventTour = tour || tournamentStore.tours[0]
+
+    const eventId =
+      COUNTRY_DRAWS.includes(id) ? `${edId}-Country`
+      : id === "9210" ? `${edId}-LC`
+      : `${edId}-${eventTour}`
+
+    const { error } = await supabase.from("events").insert({
+      ...rest,
+      start_date: dates?.start?.toString() || null,
+      end_date: dates?.end?.toString() || null,
+      tour: eventTour,
+      id: eventId,
+      edition_id: Number(edId)
+    })
+
+    if (error) throw error
+
+    const { error: venuesMappingError } = await supabase
+      .from("event_venue_mapping")
+      .insert(venues.map(venue => ({ event_id: eventId, venue_id: venue.id })))
+
+    if (venuesMappingError) {
+      console.error("Error adding venues", venuesMappingError)
+      toast.add({
+        title: "Error adding venues",
+        icon: icons.error,
+        color: "error"
+      })
+    }
+
+    const { error: supervisorsMappingError } = await supabase
+      .from("event_supervisor_mapping")
+      .insert(supervisors.map(supervisor => ({ event_id: eventId, supervisor_id: supervisor.id })))
+
+    if (supervisorsMappingError) {
+      console.error("Error adding supervisors", supervisorsMappingError)
+      toast.add({
+        title: "Error adding supervisors",
+        icon: icons.error,
+        color: "error"
+      })
+    }
+
+    const { error: surfacesMappingError } = await supabase
+      .from("event_surface_mapping")
+      .insert(surfaces.map(surface => ({ event_id: eventId, surface_id: surface })))
+
+    if (surfacesMappingError) {
+      console.error("Error adding surfaces", surfacesMappingError)
+      toast.add({
+        title: "Error adding surfaces",
+        icon: icons.error,
+        color: "error"
+      })
+    }
+
+    emits("refresh")
+    handleReset()
+    set(isOpen, false)
+  } catch (error) {
+    set(errors, error instanceof PostgrestError ? error.details : (error as any).message)
+
+    toast.add({
+      title: `Error creating ${tournamentStore.name} ${year} ${event.data.tour}`,
+      icon: icons.error,
+      color: "error"
+    })
+  } finally {
+    set(isUploading, false)
+  }
+}
 
 const formFields = computed<Array<FormFieldInterface<Schema>>>(
   () =>
@@ -98,13 +177,13 @@ const formFields = computed<Array<FormFieldInterface<Schema>>>(
         icon: ICONS.court,
         class: "col-span-2"
       },
+      { label: "Venues", key: "venues", type: "slot", class: "col-span-2" },
       {
         label: "Award",
         type: "slot",
         errorPattern: /^(currency|tfc)$/,
         class: "col-span-2"
       },
-      { label: "Venues", key: "venues", type: "slot", class: "col-span-2" },
       { label: "Supervisors", key: "supervisors", type: "slot", class: "col-span-2" },
       { label: "Singles Draw Type", key: "s_draw", type: "inputMenu", items: DRAWS },
       { label: "Doubles Draw Type", key: "d_draw", type: "inputMenu", items: DRAWS },
@@ -163,9 +242,9 @@ const formFields = computed<Array<FormFieldInterface<Schema>>>(
               />
             </u-field-group>
 
-            <!-- <u-select-menu
+            <u-input-menu
               v-else-if="field.key === 'venues'"
-              v-model="venueSearch.selectedVenues.value"
+              v-model="state[field.key]"
               :items="venueSearch.results.value"
               placeholder="Select venues"
               multiple
@@ -173,15 +252,16 @@ const formFields = computed<Array<FormFieldInterface<Schema>>>(
               :loading="venueSearch.loading.value"
               clear
               v-model:search-term="venueSearch.searchTerm.value"
+              class="w-full"
             >
               <template #content-bottom>
                 <venue-create @refresh="venueSearch.refresh" />
               </template>
-            </u-select-menu>
+            </u-input-menu>
 
-            <u-select-menu
+            <u-input-menu
               v-else-if="field.key === 'supervisors'"
-              v-model="supervisorsSearch.selectedPeople.value"
+              v-model="state[field.key]"
               :items="supervisorsSearch.results.value"
               placeholder="Select supervisors"
               multiple
@@ -189,11 +269,12 @@ const formFields = computed<Array<FormFieldInterface<Schema>>>(
               :loading="supervisorsSearch.loading.value"
               clear
               v-model:search-term="supervisorsSearch.searchTerm.value"
+              class="w-full"
             >
               <template #content-bottom>
                 <person-create @refresh="supervisorsSearch.refresh" />
               </template>
-            </u-select-menu> -->
+            </u-input-menu>
           </form-field>
         </div>
       </u-form>

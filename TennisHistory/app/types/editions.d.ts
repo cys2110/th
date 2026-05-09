@@ -79,6 +79,7 @@ declare global {
     match_type: MatchEnumType | null
     draw: DrawType | null
     currency: CurrencyType | null
+    pm_tiered: Array<number> | null
   }
 
   interface SeedInterface {

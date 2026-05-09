@@ -4,16 +4,16 @@ import { PostgrestError } from "@supabase/supabase-js"
 import { any, array, number, object, string, url, z } from "zod"
 
 const schema = object({
-  id: number(),
-  year: number(),
+  id: number("Edition ID must be a number").int("Edition ID must be an integer").positive("Edition ID must be a positive number"),
+  year: number("Year must be a number").int("Year must be an integer").positive("Year must be a positive number"),
   tours: array(TourEnum).default([]),
   dates: any().optional(),
   sponsor_name: string().optional(),
   category: CategoryEnum.optional(),
   currency: CurrencyEnum.optional(),
-  wiki_link: url().optional(),
-  tfc: number().optional(),
-  draw_link: url().optional(),
+  wiki_link: url("Wikipedia link must be valid URL").optional(),
+  tfc: number("Total financial commitment must be a number").nonnegative("Total financial commitment cannot be a negative number").optional(),
+  draw_link: url("Draw link must be a valid URL").optional(),
   draw_type: DrawsEnum.optional()
 })
 type Schema = z.infer<typeof schema>

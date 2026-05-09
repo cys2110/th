@@ -31,9 +31,14 @@ const tabItems = computed<Array<TabsItem>>(() => [
         <u-tabs
           :items="tabItems"
           size="xs"
+          :ui="{ content: 'px-4' }"
         >
           <template #details>
             <edition-details />
+          </template>
+
+          <template #awards>
+            <edition-awards />
           </template>
         </u-tabs>
       </u-page-body>

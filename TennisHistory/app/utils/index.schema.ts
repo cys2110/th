@@ -1,20 +1,5 @@
 import { array, coerce, literal, number, object, string, url, z } from "zod"
 
-export const VenueSchema = object({
-  name: string().optional(),
-  city: string(),
-  country_id: string()
-})
-
-export type VenueType = z.infer<typeof VenueSchema>
-
-export const PersonSchema = object({
-  first_name: string(),
-  last_name: string()
-})
-
-export type PersonType = z.infer<typeof PersonSchema>
-
 export const PlayerUpdateSchema = object({
   id: string(),
   first_name: string(),
@@ -105,16 +90,6 @@ export const ScrapeActivitySchema = object({
 })
 
 export type ScrapeActivityType = z.infer<typeof ScrapeActivitySchema>
-
-export const AwardSchema = object({
-  round: RoundEnum,
-  points: number().nullable().default(null),
-  pm: number().nullable().default(null),
-  tour: TourEnum,
-  match_type: MatchTypeEnum
-})
-
-export type AwardType = z.infer<typeof AwardSchema>
 
 export const SeedSchema = object({
   event_id: string(),

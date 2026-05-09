@@ -90,12 +90,7 @@ export default defineAppConfig({
         variant: "subtle"
       }
     },
-    checkbox: {
-      slots: {
-        base: "cursor-pointer",
-        label: "cursor-pointer"
-      }
-    },
+    checkbox: { slots: { label: "cursor-pointer" } },
     checkboxGroup: {
       slots: {
         legend: "font-semibold",
