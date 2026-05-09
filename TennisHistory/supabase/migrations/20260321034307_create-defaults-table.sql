@@ -5,4 +5,4 @@ CREATE TABLE defaults (
     reason TEXT,
     player_id TEXT REFERENCES players (id) ON DELETE CASCADE,
     draw draw_enum
-)
+);

@@ -3,7 +3,7 @@ useHead({ title: "About" })
 </script>
 
 <template>
-  <u-container class="max-w-7xl">
+  <u-container>
     <u-page>
       <u-page-header
         title="About"

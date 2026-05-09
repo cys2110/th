@@ -1,12 +1,12 @@
 export default defineAppConfig({
   ui: {
     colors: {
-      primary: "sky",
+      primary: "violet",
       success: "green",
       warning: "amber",
       info: "indigo",
       error: "red",
-      ATP: "violet",
+      ATP: "sky",
       WTA: "lime",
       "ITF-M": "blue",
       "ITF-W": "mauve",

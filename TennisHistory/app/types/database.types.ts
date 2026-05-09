@@ -348,6 +348,7 @@ export type Database = {
           start_date: string | null
           tfc: number | null
           tour: Database["public"]["Enums"]["tour_enum"] | null
+          undefeated_bonus: number | null
           updated_at: string
           wiki_link: string | null
         }
@@ -372,6 +373,7 @@ export type Database = {
           start_date?: string | null
           tfc?: number | null
           tour?: Database["public"]["Enums"]["tour_enum"] | null
+          undefeated_bonus?: number | null
           updated_at?: string
           wiki_link?: string | null
         }
@@ -396,6 +398,7 @@ export type Database = {
           start_date?: string | null
           tfc?: number | null
           tour?: Database["public"]["Enums"]["tour_enum"] | null
+          undefeated_bonus?: number | null
           updated_at?: string
           wiki_link?: string | null
         }
@@ -996,6 +999,7 @@ export type Database = {
           match_type: Database["public"]["Enums"]["match_type_enum"] | null
           number: number
           pm: number | null
+          pm_tiered: number[] | null
           points: number | null
           round: Database["public"]["Enums"]["round_enum"] | null
           tour: Database["public"]["Enums"]["tour_enum"] | null
@@ -1007,6 +1011,7 @@ export type Database = {
           match_type?: Database["public"]["Enums"]["match_type_enum"] | null
           number: number
           pm?: number | null
+          pm_tiered?: number[] | null
           points?: number | null
           round?: Database["public"]["Enums"]["round_enum"] | null
           tour?: Database["public"]["Enums"]["tour_enum"] | null
@@ -1018,6 +1023,7 @@ export type Database = {
           match_type?: Database["public"]["Enums"]["match_type_enum"] | null
           number?: number
           pm?: number | null
+          pm_tiered?: number[] | null
           points?: number | null
           round?: Database["public"]["Enums"]["round_enum"] | null
           tour?: Database["public"]["Enums"]["tour_enum"] | null
@@ -1097,33 +1103,56 @@ export type Database = {
       }
       ties: {
         Row: {
+          country_1_id: string | null
+          country_2_id: string | null
           date: string | null
           group_name: string | null
           id: string
           loser_id: string | null
           round_id: string
+          tie_number: number | null
           venue_id: string | null
           winner_id: string | null
         }
         Insert: {
+          country_1_id?: string | null
+          country_2_id?: string | null
           date?: string | null
           group_name?: string | null
           id?: string
           loser_id?: string | null
           round_id: string
+          tie_number?: number | null
           venue_id?: string | null
           winner_id?: string | null
         }
         Update: {
+          country_1_id?: string | null
+          country_2_id?: string | null
           date?: string | null
           group_name?: string | null
           id?: string
           loser_id?: string | null
           round_id?: string
+          tie_number?: number | null
           venue_id?: string | null
           winner_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "ties_country_1_id_fkey"
+            columns: ["country_1_id"]
+            isOneToOne: false
+            referencedRelation: "entries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ties_country_2_id_fkey"
+            columns: ["country_2_id"]
+            isOneToOne: false
+            referencedRelation: "entries"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "ties_loser_id_fkey"
             columns: ["loser_id"]
@@ -1316,6 +1345,21 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_country_big_titles: {
+        Args: { categories: string[]; country_id: string }
+        Returns: {
+          category: string
+          country: Json
+          edition_id: number
+          first_name: string
+          id: string
+          last_name: string
+          match_type: Database["public"]["Enums"]["match_type_enum"]
+          tour: Database["public"]["Enums"]["tour_enum"]
+          tournament: Json
+          year: number
+        }[]
+      }
       get_country_winners: {
         Args: { tournament_id: number }
         Returns: {
@@ -1329,6 +1373,146 @@ export type Database = {
         Returns: {
           id: number
           match_type: Database["public"]["Enums"]["match_type_enum"]
+          team: Json
+          tour: Database["public"]["Enums"]["tour_enum"]
+          year: number
+        }[]
+      }
+      get_head_to_head_details: {
+        Args: { team1_ids: string[]; team2_ids: string[] }
+        Returns: {
+          matches: Json
+          team1: Json
+          team2: Json
+        }[]
+      }
+      get_head_to_head_table: {
+        Args: { tour: Database["public"]["Enums"]["tour_enum"] }
+        Returns: {
+          losses: number
+          opponent_country: Json
+          opponent_first_name: string
+          opponent_id: string
+          opponent_last_name: string
+          opponent_rank: number
+          player_country: Json
+          player_first_name: string
+          player_id: string
+          player_last_name: string
+          player_rank: number
+          wins: number
+        }[]
+      }
+      get_player_finals: {
+        Args: { player_id: string }
+        Returns: {
+          category: string
+          end_date: string
+          id: number
+          level: Database["public"]["Enums"]["level_enum"]
+          match_type: Database["public"]["Enums"]["match_type_enum"]
+          partner: Json
+          surfaces: string[]
+          title: boolean
+          tournament: Json
+          year: number
+        }[]
+      }
+      get_player_h2h: {
+        Args: { player_id: string }
+        Returns: {
+          losses: number
+          player: Json
+          total: number
+          wins: number
+        }[]
+      }
+      get_player_wl: {
+        Args: { player_id: string }
+        Returns: {
+          draw: Database["public"]["Enums"]["draw_enum"]
+          level: Database["public"]["Enums"]["level_enum"]
+          losses: number
+          match_type: Database["public"]["Enums"]["match_type_enum"]
+          titles: number
+          wins: number
+        }[]
+      }
+      get_recent_events: {
+        Args: { player_id: string }
+        Returns: {
+          category: string
+          edition_id: number
+          level: Database["public"]["Enums"]["level_enum"]
+          round: string
+          start_date: string
+          surfaces: string[]
+          tournament_id: number
+          tournament_name: string
+          year: number
+        }[]
+      }
+      get_tournament_finalists: {
+        Args: { tournament_id: number }
+        Returns: {
+          country: Json
+          doubles_finals: number
+          doubles_titles: number
+          first_name: string
+          id: string
+          last_name: string
+          singles_finals: number
+          singles_titles: number
+          tour: Database["public"]["Enums"]["tour_enum"]
+        }[]
+      }
+      get_tournament_lowest_ranked: {
+        Args: { tournament_id: number }
+        Returns: {
+          country: Json
+          edition_id: number
+          first_name: string
+          id: string
+          last_name: string
+          match_type: Database["public"]["Enums"]["match_type_enum"]
+          rank: number
+          round: string
+          tour: Database["public"]["Enums"]["tour_enum"]
+          year: number
+        }[]
+      }
+      get_tournament_seed_stats: {
+        Args: { tournament_id: number }
+        Returns: {
+          id: number
+          match_type: Database["public"]["Enums"]["match_type_enum"]
+          round: string
+          seeded_entries: Json
+          tour: Database["public"]["Enums"]["tour_enum"]
+          year: number
+        }[]
+      }
+      get_tournament_status_stats: {
+        Args: { tournament_id: number }
+        Returns: {
+          id: number
+          match_type: Database["public"]["Enums"]["match_type_enum"]
+          status: Database["public"]["Enums"]["status_enum"]
+          team: Json
+          tour: Database["public"]["Enums"]["tour_enum"]
+          year: number
+        }[]
+      }
+      get_tournament_winners: {
+        Args: { tournament_id: number }
+        Returns: {
+          edition_id: number
+          end_date: string
+          entry_id: string
+          event_id: string
+          match_type: Database["public"]["Enums"]["match_type_enum"]
+          scores: Json
+          start_date: string
           team: Json
           tour: Database["public"]["Enums"]["tour_enum"]
           year: number
@@ -1371,6 +1555,7 @@ export type Database = {
       draw_enum: "Main" | "Qualifying"
       draws_enum:
         | "Round of 128"
+        | "Round of 96"
         | "Round of 64"
         | "Round of 48"
         | "Round of 32"
@@ -1550,6 +1735,7 @@ export const Constants = {
       draw_enum: ["Main", "Qualifying"],
       draws_enum: [
         "Round of 128",
+        "Round of 96",
         "Round of 64",
         "Round of 48",
         "Round of 32",

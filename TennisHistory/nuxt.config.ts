@@ -33,6 +33,12 @@ export default defineNuxtConfig({
     typedPages: true
   },
 
+  vite: {
+    optimizeDeps: {
+      include: ["@vue/devtools-core", "@vue/devtools-kit", "vue-echarts"]
+    }
+  },
+
   supabase: {
     redirect: false
   },

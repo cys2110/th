@@ -5,7 +5,6 @@ CREATE TABLE countries (
     continent continent_enum NOT NULL,
     alpha_2 TEXT
 );
-
 -- Venues table
 CREATE TABLE venues (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -13,20 +12,16 @@ CREATE TABLE venues (
     city TEXT NOT NULL,
     country_id TEXT REFERENCES countries (id) ON DELETE CASCADE
 );
-
 -- Add unique constraint
 ALTER TABLE venues ADD CONSTRAINT venues_unique UNIQUE (name, city);
-
 -- Surfaces table
 CREATE TABLE surfaces (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     environment environment_enum NOT NULL,
     surface surface_enum NOT NULL
 );
-
 -- Add unique constraint
 ALTER TABLE surfaces ADD CONSTRAINT surfaces_slug_unique UNIQUE (environment, surface);
-
 -- Tournaments table
 CREATE TABLE tournaments (
     id INTEGER PRIMARY KEY NOT NULL,
@@ -37,7 +32,6 @@ CREATE TABLE tournaments (
     abolished INTEGER,
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
-
 -- Players table
 CREATE TABLE players (
     id TEXT PRIMARY KEY NOT NULL,
@@ -64,7 +58,6 @@ CREATE TABLE players (
     wiki_link TEXT,
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
-
 -- People table
 CREATE TABLE people (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -72,10 +65,8 @@ CREATE TABLE people (
     last_name TEXT,
     player_id TEXT REFERENCES players (id) ON DELETE SET NULL
 );
-
 -- Add unique constraint
 ALTER TABLE people ADD CONSTRAINT people_slug_unique UNIQUE (first_name, last_name);
-
 -- Player country mapping
 CREATE TABLE player_country_mapping (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -84,7 +75,6 @@ CREATE TABLE player_country_mapping (
     start_date DATE,
     end_date DATE
 );
-
 -- Player coach mapping
 CREATE TABLE player_coach_mapping (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -93,7 +83,6 @@ CREATE TABLE player_coach_mapping (
     years TEXT,
     status TEXT CHECK (status IN ('Current', 'Former'))
 );
-
 -- Editions table
 CREATE TABLE editions (
     id INTEGER PRIMARY KEY NOT NULL,
@@ -111,7 +100,6 @@ CREATE TABLE editions (
     year INTEGER NOT NULL,
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
-
 -- Events table
 CREATE TABLE events (
     id TEXT PRIMARY KEY NOT NULL,
@@ -137,28 +125,24 @@ CREATE TABLE events (
     edition_id INTEGER REFERENCES editions (id) ON DELETE CASCADE,
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
-
 -- Event surface mapping
 CREATE TABLE event_surface_mapping (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     event_id TEXT REFERENCES events (id) ON DELETE CASCADE,
     surface_id UUID REFERENCES surfaces (id) ON DELETE CASCADE
 );
-
 -- Event venue mapping
 CREATE TABLE event_venue_mapping (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     event_id TEXT REFERENCES events (id) ON DELETE CASCADE,
     venue_id UUID REFERENCES venues (id) ON DELETE CASCADE
 );
-
 -- Event supervisor mapping
 CREATE TABLE event_supervisor_mapping (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     event_id TEXT REFERENCES events (id) ON DELETE CASCADE,
     supervisor_id UUID REFERENCES people (id) ON DELETE CASCADE
 );
-
 -- Entry table
 CREATE TABLE entries (
     id TEXT PRIMARY KEY NOT NULL,
@@ -170,7 +154,6 @@ CREATE TABLE entries (
     team_name TEXT CHECK (team_name IN ('Europe', 'World')),
     seed INTEGER
 );
-
 -- Entry player mapping
 CREATE TABLE player_entry_mapping (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -179,7 +162,6 @@ CREATE TABLE player_entry_mapping (
     country_id TEXT REFERENCES countries (id) ON DELETE CASCADE,
     rank INTEGER
 );
-
 -- Trigger to set country_id
 CREATE OR REPLACE FUNCTION set_entry_country_id()
 RETURNS TRIGGER AS $$
@@ -210,12 +192,10 @@ BEGIN
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
-
 CREATE TRIGGER set_entry_country_id_trigger
 BEFORE INSERT ON player_entry_mapping
 FOR EACH ROW
 EXECUTE FUNCTION set_entry_country_id();
-
 -- Seed mapping
 CREATE TABLE seeds (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -226,10 +206,8 @@ CREATE TABLE seeds (
     match_type match_type_enum,
     rank INTEGER
 );
-
 ALTER TABLE seeds
 ADD CONSTRAINT seeds_unique UNIQUE (event_id, entry_id);
-
 -- Lda mapping
 CREATE TABLE ldas (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -238,10 +216,8 @@ CREATE TABLE ldas (
     rank INTEGER,
     draw draw_enum
 );
-
 ALTER TABLE ldas
 ADD CONSTRAINT ldas_unique UNIQUE (event_id, entry_id);
-
 -- Withdrawals mapping
 CREATE TABLE withdrawals (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -251,7 +227,6 @@ CREATE TABLE withdrawals (
     player_id TEXT REFERENCES players (id) ON DELETE CASCADE,
     draw draw_enum
 );
-
 -- Retirement mapping
 CREATE TABLE retirements (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -261,7 +236,6 @@ CREATE TABLE retirements (
     player_id TEXT REFERENCES players (id) ON DELETE CASCADE,
     draw draw_enum
 );
-
 -- Walkover mapping
 CREATE TABLE walkovers (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -271,7 +245,6 @@ CREATE TABLE walkovers (
     player_id TEXT REFERENCES players (id) ON DELETE CASCADE,
     draw draw_enum
 );
-
 -- Wild card mapping
 CREATE TABLE wildcards (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -279,14 +252,12 @@ CREATE TABLE wildcards (
     entry_id TEXT NOT NULL REFERENCES entries (id) ON DELETE CASCADE,
     draw draw_enum
 );
-
 -- Qualifiers mapping
 CREATE TABLE qualifiers (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     event_id TEXT NOT NULL REFERENCES events (id) ON DELETE CASCADE,
     entry_id TEXT NOT NULL REFERENCES entries (id) ON DELETE CASCADE
 );
-
 -- Alternates mapping
 CREATE TABLE alternates (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -294,14 +265,12 @@ CREATE TABLE alternates (
     entry_id TEXT NOT NULL REFERENCES entries (id) ON DELETE CASCADE,
     draw draw_enum
 );
-
 -- Lucky losers mapping
 CREATE TABLE lucky_losers (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     event_id TEXT NOT NULL REFERENCES events (id) ON DELETE CASCADE,
     entry_id TEXT NOT NULL REFERENCES entries (id) ON DELETE CASCADE
 );
-
 -- Rounds table
 CREATE TABLE rounds (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -315,7 +284,6 @@ CREATE TABLE rounds (
     event_id TEXT NOT NULL REFERENCES events (id) ON DELETE CASCADE,
     group_name TEXT
 );
-
 -- Ties table
 CREATE TABLE ties (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -325,7 +293,6 @@ CREATE TABLE ties (
     date DATE,
     venue_id UUID REFERENCES venues (id) ON DELETE CASCADE
 );
-
 -- Matches table
 CREATE TABLE matches (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -346,7 +313,6 @@ CREATE TABLE matches (
     umpire_id UUID REFERENCES people (id) ON DELETE CASCADE,
     tie_id UUID REFERENCES ties (id) ON DELETE CASCADE
 );
-
 -- Match stats table
 CREATE TABLE match_stats (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -376,7 +342,6 @@ CREATE TABLE match_stats (
     avg2_speed INTEGER,
     max_speed INTEGER
 );
-
 CREATE TABLE match_scores (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     match_id UUID NOT NULL REFERENCES matches (id) ON DELETE CASCADE,
@@ -385,7 +350,6 @@ CREATE TABLE match_scores (
     set INTEGER,
     tb INTEGER
 );
-
 CREATE OR REPLACE FUNCTION handle_updated_at()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -393,22 +357,18 @@ BEGIN
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
-
 CREATE TRIGGER trigger_tournament_updated_at
 BEFORE UPDATE ON tournaments
 FOR EACH ROW
 EXECUTE FUNCTION handle_updated_at();
-
 CREATE TRIGGER trigger_player_updated_at
 BEFORE UPDATE ON players
 FOR EACH ROW
 EXECUTE FUNCTION handle_updated_at();
-
 CREATE TRIGGER trigger_edition_updated_at
 BEFORE UPDATE ON editions
 FOR EACH ROW
 EXECUTE FUNCTION handle_updated_at();
-
 CREATE TRIGGER trigger_event_updated_at
 BEFORE UPDATE ON events
 FOR EACH ROW

@@ -30,6 +30,21 @@ print("SUPABASE_KEY exists:", bool(SUPABASE_KEY))
 
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
+SELENIUM_REMOTE_URL = os.getenv("SELENIUM_REMOTE_URL", "http://localhost:4444/wd/hub")
+
+def create_remote_chrome_driver():
+    options = webdriver.ChromeOptions()
+    options.add_argument("--disable-dev-shm-usage")
+    options.add_argument("--no-sandbox")
+
+    driver = webdriver.Remote(
+        command_executor=SELENIUM_REMOTE_URL,
+        options=options
+    )
+    driver.set_page_load_timeout(30)
+
+    return driver
+
 @app.route("/atp/stats", methods=["POST"])
 def get_atp_stats():
     data = request.json
@@ -37,16 +52,17 @@ def get_atp_stats():
     links = data.get('links')
     matches = []
 
-    driver = webdriver.Chrome()
-
     failed_links = []
 
     for match in links:
+        driver = None
+
         try:
+            driver = create_remote_chrome_driver()
             driver.get(f"https://www.atptour.com{match}")
             time.sleep(10)
 
-            WebDriverWait(driver, 10).until(EC.presence_of_all_elements_located((By.CLASS_NAME, 'RGMatchStats')))
+            WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME, 'RGMatchStats')))
 
             layout = driver.find_element(By.CLASS_NAME, 'atp_layout-container').get_attribute('innerHTML')
             soup = BeautifulSoup(layout, 'html.parser')
@@ -127,12 +143,15 @@ def get_atp_stats():
                             match_info['p1'][key4] = int(p2_stripped.group(2))
 
             matches.append(match_info)
+        except TimeoutException as e:
+            failed_links.append(match)
+            print(f"Could not locate RGMatchStats for {match}: {e}")
         except Exception as e:
             failed_links.append(match)
             print(e)
-            pass
-
-    driver.quit()
+        finally:
+            if driver:
+                driver.quit()
 
     matchesToInsert = []
     failed_matches = []
@@ -179,12 +198,15 @@ def scrape_old_atp_matches():
 
     matches = []
 
-    driver = webdriver.Chrome()
-
     for link in links:
+        driver = None
+
         try:
+            driver = create_remote_chrome_driver()
             driver.get(f"https://www.atptour.com{link}")
             time.sleep(10)
+
+            WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME, 'atp_match-stats')))
 
             layout = driver.find_element(By.CLASS_NAME, 'atp_match-stats').get_attribute('innerHTML')
             soup = BeautifulSoup(layout, 'html.parser')
@@ -269,12 +291,15 @@ def scrape_old_atp_matches():
                             match['t1'][key4] = int(p2_stripped.group(2)) if p2_stripped else 0
 
             matches.append(match)
+        except TimeoutException as e:
+            failed_links.append(link)
+            print(f"Could not locate atp_match-stats for {link}: {e}")
         except Exception as e:
             failed_links.append(link)
             print(e)
-            pass
-
-    driver.quit()
+        finally:
+            if driver:
+                driver.quit()
 
     print("failed links:", failed_links)
 

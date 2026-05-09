@@ -1,0 +1,1 @@
+ALTER TABLE ties ADD COLUMN tie_number INTEGER;

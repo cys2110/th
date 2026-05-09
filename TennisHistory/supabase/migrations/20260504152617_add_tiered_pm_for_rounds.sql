@@ -1,0 +1,2 @@
+ALTER TABLE rounds
+ADD COLUMN pm_tiered NUMERIC[];

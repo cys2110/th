@@ -1,5 +1,3 @@
 ALTER TABLE ties ADD COLUMN group_name TEXT DEFAULT NULL;
-
 ALTER TABLE matches ADD COLUMN group_name TEXT DEFAULT NULL;
-
 ALTER TABLE rounds DROP COLUMN group_name;

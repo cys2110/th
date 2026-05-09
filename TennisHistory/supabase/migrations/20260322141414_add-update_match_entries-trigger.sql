@@ -34,9 +34,7 @@ BEGIN
     RETURN NEW;
 END;
 $$;
-
 DROP TRIGGER IF EXISTS update_match_entry_ids_trigger ON matches;
-
 CREATE TRIGGER update_match_entry_ids_trigger
 BEFORE INSERT OR UPDATE OF team_1_id, team_2_id, winner_id, loser_id
 ON matches

@@ -30,6 +30,8 @@ print("SUPABASE_KEY exists:", bool(SUPABASE_KEY))
 
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
+SELENIUM_REMOTE_URL = os.getenv("SELENIUM_REMOTE_URL", "http://localhost:4444/wd/hub")
+
 # Function to handle cookies
 def handle_cookies(driver):
     wait = WebDriverWait(driver, timeout=20)
@@ -39,6 +41,19 @@ def handle_cookies(driver):
             driver.find_element(By.XPATH, '//*[@id="onetrust-reject-all-handler"]').click()
     except TimeoutException:
         return False
+
+def create_remote_chrome_driver():
+    options = webdriver.ChromeOptions()
+    options.add_argument("--disable-dev-shm-usage")
+    options.add_argument("--no-sandbox")
+
+    driver = webdriver.Remote(
+        command_executor=SELENIUM_REMOTE_URL,
+        options=options
+    )
+    driver.set_page_load_timeout(30)
+
+    return driver
 
 # Endpoint to scrape ATP player data
 @app.route("/atp/player/<player_id>", methods=['GET'])
@@ -194,66 +209,75 @@ def get_atp_activity():
     players = data.get('players')
     activity = []
 
-    driver = webdriver.Chrome()
-
     for player in players:
-        driver.get(f"https://www.atptour.com/en/players/x/{player['player_id']}/player-activity?matchType={match_type}&year={year}&tournament={tournament_id}_{category}")
+        driver = None
 
         player_activity = {
             'entry_id': player['entry_id'],
             'player_id': player['player_id']
         }
 
-        WebDriverWait(driver, 10).until(EC.presence_of_all_elements_located((By.CLASS_NAME, 'atp_player-activity')))
-        time.sleep(2)
+        try:
+            driver = create_remote_chrome_driver()
+            driver.get(f"https://www.atptour.com/en/players/x/{player['player_id']}/player-activity?matchType={match_type}&year={year}&tournament={tournament_id}_{category}")
 
-        layout = driver.find_element(By.CLASS_NAME, 'atp_player-activity').get_attribute('innerHTML')
-        soup = BeautifulSoup(layout, 'html.parser')
+            WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME, 'atp_player-activity')))
+            time.sleep(2)
 
-        tournament_rows = soup.find_all('div', class_='tournament')
+            layout = driver.find_element(By.CLASS_NAME, 'atp_player-activity').get_attribute('innerHTML')
+            soup = BeautifulSoup(layout, 'html.parser')
 
-        if len(tournament_rows) == 1:
-            row = tournament_rows[0]
-        elif len(tournament_rows) > 1:
-            target_row = None
-            for row in tournament_rows:
-                a_tag = row.find('a', href=True)
-                if a_tag and f"/{tournament_id}/overview" in a_tag['href']:
-                    target_row = row
-                    break
+            tournament_rows = soup.find_all('div', class_='tournament')
 
-            if not target_row:
+            if len(tournament_rows) == 1:
+                row = tournament_rows[0]
+            elif len(tournament_rows) > 1:
+                target_row = None
+                for row in tournament_rows:
+                    a_tag = row.find('a', href=True)
+                    if a_tag and f"/{tournament_id}/overview" in a_tag['href']:
+                        target_row = row
+                        break
+
+                if not target_row:
+                    print(f"No activity found for {player}")
+                    continue
+
+                row = target_row
+            else:
                 print(f"No activity found for {player}")
                 continue
 
-            row = target_row
-        else:
-            print(f"No activity found for {player}")
+            footer = row.next_sibling
+
+            if not footer or footer == "":
+                print(f"No activity found for {player}")
+                continue
+
+            footer_text = footer.get_text(strip=True).split(', ')
+            for text in footer_text:
+                label, value = text.split(':')
+                if label == 'Points':
+                    player_activity['points'] = int(value.strip())
+                elif label == 'ATP Ranking':
+                    player_activity['rank'] = int(value.strip())
+                elif label == 'Prize Money':
+                    for prefix in [' $', ' €', ' £', ' A$']:
+                        if value.startswith(prefix):
+                            value = value.removeprefix(prefix)
+                            break
+                    player_activity['pm'] = int(value.strip().replace(',', ''))
+
+            activity.append(player_activity)
+        except TimeoutException:
+            print(f"Could not locate atp_player-activity for {player}")
             continue
-
-        footer = row.next_sibling
-
-        if not footer or footer == "":
-            print(f"No activity found for {player}")
+        except Exception as e:
+            print(f"Error scraping activity for {player}: {e}")
             continue
-
-        footer_text = footer.get_text(strip=True).split(', ')
-        for text in footer_text:
-            label, value = text.split(':')
-            if label == 'Points':
-                player_activity['points'] = int(value.strip())
-            elif label == 'ATP Ranking':
-                player_activity['rank'] = int(value.strip())
-            elif label == 'Prize Money':
-                for prefix in [' $', ' €', ' £', ' A$']:
-                    if value.startswith(prefix):
-                        value = value.removeprefix(prefix)
-                        break
-                player_activity['pm'] = int(value.strip().replace(',', ''))
-
-        activity.append(player_activity)
-
-    driver.quit()
+        finally:
+            if driver:
+                driver.quit()
 
     for item in activity:
         try:

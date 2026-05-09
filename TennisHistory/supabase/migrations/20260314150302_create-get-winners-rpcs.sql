@@ -33,7 +33,6 @@ AS $$
     AND r.round = 'Final'
     GROUP BY ed.year, ed.id, e.tour, r.match_type;
 $$;
-
 CREATE OR REPLACE FUNCTION get_country_winners(tournament_id INTEGER)
 RETURNS TABLE (
     year INTEGER,

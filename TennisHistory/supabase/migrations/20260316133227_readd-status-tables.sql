@@ -1,6 +1,5 @@
 ALTER TABLE entries
 DROP COLUMN status;
-
 CREATE TABLE entry_status (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     event_id TEXT NOT NULL REFERENCES events (id) ON DELETE CASCADE,
