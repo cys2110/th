@@ -1,14 +1,5 @@
 import { array, coerce, literal, number, object, string, url, z } from "zod"
 
-export const CountrySchema = object({
-  id: string(),
-  name: string(),
-  continent: ContinentEnum,
-  alpha_2: string().nullable().default(null)
-})
-
-export type CountryType = z.infer<typeof CountrySchema>
-
 export const VenueSchema = object({
   name: string().optional(),
   city: string(),
@@ -63,59 +54,6 @@ export const PlayerUpdateSchema = object({
 })
 
 export type PlayerUpdateType = z.infer<typeof PlayerUpdateSchema>
-
-export const EditionCreateSchema = object({
-  id: number(),
-  category: CategoryEnum.nullable().default(null),
-  currency: CurrencyEnum.optional(),
-  draw_link: url().optional(),
-  draw_type: DrawsEnum.optional(),
-  end_date: string().nullable().default(null),
-  sponsor_name: string().nullable().default(null),
-  start_date: string().nullable().default(null),
-  tfc: number().nullable().default(null),
-  tournament_id: number(),
-  tours: array(TourEnum).default([]),
-  wiki_link: url().optional(),
-  year: number()
-})
-
-export type EditionCreateType = z.infer<typeof EditionCreateSchema>
-
-export const EditionUpdateSchema = EditionCreateSchema.omit({
-  tournament_id: true
-})
-
-export type EditionUpdateType = z.infer<typeof EditionUpdateSchema>
-
-export const EventCreateSchema = object({
-  id: string(),
-  category: CategoryEnum.nullable().default(null),
-  currency: CurrencyEnum.optional(),
-  d_draw: DrawsEnum.optional(),
-  d_link: url().optional(),
-  end_date: string().nullable().default(null),
-  level: LevelEnum.optional(),
-  pm: number().nullable().default(null),
-  qd_draw: DrawsEnum.optional(),
-  qd_link: url().optional(),
-  qs_draw: DrawsEnum.optional(),
-  qs_link: url().optional(),
-  s_draw: DrawsEnum.optional(),
-  s_link: url().optional(),
-  site_link: url().optional(),
-  sponsor_name: string().nullable().default(null),
-  start_date: string().nullable().default(null),
-  tfc: number().nullable().default(null),
-  tour: TourEnum.optional(),
-  wiki_link: url().optional(),
-  edition_id: number(),
-  supervisors: array(string()).default([]),
-  venues: array(string()).default([]),
-  surfaces: array(string()).default([])
-})
-
-export type EventCreateType = z.infer<typeof EventCreateSchema>
 
 export const ScrapeDrawSchema = object({
   draw: DrawEnum,

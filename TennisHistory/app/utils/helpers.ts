@@ -79,7 +79,7 @@ export const do_n_times = (n: number, cb: () => void) => {
 }
 
 /** Function to get flag icon for country */
-export const getFlagCode = (country: CountryType) => {
+export const getFlagCode = (country: CountryInterface) => {
   const circleFlagsMapping: Record<typeof country.id, string> = {
     URS: "soviet-union",
     YUG: "yu",
@@ -107,6 +107,15 @@ export const arrayFilter = (row: Row<any>, columnId: string, filterValue: string
 
   if (!filterValue.length) return true
   if (values.some(v => filterValue.includes(v))) return true
+
+  return false
+}
+
+export const numberFilter = (row: Row<any>, columnId: string, filterValue: number[]) => {
+  const value = row.getValue(columnId) as number
+
+  if (!filterValue.length) return true
+  if (filterValue.includes(value)) return true
 
   return false
 }

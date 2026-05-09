@@ -30,6 +30,13 @@ declare global {
     direction: boolean // true = ASC, false = DESC
   }
 
+  interface CountryInterface {
+    id: string
+    name: string
+    continent: ContinentType
+    alpha_2: string | null
+  }
+
   interface VenueInterface {
     id: string
     name: string | null

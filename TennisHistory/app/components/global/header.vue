@@ -14,7 +14,7 @@ const navLinks = computed<Array<NavigationMenuItem>>(() => [
   {
     label: "Results",
     icon: ICONS.years,
-    active: route.name === "results-archive" || route.name.startsWith("tournaments"),
+    active: route.name === "results-archive" || route.path.startsWith("/tournaments"),
     defaultOpen: true,
     to: { name: "results-archive" },
     children: [
@@ -25,7 +25,7 @@ const navLinks = computed<Array<NavigationMenuItem>>(() => [
   {
     label: "Players",
     icon: ICONS.racquet,
-    active: route.name.startsWith("players") || route.name.startsWith("h2h"),
+    active: route.path.startsWith("/players") || route.path.startsWith("/h2h"),
     defaultOpen: true,
     to: { name: "players" },
     children: [
@@ -37,7 +37,7 @@ const navLinks = computed<Array<NavigationMenuItem>>(() => [
     label: "Stats/Records",
     icon: ICONS.stats,
     to: { name: "statistics-and-records" },
-    active: route.name === "statistics-and-records" || route.name.startsWith("countries") || route.name === "years",
+    active: route.name === "statistics-and-records" || route.path.startsWith("/countries") || route.name === "years",
     defaultOpen: true,
     children: [
       { label: "Countries", icon: ICONS.globe, to: { name: "countries" } },

@@ -1,6 +1,4 @@
 <script setup lang="ts" generic="S">
-import { CalendarDate } from "@internationalized/date"
-
 withDefaults(
   defineProps<{
     field: FormFieldInterface<S>
@@ -12,8 +10,6 @@ withDefaults(
 )
 
 const modelValue = defineModel<any>()
-const date = defineModel<CalendarDate | undefined>("date")
-const dates = defineModel<{ start: CalendarDate | undefined; end: CalendarDate | undefined }>("dates")
 </script>
 
 <template>
@@ -27,8 +23,7 @@ const dates = defineModel<{ start: CalendarDate | undefined; end: CalendarDate |
     :description="field.description"
     :orientation
     :ui="{
-      root: orientation === 'horizontal' ? 'my-3 gap-4' : '',
-      container: orientation === 'horizontal' ? 'flex-1' : ''
+      root: orientation === 'horizontal' ? 'my-3 gap-4' : ''
     }"
   >
     <slot v-if="field.type === 'slot'" />
@@ -51,7 +46,7 @@ const dates = defineModel<{ start: CalendarDate | undefined; end: CalendarDate |
       :currency="field.currency"
     />
 
-    <u-select-menu
+    <u-input-menu
       v-else-if="field.type === 'inputMenu'"
       v-model="modelValue[field.key]"
       :items="field.items!"
@@ -62,6 +57,7 @@ const dates = defineModel<{ start: CalendarDate | undefined; end: CalendarDate |
       clear
       :value-key="field.valueKey"
       :label-key="field.labelKey"
+      class="w-full"
     />
 
     <u-input-tags
@@ -72,6 +68,7 @@ const dates = defineModel<{ start: CalendarDate | undefined; end: CalendarDate |
       add-on-paste
       :convert-value="field.key === 'links' ? cleanLink : undefined"
       :icon="field.icon"
+      class="w-full"
     />
 
     <form-textarea
@@ -102,12 +99,12 @@ const dates = defineModel<{ start: CalendarDate | undefined; end: CalendarDate |
 
     <form-date-picker
       v-else-if="field.type === 'date'"
-      v-model="date"
+      v-model="modelValue[field.key]"
     />
 
     <form-dates-picker
       v-else-if="field.type === 'dates'"
-      v-model="dates"
+      v-model="modelValue[field.key]"
     />
   </u-form-field>
 </template>

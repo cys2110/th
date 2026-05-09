@@ -1,27 +1,28 @@
 <script setup lang="ts">
 import type { BreadcrumbItem, TabsItem } from "@nuxt/ui"
 
-const route = useRoute("edition")
+const { name, params } = useRoute("edition")
 const router = useRouter()
 
+const supabase = useSupabaseClient()
+
 const tournamentStore = useTournamentStore()
-tournamentStore.paramName = route.params.name
-tournamentStore.id = route.params.id
+tournamentStore.paramName = params.name
 
 const editionPages: Array<TabsItem> = [
   { label: "Overview", value: "edition", icon: ICONS.overview },
-  { label: "Results", value: "results", icon: ICONS.cards },
+  { label: "Results", value: "results", icon: ICONS.scores },
   { label: "Draws", value: "draws", icon: ICONS.draw, ui: { leadingIcon: "rotate-270" } }
 ]
 
-const currentPage = computed(() => editionPages.find(page => page.value === route.name))
+const currentPage = computed(() => editionPages.find(page => page.value === name))
 
 const activeRoute = computed({
   get() {
-    return route.name
+    return name
   },
   set(tab) {
-    router.push({ name: tab, params: route.params })
+    router.push({ name: tab, params })
   }
 })
 
@@ -29,26 +30,24 @@ const activeRoute = computed({
 useHead({
   title: () => currentPage.value?.label,
   templateParams: {
-    category: () => `${tournamentStore.name} ${route.params.year}`
+    category: () => `${tournamentStore.name} ${params.year}`
   }
 })
 
 const breadcrumbs = computed<Array<BreadcrumbItem>>(() => [
-  { icon: ICONS.trophy, to: { name: "tournaments" }, label: "Tournaments" },
-  { label: tournamentStore.name, to: { name: "tournament", params: { id: tournamentStore.id, name: tournamentStore.paramName } } }
+  { icon: ICONS.trophy, label: "Tournaments", to: { name: "tournaments" } },
+  { label: tournamentStore.name, to: { name: "tournament", params: { id: params.id, name: params.name } } }
 ])
 
-const { data: edition } = await useAsyncData("edition", async () => {
-  const supabase = useSupabaseClient()
-
+const { data: edition } = await useAsyncData(params.edId, async () => {
   const { data, error } = await supabase
     .from("editions")
-    .select("wiki_link, tours, tournaments(id, name), events(id)")
-    .eq("id", Number(route.params.edId))
+    .select("tours, wiki_link, tournaments(id, name), events(id)")
+    .eq("id", Number(params.edId))
     .single()
 
   if (error || !data) {
-    console.error("Error fetching edition:", error)
+    console.error("Error fetching edition:", error || undefined)
     return null
   }
 
@@ -59,8 +58,9 @@ watch(
   edition,
   () => {
     if (edition.value) {
-      tournamentStore.tournamentName = edition.value.tournaments?.name || ""
-      tournamentStore.tours = edition.value.tours!
+      const { tournaments, tours } = edition.value
+      tournamentStore.tournamentName = tournaments?.name || ""
+      tournamentStore.tours = tours || []
     }
   },
   { immediate: true }
@@ -69,9 +69,9 @@ watch(
 
 <template>
   <u-page-header
-    :title="route.params.year"
+    :title="params.year"
     :ui="{
-      root: 'border-none mb-0',
+      root: 'border-none mb-0 pb-0',
       description: 'text-md w-fit flex items-center gap-2'
     }"
   >
@@ -90,8 +90,6 @@ watch(
     </template>
 
     <template #links>
-      <slot name="header-links" />
-
       <u-button
         v-if="edition?.wiki_link"
         :icon="ICONS.wikipedia"

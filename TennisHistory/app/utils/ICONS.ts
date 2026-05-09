@@ -35,7 +35,7 @@ export default {
   one: "solar:cup-first-bold-duotone",
   overview: "icon-park-twotone:view-grid-list",
   pdf: "material-symbols-light:picture-as-pdf-rounded",
-  //   person: "solar:user-rounded-bold-duotone",
+  person: "solar:user-rounded-bold-duotone",
   people: "icon-park-twotone:peoples-two",
   peopleOff: "solar:user-minus-rounded-line-duotone",
   player: "map:tennis",

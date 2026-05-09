@@ -1,7 +1,7 @@
 <script setup lang="ts">
 withDefaults(
   defineProps<{
-    country: CountryType
+    country: CountryInterface
     iconOnly?: boolean
   }>(),
   { iconOnly: false }

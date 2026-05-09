@@ -3,9 +3,11 @@ const {
   params: { id, edId }
 } = useRoute("edition")
 
-const { data: edition, pending } = await useAsyncData("edition-details", async () => {
-  const supabase = useSupabaseClient()
+const supabase = useSupabaseClient()
 
+const key = computed(() => `${edId}-details`)
+
+const { data: edition, pending } = await useAsyncData(key, async () => {
   const { data, error } = await supabase
     .from("editions")
     .select(
@@ -76,22 +78,21 @@ const showVenues = computed(() => {
 
 <template>
   <div>
-    <edition-details-table
-      :edition
-      :pending
-    />
-
-    <div
-      v-if="!COUNTRY_DRAWS.includes(id) && id !== '9210'"
-      class="flex flex-wrap lg:flex-nowrap gap-5 mt-5"
-    >
-      <event-details
-        v-for="event in edition?.events"
-        :key="event.id"
-        :event
-        :show-surfaces
-        :show-venues
-      />
+    <div class="flex justify-end">
+      <lazy-event-create hydrate-on-idle />
     </div>
+  </div>
+
+  <div
+    v-if="!COUNTRY_DRAWS.includes(id) && id !== '9210'"
+    class="flex flex-wrap gap-5"
+  >
+    <event-details
+      v-for="event in edition?.events"
+      :key="event.id"
+      :event
+      :show-surfaces
+      :show-venues
+    />
   </div>
 </template>

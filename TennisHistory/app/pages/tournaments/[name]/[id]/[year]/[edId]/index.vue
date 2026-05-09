@@ -1,0 +1,42 @@
+<script setup lang="ts">
+import type { TabsItem } from "@nuxt/ui"
+
+definePageMeta({ name: "edition" })
+
+const {
+  params: { id, edId }
+} = useRoute("edition")
+
+const {
+  ui: { icons }
+} = useAppConfig()
+
+const isDefaultEdition = computed(() => !COUNTRY_DRAWS.includes(id) && id !== "9210")
+
+const tabItems = computed<Array<TabsItem>>(() => [
+  { label: "Details", icon: ICONS.racquet, slot: "details" },
+  ...(isDefaultEdition.value ? [{ label: "Awards", icon: ICONS.money, slot: "awards" }] : []),
+  ...(id !== "9210" ? [{ label: "Seeds", icon: ICONS.ranking, slot: "seeds" }] : []),
+  ...(!COUNTRY_DRAWS.includes(id) ? [{ label: "Entry Information", icon: icons.info }] : []),
+  { label: "Entries", icon: ICONS.player, slot: "entries" }
+])
+</script>
+
+<template>
+  <u-container>
+    <u-page>
+      <edition-wrapper />
+
+      <u-page-body>
+        <u-tabs
+          :items="tabItems"
+          size="xs"
+        >
+          <template #details>
+            <edition-details />
+          </template>
+        </u-tabs>
+      </u-page-body>
+    </u-page>
+  </u-container>
+</template>

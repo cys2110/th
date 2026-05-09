@@ -1,17 +1,4 @@
 declare global {
-  interface EditionWinnersInterface {
-    id: number
-    year: number
-    laverWinner?: {
-      team_name: string | null
-      points: number
-    }
-    country?: CountryType
-    tour?: TourType
-    match_type?: MatchEnumType
-    team?: Array<Required<BasePlayerType>>
-  }
-
   interface EditionInterface {
     id: number
     category: CategoryType | null
@@ -27,6 +14,27 @@ declare global {
     year: number
     updated_at: string
     events: Array<EventInterface>
+  }
+
+  interface LaverWinnerInterface {
+    id: number
+    year: number
+    team_name: string | null
+    points: number
+  }
+
+  interface CountryWinnerInterface {
+    id: number
+    year: number
+    country: CountryInterface
+  }
+
+  interface EditionWinnerInterface {
+    id: number
+    year: number
+    match_type: MatchEnumType
+    tour: TourType
+    team: Array<Required<BasePlayerType>>
   }
 
   interface EventInterface {

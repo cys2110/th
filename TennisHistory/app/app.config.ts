@@ -113,19 +113,22 @@ export default defineAppConfig({
     empty: { slots: { actions: "flex-nowrap" } },
     fieldGroup: { base: "w-full" },
     footerColumns: { slots: { center: "xl:col-span-3" } },
-    formField: { slots: { label: "font-semibold text-muted text-xs" } },
+    formField: {
+      slots: { label: "font-semibold text-muted" },
+      variants: {
+        orientation: {
+          horizontal: { container: "flex-1" }
+        }
+      }
+    },
     header: { slots: { title: "font-cursive" } },
-    input: { slots: { root: "w-full" } },
-    inputDate: { slots: { base: "w-full focus-within:ring focus-within:ring-2 focus-within:ring-primary" } },
+    inputDate: { slots: { base: "focus-within:ring focus-within:ring-2 focus-within:ring-primary" } },
     inputMenu: {
       slots: {
-        root: "w-full",
-        content: "ring-primary cursor-pointer min-w-fit",
+        content: "ring-primary cursor-pointer",
         trailingIcon: "group-data-[state=open]:rotate-180 duration-250 cursor-pointer"
       }
     },
-    inputNumber: { slots: { root: "w-full" } },
-    inputTags: { slots: { root: "w-full" } },
     main: { base: "min-h-0 h-[calc(100vh-var(--ui-header-height))] overflow-y-auto" },
     navigationMenu: { defaultVariants: { variant: "link" } },
     pageAside: {
@@ -177,7 +180,7 @@ export default defineAppConfig({
     },
     table: {
       slots: {
-        root: "scrollbar",
+        root: "scrollbar max-h-[calc(100vh-18rem)]",
         th: "text-center",
         tbody: "[&>tr]:data-[selectable=true]:cursor-pointer",
         td: "py-1 text-center"
@@ -185,9 +188,8 @@ export default defineAppConfig({
       defaultVariants: { loadingAnimation: "swing" }
     },
     tabs: {
-      slots: { trigger: "cursor-pointer" },
+      slots: { root: "space-y-6" },
       defaultVariants: { size: "md" }
-    },
-    textarea: { slots: { root: "w-full" } }
+    }
   }
 })

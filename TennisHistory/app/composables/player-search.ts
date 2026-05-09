@@ -28,7 +28,11 @@ export const usePlayerSearch = () => {
       return
     }
 
-    results.value = data.map(v => ({ id: v.id, label: `${v.first_name} ${v.last_name}`, icon: getFlagCode(v.country as CountryType) }))
+    results.value = data.map(v => ({
+      id: v.id,
+      label: `${v.first_name} ${v.last_name}`,
+      icon: getFlagCode(v.country as unknown as CountryInterface)
+    }))
 
     set(loading, false)
   }

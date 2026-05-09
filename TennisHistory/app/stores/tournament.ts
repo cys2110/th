@@ -9,9 +9,6 @@ export const useTournamentStore = defineStore("tournament", () => {
 
   const tours = ref<Array<TourType>>([])
 
-  const id = ref("")
-  const edId = ref("")
-
   const name = computed(() => {
     if (tournamentName.value) return tournamentName.value
 
@@ -21,8 +18,6 @@ export const useTournamentStore = defineStore("tournament", () => {
   return {
     name,
     tours,
-    id,
-    edId,
     paramName,
     tournamentName
   }

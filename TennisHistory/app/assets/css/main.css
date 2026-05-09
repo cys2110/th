@@ -71,5 +71,5 @@ input::-webkit-inner-spin-button {
 }
 
 .scrollbar {
-  @apply scrollbar-thin scrollbar-thumb-primary-600 scrollbar-track-transparent overflow-y-auto scroll-smooth max-h-[calc(100vh-18rem)];
+  @apply scrollbar-thin scrollbar-thumb-primary-600 scrollbar-track-transparent overflow-y-auto scroll-smooth;
 }

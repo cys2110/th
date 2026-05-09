@@ -45,7 +45,7 @@ const activeStatus = computed(() => {
       >
         <span>{{ player.turned_pro }}</span>
         <span v-if="!player.retired || player.retired >= currentYear"> - present</span>
-        <span v-else-if="player.retired && player.turned_pro !== player.retired"> - {{ player.retired }}</span>
+        <span v-else-if="player.turned_pro !== player.retired"> - {{ player.retired }}</span>
       </template>
     </u-page-card>
   </u-chip>
