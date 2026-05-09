@@ -1,7 +1,5 @@
 <script setup lang="ts">
-const props = defineProps<{
-  player: PlayersItemType
-}>()
+const props = defineProps<{ player: PlayersItemType }>()
 
 const {
   ui: { colors }
@@ -41,8 +39,11 @@ const activeStatus = computed(() => {
         footer: 'text-sm w-full text-muted'
       }"
     >
-      <template #footer>
-        <span v-if="player.turned_pro">{{ player.turned_pro }}</span>
+      <template
+        #footer
+        v-if="player.turned_pro"
+      >
+        <span>{{ player.turned_pro }}</span>
         <span v-if="!player.retired || player.retired >= currentYear"> - present</span>
         <span v-else-if="player.retired && player.turned_pro !== player.retired"> - {{ player.retired }}</span>
       </template>

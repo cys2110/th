@@ -2,7 +2,7 @@
 import type { TableColumn, TableRow } from "@nuxt/ui"
 
 const props = defineProps<{
-  tournaments: Array<TournamentType>
+  tournaments: Array<TournamentInterface>
   pending: boolean
   canLoadMore: boolean
   sorting: Array<SortingInterface>
@@ -11,11 +11,16 @@ const props = defineProps<{
 const emits = defineEmits<{
   "load-more": []
   "handle-sorting": [string]
+  refresh: []
 }>()
+
+const {
+  ui: { icons }
+} = useAppConfig()
 
 const filters = defineModel<TournamentFiltersInterface>("filters")
 
-const { results, loading, searchTerm, tournamentFilters } = useTournamentSearch()
+const { results, loading, searchTerm } = useTournamentSearch()
 
 const router = useRouter()
 
@@ -32,7 +37,7 @@ onMounted(() => {
   })
 })
 
-const columns: Array<TableColumn<TournamentType>> = [
+const columns: Array<TableColumn<TournamentInterface>> = [
   { accessorKey: "tours" },
   { accessorKey: "name" },
   { accessorKey: "established" },
@@ -47,7 +52,7 @@ const getSortingIcon = (field: string) => {
   return currentSort.direction ? ICONS.sortAsc : ICONS.sortDesc
 }
 
-const handleSelectRow = (_e: Event, row: TableRow<TournamentType>) => {
+const handleSelectRow = (_e: Event, row: TableRow<TournamentInterface>) => {
   const { id, name } = row.original
 
   router.push({
@@ -58,28 +63,10 @@ const handleSelectRow = (_e: Event, row: TableRow<TournamentType>) => {
     }
   })
 }
-
-const handleUpdateTournamentFilter = (value: any) => {
-  if (filters.value) {
-    filters.value.tournaments = value.map((v: any) => v.id)
-  }
-}
 </script>
 
 <template>
-  <u-theme
-    :ui="{
-      select: {
-        base: 'w-fit mx-auto'
-      },
-      selectMenu: {
-        base: 'w-fit mx-auto'
-      },
-      button: {
-        leadingIcon: 'size-5'
-      }
-    }"
-  >
+  <u-theme :ui="{ button: { leadingIcon: 'size-5' } }">
     <u-table
       ref="table"
       :data="tournaments"
@@ -88,6 +75,7 @@ const handleUpdateTournamentFilter = (value: any) => {
       :loading="pending"
       @select="handleSelectRow"
       render-fallback-value="—"
+      class="2xl:max-w-2/3 mx-auto"
       :meta="{
         class: {
           tr: row => {
@@ -112,14 +100,27 @@ const handleUpdateTournamentFilter = (value: any) => {
       }"
     >
       <template #loading>
-        <loading-icon />
+        <u-icon
+          :name="icons.loading"
+          class="size-8"
+        />
       </template>
 
       <template #empty>
-        <empty
-          message="No tournaments found"
+        <u-empty
           :icon="ICONS.trophyOff"
-        />
+          title="No tournaments found"
+          description="If you think this is an error, refresh the page. Otherwise, please be patient as we continue to add more data."
+          class="mx-2"
+        >
+          <template #actions>
+            <u-button
+              label="Refresh"
+              :icon="icons.reload"
+              @click="$emit('refresh')"
+            />
+          </template>
+        </u-empty>
       </template>
 
       <template #tours-header>
@@ -147,13 +148,13 @@ const handleUpdateTournamentFilter = (value: any) => {
       </template>
 
       <template #name-header>
-        <div class="flex items-center gap-0.5">
+        <div class="flex justify-center items-center gap-0.5">
           <u-select-menu
+            v-if="filters"
             placeholder="Tournament"
             clear
             :items="results"
-            v-model="tournamentFilters"
-            @update:model-value="(value: any) => handleUpdateTournamentFilter(value)"
+            v-model="filters.tournaments"
             multiple
             :icon="ICONS.trophy"
             :loading

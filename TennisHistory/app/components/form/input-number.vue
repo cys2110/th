@@ -34,6 +34,7 @@ const {
         }
       : undefined
     "
+    class="w-full"
   >
     <template #increment>
       <u-button

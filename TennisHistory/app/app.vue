@@ -25,7 +25,7 @@ provide(LOADING_OPTIONS_KEY, {
 <template>
   <u-app
     :tooltip="{ delayDuration: 50 }"
-    :toaster="{ position: 'top-center', expand: false }"
+    :toaster="{ position: 'top-right', expand: false }"
   >
     <nuxt-loading-indicator color="repeating-linear-gradient(to right,#e0f2fe 0%,#0ea5e9 50%,#0c4a6e 100%)" />
 

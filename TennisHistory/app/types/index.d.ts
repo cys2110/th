@@ -58,12 +58,28 @@ declare global {
     tours: Array<TourType>
     established?: number
     abolished?: number
-    tournaments: Array<number>
+    tournaments: Array<{
+      id: number
+      label: string
+    }>
+  }
+
+  interface TournamentInterface {
+    id: number
+    name: string
+    tours: Array<TourType> | null
+    abolished: number | null
+    established: number | null
+    website: string | null
   }
 
   interface PlayerFiltersInterface {
     tours: Array<TourType>
-    players: Array<string>
+    players: Array<{
+      id: string
+      label: string
+      icon: string
+    }>
     countries: Array<string>
     turned_pro?: number
     retired?: number

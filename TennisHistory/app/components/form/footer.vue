@@ -1,8 +1,14 @@
 <script setup lang="ts">
-defineProps<{
-  form: string
-  isUploading: boolean
-}>()
+withDefaults(
+  defineProps<{
+    form: string
+    loading: boolean
+    label?: string
+    icon?: string
+    loadingIcon?: string
+  }>(),
+  { label: "Submit", icon: "line-md:uploading", loadingIcon: ICONS.uploading }
+)
 
 defineEmits<{
   reset: []
@@ -16,15 +22,16 @@ const {
 
 <template>
   <u-button
-    label="Save"
+    :label
     color="success"
     block
-    :icon="icons.upload"
-    :loading="isUploading"
-    :loading-icon="ICONS.uploading"
+    :icon
+    :loading
+    :loading-icon
     type="submit"
     :form
   />
+
   <u-button
     label="Reset"
     color="warning"
@@ -32,6 +39,7 @@ const {
     :icon="icons.reload"
     @click="$emit('reset')"
   />
+
   <u-button
     label="Cancel"
     color="error"

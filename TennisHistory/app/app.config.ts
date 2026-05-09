@@ -7,7 +7,7 @@ export default defineAppConfig({
       info: "indigo",
       error: "red",
       ATP: "sky",
-      WTA: "lime",
+      WTA: "pink",
       "ITF-M": "blue",
       "ITF-W": "mauve",
       Active: "emerald",
@@ -17,7 +17,7 @@ export default defineAppConfig({
       Tour: "teal",
       Challenger: "stone",
       ITF: "rose",
-      Main: "pink",
+      Main: "lime",
       Qualifying: "mist"
     },
     icons: {
@@ -66,14 +66,11 @@ export default defineAppConfig({
       defaultVariants: { variant: "subtle", size: "md" }
     },
     button: {
-      slots: { base: "cursor-pointer" },
       compoundVariants: [
         {
           loading: true,
           leading: true,
-          class: {
-            leadingIcon: "animate-none"
-          }
+          class: { leadingIcon: "animate-none" }
         }
       ],
       defaultVariants: { variant: "subtle", size: "xs" }
@@ -159,15 +156,14 @@ export default defineAppConfig({
     },
     select: {
       slots: {
-        base: "cursor-pointer w-full",
-        content: "ring-primary cursor-pointer w-full",
+        content: "ring-primary cursor-pointer",
         trailingIcon: "group-data-[state=open]:rotate-180 duration-250"
       }
     },
     selectMenu: {
       slots: {
-        base: "cursor-pointer w-full hover:bg-default!",
-        content: "ring-primary cursor-pointer min-w-fit"
+        content: "ring-primary cursor-pointer min-w-fit",
+        trailingIcon: "group-data-[state=open]:rotate-180 duration-250"
       }
     },
     slideover: { slots: { body: "flex flex-col gap-5" } },

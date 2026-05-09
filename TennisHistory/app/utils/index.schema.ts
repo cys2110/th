@@ -24,13 +24,6 @@ export const PersonSchema = object({
 
 export type PersonType = z.infer<typeof PersonSchema>
 
-export const PlayerCreateSchema = object({
-  id: string(),
-  tour: TourEnum
-})
-
-export type PlayerCreateType = z.infer<typeof PlayerCreateSchema>
-
 export const PlayerUpdateSchema = object({
   id: string(),
   first_name: string(),
@@ -70,17 +63,6 @@ export const PlayerUpdateSchema = object({
 })
 
 export type PlayerUpdateType = z.infer<typeof PlayerUpdateSchema>
-
-export const TournamentSchema = object({
-  abolished: number().nullable().default(null),
-  established: number().nullable().default(null),
-  id: number(),
-  name: string(),
-  tours: array(TourEnum).nullable().default([]),
-  website: url().nullable().default(null)
-})
-
-export type TournamentType = z.infer<typeof TournamentSchema>
 
 export const EditionCreateSchema = object({
   id: number(),

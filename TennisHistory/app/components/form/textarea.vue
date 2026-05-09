@@ -1,18 +1,16 @@
 <script setup lang="ts">
 withDefaults(
   defineProps<{
-    type?: string
     placeholder: string
     icon?: string
-    disabled?: boolean
+    rows?: number
   }>(),
   {
-    type: "text",
-    disabled: false
+    rows: 2
   }
 )
 
-const modelValue = defineModel<any>()
+const modelValue = defineModel<string | undefined>()
 
 const {
   ui: { icons }
@@ -20,16 +18,16 @@ const {
 </script>
 
 <template>
-  <u-input
-    :type
-    :placeholder
-    :disabled="disabled"
+  <u-textarea
     v-model="modelValue"
+    :placeholder
     :icon
+    :rows
+    class="w-full"
   >
     <template
+      v-if="isDefined(modelValue)"
       #trailing
-      v-if="isDefined(modelValue) && !disabled"
     >
       <u-button
         color="neutral"
@@ -38,5 +36,5 @@ const {
         @click="modelValue = undefined"
       />
     </template>
-  </u-input>
+  </u-textarea>
 </template>

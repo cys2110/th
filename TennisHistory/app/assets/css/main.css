@@ -33,6 +33,12 @@ input::-webkit-inner-spin-button {
   --distance-between-score-pairs: 14px; */
 }
 
+@layer base {
+  button {
+    @apply cursor-pointer;
+  }
+}
+
 :root {
   --ui-bg: var(--ui-color-neutral-100);
   --ui-container: var(--container-8xl);

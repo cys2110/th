@@ -13,11 +13,16 @@ const props = defineProps<{
 const emits = defineEmits<{
   "load-more": []
   "handle-sorting": [field: string]
+  refresh: []
 }>()
+
+const {
+  ui: { icons }
+} = useAppConfig()
 
 const filters = defineModel<PlayerFiltersInterface>("filters")
 
-const { results, loading, searchTerm, selectedPlayers } = usePlayerSearch()
+const { results, loading, searchTerm } = usePlayerSearch()
 
 const router = useRouter()
 
@@ -63,26 +68,10 @@ const handleSelectRow = (_e: Event, row: TableRow<PlayersItemType>) => {
     }
   })
 }
-
-const handleUpdatePlayersFilter = (value: any[]) => {
-  if (filters.value) filters.value.players = value.map(v => v.id)
-}
 </script>
 
 <template>
-  <u-theme
-    :ui="{
-      select: {
-        base: 'w-fit mx-auto'
-      },
-      selectMenu: {
-        base: 'w-fit mx-auto'
-      },
-      button: {
-        leadingIcon: 'size-5'
-      }
-    }"
-  >
+  <u-theme :ui="{ button: { leadingIcon: 'size-5' } }">
     <u-table
       ref="table"
       :data="players"
@@ -91,6 +80,7 @@ const handleUpdatePlayersFilter = (value: any[]) => {
       :loading="pending"
       @select="handleSelectRow"
       render-fallback-value="—"
+      class="2xl:max-w-2/3 mx-auto"
       :meta="{
         class: {
           tr: row => (row.original.tour === 'ATP' ? 'bg-ATP/10' : 'bg-WTA/10')
@@ -98,14 +88,27 @@ const handleUpdatePlayersFilter = (value: any[]) => {
       }"
     >
       <template #loading>
-        <loading-icon />
+        <u-icon
+          :name="icons.loading"
+          class="size-8"
+        />
       </template>
 
       <template #empty>
-        <empty
-          message="No players found"
+        <u-empty
           :icon="ICONS.peopleOff"
-        />
+          title="No players found"
+          description="If you think this is an error, refresh the page. Otherwise, please be patient as we continue to add more data."
+          class="mx-2"
+        >
+          <template #actions>
+            <u-button
+              label="Refresh"
+              :icon="icons.reload"
+              @click="$emit('refresh')"
+            />
+          </template>
+        </u-empty>
       </template>
 
       <template #tour-header>
@@ -156,13 +159,13 @@ const handleUpdatePlayersFilter = (value: any[]) => {
       <template #name-header>
         <div class="flex items-center justify-center gap-0.5">
           <u-select-menu
-            placeholder="Filter by Player"
-            clear
+            v-if="filters"
+            v-model="filters.players"
             :items="results"
-            v-model="selectedPlayers"
-            @update:model-value="(value: any) => handleUpdatePlayersFilter(value)"
+            placeholder="Player"
             multiple
             :icon="ICONS.player"
+            clear
             :loading
             v-model:search-term="searchTerm"
             variant="none"
@@ -186,7 +189,6 @@ const handleUpdatePlayersFilter = (value: any[]) => {
             placeholder="Turned pro"
             variant="none"
             clear
-            :content="{ align: 'center' }"
           />
           <u-button
             variant="ghost"

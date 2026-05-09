@@ -7,7 +7,12 @@ const props = defineProps<{
 
 const emits = defineEmits<{
   "load-more": []
+  refresh: []
 }>()
+
+const {
+  ui: { icons }
+} = useAppConfig()
 
 const el = useTemplateRef("el")
 
@@ -23,7 +28,7 @@ useInfiniteScroll(el, () => emits("load-more"), {
     v-if="players.length || pending"
     class="scrollbar"
   >
-    <u-page-grid class="2xl:grid-cols-4">
+    <u-page-grid class="xl:grid-cols-4 2xl:grid-cols-5">
       <players-card
         v-if="players.length"
         v-for="player in players"
@@ -39,9 +44,18 @@ useInfiniteScroll(el, () => emits("load-more"), {
     </u-page-grid>
   </div>
 
-  <empty
+  <u-empty
     v-else
-    message="No players found"
     :icon="ICONS.peopleOff"
-  />
+    title="No players found"
+    description="If you think this is an error, refresh the page. Otherwise, please be patient as we continue to add more data."
+  >
+    <template #actions>
+      <u-button
+        label="Refresh"
+        :icon="icons.reload"
+        @click="$emit('refresh')"
+      />
+    </template>
+  </u-empty>
 </template>

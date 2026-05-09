@@ -4,9 +4,7 @@ withDefaults(
     country: CountryType
     iconOnly?: boolean
   }>(),
-  {
-    iconOnly: false
-  }
+  { iconOnly: false }
 )
 </script>
 
@@ -15,11 +13,14 @@ withDefaults(
     :to="{ name: 'country', params: { id: country.id, name: kebabCase(country.name!) } }"
     class="w-fit flex items-center gap-1"
   >
-    <u-icon :name="getFlagCode(country)" />
+    <u-icon
+      :name="getFlagCode(country)"
+      class="rounded-md size-5"
+    />
 
     <span
       v-if="!iconOnly"
-      class="hover-link default-link w-fit"
+      class="hover-link primary-link w-fit"
     >
       {{ country.name }}
     </span>

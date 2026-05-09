@@ -35,7 +35,7 @@ export default defineNuxtConfig({
 
   vite: {
     optimizeDeps: {
-      include: ["@vue/devtools-core", "@vue/devtools-kit", "vue-echarts"]
+      include: ["@vue/devtools-core", "@vue/devtools-kit", "vue-echarts", "@tanstack/vue-table", "convert", "lodash", "zod"]
     }
   },
 

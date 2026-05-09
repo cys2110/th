@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import type { FormErrorEvent, FormSubmitEvent } from "@nuxt/ui"
+import { PostgrestError } from "@supabase/supabase-js"
+import { array, number, object, string, url, z } from "zod"
 
 const {
   ui: { icons }
@@ -11,19 +13,37 @@ const supabase = useSupabaseClient()
 
 const isOpen = ref(false)
 const isUploading = ref(false)
-
 const errors = ref()
+const form = useTemplateRef("form")
 
-const state = ref<Partial<TournamentType>>({})
+defineShortcuts({
+  ctrl_t: () => set(isOpen, !isOpen.value),
+  ctrl_r: () => set(state, {}),
+  ctrl_enter: () => form.value?.submit()
+})
+
+const schema = object({
+  id: number("Tournament ID must be a number.").int("Tournament ID must be an integer.").positive("Tournament ID must be positive."),
+  name: string().min(1, "Tournament name is required."),
+  tours: array(TourEnum).default([]),
+  abolished: number("Abolished year must be a number.").optional(),
+  established: number("Established year must be a number.").optional(),
+  website: url("Website must be a valid URL.").optional()
+})
+type Schema = z.infer<typeof schema>
+
+const state = ref<Partial<Schema>>({})
 
 const handleReset = () => {
   set(state, {})
-  errors.value = undefined
+  set(errors, undefined)
 }
 
-const onError = (event: FormErrorEvent) => (errors.value = event.errors)
+const onError = (event: FormErrorEvent) => {
+  set(errors, event.errors)
+}
 
-const onSubmit = async (event: FormSubmitEvent<TournamentType>) => {
+const onSubmit = async (event: FormSubmitEvent<Schema>) => {
   set(isUploading, true)
 
   try {
@@ -33,7 +53,6 @@ const onSubmit = async (event: FormSubmitEvent<TournamentType>) => {
 
     toast.add({
       title: `${event.data.name} successfully created!`,
-      description: JSON.stringify(event.data),
       icon: icons.success,
       color: "success"
     })
@@ -46,13 +65,19 @@ const onSubmit = async (event: FormSubmitEvent<TournamentType>) => {
       }
     })
   } catch (error) {
-    errors.value = error
+    set(errors, error instanceof PostgrestError ? error.details : (error as any).message)
+
+    toast.add({
+      title: `Error creating ${event.data.name}`,
+      icon: icons.error,
+      color: "error"
+    })
   } finally {
     set(isUploading, false)
   }
 }
 
-const formFields: FormFieldInterface<TournamentType>[] = [
+const formFields: FormFieldInterface<Schema>[] = [
   { label: "ID", key: "id", type: "text", subType: "number", required: true },
   { label: "Tours", key: "tours", type: "checkbox", items: TOUR_OPTIONS, required: true, icon: ICONS.tour },
   { label: "Name", key: "name", type: "text", required: true, class: "col-span-2" },
@@ -67,15 +92,13 @@ const formFields: FormFieldInterface<TournamentType>[] = [
     :title="`Create ${state.name || 'Tournament'}`"
     v-model:open="isOpen"
   >
-    <u-button
-      color="warning"
-      :icon="icons.plus"
-    />
+    <u-button :icon="icons.plus" />
 
     <template #body>
       <u-form
         id="tournament-form"
-        :schema="TournamentSchema"
+        ref="form"
+        :schema
         :state
         @submit="onSubmit"
         @error="onError"
@@ -93,19 +116,16 @@ const formFields: FormFieldInterface<TournamentType>[] = [
       <u-alert
         v-if="errors"
         color="error"
-        :title="`Error saving ${state.name}`"
+        :title="`Error creating ${state.name}`"
+        :description="errors"
         class="mt-5"
-      >
-        <template #description>
-          {{ errors }}
-        </template>
-      </u-alert>
+      />
     </template>
 
     <template #footer="{ close }">
       <form-footer
         form="tournament-form"
-        :is-uploading
+        :loading="isUploading"
         @reset="handleReset"
         @close="close"
       />

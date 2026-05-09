@@ -1,7 +1,5 @@
 <script setup lang="ts">
-const props = defineProps<{
-  tournament: TournamentType
-}>()
+const props = defineProps<{ tournament: TournamentInterface }>()
 
 const {
   ui: { colors }
@@ -41,10 +39,13 @@ const highlightColor = computed(() => {
       />
     </template>
 
-    <template #footer>
-      <span v-if="tournament.established">{{ tournament.established }}</span>
-      <span v-if="tournament.established && !tournament.abolished"> - present</span>
-      <span v-if="tournament.abolished && tournament.abolished !== tournament.established"> - {{ tournament.abolished }}</span>
+    <template
+      #footer
+      v-if="tournament.established"
+    >
+      <span>{{ tournament.established }}</span>
+      <span v-if="!tournament.abolished"> - present</span>
+      <span v-else-if="tournament.abolished !== tournament.established"> - {{ tournament.abolished }}</span>
     </template>
   </u-page-card>
 </template>

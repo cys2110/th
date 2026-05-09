@@ -1,11 +1,16 @@
 <script setup lang="ts">
-import { CalendarDate } from "@internationalized/date"
+import { CalendarDate, parseDate } from "@internationalized/date"
+
+defineProps<{
+  min?: string
+  max?: string
+}>()
 
 const breakpoints = useBreakpoints(breakpointsTailwind, { ssrWidth: useSSRWidth() })
 const mdAndDown = breakpoints.smallerOrEqual("md")
 const xlAndUp = breakpoints.greaterOrEqual("xl")
 
-const dateRange = defineModel<{ start: CalendarDate | undefined; end: CalendarDate | undefined }>()
+const date = defineModel<CalendarDate>()
 
 const inputDateRef = useTemplateRef("inputDateRef")
 </script>
@@ -13,31 +18,35 @@ const inputDateRef = useTemplateRef("inputDateRef")
 <template>
   <u-input-date
     ref="inputDateRef"
-    v-model="dateRange"
-    range
+    v-model="date"
     locale="en-GB"
+    :min-value="min ? parseDate(min) : undefined"
+    :max-value="max ? parseDate(max) : undefined"
+    class="w-full"
   >
     <template #trailing>
-      <u-popover :reference="inputDateRef?.inputsRef[0]?.$el">
+      <u-popover :reference="inputDateRef?.inputsRef[3]?.$el">
         <u-button
           color="neutral"
           variant="link"
           :icon="ICONS.calendar"
-          aria-label="Select a date range"
+          aria-label="Select date"
           class="px-0"
         />
 
         <template #content>
           <u-calendar
-            range
-            v-model="dateRange"
+            v-model="date"
+            :placeholder="min ? parseDate(min) : undefined"
             :week-starts-on="1"
             :weekday-format="
               mdAndDown ? 'narrow'
               : xlAndUp ? 'long'
               : 'short'
             "
-            class="p-2"
+            :max-value="max ? parseDate(max) : undefined"
+            :min-value="min ? parseDate(min) : undefined"
+            class="px-2"
           />
         </template>
       </u-popover>
