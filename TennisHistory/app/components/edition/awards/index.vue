@@ -18,6 +18,7 @@ const supabase = useSupabaseClient()
 
 const tournamentStore = useTournamentStore()
 const updatedAwards = ref<Record<string, any>>({})
+const isSaving = ref(false)
 
 const key = computed(() => `${edId}-awards`)
 
@@ -69,11 +70,20 @@ const columns: Array<TableColumn<AwardInterface>> = [
   {
     accessorKey: "points",
     header: "Points",
-    ...(dev && { footer: () => h(UButton, { icon: ICONS.save, disabled: !!Object.keys(updatedAwards).length, onClick: handleSubmit }) })
+    ...(dev && {
+      footer: () =>
+        h(UButton, {
+          icon: isSaving.value ? ICONS.uploading : ICONS.save,
+          disabled: !!Object.keys(updatedAwards).length || isSaving.value,
+          onClick: handleSubmit
+        })
+    })
   }
 ]
 
 const handleSubmit = async () => {
+  set(isSaving, true)
+
   const errors: Record<string, any> = {}
   for (const [id, award] of Object.entries(updatedAwards)) {
     const { error } = await supabase.from("rounds").update({ pm: award.pm, points: award.points }).eq("id", id)
@@ -97,6 +107,8 @@ const handleSubmit = async () => {
       })
     }
   }
+
+  set(isSaving, false)
 }
 </script>
 

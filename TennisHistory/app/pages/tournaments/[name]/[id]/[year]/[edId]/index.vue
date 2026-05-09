@@ -4,7 +4,7 @@ import type { TabsItem } from "@nuxt/ui"
 definePageMeta({ name: "edition" })
 
 const {
-  params: { id, edId }
+  params: { id }
 } = useRoute("edition")
 
 const {

@@ -320,6 +320,9 @@ def get_wta_player(player_id):
     bio_block = main.find_all('div', class_ = 'profile-bio__info-block')
 
     if stats_block:
+        player_name = stats_block.get('data-player-name')
+        player['site_link'] = f"https://www.wtatennis.com/players/{player['id']}/{player_name.lower().replace(" ", "-")}"
+
         stats_details = stats_block.get('data-player-stats')
         if stats_details:
             parsed = json.loads(stats_details)
@@ -384,6 +387,7 @@ def get_wta_player(player_id):
 
     try:
         response = (supabase.table("players").update({
+            'site_link': player.get('site_link'),
             'ch_singles_date': player.get('singles_ch_date'),
             'ch_doubles_date': player.get('doubles_ch_date'),
             'ch_singles': player.get('ch_singles'),

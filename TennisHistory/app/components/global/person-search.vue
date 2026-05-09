@@ -20,7 +20,7 @@ watch(selectedPerson, newPerson => (modelValue.value = newPerson?.id))
 </script>
 
 <template>
-  <u-select-menu
+  <u-input-menu
     v-model="selectedPerson"
     v-model:search-term="searchTerm"
     :loading="loading"
@@ -28,9 +28,10 @@ watch(selectedPerson, newPerson => (modelValue.value = newPerson?.id))
     :placeholder
     :icon
     :items="results"
+    class="w-full"
   >
     <template #content-bottom>
       <person-create @refresh="refresh" />
     </template>
-  </u-select-menu>
+  </u-input-menu>
 </template>

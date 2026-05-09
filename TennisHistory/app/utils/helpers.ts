@@ -78,6 +78,26 @@ export const do_n_times = (n: number, cb: () => void) => {
   }
 }
 
+export const getAge = (dob: Date, dod?: Date) => {
+  const endDate = dod || new Date()
+
+  let years = endDate.getFullYear() - dob.getFullYear()
+  let months = endDate.getMonth() - dob.getMonth()
+  let days = endDate.getDate() - dob.getDate()
+
+  if (days < 0) {
+    months--
+    days += new Date(endDate.getFullYear(), endDate.getMonth(), 0).getDate()
+  }
+
+  if (months < 0) {
+    years--
+    months += 12
+  }
+
+  return lgAndDown.value ? `${years}y, ${months}m, ${days}d` : `${years} years, ${months} months, ${days} days`
+}
+
 /** Function to get flag icon for country */
 export const getFlagCode = (country: CountryInterface) => {
   const circleFlagsMapping: Record<typeof country.id, string> = {

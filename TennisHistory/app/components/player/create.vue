@@ -104,6 +104,7 @@ const handleSubmit = async () => {
         :icon="icons.upload"
         :loading="isUploading"
         :loading-icon="ICONS.uploading"
+        @click="handleSubmit"
       />
       <u-button
         label="Reset"
