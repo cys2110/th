@@ -142,7 +142,7 @@ const handleScrape = async () => {
     headline="Players"
     :title="playerStore.fullName"
     :ui="{
-      root: 'border-none mb-0 py-0',
+      root: 'border-none mb-0 pb-0',
       description: 'text-md w-fit flex items-center gap-2'
     }"
   >
@@ -191,7 +191,6 @@ const handleScrape = async () => {
       <dev-only>
         <u-button
           v-if="scrapeEnabled"
-          color="warning"
           :icon="isScraping ? ICONS.downloading : ICONS.download"
           @click="handleScrape"
         />

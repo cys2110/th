@@ -98,7 +98,7 @@ const handleSubmit = async () => {
 
     <template #footer="{ close }">
       <u-button
-        label="Save"
+        label="Submit"
         color="success"
         block
         :icon="icons.upload"

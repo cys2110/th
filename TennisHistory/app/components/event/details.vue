@@ -47,26 +47,19 @@ const xlAndUp = breakpoints.greaterOrEqual("xl")
           :icon="ICONS.wikipedia"
           target="_blank"
         />
+
+        <dev-only>
+          <scrape-atp-draw v-if="event.tour === 'ATP'" />
+
+          <scrape-wta-draw v-else-if="event.tour === 'WTA'" />
+
+          <scrape-results v-if="event.tour === 'ATP'" />
+
+          <scrape-atp-stats v-if="event.tour === 'ATP'" />
+
+          <scrape-wta-stats v-else-if="event.tour === 'WTA'" />
+        </dev-only>
       </u-field-group>
-
-      <!-- <dev-only>
-        <event-scrape-draw
-          v-if="event.tour && ['ATP', 'WTA'].includes(event.tour)"
-          :tour="event.tour"
-          :event_id="event.id"
-        />
-
-        <event-scrape-results
-          v-if="event.tour === 'ATP'"
-          :event_id="event.id"
-        />
-
-        <event-scrape-stats
-          v-if="event.tour && ['ATP', 'WTA'].includes(event.tour)"
-          :tour="event.tour"
-          :event_id="event.id"
-        />
-      </dev-only> -->
     </template>
 
     <u-calendar
