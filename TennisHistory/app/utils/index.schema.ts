@@ -1,35 +1,5 @@
 import { array, literal, number, object, string, z } from "zod"
 
-export const ScrapeActivitySchema = object({
-  tournament_id: string(),
-  year: string(),
-  match_type: MatchTypeEnum,
-  category: string(),
-  players: array(
-    object({
-      entry_id: string(),
-      player_id: string(),
-      icon: string(),
-      name: string()
-    })
-  )
-})
-
-export type ScrapeActivityType = z.infer<typeof ScrapeActivitySchema>
-
-export const EntrySchema = object({
-  points: number().nullable().default(null),
-  pm: number().nullable().default(null),
-  match_type: MatchTypeEnum,
-  event_id: string(),
-  player_id: string(),
-  rank: number().nullable().default(null),
-  teammate_id: string().optional(),
-  teammate_rank: number().optional()
-})
-
-export type EntryType = z.infer<typeof EntrySchema>
-
 export const CountryEntrySchema = object({
   id: string(),
   country_id: string(),

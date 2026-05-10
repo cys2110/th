@@ -1,9 +1,16 @@
 <script setup lang="ts">
 import type { FormErrorEvent, FormSubmitEvent } from "@nuxt/ui"
+import { object, string, z } from "zod"
 
-const emit = defineEmits<{
-  refresh: []
-}>()
+const schema = object({
+  category: string(),
+  tournament_id: string()
+})
+type Schema = z.infer<typeof schema>
+
+const props = defineProps<{ matchType: MatchEnumType; players: Array<{ id: string; entry_id: string }>; disabled?: boolean }>()
+
+const emits = defineEmits<{ refresh: [] }>()
 
 const {
   params: { year, id, edId }
@@ -20,59 +27,30 @@ const isOpen = ref(false)
 const isUploading = ref(false)
 const errors = ref()
 
-const {
-  data: players,
-  pending,
-  refresh
-} = await useAsyncData(
-  "entries-individual-players",
-  async () => {
-    const { data, error } = await supabase
-      .from("entries")
-      .select("id, match_type, player_entry_mapping(players(id, first_name, last_name), countries(*)), events!inner(edition_id)")
-      .eq("events.edition_id", Number(edId))
-
-    if (error || !data) {
-      console.error("Error fetching players:", error)
-      return []
-    }
-
-    return data.flatMap(entry =>
-      entry.player_entry_mapping.map(pem => ({
-        entry_id: entry.id,
-        player_id: pem.players.id,
-        name: `${pem.players.first_name} ${pem.players.last_name}`,
-        icon: getFlagCode(pem.countries!),
-        match_type: entry.match_type
-      }))
-    )
-  },
-  { default: () => [] }
-)
-
-const initialState = {
-  tournament_id: id,
-  year,
-  type: "Singles" as MatchEnumType,
-  players: []
-}
-
-const state = ref<Partial<ScrapeActivityType>>({ ...initialState })
+const state = ref<Partial<Schema>>({ tournament_id: id })
 
 const handleReset = () => {
-  set(state, { ...initialState })
+  set(state, { tournament_id: id })
+  set(errors, undefined)
 }
 
-const onError = (event: FormErrorEvent) => console.error(event.errors)
+const onError = (event: FormErrorEvent) => {
+  set(errors, event.errors)
+}
 
-const onSubmit = async (event: FormSubmitEvent<ScrapeActivityType>) => {
+const onSubmit = async (event: FormSubmitEvent<Schema>) => {
   set(isUploading, true)
   try {
     const response = await $fetch(`${FLASK_ROUTE}/atp/activity`, {
       method: "POST",
       timeout: 120_000,
       "Content-Type": "application/json",
-      body: JSON.stringify(event.data)
+      body: JSON.stringify({
+        ...event.data,
+        match_type: props.matchType,
+        year,
+        players: props.players
+      })
     })
 
     if ((response as any).success) {
@@ -83,8 +61,7 @@ const onSubmit = async (event: FormSubmitEvent<ScrapeActivityType>) => {
       })
 
       set(isOpen, false)
-      state.value.players = []
-      emit("refresh")
+      emits("refresh")
     } else {
       toast.add({
         title: "Error scraping activity",
@@ -104,9 +81,8 @@ const onSubmit = async (event: FormSubmitEvent<ScrapeActivityType>) => {
   }
 }
 
-const formFields = computed<FormFieldInterface<ScrapeActivityType>[]>(() => [
+const formFields: Array<FormFieldInterface<Schema>> = [
   { label: "Tournament ID", key: "tournament_id", type: "text" },
-  { label: "Match Type", key: "match_type", type: "radio", items: MATCH_TYPES, required: true },
   {
     label: "Category",
     key: "category",
@@ -121,21 +97,9 @@ const formFields = computed<FormFieldInterface<ScrapeActivityType>[]>(() => [
       { value: "FU", label: "Futures" }
     ],
     required: true,
-    class: "col-span-2",
     valueKey: "value"
-  },
-  {
-    label: "Players",
-    key: "players",
-    type: "inputMenu",
-    items: players.value?.filter(p => p.match_type === state.value.match_type) || [],
-    loading: pending.value,
-    class: "col-span-2",
-    required: true,
-    labelKey: "name",
-    multiple: true
   }
-])
+]
 </script>
 
 <template>
@@ -145,21 +109,13 @@ const formFields = computed<FormFieldInterface<ScrapeActivityType>[]>(() => [
   >
     <u-button
       :icon="isUploading ? ICONS.downloading : ICONS.download"
-      color="warning"
+      :disabled
     />
 
     <template #body>
-      <div class="flex justify-end">
-        <u-button
-          :icon="icons.reload"
-          color="warning"
-          @click="() => refresh()"
-        />
-      </div>
-
       <u-form
         id="activity-form"
-        :schema="ScrapeActivitySchema"
+        :schema
         :state
         @submit="onSubmit"
         @error="onError"
@@ -178,18 +134,15 @@ const formFields = computed<FormFieldInterface<ScrapeActivityType>[]>(() => [
         v-if="errors"
         color="error"
         :title="`Error saving entry`"
+        :description="errors"
         class="mt-5"
-      >
-        <template #description>
-          {{ errors }}
-        </template>
-      </u-alert>
+      />
     </template>
 
     <template #footer="{ close }">
       <form-footer
         form="activity-form"
-        :is-uploading
+        :loading="isUploading"
         @reset="handleReset"
         @close="close"
       />

@@ -13,9 +13,7 @@ const schema = object({
 })
 type Schema = z.infer<typeof schema>
 
-const emits = defineEmits<{
-  refresh: []
-}>()
+const emits = defineEmits<{ refresh: [] }>()
 
 const {
   ui: { icons }
@@ -39,7 +37,7 @@ defineShortcuts({
   ctrl_enter: () => form.value?.submit()
 })
 
-const eventsKey = computed(() => `${edId}-seed-events`)
+const eventsKey = computed(() => `${edId}-events`)
 
 // Get events
 const { data: events, pending: eventsPending } = await useAsyncData(

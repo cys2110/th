@@ -30,7 +30,7 @@ print("SUPABASE_KEY exists:", bool(SUPABASE_KEY))
 
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
-SELENIUM_REMOTE_URL = os.getenv("SELENIUM_REMOTE_URL", "http://localhost:4444/wd/hub")
+SELENIUM_REMOTE_URL = os.getenv("SELENIUM_REMOTE_URL")
 
 # Function to handle cookies
 def handle_cookies(driver):
@@ -214,12 +214,12 @@ def get_atp_activity():
 
         player_activity = {
             'entry_id': player['entry_id'],
-            'player_id': player['player_id']
+            'player_id': player['id']
         }
 
         try:
             driver = create_remote_chrome_driver()
-            driver.get(f"https://www.atptour.com/en/players/x/{player['player_id']}/player-activity?matchType={match_type}&year={year}&tournament={tournament_id}_{category}")
+            driver.get(f"https://www.atptour.com/en/players/x/{player['id']}/player-activity?matchType={match_type}&year={year}&tournament={tournament_id}_{category}")
 
             WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME, 'atp_player-activity')))
             time.sleep(2)

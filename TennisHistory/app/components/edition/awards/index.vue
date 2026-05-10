@@ -62,7 +62,7 @@ const mapping = computed(() => {
 })
 
 const columns: Array<TableColumn<AwardInterface>> = [
-  ...(dev ? [{ id: "checkbox", footer: () => h(LazyEditionAwardsCreate, { hydrateOnIdle: true, onRefresh: refresh }) }] : []),
+  { id: "checkbox", footer: () => h(LazyEditionAwardsCreate, { hydrateOnIdle: true, onRefresh: refresh }) },
   { accessorKey: "tour" },
   { accessorKey: "match_type" },
   { accessorKey: "number", filterFn: numberFilter },
@@ -82,6 +82,7 @@ const columns: Array<TableColumn<AwardInterface>> = [
 ]
 
 const columnVisibility = computed(() => ({
+  checkbox: dev,
   tour: tournamentStore.tours.length > 1
 }))
 
@@ -141,7 +142,7 @@ const handleSubmit = async () => {
         tr: row => (row.original.draw === 'Qualifying' ? 'bg-elevated dark:bg-muted/50' : '')
       }
     }"
-    :ui="{ root: 'xl:max-w-3/4 2xl:max-w-2/3 mx-auto max-h-[calc(100vh-25rem)]', td: 'empty:p-0' }"
+    :ui="{ root: 'xl:max-w-3/4 2xl:max-w-2/3 mx-auto max-h-[calc(100vh-25rem)]' }"
   >
     <template #loading>
       <u-icon

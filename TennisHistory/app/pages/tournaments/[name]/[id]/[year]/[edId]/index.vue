@@ -48,6 +48,10 @@ const tabItems = computed<Array<TabsItem>>(() => [
           <template #entry-info>
             <edition-entry-info />
           </template>
+
+          <template #entries>
+            <edition-entries />
+          </template>
         </u-tabs>
       </u-page-body>
     </u-page>

@@ -69,7 +69,7 @@ const {
 )
 
 const columns: Array<TableColumn<SeedInterface>> = [
-  ...(dev ? [{ id: "checkbox", footer: () => h(LazyEditionSeedsCreate, { hydrateOnIdle: true, onRefresh: refresh }) }] : []),
+  { id: "checkbox", footer: () => h(LazyEditionSeedsCreate, { hydrateOnIdle: true, onRefresh: refresh }) },
   { accessorKey: "tour" },
   { accessorKey: "match_type" },
   { accessorKey: "draw" },
@@ -94,6 +94,7 @@ const columns: Array<TableColumn<SeedInterface>> = [
 ]
 
 const columnVisibility = computed(() => ({
+  checkbox: dev,
   tour: tournamentStore.tours.length > 1
 }))
 

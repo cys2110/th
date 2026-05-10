@@ -49,15 +49,30 @@ const xlAndUp = breakpoints.greaterOrEqual("xl")
         />
 
         <dev-only>
-          <scrape-atp-draw v-if="event.tour === 'ATP'" />
+          <lazy-scrape-atp-draw
+            v-if="event.tour === 'ATP'"
+            hydrate-on-idle
+          />
 
-          <scrape-wta-draw v-else-if="event.tour === 'WTA'" />
+          <lazy-scrape-wta-draw
+            v-else-if="event.tour === 'WTA'"
+            hydrate-on-idle
+          />
 
-          <scrape-results v-if="event.tour === 'ATP'" />
+          <lazy-scrape-results
+            v-if="event.tour === 'ATP'"
+            hydrate-on-idle
+          />
 
-          <scrape-atp-stats v-if="event.tour === 'ATP'" />
+          <lazy-scrape-atp-stats
+            v-if="event.tour === 'ATP'"
+            hydrate-on-idle
+          />
 
-          <scrape-wta-stats v-else-if="event.tour === 'WTA'" />
+          <lazy-scrape-wta-stats
+            v-else-if="event.tour === 'WTA'"
+            hydrate-on-idle
+          />
         </dev-only>
       </u-field-group>
     </template>
