@@ -114,6 +114,7 @@ const handleSubmit = async () => {
   }
 
   refresh()
+  set(updatedAwards, {})
   set(isSaving, false)
 }
 </script>
@@ -168,11 +169,11 @@ const handleSubmit = async () => {
       </u-empty>
     </template>
 
-    <template #checkbox-header>
+    <template #checkbox-header="{ table }">
       <div class="mx-auto w-fit">
         <u-checkbox
           :model-value="
-            Object.keys(updatedAwards).length === awards.length ? true
+            Object.keys(updatedAwards).length === table.getFilteredRowModel().rows.length ? true
             : Object.keys(updatedAwards).length ? 'indeterminate'
             : false
           "
@@ -181,11 +182,11 @@ const handleSubmit = async () => {
               if (Object.keys(updatedAwards).length) {
                 updatedAwards = {}
               } else {
-                awards.forEach(
+                table.getFilteredRowModel().rows.map(
                   award =>
-                    (updatedAwards[award.id] = {
-                      pm: award.pm,
-                      points: award.points
+                    (updatedAwards[award.original.id] = {
+                      pm: award.original.pm,
+                      points: award.original.points
                     })
                 )
               }

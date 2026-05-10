@@ -2,7 +2,7 @@
 
 <template>
   <div>
-    Page: h2h/index
+    Component: results/stepper
   </div>
 </template>
 

@@ -159,55 +159,29 @@ declare global {
     format: 3 | 5
     incomplete: IncompleteType | null
     duration: string | null
-    rounds: {
-      id: string
-      draw: DrawType
-      tour: TourType | null
+    round: {
       round: RoundType
       number: number
-      match_type: MatchEnumType
     }
-    people: {
+    umpire: {
       id: string
       first_name: string
       last_name: string
     } | null
     winner: {
       id: string
-      entry_status: Array<{
-        status: StatusType
-        draw: DrawType
-      }>
-      player_entry_mapping: Array<{
-        players: Pick<PlayerInterface, "first_name" | "last_name" | "id">
-        countries: CountryType
-        rank: number | null
-      }>
-      seeds: Array<{
-        seed: number
-        draw: DrawType
-      }>
+      status: StatusType | null
+      seed: number | null
+      team: Array<Required<BasePlayerType & { rank: number | null }>>
     }
     loser: {
       id: string
-      entry_status: Array<{
-        status: StatusType
-        draw: DrawType
-      }>
-      player_entry_mapping: Array<{
-        players: Pick<PlayerInterface, "first_name" | "last_name" | "id">
-        countries: CountryType
-        rank: number | null
-      }>
-      seeds: Array<{
-        seed: number
-        draw: DrawType
-      }>
+      status: StatusType | null
+      seed: number | null
+      team: Array<Required<BasePlayerType & { rank: number | null }>>
     }
-    match_stats: Array<{
-      count: number
-    }>
-    match_scores: Array<ScoreInterface>
+    stats: boolean
+    scores: Array<ScoreInterface>
   }
 
   interface EditionResultTeamPlayerInterface {
@@ -226,28 +200,9 @@ declare global {
     rank?: number | null
   }
 
-  interface EditionResultMatchInterface {
-    id: string
-    court: string | null
-    date: string | null
-    tour: TourType | null
-    match_type: MatchEnumType
-    format: 3 | 5
-    incomplete: IncompleteType | null
-    duration: string | null
-    umpire: {
-      first_name: string
-      last_name: string
-    } | null
-    stats: boolean
-    winner: EditionResultSideInterface
-    loser: EditionResultSideInterface
-    scores: Array<ScoreInterface>
-  }
-
   interface EditionResultStepperItemInterface {
     title: RoundType
-    matches: Array<EditionResultMatchInterface>
+    matches: Array<ResultsMatchInterface>
   }
 }
 

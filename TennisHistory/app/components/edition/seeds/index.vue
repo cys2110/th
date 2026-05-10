@@ -181,11 +181,11 @@ const handleSave = async () => {
       </u-empty>
     </template>
 
-    <template #checkbox-header>
+    <template #checkbox-header="{ table }">
       <div class="w-fit mx-auto">
         <u-checkbox
           :model-value="
-            Object.keys(updatedSeeds).length === seeds.length ? true
+            Object.keys(updatedSeeds).length === table.getFilteredRowModel().rows.length ? true
             : Object.keys(updatedSeeds).length ? 'indeterminate'
             : false
           "
@@ -194,7 +194,7 @@ const handleSave = async () => {
               if (Object.keys(updatedSeeds).length === seeds.length) {
                 updatedSeeds = {}
               } else {
-                seeds.forEach(seed => (updatedSeeds[seed.id] = seed.rank))
+                table.getFilteredRowModel().rows.map(seed => (updatedSeeds[seed.original.id] = seed.original.rank))
               }
             }
           "

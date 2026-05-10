@@ -1,6 +1,6 @@
 <script setup lang="ts">
 const {
-  params: { id, year, edId }
+  params: { id, name, year, edId }
 } = useRoute("edition")
 
 const {
@@ -43,7 +43,7 @@ const handleSubmit = async () => {
         const url = URL.createObjectURL(blob)
         const a = document.createElement("a")
         a.href = url
-        a.download = `${tournamentStore.name}_year_${year}_${matchType.value}.json`
+        a.download = `${name}_year_${year}_${matchType.value}.json`
         a.click()
         URL.revokeObjectURL(url)
 
