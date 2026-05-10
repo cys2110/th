@@ -17,19 +17,6 @@ export const ScrapeActivitySchema = object({
 
 export type ScrapeActivityType = z.infer<typeof ScrapeActivitySchema>
 
-export const EntryInfoSchema = object({
-  relationship: string(),
-  entry_id: string(),
-  event_id: string(),
-  draw: DrawEnum,
-  status: StatusEnum.optional(),
-  rank: number().optional(),
-  reason: string().optional(),
-  player_id: string().optional()
-})
-
-export type EntryInfoType = z.infer<typeof EntryInfoSchema>
-
 export const EntrySchema = object({
   points: number().nullable().default(null),
   pm: number().nullable().default(null),

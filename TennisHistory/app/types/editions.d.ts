@@ -98,6 +98,7 @@ declare global {
     label: string
     entries: Array<{
       id: string
+      entry_id: string
       team: Array<BasePlayerType>
       draw: DrawType
       tour: TourType

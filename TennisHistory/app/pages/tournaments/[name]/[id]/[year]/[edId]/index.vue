@@ -17,7 +17,7 @@ const tabItems = computed<Array<TabsItem>>(() => [
   { label: "Details", icon: ICONS.racquet, slot: "details" },
   ...(isDefaultEdition.value ? [{ label: "Awards", icon: ICONS.money, slot: "awards" }] : []),
   ...(id !== "9210" ? [{ label: "Seeds", icon: ICONS.ranking, slot: "seeds" }] : []),
-  ...(!COUNTRY_DRAWS.includes(id) ? [{ label: "Entry Information", icon: icons.info }] : []),
+  ...(!COUNTRY_DRAWS.includes(id) ? [{ label: "Entry Information", icon: icons.info, slot: "entry-info" }] : []),
   { label: "Entries", icon: ICONS.player, slot: "entries" }
 ])
 </script>
@@ -43,6 +43,10 @@ const tabItems = computed<Array<TabsItem>>(() => [
 
           <template #seeds>
             <edition-seeds />
+          </template>
+
+          <template #entry-info>
+            <edition-entry-info />
           </template>
         </u-tabs>
       </u-page-body>

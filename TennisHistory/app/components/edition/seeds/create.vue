@@ -28,8 +28,6 @@ const {
 const toast = useToast()
 const supabase = useSupabaseClient()
 
-const tournamentStore = useTournamentStore()
-
 const isOpen = ref(false)
 const isUploading = ref(false)
 const errors = ref()
@@ -44,7 +42,7 @@ defineShortcuts({
 const eventsKey = computed(() => `${edId}-seed-events`)
 
 // Get events
-const { data: events } = await useAsyncData(
+const { data: events, pending: eventsPending } = await useAsyncData(
   eventsKey,
   async () => {
     const { data, error } = await supabase.from("events").select("id, tour").eq("edition_id", Number(edId))
@@ -67,7 +65,7 @@ const { data: entries, pending } = await useAsyncData(
   async () => {
     const { data, error } = await supabase
       .from("entries")
-      .select("id, match_type, player_entry_mapping(players(first_name, last_name)), events!inner(edition_id, tour)")
+      .select("id, event_id, match_type, player_entry_mapping(players(id, first_name, last_name)), events!inner(edition_id, tour)")
       .eq("events.edition_id", Number(edId))
 
     if (error) {
@@ -79,6 +77,11 @@ const { data: entries, pending } = await useAsyncData(
       id: entry.id,
       match_type: entry.match_type,
       tour: entry.events.tour,
+      event_id: entry.event_id,
+      players: entry.player_entry_mapping.map(pem => ({
+        id: pem.players.id,
+        name: `${pem.players.first_name} ${pem.players.last_name}`
+      })),
       label: entry.player_entry_mapping.map(pem => `${pem.players.first_name} ${pem.players.last_name}`).join(" / ")
     }))
   },
@@ -167,6 +170,7 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
               loop
               value-key="id"
               label-key="tour"
+              :loading="eventsPending"
             />
           </u-form-field>
 
@@ -214,6 +218,7 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
             "
             :placeholder="`Select ${state.match_type === 'Doubles' ? 'Team' : 'Player'}`"
             :icon="ICONS.player"
+            :loading="pending"
             value-key="id"
             label-key="label"
             clear

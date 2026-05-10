@@ -1,9 +1,21 @@
 <script setup lang="ts">
 import type { FormErrorEvent, FormSubmitEvent } from "@nuxt/ui"
+import { PostgrestError } from "@supabase/supabase-js"
+import { number, object, string, z } from "zod"
 
-const emit = defineEmits<{
-  refresh: []
-}>()
+const schema = object({
+  relationship: string(),
+  entry_id: string(),
+  event_id: string(),
+  draw: DrawEnum,
+  status: StatusEnum.optional(),
+  rank: number().optional(),
+  reason: string().optional(),
+  player_id: string().optional()
+})
+type Schema = z.infer<typeof schema>
+
+const emits = defineEmits<{ refresh: [] }>()
 
 const {
   params: { edId }
@@ -19,14 +31,24 @@ const supabase = useSupabaseClient()
 const isOpen = ref(false)
 const isUploading = ref(false)
 const errors = ref()
+const form = useTemplateRef("form")
+
+defineShortcuts({
+  ctrl_i: () => set(isOpen, !isOpen.value),
+  ctrl_r: () => set(state, {}),
+  ctrl_enter: () => form.value?.submit()
+})
+
+// Get entry list
+const entriesKey = computed(() => `${edId}-entries`)
 
 // Get entry list
 const { data: entries, pending } = await useAsyncData(
-  "entry-info-entries",
+  entriesKey,
   async () => {
     const { data, error } = await supabase
       .from("entries")
-      .select("id, player_entry_mapping(players(id, first_name, last_name)), events!inner(id, edition_id)")
+      .select("id, event_id, match_type, player_entry_mapping(players(id, first_name, last_name)), events!inner(edition_id, tour)")
       .eq("events.edition_id", Number(edId))
 
     if (error) {
@@ -36,12 +58,14 @@ const { data: entries, pending } = await useAsyncData(
 
     return data.map(entry => ({
       id: entry.id,
-      label: entry.player_entry_mapping.map(pem => `${pem.players.first_name} ${pem.players.last_name}`).join(" / "),
-      event_id: entry.events.id,
+      match_type: entry.match_type,
+      tour: entry.events.tour,
+      event_id: entry.event_id,
       players: entry.player_entry_mapping.map(pem => ({
         id: pem.players.id,
         name: `${pem.players.first_name} ${pem.players.last_name}`
-      }))
+      })),
+      label: entry.player_entry_mapping.map(pem => `${pem.players.first_name} ${pem.players.last_name}`).join(" / ")
     }))
   },
   { default: () => [] }
@@ -49,7 +73,7 @@ const { data: entries, pending } = await useAsyncData(
 
 const playerOptions = ref<{ id: string; name: string }[]>([])
 
-const state = ref<Partial<EntryInfoType>>({})
+const state = ref<Partial<Schema>>({})
 
 const handleEntrySelect = () => {
   const entry = entries.value.find(entry => entry.id === state.value.entry_id)
@@ -57,12 +81,18 @@ const handleEntrySelect = () => {
   playerOptions.value = entry!.players
 }
 
-const handleReset = () => set(state, {})
+const handleReset = () => {
+  set(state, {})
+  set(errors, undefined)
+}
 
-const onError = (event: FormErrorEvent) => console.error(event.errors)
+const onError = (event: FormErrorEvent) => {
+  set(errors, event.errors)
+}
 
-const onSubmit = async (event: FormSubmitEvent<EntryInfoType>) => {
+const onSubmit = async (event: FormSubmitEvent<Schema>) => {
   set(isUploading, true)
+  set(errors, undefined)
 
   let error
 
@@ -137,19 +167,18 @@ const onSubmit = async (event: FormSubmitEvent<EntryInfoType>) => {
   }
 
   if (error) {
-    errors.value = error
+    set(errors, error instanceof PostgrestError ? error.details : (error as any).message)
     set(isUploading, false)
     return
   }
 
   toast.add({
     title: `${event.data.relationship} successfully created!`,
-    description: JSON.stringify(event.data),
     icon: icons.success,
     color: "success"
   })
 
-  emit("refresh")
+  emits("refresh")
   handleReset()
   set(isOpen, false)
   set(isUploading, false)
@@ -161,16 +190,13 @@ const onSubmit = async (event: FormSubmitEvent<EntryInfoType>) => {
     title="Create Entry Info"
     v-model:open="isOpen"
   >
-    <u-button
-      :icon="icons.plus"
-      block
-      color="warning"
-    />
+    <u-button :icon="icons.plus" />
 
     <template #body>
       <u-form
         id="entry-info-form"
-        :schema="EntryInfoSchema"
+        ref="form"
+        :schema
         :state="state"
         @submit="onSubmit"
         @error="onError"
@@ -181,11 +207,12 @@ const onSubmit = async (event: FormSubmitEvent<EntryInfoType>) => {
             label="Info Type"
             required
           >
-            <u-select-menu
+            <u-input-menu
               v-model="state.relationship"
               :items="['Status', 'Default', 'Last Direct Acceptance', 'Retirement', 'Walkover', 'Withdrawal']"
               placeholder="Select info type"
               clear
+              class="w-full"
             />
           </u-form-field>
 
@@ -208,13 +235,14 @@ const onSubmit = async (event: FormSubmitEvent<EntryInfoType>) => {
             required
             class="col-span-2"
           >
-            <u-select-menu
+            <u-input-menu
               v-model="state.entry_id"
               @update:model-value="handleEntrySelect"
               :items="entries"
               :loading="pending"
               placeholder="Select entry"
               value-key="id"
+              class="w-full"
             />
           </u-form-field>
 
@@ -236,12 +264,13 @@ const onSubmit = async (event: FormSubmitEvent<EntryInfoType>) => {
             label="Status"
             class="col-span-2"
           >
-            <u-select-menu
+            <u-input-menu
               v-model="state.status"
               :items="Object.entries(STATUS_MAPPING).map(([value, label]) => ({ label, value }))"
               value-key="value"
               clear
               placeholder="Select status"
+              class="w-full"
             />
           </u-form-field>
 
@@ -260,13 +289,14 @@ const onSubmit = async (event: FormSubmitEvent<EntryInfoType>) => {
               name="player_id"
               label="Player"
             >
-              <u-select-menu
+              <u-input-menu
                 v-model="state.player_id"
                 :items="playerOptions"
                 value-key="id"
                 label-key="name"
                 clear
                 placeholder="Select player"
+                class="w-full"
               />
             </u-form-field>
           </template>
@@ -277,18 +307,15 @@ const onSubmit = async (event: FormSubmitEvent<EntryInfoType>) => {
         v-if="errors"
         color="error"
         title="Error saving round"
+        :description="errors"
         class="mt-5"
-      >
-        <template #description>
-          {{ errors }}
-        </template>
-      </u-alert>
+      />
     </template>
 
     <template #footer="{ close }">
       <form-footer
         form="entry-info-form"
-        :is-uploading
+        :loading="isUploading"
         @reset="handleReset"
         @close="close"
       />
