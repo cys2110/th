@@ -111,7 +111,7 @@ const handleSave = async () => {
   for (const [id, match] of Object.entries(updatedMatches.value)) {
     const { error } = await supabase
       .from("matches")
-      .update({ ...match })
+      .update({ ...match, date: match.date?.toString() || null })
       .eq("id", id)
 
     if (error) errors[id] = error

@@ -13,9 +13,7 @@ const schema = object({
 })
 type Schema = z.infer<typeof schema>
 
-const emits = defineEmits<{
-  refresh: []
-}>()
+const emits = defineEmits<{ refresh: [] }>()
 
 const {
   ui: { icons }
