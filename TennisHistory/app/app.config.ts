@@ -183,7 +183,7 @@ export default defineAppConfig({
       defaultVariants: { loadingAnimation: "swing" }
     },
     tabs: {
-      slots: { root: "space-y-6" },
+      slots: { root: "space-y-6", content: "max-h-[calc(100vh-23rem)] overflow-y-auto" },
       defaultVariants: { size: "md" }
     }
   }

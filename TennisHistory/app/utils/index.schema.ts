@@ -17,17 +17,6 @@ export const ScrapeActivitySchema = object({
 
 export type ScrapeActivityType = z.infer<typeof ScrapeActivitySchema>
 
-export const SeedSchema = object({
-  event_id: string(),
-  entry_id: string(),
-  seed: number(),
-  draw: DrawEnum,
-  match_type: MatchTypeEnum,
-  rank: number().optional()
-})
-
-export type SeedType = z.infer<typeof SeedSchema>
-
 export const EntryInfoSchema = object({
   relationship: string(),
   entry_id: string(),

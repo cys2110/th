@@ -1,5 +1,5 @@
 <script setup lang="ts">
-defineProps<{ players: Array<Required<BasePlayerType>> }>()
+withDefaults(defineProps<{ players: Array<Required<BasePlayerType>>; strikethrough?: boolean }>(), { strikethrough: false })
 </script>
 
 <template>
@@ -27,6 +27,7 @@ defineProps<{ players: Array<Required<BasePlayerType>> }>()
         <u-link
           :to="{ name: 'player', params: { id: player.id, name: kebabCase(`${player.first_name} ${player.last_name}`) } }"
           class="hover-link primary-link"
+          :class="{ 'line-through': strikethrough }"
         >
           {{ player.first_name }} {{ player.last_name }}
         </u-link>

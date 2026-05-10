@@ -74,46 +74,51 @@ const columns: Array<TableColumn<AwardInterface>> = [
       footer: () =>
         h(UButton, {
           icon: isSaving.value ? ICONS.uploading : ICONS.save,
-          disabled: !!Object.keys(updatedAwards).length || isSaving.value,
+          disabled: !Object.keys(updatedAwards.value).length || isSaving.value,
           onClick: handleSubmit
         })
     })
   }
 ]
 
+const columnVisibility = computed(() => ({
+  tour: tournamentStore.tours.length > 1
+}))
+
 const handleSubmit = async () => {
   set(isSaving, true)
 
   const errors: Record<string, any> = {}
-  for (const [id, award] of Object.entries(updatedAwards)) {
+  for (const [id, award] of Object.entries(updatedAwards.value)) {
     const { error } = await supabase.from("rounds").update({ pm: award.pm, points: award.points }).eq("id", id)
 
     if (error) errors[id] = error
-
-    if (Object.keys(errors).length) {
-      console.log(errors)
-
-      toast.add({
-        title: "Error updating rounds",
-        description: `${Object.keys(updatedAwards).length - errors.length} successfully updated. ${errors.length} failed.`,
-        icon: icons.error,
-        color: "error"
-      })
-    } else {
-      toast.add({
-        title: "Rounds successfully updated",
-        icon: icons.success,
-        color: "success"
-      })
-    }
   }
 
+  if (Object.keys(errors).length) {
+    console.log(errors)
+
+    toast.add({
+      title: "Error updating rounds",
+      description: `${Object.keys(updatedAwards).length - errors.length} successfully updated. ${errors.length} failed.`,
+      icon: icons.error,
+      color: "error"
+    })
+  } else {
+    toast.add({
+      title: "Rounds successfully updated",
+      icon: icons.success,
+      color: "success"
+    })
+  }
+
+  refresh()
   set(isSaving, false)
 }
 </script>
 
 <template>
-  <div class="flex justify-end">
+  <div class="flex justify-end mb-4">
     <edition-awards-chart
       :awards
       :pending
@@ -130,12 +135,13 @@ const handleSubmit = async () => {
       getFacetedRowModel: getFacetedRowModel(),
       getFacetedUniqueValues: getFacetedUniqueValues()
     }"
+    v-model:column-visibility="columnVisibility"
     :meta="{
       class: {
-        tr: row => (row.original.draw === 'Qualifying' ? 'bg-muted/50' : '')
+        tr: row => (row.original.draw === 'Qualifying' ? 'bg-elevated dark:bg-muted/50' : '')
       }
     }"
-    :ui="{ root: 'xl:max-w-3/4 2xl:max-w-2/3 mx-auto', td: 'empty:p-0' }"
+    :ui="{ root: 'xl:max-w-3/4 2xl:max-w-2/3 mx-auto max-h-[calc(100vh-25rem)]', td: 'empty:p-0' }"
   >
     <template #loading>
       <u-icon

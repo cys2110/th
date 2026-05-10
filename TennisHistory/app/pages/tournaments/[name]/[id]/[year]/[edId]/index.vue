@@ -40,6 +40,10 @@ const tabItems = computed<Array<TabsItem>>(() => [
           <template #awards>
             <edition-awards />
           </template>
+
+          <template #seeds>
+            <edition-seeds />
+          </template>
         </u-tabs>
       </u-page-body>
     </u-page>
