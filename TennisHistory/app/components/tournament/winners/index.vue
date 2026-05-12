@@ -6,7 +6,6 @@ const {
 const supabase = useSupabaseClient()
 
 const viewModeStore = useViewModeStore()
-const tournamentStore = useTournamentStore()
 
 const key = computed(() => `${id}-winners`)
 

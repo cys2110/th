@@ -5,6 +5,7 @@ const props = defineProps<{
   event: EventInterface
   showSurfaces: boolean
   showVenues: boolean
+  startDate: string | null
 }>()
 
 const {
@@ -67,6 +68,7 @@ const xlAndUp = breakpoints.greaterOrEqual("xl")
           <lazy-scrape-atp-stats
             v-if="event.tour === 'ATP'"
             hydrate-on-idle
+            :start-date="startDate || event.start_date"
           />
 
           <lazy-scrape-wta-stats

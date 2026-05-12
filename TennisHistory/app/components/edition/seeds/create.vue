@@ -106,6 +106,7 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
     const { match_type, event_id, ...rest } = event.data
     const { error } = await supabase.from("seeds").insert({
       ...rest,
+      match_type,
       event_id: event_id ?? events.value[0]!.id
     })
 

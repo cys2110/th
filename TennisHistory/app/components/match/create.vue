@@ -5,7 +5,7 @@ import { any, array, literal, number, object, string, z } from "zod"
 
 const schema = object({
   match_no: number(),
-  tour: TourEnum,
+  tour: TourEnum.optional(),
   match_type: MatchTypeEnum,
   draw: DrawEnum,
   round_id: string(),
@@ -22,7 +22,8 @@ const schema = object({
     label: string()
   }).optional(),
   sets: array(MatchScoreSchema).default([]),
-  stats: array(MatchStatSchema).default([])
+  stats: array(MatchStatSchema).default([]),
+  group_name: string().optional()
 })
 type Schema = z.infer<typeof schema>
 
@@ -58,7 +59,10 @@ const key = computed(() => `${edId}-rounds`)
 const { data: rounds, pending: roundsPending } = await useAsyncData(
   key,
   async () => {
-    const { data, error } = await supabase.from("rounds").select("id, round, tour, draw, match_type").eq("event_id", `${edId}-Country`)
+    const { data, error } = await supabase
+      .from("rounds")
+      .select("id, round, tour, draw, match_type, events!inner(edition_id)")
+      .eq("events.edition_id", Number(edId))
 
     if (error || !data) {
       console.error("Error fetching rounds:", error)
@@ -108,7 +112,7 @@ const state = ref<Partial<Schema>>({
 })
 
 watch(
-  state,
+  () => [state.value.format, state.value.team_1_id, state.value.team_2_id],
   () => {
     const { format, team_1_id, team_2_id } = state.value
 
@@ -181,7 +185,7 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
 
           return [
             { match_id: matchId, entry_id: rest.team_1_id!, set_no: set.set_no, set: set.t1, tb: set.t1 === 7 ? maxTb : set.tb },
-            { match_id: matchId, entry_id: rest.team_2_id!, set: set.t2, tb: set.t2 === 7 ? maxTb : set.tb }
+            { match_id: matchId, entry_id: rest.team_2_id!, set_no: set.set_no, set: set.t2, tb: set.t2 === 7 ? maxTb : set.tb }
           ]
         })
       )
@@ -305,13 +309,14 @@ const formFields = computed<FormFieldInterface<Schema>[]>(
         type: "radio",
         items: [
           { label: `${state.value.match_type === "Doubles" ? "Team" : "Player"} 1`, value: 1 },
-          { label: `${state.value.match_type === "Doubles" ? "Team" : "Player"} 1`, value: 2 }
+          { label: `${state.value.match_type === "Doubles" ? "Team" : "Player"} 2`, value: 2 }
         ]
       },
       { label: "Date", key: "date", type: "date" },
       { label: "Court", key: "court", type: "text" },
       { label: "Duration", key: "duration", type: "text", placeholder: "HH:MM:SS" },
       { label: "Umpire", key: "umpire", type: "slot", class: "col-span-2" },
+      { label: "Group", key: "group_name", type: "text", class: "col-span-2" },
       {
         label: "Incomplete",
         key: "incomplete",
@@ -357,6 +362,7 @@ const statsFields: Array<{ label: string; key?: keyof MatchStatType; children?: 
     <template #body>
       <u-form
         id="match-form"
+        ref="form"
         :schema
         :state="state"
         @submit="onSubmit"
@@ -370,7 +376,6 @@ const statsFields: Array<{ label: string; key?: keyof MatchStatType; children?: 
             v-model="state"
           >
             <u-input-menu
-              v-if="field.key === 'umpire'"
               v-model="state.umpire"
               v-model:search-term="searchTerm"
               :loading="loading"
@@ -509,6 +514,7 @@ const statsFields: Array<{ label: string; key?: keyof MatchStatType; children?: 
         v-if="errors"
         color="error"
         :title="`Error saving match`"
+        :description="errors"
         class="mt-5"
       />
     </template>

@@ -9,10 +9,9 @@ const {
 
 const toast = useToast()
 
-const tournamentStore = useTournamentStore()
-
 const isOpen = ref(false)
 const isScraping = ref(false)
+const tournamentId = ref(Number(id))
 const matchType = ref<MatchEnumType>("Singles")
 
 const handleSubmit = async () => {
@@ -23,7 +22,7 @@ const handleSubmit = async () => {
     timeout: 120_000,
     "Content-Type": "application/json",
     body: JSON.stringify({
-      tournament_id: id,
+      tournament_id: tournamentId.value,
       event_id: `${edId}-ATP`,
       year,
       match_type: matchType.value
@@ -73,7 +72,13 @@ const handleSubmit = async () => {
     <u-button :icon="ICONS.cards" />
 
     <template #body>
-      <div class="w-fit mx-auto">
+      <div class="grid grid-cols-2 gap-3">
+        <form-input
+          v-model="tournamentId"
+          type="number"
+          placeholder="Tournament ID"
+        />
+
         <u-radio-group
           v-model="matchType"
           :items="[...MATCH_TYPES]"

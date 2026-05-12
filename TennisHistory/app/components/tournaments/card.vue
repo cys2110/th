@@ -34,7 +34,7 @@ const highlightColor = computed(() => {
       <u-badge
         v-for="tour in tournament.tours"
         :key="tour"
-        :color="<keyof typeof colors>tour"
+        :color="tour"
         :label="tour"
       />
     </template>

@@ -13,7 +13,9 @@ round_name_mapping = {
     'Round of 128': 'Round of 128',
     '3rd Round Qualifying': 'Qualifying round 3',
     '2nd Round Qualifying': 'Qualifying round 2',
-    '1st Round Qualifying': 'Qualifying round 1'
+    '1st Round Qualifying': 'Qualifying round 1',
+    'Round Robin': 'Round robin',
+    'Round robin': 'Round robin'
 }
 
 def extract_atp_id_from_link(link):

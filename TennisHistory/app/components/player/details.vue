@@ -256,7 +256,7 @@ const handleSubmit = async () => {
           </div>
 
           <u-checkbox
-            :icon="ICONS.racquet"
+            :icon="ICONS.player"
             :model-value="'first_name' in updatedPlayer && 'last_name' in updatedPlayer"
             @update:model-value="
               () => {
@@ -328,7 +328,7 @@ const handleSubmit = async () => {
         </div>
 
         <u-checkbox
-          :icon="ICONS.racquet"
+          :icon="ICONS.player"
           :model-value="'height' in updatedPlayer"
           @update:model-value="
             () => {
@@ -378,7 +378,7 @@ const handleSubmit = async () => {
         </div>
 
         <u-checkbox
-          :icon="ICONS.racquet"
+          :icon="ICONS.player"
           :model-value="'dob' in updatedPlayer && 'dod' in updatedPlayer"
           @update:model-value="
             () => {
@@ -438,7 +438,7 @@ const handleSubmit = async () => {
         </div>
 
         <u-checkbox
-          :icon="ICONS.racquet"
+          :icon="ICONS.player"
           :model-value="'turned_pro' in updatedPlayer && 'retired' in updatedPlayer"
           @update:model-value="
             () => {
@@ -480,7 +480,7 @@ const handleSubmit = async () => {
         >
 
         <u-checkbox
-          :icon="ICONS.racquet"
+          :icon="ICONS.player"
           :model-value="'rh' in updatedPlayer"
           @update:model-value="
             () => {
@@ -518,7 +518,7 @@ const handleSubmit = async () => {
         >
 
         <u-checkbox
-          :icon="ICONS.racquet"
+          :icon="ICONS.player"
           :model-value="'bh' in updatedPlayer"
           @update:model-value="
             () => {
@@ -606,7 +606,7 @@ const handleSubmit = async () => {
         </div>
 
         <u-checkbox
-          :icon="ICONS.racquet"
+          :icon="ICONS.player"
           :model-value="'hof' in updatedPlayer"
           @update:model-value="
             () => {
@@ -645,7 +645,7 @@ const handleSubmit = async () => {
           </div>
 
           <u-checkbox
-            :icon="ICONS.racquet"
+            :icon="ICONS.player"
             :model-value="'wiki_link' in updatedPlayer"
             @update:model-value="
               () => {
@@ -681,7 +681,7 @@ const handleSubmit = async () => {
           </div>
 
           <u-checkbox
-            :icon="ICONS.racquet"
+            :icon="ICONS.player"
             :model-value="'official_link' in updatedPlayer"
             @update:model-value="
               () => {
@@ -780,7 +780,7 @@ const handleSubmit = async () => {
         </div>
 
         <u-checkbox
-          :icon="ICONS.racquet"
+          :icon="ICONS.player"
           :model-value="'coaches' in updatedPlayer"
           @update:model-value="
             () => {
@@ -873,7 +873,7 @@ const handleSubmit = async () => {
         </div>
 
         <u-checkbox
-          :icon="ICONS.racquet"
+          :icon="ICONS.player"
           :model-value="'countries' in updatedPlayer"
           @update:model-value="
             () => {

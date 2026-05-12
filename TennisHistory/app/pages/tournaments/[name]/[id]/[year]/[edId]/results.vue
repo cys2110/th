@@ -115,13 +115,13 @@ const {
         return -1
       }
 
-      const aRank = Math.max(
-        a.winner.team.reduce((acc, cur) => acc + (cur.rank || 0), 0),
-        a.loser.team.reduce((acc, cur) => acc + (cur.rank || 0), 0)
+      const aRank = Math.min(
+        a.winner.team.reduce((acc, cur) => acc + (cur.rank || 9999), 0),
+        a.loser.team.reduce((acc, cur) => acc + (cur.rank || 9999), 0)
       )
-      const bRank = Math.max(
-        b.winner.team.reduce((acc, cur) => acc + (cur.rank || 0), 0),
-        b.loser.team.reduce((acc, cur) => acc + (cur.rank || 0), 0)
+      const bRank = Math.min(
+        b.winner.team.reduce((acc, cur) => acc + (cur.rank || 9999), 0),
+        b.loser.team.reduce((acc, cur) => acc + (cur.rank || 9999), 0)
       )
 
       return (

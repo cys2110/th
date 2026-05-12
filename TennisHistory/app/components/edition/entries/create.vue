@@ -17,7 +17,7 @@ const schema = object({
     id: string(),
     label: string(),
     icon: string()
-  }),
+  }).optional(),
   teammate_rank: number("Rank must be a number").int("Rank must be an integer").nonnegative("Rank cannot be a negative number").optional()
 })
 type Schema = z.infer<typeof schema>

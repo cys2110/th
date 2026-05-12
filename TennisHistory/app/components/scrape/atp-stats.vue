@@ -1,4 +1,6 @@
 <script setup lang="ts">
+const props = defineProps<{ startDate: string | null }>()
+
 const {
   params: { id, edId }
 } = useRoute("edition")
@@ -16,11 +18,11 @@ const links = ref<Array<string>>([])
 const handleSubmit = async () => {
   set(isScraping, true)
 
-  const url = COUNTRY_DRAWS.includes(id) ? "old-matches" : "stats"
+  const url = COUNTRY_DRAWS.includes(id) || new Date(props.startDate!) <= new Date("2021-10-17") ? "old-matches" : "stats"
 
   await $fetch(`${FLASK_ROUTE}/atp/${url}`, {
     method: "POST",
-    timeout: 120_000,
+    timeout: 180_000,
     "Content-Type": "application/json",
     body: JSON.stringify({
       event_id: `${edId}-ATP`,

@@ -191,7 +191,7 @@ const handleSave = async () => {
           "
           @update:model-value="
             () => {
-              if (Object.keys(updatedSeeds).length === seeds.length) {
+              if (Object.keys(updatedSeeds).length) {
                 updatedSeeds = {}
               } else {
                 table.getFilteredRowModel().rows.map(seed => (updatedSeeds[seed.original.id] = seed.original.rank))

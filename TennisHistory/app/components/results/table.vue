@@ -2,8 +2,7 @@
 import type { TableColumn, TableRow } from "@nuxt/ui"
 import { getFacetedRowModel, getFacetedUniqueValues } from "@tanstack/vue-table"
 import { parseDate } from "@internationalized/date"
-import { LazyMatchCreate, UButton } from "#components"
-import { curry } from "lodash"
+import { LazyMatchCreate, UButton, UFieldGroup } from "#components"
 
 const props = defineProps<{
   matches: Array<ResultsMatchInterface>
@@ -38,25 +37,26 @@ const mapping = computed(() => {
 })
 
 const columns: Array<TableColumn<ResultsMatchInterface>> = [
-  { id: "checkbox", footer: () => h(LazyMatchCreate, { hydrateOnIdle: true, onRefresh: () => emits("refresh") }) },
+  { id: "checkbox" },
   { accessorKey: "tour" },
   { accessorKey: "match_type" },
   {
     accessorKey: "round.number",
     filterFn: numberFilter,
-    ...(dev && { footer: () => h(UButton, { icon: icons.reload, onClick: () => emits("refresh") }) })
-  },
-  {
-    accessorKey: "date",
     ...(dev && {
       footer: () =>
-        h(UButton, {
-          icon: isSaving.value ? ICONS.uploading : ICONS.save,
-          onClick: handleSave,
-          disabled: isSaving.value || !Object.keys(updatedMatches.value).length
-        })
+        h(UFieldGroup, { class: "w-fit" }, () => [
+          h(LazyMatchCreate, { hydrateOnIdle: true, onRefresh: () => emits("refresh") }),
+          h(UButton, { icon: icons.reload, onClick: () => emits("refresh") }),
+          h(UButton, {
+            icon: isSaving.value ? ICONS.uploading : ICONS.save,
+            onClick: handleSave,
+            disabled: isSaving.value || !Object.keys(updatedMatches.value).length
+          })
+        ])
     })
   },
+  { accessorKey: "date" },
   { accessorKey: "court", filterFn: "arrIncludesSome" },
   { id: "umpire", accessorFn: row => (row.umpire ? `${row.umpire.last_name}, ${row.umpire.first_name}` : undefined), filterFn: "arrIncludesSome" },
   {
@@ -87,6 +87,10 @@ const columnVisibility = computed(() => ({
 }))
 
 const handleSelectRow = (_e: Event, row: TableRow<ResultsMatchInterface>) => {
+  if (Object.keys(updatedMatches.value).length) {
+    return
+  }
+
   if (dev || row.original.stats) {
     router.push({
       name: "match",
@@ -109,20 +113,21 @@ const handleSave = async () => {
 
   const errors: Record<string, any> = {}
   for (const [id, match] of Object.entries(updatedMatches.value)) {
+    const { date, umpire, ...rest } = match
     const { error } = await supabase
       .from("matches")
-      .update({ ...match, date: match.date?.toString() || null })
+      .update({ ...rest, date: date?.toString() || null, umpire_id: umpire?.id || null })
       .eq("id", id)
 
     if (error) errors[id] = error
   }
 
   if (Object.keys(errors).length) {
-    console.log(errors)
+    console.error(errors)
 
     toast.add({
       title: "Error updating rounds",
-      description: `${Object.keys(updatedMatches).length - errors.length} successfully updated. ${errors.length} failed.`,
+      description: `${Object.keys(updatedMatches.value).length - errors.length} successfully updated. ${errors.length} failed.`,
       icon: icons.error,
       color: "error"
     })

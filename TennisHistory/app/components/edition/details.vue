@@ -240,6 +240,7 @@ const showVenues = computed(() => {
       :event
       :show-surfaces
       :show-venues
+      :start-date="edition?.start_date"
     />
   </div>
 </template>

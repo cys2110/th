@@ -76,7 +76,7 @@ def get_atp_results():
             match_headers = header_div.find_all('span')
 
             match_header = match_headers[0].get_text(strip=True)
-            parts = [p.strip() for p in match_header.split(' - ', 1)]
+            parts = [p.strip() for p in match_header.split(' -', 1)]
             round_name = round_name_mapping.get(parts[0])
             court_name = parts[1] if len(parts) > 1 else None
             match_time = match_headers[1].get_text(strip=True) if len(match_headers) > 1 else '00:00:00'
@@ -136,26 +136,28 @@ def get_atp_results():
             except:
                 pass
 
-            matches.append(match_detail)
+            if match_detail.get('bye') is None:
+                matches.append(match_detail)
 
     failed_matches = []
 
     for match in matches:
         # Get match id
-        winner_id = f"{event_id} {match['p1']}" if match_type == 'Singles' else f"{event_id} {match['p1']} {match['p2']}"
-        loser_id = f"{event_id} {match['p2']}" if match_type == 'Singles' else f"{event_id} {match['p3']} {match['p4']}"
+        entry_ids = [f"{event_id} {match['p1']}", f"{event_id} {match['p2']}"] if match_type == 'Singles' else [f"{event_id} {match['p1']} {match['p2']}", f"{event_id} {match['p2']} {match['p1']}", f"{event_id} {match['p3']} {match['p4']}", f"{event_id} {match['p4']} {match['p3']}"]
 
         try:
             matchesResponse = (supabase
                 .table("matches")
-                .select("id, rounds!inner(round)")
+                .select("id, team_1_id, team_2_id, rounds!inner(round)")
                 .eq("rounds.round", match['round'])
                 .eq("rounds.event_id", event_id)
-                .in_("team_1_id", [winner_id, loser_id])
-                .in_("team_2_id", [winner_id, loser_id])
+                .in_("team_1_id", entry_ids)
+                .in_("team_2_id", entry_ids)
                 .single()
                 .execute()
             )
+
+            umpire_id = None
 
             if match.get('umpire'):
                 # Get umpire id
@@ -164,7 +166,13 @@ def get_atp_results():
                     .execute()
                 )
 
+                if umpiresResponse.data:
+                    umpire_id = umpiresResponse.data[0]['id']
+
             if matchesResponse.data is not None:
+                winner_id = matchesResponse.data['team_1_id'] if match['p1'] in matchesResponse.data['team_1_id'] else matchesResponse.data['team_2_id']
+                loser_id = matchesResponse.data['team_2_id'] if match['p1'] in matchesResponse.data['team_1_id'] else matchesResponse.data['team_1_id']
+
                 response = (supabase
                     .table("matches")
                     .update({
@@ -173,7 +181,7 @@ def get_atp_results():
                         'date': match.get('date'),
                         'winner_id': winner_id,
                         'loser_id': loser_id,
-                        'umpire_id': umpiresResponse.data[0]['id'] if umpiresResponse.data else None
+                        'umpire_id': umpire_id
                     })
                     .eq("id", matchesResponse.data['id'])
                     .execute()

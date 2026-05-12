@@ -22,9 +22,7 @@ const modelValue = defineModel<any>()
     :class="field.class"
     :description="field.description"
     :orientation
-    :ui="{
-      root: orientation === 'horizontal' ? 'my-3 gap-4' : ''
-    }"
+    :ui="{ root: orientation === 'horizontal' ? 'my-3 gap-4' : '' }"
   >
     <slot v-if="field.type === 'slot'" />
 

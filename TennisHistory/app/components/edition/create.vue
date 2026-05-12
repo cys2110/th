@@ -119,6 +119,8 @@ const formFields = computed<Array<FormFieldInterface<Schema>>>(
           }
         ]
       : []),
+      { label: "Dates", key: "dates", type: "dates", class: "col-span-2" },
+      { label: "Wikipedia Link", key: "wiki_link", type: "textarea", class: "col-span-2" },
       {
         label: "Category",
         key: "category",
@@ -127,9 +129,7 @@ const formFields = computed<Array<FormFieldInterface<Schema>>>(
         icon: ICONS.category,
         class: tournamentStore.tours.length > 1 ? "col-span-1" : "col-span-2"
       },
-      { label: "Dates", key: "dates", type: "dates", class: "col-span-2" },
       { label: "Award", type: "slot", errorPattern: /^(currency|tfc)$/, class: "col-span-2" },
-      { label: "Wikipedia Link", key: "wiki_link", type: "textarea", class: "col-span-2" },
       { label: "Draw Type", key: "draw_type", type: "inputMenu", items: DRAWS, icon: ICONS.draw, class: "col-span-2" },
       { label: "Draw Link", key: "draw_link", type: "textarea", class: "col-span-2" }
     ] as Array<FormFieldInterface<Schema>>

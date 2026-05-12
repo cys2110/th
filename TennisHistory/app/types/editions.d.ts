@@ -204,6 +204,42 @@ declare global {
     title: RoundType
     matches: Array<ResultsMatchInterface>
   }
+
+  interface DrawEntry {
+    status: StatusType | null
+    seed: number | null
+    players: Array<Required<BasePlayerType>>
+  }
+
+  interface DrawScore {
+    mainScore: number
+    tiebreak: number | null
+    isWinner: boolean
+  }
+
+  interface DrawSide {
+    entryId?: string
+    scores: Array<DrawScore>
+    isWinner?: boolean
+  }
+
+  interface DrawMatch {
+    match_no: number
+    sides: Array<DrawSide>
+    incomplete: IncompleteType | null
+    isBronzeMatch?: boolean
+  }
+
+  interface DrawData {
+    rounds: Array<{
+      name: RoundType
+      number: number
+      matches: Array<DrawMatch>
+    }>
+    entries: {
+      [entryId: string]: DrawEntry
+    }
+  }
 }
 
 export {}

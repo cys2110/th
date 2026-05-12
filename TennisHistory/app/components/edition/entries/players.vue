@@ -63,6 +63,8 @@ const {
         "entries.event_id",
         events.map(event => event.id)
       )
+      .order("players(last_name)", { ascending: true })
+      .order("players(first_name)", { ascending: true })
 
     if (error || !data) {
       console.error("Error fetching players:", error)
@@ -169,7 +171,9 @@ const columns: TableColumn<IndividualPlayerEntryInterface>[] = [
         footer: () =>
           h(LazyScrapeActivity, {
             matchType: "Singles",
-            players: entries.value.filter(player => player.singles.id).map(player => ({ id: player.id, entry_id: player.singles.entry_id! })),
+            players: entries.value
+              .filter(player => player.singles.id && !isDefined(player.singles.rank))
+              .map(player => ({ id: player.id, entry_id: player.singles.entry_id! })),
             onRefresh: refresh,
             disabled: entries.value.filter(player => player.singles.id).every(player => isDefined(player.singles.rank))
           })
@@ -222,7 +226,9 @@ const columns: TableColumn<IndividualPlayerEntryInterface>[] = [
         footer: () =>
           h(LazyScrapeActivity, {
             matchType: "Doubles",
-            players: entries.value.filter(player => player.doubles.id).map(player => ({ id: player.id, entry_id: player.doubles.entry_id! })),
+            players: entries.value
+              .filter(player => player.doubles.id && !isDefined(player.doubles.rank))
+              .map(player => ({ id: player.id, entry_id: player.doubles.entry_id! })),
             onRefresh: refresh,
             disabled: entries.value.filter(player => player.doubles.id).every(player => isDefined(player.doubles.rank))
           })
@@ -418,7 +424,7 @@ const handleSave = async () => {
         </div>
 
         <lazy-scrape-activity
-          v-if="row.original.tour === 'ATP' && !row.original.singles.rank && row.original.singles.draws.length"
+          v-if="row.original.tour === 'ATP' && !isDefined(row.original.singles.rank) && row.original.singles.draws.length"
           hydrate-on-idle
           match-type="Singles"
           :players="[{ id: row.original.id, entry_id: row.original.singles.entry_id! }]"
@@ -542,7 +548,7 @@ const handleSave = async () => {
         </div>
 
         <lazy-scrape-activity
-          v-if="row.original.tour === 'ATP' && !row.original.doubles.rank && row.original.doubles.draws.length"
+          v-if="row.original.tour === 'ATP' && !isDefined(row.original.doubles.rank) && row.original.doubles.draws.length"
           hydrate-on-idle
           match-type="Doubles"
           :players="[{ id: row.original.id, entry_id: row.original.doubles.entry_id! }]"

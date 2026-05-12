@@ -13,7 +13,7 @@ const props = defineProps<{ matchType: MatchEnumType; players: Array<{ id: strin
 const emits = defineEmits<{ refresh: [] }>()
 
 const {
-  params: { year, id, edId }
+  params: { year, id }
 } = useRoute("edition")
 
 const {
@@ -21,7 +21,6 @@ const {
 } = useAppConfig()
 
 const toast = useToast()
-const supabase = useSupabaseClient()
 
 const isOpen = ref(false)
 const isUploading = ref(false)
@@ -43,7 +42,7 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
   try {
     const response = await $fetch(`${FLASK_ROUTE}/atp/activity`, {
       method: "POST",
-      timeout: 120_000,
+      timeout: 240_000,
       "Content-Type": "application/json",
       body: JSON.stringify({
         ...event.data,

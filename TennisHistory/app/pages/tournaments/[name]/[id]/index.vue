@@ -8,7 +8,7 @@ const {
 } = useRoute("tournament")
 
 const {
-  ui: { colors, icons }
+  ui: { icons }
 } = useAppConfig()
 
 const supabase = useSupabaseClient()
@@ -34,7 +34,7 @@ const tabItems = computed<Array<TabsItem>>(() => [
   }
 ])
 
-const { data: tournament, refresh } = await useAsyncData(id, async () => {
+const { data: tournament } = await useAsyncData(id, async () => {
   const { data, error } = await supabase.from("tournaments").select("*").eq("id", Number(id)).single()
 
   if (error || !data) {

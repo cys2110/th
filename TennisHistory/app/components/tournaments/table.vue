@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { LazyTournamentCreate, UButton, UFieldGroup } from "#components"
 import type { TableColumn, TableRow } from "@nuxt/ui"
 
 const props = defineProps<{
@@ -18,15 +19,13 @@ const {
   ui: { icons }
 } = useAppConfig()
 
+const { dev } = useRuntimeConfig().public
+
 const filters = defineModel<TournamentFiltersInterface>("filters")
 
 const { results, loading, searchTerm } = useTournamentSearch()
 
 const router = useRouter()
-
-const {
-  ui: { colors }
-} = useAppConfig()
 
 const table = useTemplateRef("table")
 
@@ -38,7 +37,16 @@ onMounted(() => {
 })
 
 const columns: Array<TableColumn<TournamentInterface>> = [
-  { accessorKey: "tours" },
+  {
+    accessorKey: "tours",
+    ...(dev && {
+      footer: () =>
+        h(UFieldGroup, { class: "w-fit" }, () => [
+          h(UButton, { icon: icons.reload, onClick: () => emits("refresh") }),
+          h(LazyTournamentCreate, { hydrateOnIdle: true, onRefresh: () => emits("refresh") })
+        ])
+    })
+  },
   { accessorKey: "name" },
   { accessorKey: "established" },
   { accessorKey: "abolished" }
@@ -80,7 +88,7 @@ const handleSelectRow = (_e: Event, row: TableRow<TournamentInterface>) => {
         class: {
           tr: row => {
             if ((row.original.tours || []).length > 1) {
-              return 'bg-primary/10'
+              return 'bg-primary/20'
             } else {
               switch (row.original.tours![0]) {
                 case 'ATP':
@@ -92,7 +100,7 @@ const handleSelectRow = (_e: Event, row: TableRow<TournamentInterface>) => {
                 case 'ITF-W':
                   return 'bg-ITF-W/10'
                 default:
-                  return 'bg-primary/10'
+                  return 'bg-primary/20'
               }
             }
           }
@@ -142,7 +150,7 @@ const handleSelectRow = (_e: Event, row: TableRow<TournamentInterface>) => {
             v-for="tour in row.original.tours"
             :key="tour"
             :label="tour"
-            :color="<keyof typeof colors>tour"
+            :color="tour"
           />
         </div>
       </template>

@@ -108,12 +108,6 @@ const loadMore = () => {
         title="Tournaments"
         :ui="{ description: 'flex justify-end gap-4' }"
       >
-        <template #links>
-          <dev-only>
-            <lazy-tournament-create hydrate-on-idle />
-          </dev-only>
-        </template>
-
         <template
           #description
           v-if="!viewModeStore.isTableView"

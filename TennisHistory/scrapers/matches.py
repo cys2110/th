@@ -81,7 +81,8 @@ def get_atp_stats():
                     for link in links
                     if (match := re.search(r'/([a-zA-Z0-9]{4})/', link.get('href', '')))
                 ]
-                return f"{event_id} {' '.join(ids)}"
+
+                return [f"{event_id} {' '.join(ids)}", f"{event_id} {' '.join(ids[::-1])}"]
 
             team1_id = extract_team_id(players_container.select_one('.team1'))
             team2_id = extract_team_id(players_container.select_one('.team2'))
@@ -162,9 +163,9 @@ def get_atp_stats():
             matchesResponse = (
                 supabase
                 .table("matches")
-                .select("id, rounds!inner(event_id)")
-                .eq("team_1_id", match['p1']['entry_id'])
-                .eq("team_2_id", match['p2']['entry_id'])
+                .select("id, team_1_id, team_2_id, rounds!inner(event_id, round)")
+                .in_("team_1_id", match['p1']['entry_id'])
+                .in_("team_2_id", match['p2']['entry_id'])
                 .eq("rounds.event_id", event_id)
                 .single()
                 .execute()
@@ -173,8 +174,12 @@ def get_atp_stats():
             if matchesResponse.data is not None:
                 match['p1']['match_id'] = matchesResponse.data['id']
                 match['p2']['match_id'] = matchesResponse.data['id']
+                match['p1']['entry_id'] = matchesResponse.data['team_1_id']
+                match['p2']['entry_id'] = matchesResponse.data['team_2_id']
                 matchesToInsert.append(match['p1'])
                 matchesToInsert.append(match['p2'])
+            else:
+                print("No match found")
         except Exception as e:
             failed_matches.append(match)
             print(e)
@@ -192,7 +197,6 @@ def get_atp_stats():
 def scrape_old_atp_matches():
     data = request.json
     event_id = data['event_id']
-    # match_type = data['match_type']
     links = data['links']
     failed_links = []
 
@@ -217,11 +221,9 @@ def scrape_old_atp_matches():
             }
 
             # Get players
-            player_1_box = soup.find('div', class_='player-team')
-            player_2_box = soup.find('div', class_='opponent-team')
+            players_info = soup.find_all('div', class_='player-info')
 
-            player_1_link = player_1_box.find('a')
-            player_2_link = player_2_box.find('a')
+            player_1_link, player_2_link = [info.find('a') for info in players_info]
 
             player_1_id = re.search(r'/([a-zA-Z0-9]{4})/', player_1_link['href']).group(1)
             player_2_id = re.search(r'/([a-zA-Z0-9]{4})/', player_2_link['href']).group(1)
@@ -307,7 +309,14 @@ def scrape_old_atp_matches():
 
     for match in matches:
         try:
-            response = (supabase.table("matches").select("id, rounds!inner(event_id)").eq("rounds.event_id", event_id).eq("team_1_id", match['t1']['entry_id']).eq("team_2_id", match['t2']['entry_id']).single().execute())
+            response = (supabase
+                .table("matches")
+                .select("id, rounds!inner(event_id, round)")
+                .eq("rounds.event_id", event_id)
+                .eq("winner_id", match['t1']['entry_id'])
+                .eq("loser_id", match['t2']['entry_id'])
+                .single()
+                .execute())
 
             if response.data is not None:
                 rows.append({**match['t1'], 'match_id': response.data['id']})
@@ -322,7 +331,7 @@ def scrape_old_atp_matches():
         print(e)
         pass
 
-    return jsonify(matches)
+    return jsonify({ 'matches': matches, 'success': True})
 
 def get_wta_ids(competitor):
     player_link = competitor.get('@id')

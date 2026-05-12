@@ -40,6 +40,7 @@ export const CURRENCY_OPTIONS = Object.entries(CURRENCY_MAPPING).map(([key, valu
 
 export const DRAWS = [
   "Round of 128",
+  "Round of 96",
   "Round of 64",
   "Round of 48",
   "Round of 32",
