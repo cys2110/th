@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { TableColumn, TableRow } from "@nuxt/ui"
 import { getFacetedRowModel, getFacetedUniqueValues, getGroupedRowModel, type Row } from "@tanstack/vue-table"
-import { CountryLink, LazyEditionCreate, PlayersLink, TableRowToggle, UBadge, UIcon } from "#components"
+import { CountryLink, LazyEditionCreate, PlayersLink, TableRowToggle, UBadge, UButton, UFieldGroup, UIcon } from "#components"
 
 type Winner = LaverWinnerInterface | CountryWinnerInterface | EditionWinnerInterface
 
@@ -9,6 +9,8 @@ const props = defineProps<{
   events: Array<Winner>
   pending: boolean
 }>()
+
+const emits = defineEmits<{ refresh: [] }>()
 
 const router = useRouter()
 const { dev } = useRuntimeConfig().public
@@ -35,6 +37,8 @@ const isDefaultWinner = (item: Winner): item is EditionWinnerInterface => {
   return "tour" in item
 }
 
+const uniqueYears = computed(() => useArrayUnique(props.events.map(ed => ed.year)).value.sort())
+
 const getEditionNumber = (event: Winner) => {
   const year = event.year.toString()
   const edId = event.id.toString()
@@ -48,8 +52,13 @@ const getEditionNumber = (event: Winner) => {
 
 const columns: Array<TableColumn<Winner>> = [
   {
-    accessorKey: "year",
-    filterFn: numberFilter,
+    accessorKey: "id",
+    filterFn: (row, columnId, filterValue) => {
+      if (!filterValue?.length) return true
+      if (filterValue.includes(row.original.year)) return true
+
+      return false
+    },
     cell: ({ row, table }) => {
       const editionNumber = getEditionNumber(row.original)
 
@@ -57,13 +66,15 @@ const columns: Array<TableColumn<Winner>> = [
         return h(TableRowToggle, { row: row as Row<unknown> }, () =>
           h("div", {}, [h("span", {}, row.original.year), editionNumber && h("span", {}, ` [${editionNumber}]`)])
         )
-      } else if (!table.getState().grouping.includes("year")) {
+      } else if (!table.getState().grouping.includes("id")) {
         return h("div", {}, [h("span", {}, row.original.year), editionNumber && h("span", {}, ` [${editionNumber}]`)])
       }
     },
-    ...(dev && {
-      footer: () => h(LazyEditionCreate, { hydrateOnIdle: true })
-    })
+    footer: ({ table }) => {
+      const rowCount = table.getGroupedRowModel().rows.length
+
+      return `${rowCount} edition${rowCount === 1 ? "" : "s"}`
+    }
   },
   {
     accessorKey: "tour",
@@ -103,7 +114,14 @@ const columns: Array<TableColumn<Winner>> = [
           })
         }
       }
-    }
+    },
+    ...(dev && {
+      footer: () =>
+        h(UFieldGroup, { class: "w-fit" }, () => [
+          h(UButton, { icon: icons.reload, onClick: () => emits("refresh") }),
+          h(LazyEditionCreate, { hydrateOnIdle: true })
+        ])
+    })
   },
   {
     accessorKey: "country.name",
@@ -114,7 +132,14 @@ const columns: Array<TableColumn<Winner>> = [
           class: "mx-auto"
         })
       }
-    }
+    },
+    ...(dev && {
+      footer: () =>
+        h(UFieldGroup, { class: "w-fit" }, () => [
+          h(UButton, { icon: icons.reload, onClick: () => emits("refresh") }),
+          h(LazyEditionCreate, { hydrateOnIdle: true })
+        ])
+    })
   },
   {
     accessorKey: "laverWinner.team_name",
@@ -126,13 +151,20 @@ const columns: Array<TableColumn<Winner>> = [
           name: team === "Europe" ? ICONS.europe : ICONS.world
         })
       }
-    }
+    },
+    ...(dev && {
+      footer: () =>
+        h(UFieldGroup, { class: "w-fit" }, () => [
+          h(UButton, { icon: icons.reload, onClick: () => emits("refresh") }),
+          h(LazyEditionCreate, { hydrateOnIdle: true })
+        ])
+    })
   }
 ]
 
 const grouping = computed(() => {
   if (props.events[0] && isDefaultWinner(props.events[0])) {
-    return ["year"]
+    return ["id"]
   }
   return []
 })
@@ -160,6 +192,18 @@ const handleSelectRow = (_e: Event, row: TableRow<Winner>) => {
     })
   }
 }
+
+const tableClass = computed(() => {
+  let className = "mx-auto"
+
+  if (!props.events.length || isDefaultWinner(props.events[0]!)) {
+    className += " max-w-3/4"
+  } else {
+    className += " max-w-1/2"
+  }
+
+  return className
+})
 </script>
 
 <template>
@@ -180,8 +224,16 @@ const handleSelectRow = (_e: Event, row: TableRow<Winner>) => {
     render-fallback-value="—"
     v-model:column-visibility="columnVisibility"
     :grouping
-    :class="!events.length || isDefaultWinner(events[0]!) ? 'max-w-3/4' : 'max-w-1/2'"
-    :ui="{ root: 'mx-auto', td: 'empty:p-0' }"
+    :meta="{
+      class: {
+        tr: row => (row.getIsGrouped() ? '' : 'even:bg-elevated/25')
+      }
+    }"
+    :ui="{
+      root: tableClass,
+      tbody: '[&>tr]:data-[selectable=true]:cursor-pointer [&>tr]:data-[selectable=true]:hover:bg-elevated/50',
+      td: 'empty:p-0'
+    }"
   >
     <template #loading>
       <u-icon
@@ -207,14 +259,18 @@ const handleSelectRow = (_e: Event, row: TableRow<Winner>) => {
       </u-empty>
     </template>
 
-    <template #year-header="{ column }">
+    <template #id-header="{ column }">
       <div class="flex justify-center items-center gap-0.5">
         <table-group-header :column />
-        <table-filter-header
-          :column
-          label="Year"
+        <u-select-menu
+          placeholder="Year"
+          variant="none"
+          clear
+          :items="uniqueYears"
           :icon="ICONS.calendar"
           multiple
+          :model-value="<number[]>column.getFilterValue()"
+          @update:model-value="column.setFilterValue($event)"
         />
         <table-sort-header :column />
       </div>

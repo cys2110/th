@@ -38,7 +38,7 @@ const errors = ref()
 const form = useTemplateRef("form")
 
 defineShortcuts({
-  ctrl_e: () => set(isOpen, !isOpen.value),
+  ctrl_a: () => set(isOpen, !isOpen.value),
   ctrl_r: () => set(state, {}),
   ctrl_enter: () => form.value?.submit()
 })
@@ -104,34 +104,19 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
 const formFields = computed<Array<FormFieldInterface<Schema>>>(
   () =>
     [
-      { label: "Edition ID", key: "id", type: "text", subType: "number", required: true },
-      { label: "Year", key: "year", type: "inputMenu", items: OPEN_ERA_YEARS, required: true, icon: ICONS.years },
-      { label: "Sponsor Name", key: "sponsor_name", type: "text", class: "col-span-2" },
-      ...(tournamentStore.tours.length > 1 ?
-        [
-          {
-            label: "Tours",
-            key: "tours",
-            type: "checkbox",
-            items: tournamentStore.tours,
-            required: true,
-            icon: ICONS.tour
-          }
-        ]
-      : []),
-      { label: "Dates", key: "dates", type: "dates", class: "col-span-2" },
-      { label: "Wikipedia Link", key: "wiki_link", type: "textarea", class: "col-span-2" },
+      { label: "Sponsor Name", key: "sponsor_name", type: "text" },
+      { label: "Dates", key: "dates", type: "dates" },
+      { label: "Wikipedia Link", key: "wiki_link", type: "textarea" },
       {
         label: "Category",
         key: "category",
         type: "inputMenu",
         items: CATEGORIES,
-        icon: ICONS.category,
-        class: tournamentStore.tours.length > 1 ? "col-span-1" : "col-span-2"
+        icon: ICONS.category
       },
-      { label: "Award", type: "slot", errorPattern: /^(currency|tfc)$/, class: "col-span-2" },
-      { label: "Draw Type", key: "draw_type", type: "inputMenu", items: DRAWS, icon: ICONS.draw, class: "col-span-2" },
-      { label: "Draw Link", key: "draw_link", type: "textarea", class: "col-span-2" }
+      { label: "Award", type: "slot", errorPattern: /^(currency|tfc)$/ },
+      { label: "Draw Type", key: "draw_type", type: "inputMenu", items: DRAWS },
+      { label: "Draw Link", key: "draw_link", type: "textarea" }
     ] as Array<FormFieldInterface<Schema>>
 )
 </script>
@@ -151,31 +136,51 @@ const formFields = computed<Array<FormFieldInterface<Schema>>>(
         :state
         @submit="onSubmit"
         @error="onError"
+        class="space-y-3"
       >
-        <div class="grid grid-cols-2 items-center gap-3">
+        <div
+          class="grid items-center gap-3"
+          :class="tournamentStore.tours.length > 1 ? 'grid-cols-3' : 'grid-cols-2'"
+        >
           <form-field
-            v-for="field in formFields"
-            :key="field.label"
-            :field
+            :field="{ label: 'ID', key: 'id', type: 'text', subType: 'number', required: true }"
             v-model="state"
-          >
-            <u-field-group>
-              <u-input-menu
-                placeholder="e.g., $"
-                :items="CURRENCY_OPTIONS"
-                v-model="state.currency"
-                value-key="value"
-                label-key="label"
-              />
+          />
 
-              <form-input-number
-                placeholder="Enter TFC"
-                :currency="state.currency || 'USD'"
-                v-model="state.tfc"
-              />
-            </u-field-group>
-          </form-field>
+          <form-field
+            :field="{ label: 'Year', key: 'year', type: 'inputMenu', items: OPEN_ERA_YEARS, required: true, icon: ICONS.years }"
+            v-model="state"
+          />
+
+          <form-field
+            v-if="tournamentStore.tours.length > 1"
+            :field="{ label: 'Tours', key: 'tours', type: 'checkbox', items: tournamentStore.tours, required: true, icon: ICONS.tour }"
+            v-model="state"
+          />
         </div>
+
+        <form-field
+          v-for="field in formFields"
+          :key="field.label"
+          :field
+          v-model="state"
+        >
+          <u-field-group>
+            <u-input-menu
+              placeholder="e.g., $"
+              :items="CURRENCY_OPTIONS"
+              v-model="state.currency"
+              value-key="value"
+              label-key="label"
+            />
+
+            <form-input-number
+              placeholder="Enter TFC"
+              :currency="state.currency || 'USD'"
+              v-model="state.tfc"
+            />
+          </u-field-group>
+        </form-field>
       </u-form>
 
       <u-alert

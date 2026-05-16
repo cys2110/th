@@ -124,6 +124,7 @@ export default defineAppConfig({
         trailingIcon: "group-data-[state=open]:rotate-180 duration-250 cursor-pointer"
       }
     },
+    listbox: { slots: { content: "cursor-pointer" } },
     main: { base: "min-h-0 h-[calc(100vh-var(--ui-header-height))] overflow-y-auto" },
     navigationMenu: { defaultVariants: { variant: "link" } },
     pageAside: {
@@ -177,7 +178,7 @@ export default defineAppConfig({
       slots: {
         root: "scrollbar max-h-[calc(100vh-18rem)]",
         th: "text-center",
-        tbody: "[&>tr]:data-[selectable=true]:cursor-pointer",
+        tbody: "[&>tr]:data-[selectable=true]:hover:bg-transparent",
         td: "py-1 text-center"
       },
       defaultVariants: { loadingAnimation: "swing" }

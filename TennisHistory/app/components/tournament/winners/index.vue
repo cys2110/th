@@ -14,7 +14,7 @@ const { data: editions, pending } = await useAsyncData<Array<LaverWinnerInterfac
   async () => {
     // Laver Cup
     if (id === "9210") {
-      const { data, error } = await supabase.from("editions").select("id, year, events(entries(*))").eq("tournament_id", Number(id))
+      const { data, error } = await supabase.from("editions").select("id, year, events(id,entries(*))").eq("tournament_id", Number(id))
 
       if (error || !data) {
         console.error("Error fetching editions:", error)
@@ -26,7 +26,7 @@ const { data: editions, pending } = await useAsyncData<Array<LaverWinnerInterfac
           ({
             id: edition.id,
             year: edition.year,
-            laverWinner: edition.events[0]?.entries.find(entry => entry.points && entry.points > 12)
+            laverWinner: edition.events?.[0]?.entries.find(entry => entry.points && entry.points > 12) || []
           }) as unknown as LaverWinnerInterface
       )
     } else if (COUNTRY_DRAWS.includes(id)) {

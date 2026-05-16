@@ -41,16 +41,14 @@ const errors = ref()
 const form = useTemplateRef("form")
 
 defineShortcuts({
-  ctrl_e: () => set(isOpen, !isOpen.value),
-  ctrl_r: () => set(state, {}),
+  ctrl_a: () => set(isOpen, !isOpen.value),
+  ctrl_r: () => handleReset(),
   ctrl_enter: () => form.value?.submit()
 })
 
 const eventId = computed(() => {
   if (COUNTRY_DRAWS.includes(id)) {
     return `${edId}-Country`
-  } else if (id === "9210") {
-    return `${edId}-LC`
   } else {
     return undefined
   }
@@ -159,7 +157,7 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
         id="entry-form"
         ref="form"
         :schema
-        :state="state"
+        :state
         @submit="onSubmit"
         @error="onError"
         class="space-y-3"

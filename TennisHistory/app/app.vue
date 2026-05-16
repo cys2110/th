@@ -27,7 +27,7 @@ provide(LOADING_OPTIONS_KEY, {
     :tooltip="{ delayDuration: 50 }"
     :toaster="{ position: 'top-right', expand: false }"
   >
-    <nuxt-loading-indicator color="repeating-linear-gradient(to right,#e0f2fe 0%,#0ea5e9 50%,#0c4a6e 100%)" />
+    <nuxt-loading-indicator color="repeating-linear-gradient(to right,#ddd6fe 0%,#7c3aed 50%,#4c1d95 100%)" />
 
     <Header />
 

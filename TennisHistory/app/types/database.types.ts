@@ -145,6 +145,7 @@ export type Database = {
       }
       entries: {
         Row: {
+          captain: string | null
           country_id: string | null
           event_id: string
           id: string
@@ -152,8 +153,10 @@ export type Database = {
           pm: number | null
           points: number | null
           team_name: string | null
+          vc: string | null
         }
         Insert: {
+          captain?: string | null
           country_id?: string | null
           event_id: string
           id: string
@@ -161,8 +164,10 @@ export type Database = {
           pm?: number | null
           points?: number | null
           team_name?: string | null
+          vc?: string | null
         }
         Update: {
+          captain?: string | null
           country_id?: string | null
           event_id?: string
           id?: string
@@ -170,8 +175,16 @@ export type Database = {
           pm?: number | null
           points?: number | null
           team_name?: string | null
+          vc?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "entries_captain_fkey"
+            columns: ["captain"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "entries_country_id_fkey"
             columns: ["country_id"]
@@ -184,6 +197,13 @@ export type Database = {
             columns: ["event_id"]
             isOneToOne: false
             referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "entries_vc_fkey"
+            columns: ["vc"]
+            isOneToOne: false
+            referencedRelation: "players"
             referencedColumns: ["id"]
           },
         ]

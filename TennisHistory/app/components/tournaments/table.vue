@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { LazyTournamentCreate, UButton, UFieldGroup } from "#components"
 import type { TableColumn, TableRow } from "@nuxt/ui"
 
 const props = defineProps<{
   tournaments: Array<TournamentInterface>
   pending: boolean
+  count: number
   canLoadMore: boolean
   sorting: Array<SortingInterface>
 }>()
@@ -18,8 +18,6 @@ const emits = defineEmits<{
 const {
   ui: { icons }
 } = useAppConfig()
-
-const { dev } = useRuntimeConfig().public
 
 const filters = defineModel<TournamentFiltersInterface>("filters")
 
@@ -37,17 +35,8 @@ onMounted(() => {
 })
 
 const columns: Array<TableColumn<TournamentInterface>> = [
-  {
-    accessorKey: "tours",
-    ...(dev && {
-      footer: () =>
-        h(UFieldGroup, { class: "w-fit" }, () => [
-          h(UButton, { icon: icons.reload, onClick: () => emits("refresh") }),
-          h(LazyTournamentCreate, { hydrateOnIdle: true, onRefresh: () => emits("refresh") })
-        ])
-    })
-  },
-  { accessorKey: "name" },
+  { accessorKey: "tours" },
+  { accessorKey: "name", footer: () => `${props.count} tournament${props.count === 1 ? "" : "s"}` },
   { accessorKey: "established" },
   { accessorKey: "abolished" }
 ]
@@ -83,28 +72,9 @@ const handleSelectRow = (_e: Event, row: TableRow<TournamentInterface>) => {
       :loading="pending"
       @select="handleSelectRow"
       render-fallback-value="—"
-      class="2xl:max-w-2/3 mx-auto"
-      :meta="{
-        class: {
-          tr: row => {
-            if ((row.original.tours || []).length > 1) {
-              return 'bg-primary/20'
-            } else {
-              switch (row.original.tours![0]) {
-                case 'ATP':
-                  return 'bg-ATP/10'
-                case 'WTA':
-                  return 'bg-WTA/10'
-                case 'ITF-M':
-                  return 'bg-ITF-M/10'
-                case 'ITF-W':
-                  return 'bg-ITF-W/10'
-                default:
-                  return 'bg-primary/20'
-              }
-            }
-          }
-        }
+      :ui="{
+        root: '2xl:max-w-2/3 mx-auto',
+        tbody: '[&>tr]:data-[selectable=true]:cursor-pointer [&>tr]:data-[selectable=true]:hover:bg-elevated/50 [&>tr]:even:bg-elevated/25'
       }"
     >
       <template #loading>
@@ -156,7 +126,7 @@ const handleSelectRow = (_e: Event, row: TableRow<TournamentInterface>) => {
       </template>
 
       <template #name-header>
-        <div class="flex justify-center items-center gap-0.5">
+        <div class="flex justify-center items-center gap-0.5 w-fit mx-auto">
           <u-select-menu
             v-if="filters"
             placeholder="Tournament"
@@ -179,7 +149,7 @@ const handleSelectRow = (_e: Event, row: TableRow<TournamentInterface>) => {
       </template>
 
       <template #established-header>
-        <div class="flex items-center gap-0.5">
+        <div class="flex items-center gap-0.5 w-fit mx-auto">
           <u-select-menu
             v-if="filters"
             v-model="filters.established"
@@ -199,7 +169,7 @@ const handleSelectRow = (_e: Event, row: TableRow<TournamentInterface>) => {
       </template>
 
       <template #abolished-header>
-        <div class="flex items-center gap-0.5">
+        <div class="flex items-center gap-0.5 w-fit mx-auto">
           <u-select-menu
             v-if="filters"
             v-model="filters.abolished"

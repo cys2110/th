@@ -17,7 +17,7 @@ const errors = ref()
 const form = useTemplateRef("form")
 
 defineShortcuts({
-  ctrl_t: () => set(isOpen, !isOpen.value),
+  ctrl_a: () => set(isOpen, !isOpen.value),
   ctrl_r: () => set(state, {}),
   ctrl_enter: () => form.value?.submit()
 })
@@ -90,7 +90,10 @@ const formFields: FormFieldInterface<Schema>[] = [
     :title="`Create ${state.name || 'Tournament'}`"
     v-model:open="isOpen"
   >
-    <u-button :icon="icons.plus" />
+    <u-button
+      :icon="icons.plus"
+      :ui="{ leadingIcon: 'size-4' }"
+    />
 
     <template #body>
       <u-form

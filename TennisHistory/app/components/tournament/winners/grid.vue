@@ -10,9 +10,9 @@ const {
 
 const tournamentStore = useTournamentStore()
 
-const uniqueYears = computed(() => useArrayUnique(props.editions.map(ed => ed.year)).value.sort())
+const uniqueEditions = computed(() => useArrayUnique(props.editions.map(ed => ed.id)).value.sort())
 
-const getYearEvents = (year: number) => props.editions.filter(edition => edition.year === year)
+const getEditionEvents = (id: number) => props.editions.filter(edition => edition.id === id)
 </script>
 
 <template>
@@ -22,9 +22,9 @@ const getYearEvents = (year: number) => props.editions.filter(edition => edition
   >
     <tournament-winners-card
       v-if="editions.length"
-      v-for="year in uniqueYears"
-      :key="year"
-      :events="getYearEvents(year)"
+      v-for="edition in uniqueEditions"
+      :key="edition"
+      :events="getEditionEvents(edition)"
     />
 
     <tournament-winners-loading

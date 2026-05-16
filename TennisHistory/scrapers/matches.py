@@ -163,10 +163,11 @@ def get_atp_stats():
             matchesResponse = (
                 supabase
                 .table("matches")
-                .select("id, team_1_id, team_2_id, rounds!inner(event_id, round)")
+                .select("id, team_1_id, team_2_id, rounds!inner(event_id, round, draw)")
                 .in_("team_1_id", match['p1']['entry_id'])
                 .in_("team_2_id", match['p2']['entry_id'])
                 .eq("rounds.event_id", event_id)
+                # .eq("rounds.draw", "Qualifying")
                 .single()
                 .execute()
             )

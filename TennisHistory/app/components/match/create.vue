@@ -30,7 +30,7 @@ type Schema = z.infer<typeof schema>
 const emits = defineEmits<{ refresh: [] }>()
 
 const {
-  params: { edId }
+  params: { id, edId }
 } = useRoute("results")
 
 const {
@@ -49,8 +49,8 @@ const errors = ref()
 const form = useTemplateRef("form")
 
 defineShortcuts({
-  ctrl_m: () => set(isOpen, !isOpen.value),
-  ctrl_r: () => set(state, {}),
+  ctrl_a: () => set(isOpen, !isOpen.value),
+  ctrl_r: () => handleReset(),
   ctrl_enter: () => form.value?.submit()
 })
 
@@ -261,6 +261,8 @@ const formFields = computed<FormFieldInterface<Schema>[]>(
         key: "round_id",
         type: "inputMenu",
         items: rounds.value.filter(round => {
+          if (id === "9210") return true
+
           const isTourMatch = !state.value.tour || state.value.tour === round.tour
           const isMatchTypeMatch = !state.value.match_type || state.value.match_type === round.match_type
           const isDrawMatch = !state.value.draw || state.value.draw === round.draw

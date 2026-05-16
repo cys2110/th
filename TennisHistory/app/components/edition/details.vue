@@ -87,12 +87,20 @@ const showVenues = computed(() => {
 
 <template>
   <div>
-    <div class="flex justify-end">
-      <lazy-event-create
-        hydrate-on-idle
-        @refresh="refresh"
-      />
-    </div>
+    <dev-only>
+      <div class="flex justify-end">
+        <u-field-group class="w-fit">
+          <lazy-event-create
+            hydrate-on-idle
+            @refresh="refresh"
+          />
+          <lazy-scrape-results
+            v-if="id === '9210'"
+            hydrate-on-idle
+          />
+        </u-field-group>
+      </div>
+    </dev-only>
 
     <div
       v-if="edition || pending"
@@ -240,7 +248,7 @@ const showVenues = computed(() => {
       :event
       :show-surfaces
       :show-venues
-      :start-date="edition?.start_date"
+      :start-date="edition!.start_date"
     />
   </div>
 </template>

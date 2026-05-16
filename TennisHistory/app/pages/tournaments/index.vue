@@ -1,6 +1,10 @@
 <script setup lang="ts">
 useHead({ title: "Tournaments" })
 
+const {
+  ui: { icons }
+} = useAppConfig()
+
 const supabase = useSupabaseClient()
 
 const viewModeStore = useViewModeStore()
@@ -33,6 +37,7 @@ const handleSorting = (field: string) => {
 }
 
 const tournaments = ref<Array<TournamentInterface>>([])
+const count = ref(0)
 const canLoadMore = ref(false)
 
 const { pending, execute, refresh } = await useAsyncData(
@@ -55,26 +60,21 @@ const { pending, execute, refresh } = await useAsyncData(
 
     if (filters.value.abolished) query.lte("abolished", filters.value.abolished)
 
-    if (sorting.value.length) {
-      sorting.value.forEach(s => query.order(s.field, { ascending: s.direction }))
-    } else {
-      query.order("id", { ascending: true })
-    }
+    if (sorting.value.length) sorting.value.forEach(s => query.order(s.field, { ascending: s.direction }))
 
-    const { data, count, error } = await query
+    query.order("id", { ascending: true }) // Add sorting for consistent ordering
+
+    const { data, count: countData, error } = await query
 
     if (error || !data) {
       console.error("Error fetching tournaments:", error)
       return []
     }
 
-    if (data.length + tournaments.value.length < (count || 0)) {
-      set(canLoadMore, true)
-    } else {
-      set(canLoadMore, false)
-    }
+    set(canLoadMore, data.length + tournaments.value.length < (countData || 0))
+    set(count, countData || 0)
 
-    tournaments.value = [...tournaments.value, ...data]
+    tournaments.value = tournaments.value.concat(data)
 
     return data
   },
@@ -108,6 +108,19 @@ const loadMore = () => {
         title="Tournaments"
         :ui="{ description: 'flex justify-end gap-4' }"
       >
+        <template #links>
+          <dev-only>
+            <u-field-group class="w-fit">
+              <u-button
+                :icon="icons.reload"
+                @click="refresh()"
+              />
+
+              <lazy-tournament-create hydrate-on-idle />
+            </u-field-group>
+          </dev-only>
+        </template>
+
         <template
           #description
           v-if="!viewModeStore.isTableView"
@@ -142,6 +155,7 @@ const loadMore = () => {
           :pending
           :can-load-more
           :sorting
+          :count
           @load-more="loadMore"
           @handle-sorting="handleSorting"
           v-model:filters="filters"

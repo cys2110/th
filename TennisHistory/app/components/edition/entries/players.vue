@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { LazyEditionEntriesCreate, LazyScrapeActivity, UBadge, UButton, UFieldGroup } from "#components"
+import { LazyEditionEntriesCreate, LazyEditionEntriesCreateLc, LazyScrapeActivity, UBadge, UButton, UFieldGroup } from "#components"
 import type { TableColumn, TableRow } from "@nuxt/ui"
 import { createColumnHelper, getFacetedRowModel, getFacetedUniqueValues } from "@tanstack/vue-table"
 
@@ -140,7 +140,7 @@ const columns: TableColumn<IndividualPlayerEntryInterface>[] = [
     ...(dev && {
       footer: () =>
         h(UFieldGroup, { class: "w-fit mx-auto" }, () => [
-          h(LazyEditionEntriesCreate, { hydrateOnIdle: true, onRefresh: refresh }),
+          h(id === "9210" ? LazyEditionEntriesCreateLc : LazyEditionEntriesCreate, { hydrateOnIdle: true, onRefresh: refresh }),
           h(UButton, { icon: icons.reload, onClick: () => refresh() }),
           h(UButton, {
             icon: ICONS.columnVisibility,

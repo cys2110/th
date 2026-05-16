@@ -29,7 +29,7 @@ const modelValue = defineModel<any>()
     <form-input
       v-else-if="field.type === 'text'"
       :type="field.subType"
-      :placeholder="field.placeholder || `Enter ${field.label.toLowerCase()}`"
+      :placeholder="field.placeholder || field.label"
       :disabled="field.disabled"
       v-model="modelValue[field.key]"
       :icon="field.icon"
@@ -38,7 +38,7 @@ const modelValue = defineModel<any>()
     <form-input-number
       v-else-if="field.type === 'number'"
       v-model="modelValue[field.key]"
-      :placeholder="field.placeholder ?? `Enter ${field.label.toLowerCase()}`"
+      :placeholder="field.placeholder ?? field.label"
       :disabled="field.disabled"
       :icon="field.icon"
       :currency="field.currency"
@@ -48,7 +48,7 @@ const modelValue = defineModel<any>()
       v-else-if="field.type === 'inputMenu'"
       v-model="modelValue[field.key]"
       :items="field.items!"
-      :placeholder="field.placeholder || `Select ${field.label.toLowerCase()}`"
+      :placeholder="field.placeholder || field.label"
       :multiple="field.multiple"
       :icon="field.icon"
       :loading="field.loading"
@@ -72,7 +72,7 @@ const modelValue = defineModel<any>()
     <form-textarea
       v-else-if="field.type === 'textarea'"
       v-model="modelValue[field.key]"
-      :placeholder="field.placeholder ?? `Enter ${field.label.toLowerCase()}`"
+      :placeholder="field.placeholder ?? field.label"
       :icon="field.icon"
     />
 
@@ -103,6 +103,13 @@ const modelValue = defineModel<any>()
     <form-dates-picker
       v-else-if="field.type === 'dates'"
       v-model="modelValue[field.key]"
+    />
+
+    <u-listbox
+      v-else-if="field.type === 'listbox'"
+      v-model="modelValue[field.key]"
+      :items="field.items.map((item: any) => ({ value: item, label: item }))"
+      value-key="value"
     />
   </u-form-field>
 </template>

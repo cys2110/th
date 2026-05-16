@@ -19,7 +19,8 @@ export const CATEGORIES = [
   "United Cup",
   "ATP Cup",
   "WTA Premier 5",
-  "WTA International"
+  "WTA International",
+  "ATP World Series"
 ] as const
 
 export const CONTINENTS = ["Africa", "Asia", "Europe", "North America", "Oceania", "South America"] as const

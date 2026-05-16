@@ -24,8 +24,8 @@ useInfiniteScroll(el, () => emits("load-more"), {
 
 <template>
   <div
-    ref="el"
     v-if="tournaments.length || pending"
+    ref="el"
     class="scrollbar"
   >
     <u-page-grid class="xl:grid-cols-4 2xl:grid-cols-5">

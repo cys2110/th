@@ -1,4 +1,6 @@
 <script setup lang="ts">
+withDefaults(defineProps<{ multiple?: boolean }>(), { multiple: false })
+
 const { results, loading, searchTerm } = usePlayerSearch()
 
 const modelValue = defineModel<any>()
@@ -14,5 +16,6 @@ const modelValue = defineModel<any>()
     :icon="ICONS.player"
     :items="results"
     class="w-full"
+    :multiple
   />
 </template>

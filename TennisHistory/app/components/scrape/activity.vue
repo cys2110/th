@@ -93,7 +93,8 @@ const formFields: Array<FormFieldInterface<Schema>> = [
       { value: "500", label: "ATP 500" },
       { value: "250", label: "ATP 250" },
       { value: "CH", label: "Challenger" },
-      { value: "FU", label: "Futures" }
+      { value: "FU", label: "Futures" },
+      { value: "LC", label: "Laver Cup" }
     ],
     required: true,
     valueKey: "value"

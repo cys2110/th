@@ -62,7 +62,7 @@ const errors = ref()
 const form = useTemplateRef("form")
 
 defineShortcuts({
-  ctrl_e: () => set(isOpen, !isOpen.value),
+  ctrl_a: () => set(isOpen, !isOpen.value),
   ctrl_r: () => set(state, {}),
   ctrl_enter: () => form.value?.submit()
 })
@@ -86,6 +86,8 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
 
     const eventTour = tour || tournamentStore.tours[0]
 
+    console.log(eventTour)
+
     const eventId =
       COUNTRY_DRAWS.includes(id) ? `${edId}-Country`
       : id === "9210" ? `${edId}-LC`
@@ -100,7 +102,10 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
       edition_id: Number(edId)
     })
 
-    if (error) throw error
+    if (error) {
+      console.error("Error adding event", error)
+      throw error
+    }
 
     const { error: venuesMappingError } = await supabase
       .from("event_venue_mapping")
@@ -160,8 +165,6 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
 const formFields = computed<Array<FormFieldInterface<Schema>>>(
   () =>
     [
-      ...(tournamentStore.tours.length > 1 ? [{ label: "Tour", key: "tour", type: "radio", items: tournamentStore.tours, required: true }] : []),
-      { label: "Level", key: "level", type: "radio", items: LEVELS, required: true },
       { label: "Dates", key: "dates", type: "dates", class: "col-span-2" },
       { label: "Sponsor Name", key: "sponsor_name", type: "text", class: "col-span-2" },
       { label: "Site Link", key: "site_link", type: "textarea", class: "col-span-2" },
@@ -212,7 +215,24 @@ const formFields = computed<Array<FormFieldInterface<Schema>>>(
         :state
         @submit="onSubmit"
         @error="onError"
+        class="space-y-3"
       >
+        <div
+          class="grid gap-3"
+          :class="tournamentStore.tours.length > 1 && !COUNTRY_DRAWS.includes(id) ? 'grid-cols-2' : 'grid-cols-1'"
+        >
+          <form-field
+            v-if="tournamentStore.tours.length > 1 && !COUNTRY_DRAWS.includes(id)"
+            :field="{ label: 'Tour', key: 'tour', type: 'listbox', items: tournamentStore.tours, required: true }"
+            v-model="state"
+          />
+
+          <form-field
+            :field="{ label: 'Level', key: 'level', type: 'listbox', items: LEVELS, required: true }"
+            v-model="state"
+          />
+        </div>
+
         <div class="grid grid-cols-2 items-center gap-3">
           <form-field
             v-for="field in formFields"
@@ -228,13 +248,11 @@ const formFields = computed<Array<FormFieldInterface<Schema>>>(
                 value-key="value"
                 label-key="label"
               />
-
               <form-input-number
                 placeholder="Enter PM"
                 :currency="state.currency || 'USD'"
                 v-model="state.pm"
               />
-
               <form-input-number
                 placeholder="Enter TFC"
                 :currency="state.currency || 'USD'"

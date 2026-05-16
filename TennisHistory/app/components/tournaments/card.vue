@@ -25,10 +25,7 @@ const highlightColor = computed(() => {
     }"
     highlight
     :highlight-color
-    :ui="{
-      leading: 'space-x-1',
-      footer: 'text-sm'
-    }"
+    :ui="{ leading: 'space-x-1', footer: 'text-sm' }"
   >
     <template #leading>
       <u-badge
