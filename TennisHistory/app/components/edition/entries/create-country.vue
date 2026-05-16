@@ -205,6 +205,7 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
               label-key="name"
               value-key="id"
               placeholder="Country"
+              clear
               class="w-full"
             />
           </u-form-field>
