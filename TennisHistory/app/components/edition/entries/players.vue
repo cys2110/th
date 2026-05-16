@@ -1,5 +1,13 @@
 <script setup lang="ts">
-import { LazyEditionEntriesCreate, LazyEditionEntriesCreateLc, LazyScrapeActivity, UBadge, UButton, UFieldGroup } from "#components"
+import {
+  LazyEditionEntriesCreate,
+  LazyEditionEntriesCreateCountry,
+  LazyEditionEntriesCreateLc,
+  LazyScrapeActivity,
+  UBadge,
+  UButton,
+  UFieldGroup
+} from "#components"
 import type { TableColumn, TableRow } from "@nuxt/ui"
 import { createColumnHelper, getFacetedRowModel, getFacetedUniqueValues } from "@tanstack/vue-table"
 
@@ -44,7 +52,7 @@ const {
         `
       id,
       countries(*),
-      players(id, first_name, last_name, tour),
+      players!inner(id, first_name, last_name, tour),
       rank,
       entries!inner(
         id,
@@ -63,8 +71,6 @@ const {
         "entries.event_id",
         events.map(event => event.id)
       )
-      .order("players(last_name)", { ascending: true })
-      .order("players(first_name)", { ascending: true })
 
     if (error || !data) {
       console.error("Error fetching players:", error)
@@ -113,7 +119,11 @@ const {
         }
       } as IndividualPlayerEntryInterface)
     }
-    return players
+
+    return players.sort((a, b) => {
+      if (a.last_name === b.last_name) return a.first_name.localeCompare(b.first_name)
+      return a.last_name.localeCompare(b.last_name)
+    })
   },
   { default: () => [] }
 )
@@ -140,7 +150,12 @@ const columns: TableColumn<IndividualPlayerEntryInterface>[] = [
     ...(dev && {
       footer: () =>
         h(UFieldGroup, { class: "w-fit mx-auto" }, () => [
-          h(id === "9210" ? LazyEditionEntriesCreateLc : LazyEditionEntriesCreate, { hydrateOnIdle: true, onRefresh: refresh }),
+          h(
+            id === "9210" ? LazyEditionEntriesCreateLc
+            : COUNTRY_DRAWS.includes(id) ? LazyEditionEntriesCreateCountry
+            : LazyEditionEntriesCreate,
+            { hydrateOnIdle: true, onRefresh: refresh }
+          ),
           h(UButton, { icon: icons.reload, onClick: () => refresh() }),
           h(UButton, {
             icon: ICONS.columnVisibility,
@@ -172,10 +187,10 @@ const columns: TableColumn<IndividualPlayerEntryInterface>[] = [
           h(LazyScrapeActivity, {
             matchType: "Singles",
             players: entries.value
-              .filter(player => player.singles.id && !isDefined(player.singles.rank))
+              .filter(player => player.singles.id && !isDefined(player.singles.rank) && player.tour === "ATP")
               .map(player => ({ id: player.id, entry_id: player.singles.entry_id! })),
             onRefresh: refresh,
-            disabled: entries.value.filter(player => player.singles.id).every(player => isDefined(player.singles.rank))
+            disabled: entries.value.filter(player => player.singles.id && player.tour === "ATP").every(player => isDefined(player.singles.rank))
           })
       },
       {
@@ -227,10 +242,10 @@ const columns: TableColumn<IndividualPlayerEntryInterface>[] = [
           h(LazyScrapeActivity, {
             matchType: "Doubles",
             players: entries.value
-              .filter(player => player.doubles.id && !isDefined(player.doubles.rank))
+              .filter(player => player.doubles.id && !isDefined(player.doubles.rank) && player.tour === "ATP")
               .map(player => ({ id: player.id, entry_id: player.doubles.entry_id! })),
             onRefresh: refresh,
-            disabled: entries.value.filter(player => player.doubles.id).every(player => isDefined(player.doubles.rank))
+            disabled: entries.value.filter(player => player.doubles.id && player.tour === "ATP").every(player => isDefined(player.doubles.rank))
           })
       },
       {
@@ -388,49 +403,37 @@ const handleSave = async () => {
     </template>
 
     <template #singles_checkbox-cell="{ row }">
-      <div class="w-fit mx-auto flex items-center gap-1">
-        <div>
-          <u-checkbox
-            v-if="row.original.singles.id"
-            label="Rank"
-            :model-value="row.original.singles.id in updatedMapping"
-            @update:model-value="
-              () => {
-                if (row.original.singles.id! in updatedMapping) {
-                  delete updatedMapping[row.original.singles.id!]
-                } else {
-                  updatedMapping[row.original.singles.id!] = row.original.singles.rank
-                }
+      <u-checkbox
+        v-if="row.original.singles.id"
+        label="Rank"
+        :model-value="row.original.singles.id in updatedMapping"
+        @update:model-value="
+          () => {
+            if (row.original.singles.id! in updatedMapping) {
+              delete updatedMapping[row.original.singles.id!]
+            } else {
+              updatedMapping[row.original.singles.id!] = row.original.singles.rank
+            }
+          }
+        "
+      />
+      <u-checkbox
+        v-if="row.original.singles.entry_id"
+        label="Entry"
+        :model-value="row.original.singles.entry_id in updatedEntries"
+        @update:model-value="
+          () => {
+            if (row.original.singles.entry_id! in updatedEntries) {
+              delete updatedEntries[row.original.singles.entry_id!]
+            } else {
+              updatedEntries[row.original.singles.entry_id!] = {
+                pm: row.original.singles.pm,
+                points: row.original.singles.points
               }
-            "
-          />
-          <u-checkbox
-            v-if="row.original.singles.entry_id"
-            label="Entry"
-            :model-value="row.original.singles.entry_id in updatedEntries"
-            @update:model-value="
-              () => {
-                if (row.original.singles.entry_id! in updatedEntries) {
-                  delete updatedEntries[row.original.singles.entry_id!]
-                } else {
-                  updatedEntries[row.original.singles.entry_id!] = {
-                    pm: row.original.singles.pm,
-                    points: row.original.singles.points
-                  }
-                }
-              }
-            "
-          />
-        </div>
-
-        <lazy-scrape-activity
-          v-if="row.original.tour === 'ATP' && !isDefined(row.original.singles.rank) && row.original.singles.draws.length"
-          hydrate-on-idle
-          match-type="Singles"
-          :players="[{ id: row.original.id, entry_id: row.original.singles.entry_id! }]"
-          @refresh="refresh"
-        />
-      </div>
+            }
+          }
+        "
+      />
     </template>
 
     <template #singles_draws-header="{ column }">
@@ -512,49 +515,37 @@ const handleSave = async () => {
     </template>
 
     <template #doubles_checkbox-cell="{ row }">
-      <div class="w-fit mx-auto flex items-center gap-1">
-        <div>
-          <u-checkbox
-            v-if="row.original.doubles.id"
-            label="Rank"
-            :model-value="row.original.doubles.id in updatedMapping"
-            @update:model-value="
-              () => {
-                if (row.original.doubles.id! in updatedMapping) {
-                  delete updatedMapping[row.original.doubles.id!]
-                } else {
-                  updatedMapping[row.original.doubles.id!] = row.original.doubles.rank
-                }
+      <u-checkbox
+        v-if="row.original.doubles.id"
+        label="Rank"
+        :model-value="row.original.doubles.id in updatedMapping"
+        @update:model-value="
+          () => {
+            if (row.original.doubles.id! in updatedMapping) {
+              delete updatedMapping[row.original.doubles.id!]
+            } else {
+              updatedMapping[row.original.doubles.id!] = row.original.doubles.rank
+            }
+          }
+        "
+      />
+      <u-checkbox
+        v-if="row.original.doubles.entry_id"
+        label="Entry"
+        :model-value="row.original.doubles.entry_id in updatedEntries"
+        @update:model-value="
+          () => {
+            if (row.original.doubles.entry_id! in updatedEntries) {
+              delete updatedEntries[row.original.doubles.entry_id!]
+            } else {
+              updatedEntries[row.original.doubles.entry_id!] = {
+                pm: row.original.doubles.pm,
+                points: row.original.doubles.points
               }
-            "
-          />
-          <u-checkbox
-            v-if="row.original.doubles.entry_id"
-            label="Entry"
-            :model-value="row.original.doubles.entry_id in updatedEntries"
-            @update:model-value="
-              () => {
-                if (row.original.doubles.entry_id! in updatedEntries) {
-                  delete updatedEntries[row.original.doubles.entry_id!]
-                } else {
-                  updatedEntries[row.original.doubles.entry_id!] = {
-                    pm: row.original.doubles.pm,
-                    points: row.original.doubles.points
-                  }
-                }
-              }
-            "
-          />
-        </div>
-
-        <lazy-scrape-activity
-          v-if="row.original.tour === 'ATP' && !isDefined(row.original.doubles.rank) && row.original.doubles.draws.length"
-          hydrate-on-idle
-          match-type="Doubles"
-          :players="[{ id: row.original.id, entry_id: row.original.doubles.entry_id! }]"
-          @refresh="refresh"
-        />
-      </div>
+            }
+          }
+        "
+      />
     </template>
 
     <template #doubles_draws-header="{ column }">

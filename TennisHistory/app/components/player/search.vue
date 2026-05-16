@@ -7,7 +7,7 @@ const modelValue = defineModel<any>()
 </script>
 
 <template>
-  <u-input-menu
+  <u-select-menu
     v-model="modelValue"
     v-model:search-term="searchTerm"
     :loading="loading"

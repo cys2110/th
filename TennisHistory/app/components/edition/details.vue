@@ -98,6 +98,15 @@ const showVenues = computed(() => {
             v-if="id === '9210'"
             hydrate-on-idle
           />
+          <lazy-scrape-atp-stats
+            v-if="id === '9210'"
+            hydrate-on-idle
+            :start-date="edition!.start_date"
+          />
+          <lazy-edition-country-rounds-create
+            v-if="COUNTRY_DRAWS.includes(id)"
+            hydrate-on-idle
+          />
         </u-field-group>
       </div>
     </dev-only>

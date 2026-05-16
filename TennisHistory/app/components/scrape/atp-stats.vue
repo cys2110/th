@@ -18,14 +18,14 @@ const links = ref<Array<string>>([])
 const handleSubmit = async () => {
   set(isScraping, true)
 
-  const url = COUNTRY_DRAWS.includes(id) || new Date(props.startDate!) <= new Date("2021-10-17") ? "old-matches" : "stats"
+  const url = COUNTRY_DRAWS.includes(id) || id === "9210" || new Date(props.startDate!) <= new Date("2021-10-17") ? "old-matches" : "stats"
 
   await $fetch(`${FLASK_ROUTE}/atp/${url}`, {
     method: "POST",
     timeout: 180_000,
     "Content-Type": "application/json",
     body: JSON.stringify({
-      event_id: `${edId}-ATP`,
+      event_id: id === "9210" ? `${edId}-LC` : `${edId}-ATP`,
       links: links.value
     })
   })

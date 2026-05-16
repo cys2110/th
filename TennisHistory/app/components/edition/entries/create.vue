@@ -46,14 +46,6 @@ defineShortcuts({
   ctrl_enter: () => form.value?.submit()
 })
 
-const eventId = computed(() => {
-  if (COUNTRY_DRAWS.includes(id)) {
-    return `${edId}-Country`
-  } else {
-    return undefined
-  }
-})
-
 const eventsKey = computed(() => `${edId}-events`)
 
 // Get events
@@ -72,10 +64,10 @@ const { data: events } = await useAsyncData(
   { default: () => [] }
 )
 
-const state = ref<Partial<Schema>>({ event_id: eventId.value, player: undefined, teammate: undefined })
+const state = ref<Partial<Schema>>({ player: undefined, teammate: undefined })
 
 const handleReset = () => {
-  set(state, { event_id: eventId.value, player: undefined, teammate: undefined })
+  set(state, { player: undefined, teammate: undefined })
   set(errors, undefined)
 }
 

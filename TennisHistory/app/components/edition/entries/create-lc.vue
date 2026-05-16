@@ -2,98 +2,31 @@
 import type { FormErrorEvent, FormSubmitEvent } from "@nuxt/ui"
 import { array, number, object, string, z } from "zod"
 
-interface SearchResults {
-  id: string
-  label: string
-  icon: string
-}
+const playerSchema = object({
+  id: string(),
+  label: string(),
+  icon: string()
+})
+type PlayerSchema = z.infer<typeof playerSchema>
 
 const schema = object({
   europe: object({
     points: number(),
-    captain: object({
-      id: string(),
-      label: string(),
-      icon: string()
-    }),
-    vice_captain: object({
-      id: string(),
-      label: string(),
-      icon: string()
-    }),
-    singles: array(
-      object({
-        id: string(),
-        label: string(),
-        icon: string()
-      })
-    ).default([]),
-    doubles: array(
-      array(
-        object({
-          id: string(),
-          label: string(),
-          icon: string()
-        })
-      )
-    ).default([]),
-    alternates: array(
-      object({
-        id: string(),
-        label: string(),
-        icon: string()
-      })
-    ).default([]),
-    withdrawn: array(
-      object({
-        id: string(),
-        label: string(),
-        icon: string()
-      })
-    ).default([])
+    captain: playerSchema,
+    vice_captain: playerSchema,
+    singles: array(playerSchema).default([]),
+    doubles: array(array(playerSchema)).default([]),
+    alternates: array(playerSchema).default([]),
+    withdrawn: array(playerSchema).default([])
   }),
   world: object({
     points: number(),
-    captain: object({
-      id: string(),
-      label: string(),
-      icon: string()
-    }),
-    vice_captain: object({
-      id: string(),
-      label: string(),
-      icon: string()
-    }),
-    singles: array(
-      object({
-        id: string(),
-        label: string(),
-        icon: string()
-      })
-    ).default([]),
-    doubles: array(
-      array(
-        object({
-          id: string(),
-          label: string(),
-          icon: string()
-        })
-      )
-    ).default([]),
-    alternates: array(
-      object({
-        id: string(),
-        label: string(),
-        icon: string()
-      })
-    ).default([]),
-    withdrawn: array(
-      object({
-        id: string(),
-        label: string(),
-        icon: string()
-      })
-    ).default([])
+    captain: playerSchema,
+    vice_captain: playerSchema,
+    singles: array(playerSchema).default([]),
+    doubles: array(array(playerSchema)).default([]),
+    alternates: array(playerSchema).default([]),
+    withdrawn: array(playerSchema).default([])
   })
 })
 type Schema = z.infer<typeof schema>
@@ -120,10 +53,10 @@ const isOpen = ref(false)
 const isUploading = ref(false)
 const errors = ref()
 const form = useTemplateRef("form")
-const europeSourceSelection = ref<Array<SearchResults>>([])
-const europeTargetSelection = ref<Array<SearchResults>>([])
-const worldSourceSelection = ref<Array<SearchResults>>([])
-const worldTargetSelection = ref<Array<SearchResults>>([])
+const europeSourceSelection = ref<Array<PlayerSchema>>([])
+const europeTargetSelection = ref<Array<PlayerSchema>>([])
+const worldSourceSelection = ref<Array<PlayerSchema>>([])
+const worldTargetSelection = ref<Array<PlayerSchema>>([])
 
 defineShortcuts({
   ctrl_a: () => set(isOpen, !isOpen.value),

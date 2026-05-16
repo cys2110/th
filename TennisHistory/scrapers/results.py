@@ -146,16 +146,18 @@ def get_atp_results():
         entry_ids = [f"{event_id} {match['p1']}", f"{event_id} {match['p2']}"] if match_type == 'Singles' else [f"{event_id} {match['p1']} {match['p2']}", f"{event_id} {match['p2']} {match['p1']}", f"{event_id} {match['p3']} {match['p4']}", f"{event_id} {match['p4']} {match['p3']}"]
 
         try:
-            matchesResponse = (supabase
+            matchesQuery = (supabase
                 .table("matches")
                 .select("id, team_1_id, team_2_id, rounds!inner(round)")
-                .eq("rounds.round", match['round'])
                 .eq("rounds.event_id", event_id)
                 .in_("team_1_id", entry_ids)
                 .in_("team_2_id", entry_ids)
-                .single()
-                .execute()
             )
+
+            if tournament_id != 9210:
+                matchesQuery = matchesQuery.eq("rounds.round", match['round'])
+
+            matchesResponse = matchesQuery.single().execute()
 
             umpire_id = None
 
