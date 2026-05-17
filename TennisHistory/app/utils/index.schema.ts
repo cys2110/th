@@ -1,22 +1,4 @@
-import { array, boolean, literal, number, object, string, z } from "zod"
-
-export const CountryEntrySchema = object({
-  id: string(),
-  country_id: string(),
-  seed: number().optional(),
-  event_id: string()
-})
-
-export type CountryEntryType = z.infer<typeof CountryEntrySchema>
-
-export const PlayerCountryEntrySchema = object({
-  entry_id: string(),
-  player_id: string(),
-  rank: number().nullable().default(null),
-  doubles_rank: number().nullable().default(null)
-})
-
-export type PlayerCountryEntryType = z.infer<typeof PlayerCountryEntrySchema>
+import { boolean, number, object, string, z } from "zod"
 
 export const MatchScoreSchema = object({
   set_no: number().gte(1).lte(5),
@@ -55,11 +37,3 @@ export const MatchStatSchema = object({
 })
 
 export type MatchStatType = z.infer<typeof MatchStatSchema>
-
-export const CountryMatchSchema = object({
-  tour: true,
-  tie_id: string().nullable().default(null),
-  group_name: string().nullable().default(null)
-})
-
-export type CountryMatchType = z.infer<typeof CountryMatchSchema>

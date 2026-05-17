@@ -95,11 +95,11 @@ const showVenues = computed(() => {
             @refresh="refresh"
           />
           <lazy-scrape-results
-            v-if="id === '9210'"
+            v-if="id === '9210' || COUNTRY_DRAWS.includes(id)"
             hydrate-on-idle
           />
           <lazy-scrape-atp-stats
-            v-if="id === '9210'"
+            v-if="id === '9210' || COUNTRY_DRAWS.includes(id)"
             hydrate-on-idle
             :start-date="edition!.start_date"
           />

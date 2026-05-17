@@ -23,7 +23,10 @@ const handleSubmit = async () => {
     "Content-Type": "application/json",
     body: JSON.stringify({
       tournament_id: tournamentId.value,
-      event_id: id === "9210" ? `${edId}-LC` : `${edId}-ATP`,
+      event_id:
+        id === "9210" ? `${edId}-LC`
+        : COUNTRY_DRAWS.includes(id) ? `${edId}-Country`
+        : `${edId}-ATP`,
       year,
       match_type: matchType.value
     })

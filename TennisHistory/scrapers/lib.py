@@ -18,5 +18,18 @@ round_name_mapping = {
     'Round robin': 'Round robin'
 }
 
+country_tournaments = [8888, 615, 9900]
+
+country_round_mapping = {
+    'Finals': 'Final',
+    "Final": "Final",
+    'Semi-Finals': 'Semifinals',
+    "Semifinals": "Semifinals",
+    'Quarter-Finals': 'Quarterfinals',
+    "Quarterfinals": "Quarterfinals",
+    'Round Robin': 'Group stage',
+    'Round robin': 'Group stage'
+}
+
 def extract_atp_id_from_link(link):
     return re.search(r'/([a-zA-Z0-9]{4})/', link).group(1)

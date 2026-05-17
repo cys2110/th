@@ -25,7 +25,10 @@ const handleSubmit = async () => {
     timeout: 180_000,
     "Content-Type": "application/json",
     body: JSON.stringify({
-      event_id: id === "9210" ? `${edId}-LC` : `${edId}-ATP`,
+      event_id:
+        id === "9210" ? `${edId}-LC`
+        : COUNTRY_DRAWS.includes(id) ? `${edId}-Country`
+        : `${edId}-ATP`,
       links: links.value
     })
   })

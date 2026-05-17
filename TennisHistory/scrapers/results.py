@@ -12,7 +12,7 @@ from dotenv import load_dotenv
 from supabase import create_client
 from pathlib import Path
 from datetime import datetime
-from lib import round_name_mapping
+from lib import round_name_mapping, country_round_mapping, country_tournaments
 
 # Loading supabase authentication details
 env_path = Path(__file__).resolve().parent / ".env"
@@ -43,9 +43,7 @@ def get_atp_results():
     matches = []
     links = []
 
-    url_slug = 'singles' if match_type == 'Singles' else 'doubles'
-
-    url = f"https://www.atptour.com/en/scores/archive/x/{tournament_id}/{year}/results?matchtype={url_slug}"
+    url = f"https://www.atptour.com/en/scores/archive/x/{tournament_id}/{year}/results?matchType={match_type}"
 
     driver = webdriver.Chrome()
     driver.get(url)
@@ -77,7 +75,7 @@ def get_atp_results():
 
             match_header = match_headers[0].get_text(strip=True)
             parts = [p.strip() for p in match_header.split(' -', 1)]
-            round_name = round_name_mapping.get(parts[0])
+            round_name = country_round_mapping.get(parts[0]) if tournament_id in country_tournaments else round_name_mapping.get(parts[0])
             court_name = parts[1] if len(parts) > 1 else None
             match_time = match_headers[1].get_text(strip=True) if len(match_headers) > 1 else '00:00:00'
 

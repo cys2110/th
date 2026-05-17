@@ -2,7 +2,7 @@
 import type { TableColumn, TableRow } from "@nuxt/ui"
 import { getFacetedRowModel, getFacetedUniqueValues } from "@tanstack/vue-table"
 import { parseDate } from "@internationalized/date"
-import { LazyMatchCreate, UButton, UFieldGroup } from "#components"
+import { LazyMatchCreate, LazyMatchCreateCountry, UButton, UFieldGroup } from "#components"
 
 const props = defineProps<{
   matches: Array<ResultsMatchInterface>
@@ -46,7 +46,7 @@ const columns: Array<TableColumn<ResultsMatchInterface>> = [
     ...(dev && {
       footer: () =>
         h(UFieldGroup, { class: "w-fit" }, () => [
-          h(LazyMatchCreate, { hydrateOnIdle: true, onRefresh: () => emits("refresh") }),
+          h(COUNTRY_DRAWS.includes(id) ? LazyMatchCreateCountry : LazyMatchCreate, { hydrateOnIdle: true, onRefresh: () => emits("refresh") }),
           h(UButton, { icon: icons.reload, onClick: () => emits("refresh") }),
           h(UButton, {
             icon: isSaving.value ? ICONS.uploading : ICONS.save,

@@ -12,16 +12,12 @@ const props = defineProps<{
 
 const { results, loading, refresh, searchTerm } = usePersonSearch()
 
-const modelValue = defineModel<string>()
-
-const selectedPerson = ref(props.startValue)
-
-watch(selectedPerson, newPerson => (modelValue.value = newPerson?.id))
+const modelValue = defineModel<any>()
 </script>
 
 <template>
   <u-input-menu
-    v-model="selectedPerson"
+    v-model="modelValue"
     v-model:search-term="searchTerm"
     :loading="loading"
     clear

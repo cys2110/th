@@ -1,17 +1,21 @@
 <script setup lang="ts">
 import type { FormErrorEvent, FormSubmitEvent } from "@nuxt/ui"
-import { PostgrestError } from "@supabase/supabase-js"
 import { any, array, literal, number, object, string, z } from "zod"
 
 const schema = object({
+  tie: object({
+    id: string(),
+    label: string(),
+    round_id: string(),
+    country_1: string(),
+    country_2: string()
+  }),
   match_no: number(),
   tour: TourEnum.optional(),
   match_type: MatchTypeEnum,
-  draw: DrawEnum,
-  round_id: string(),
-  format: literal([3, 5]).default(3),
-  team_1_id: string().optional(),
-  team_2_id: string().optional(),
+  format: literal([3, 5]),
+  team_1_id: string(),
+  team_2_id: string(),
   winner: literal([1, 2]).optional(),
   incomplete: IncompleteEnum.optional(),
   court: string().optional(),
@@ -22,16 +26,15 @@ const schema = object({
     label: string()
   }).optional(),
   sets: array(MatchScoreSchema).default([]),
-  stats: array(MatchStatSchema).default([]),
-  group_name: string().optional()
+  stats: array(MatchStatSchema).default([])
 })
 type Schema = z.infer<typeof schema>
 
 const emits = defineEmits<{ refresh: [] }>()
 
 const {
-  params: { id, edId }
-} = useRoute("results")
+  params: { edId }
+} = useRoute("edition")
 
 const {
   ui: { icons }
@@ -53,38 +56,47 @@ defineShortcuts({
   ctrl_enter: () => form.value?.submit()
 })
 
-const key = computed(() => `${edId}-rounds`)
-
-const { data: rounds, pending: roundsPending } = await useAsyncData(
-  key,
+const tiesKey = computed(() => `${edId}-Country-ties`)
+const { data: ties, pending: tiesPending } = await useAsyncData(
+  tiesKey,
   async () => {
     const { data, error } = await supabase
-      .from("rounds")
-      .select("id, round, tour, draw, match_type, events!inner(edition_id)")
-      .eq("events.edition_id", Number(edId))
+      .from("ties")
+      .select("*, rounds!inner(*), country_1:country_1_id(countries(*)), country_2:country_2_id(countries(*))")
+      .eq("rounds.event_id", `${edId}-Country`)
 
     if (error || !data) {
-      console.error("Error fetching rounds:", error)
+      console.error("Error fetching ties:", error)
       return []
     }
 
-    return data
+    return data.map(tie => ({
+      id: tie.id,
+      // @ts-expect-error
+      label: `${tie.group_name || tie.rounds.round} - ${tie.country_1.countries.id} v ${tie.country_2.countries.id}`,
+      round_id: tie.rounds.id,
+      // @ts-expect-error
+      country_1: tie.country_1.countries.id,
+      // @ts-expect-error
+      country_2: tie.country_2.countries.id
+    }))
   },
   { default: () => [] }
 )
 
 const entriesKey = computed(() => `${edId}-entries`)
 
-// Get entry list
-const { data: entries, pending } = await useAsyncData(
+const { data: entries, pending: entriesPending } = await useAsyncData(
   entriesKey,
   async () => {
     const { data, error } = await supabase
       .from("entries")
-      .select("id, event_id, match_type, player_entry_mapping(players(id, first_name, last_name)), events!inner(edition_id, tour)")
-      .eq("events.edition_id", Number(edId))
+      .select("id, match_type, player_entry_mapping(country_id, players(first_name, last_name))")
+      .eq("event_id", `${edId}-Country`)
+      .is("country_id", null)
+      .order("id", { ascending: true })
 
-    if (error) {
+    if (error || !data) {
       console.error("Error fetching entries:", error)
       return []
     }
@@ -92,12 +104,7 @@ const { data: entries, pending } = await useAsyncData(
     return data.map(entry => ({
       id: entry.id,
       match_type: entry.match_type,
-      tour: entry.events.tour,
-      event_id: entry.event_id,
-      players: entry.player_entry_mapping.map(pem => ({
-        id: pem.players.id,
-        name: `${pem.players.first_name} ${pem.players.last_name}`
-      })),
+      country: entry.player_entry_mapping[0]?.country_id,
       label: entry.player_entry_mapping.map(pem => `${pem.players.first_name} ${pem.players.last_name}`).join(" / ")
     }))
   },
@@ -139,16 +146,16 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
   set(isUploading, true)
   set(errors, undefined)
 
-  const { tour, winner, date, umpire, sets, stats, ...rest } = event.data
-
-  const matchTour = event.data.tour || tournamentStore.tours[0]
+  const { tie, winner, date, umpire, sets, stats, ...rest } = event.data
 
   try {
     const { data, error } = await supabase
       .from("matches")
       .insert({
         ...rest,
-        tour: matchTour,
+        draw: "Main",
+        round_id: tie.round_id,
+        tie_id: tie.id,
         date: date?.toString() || null,
         umpire_id: umpire?.id || null,
         winner_id:
@@ -221,13 +228,13 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
       }
     }
 
-    const { match_no, tour, match_type, draw, round_id, format } = event.data
+    const { match_no, format } = event.data
 
-    set(state, { tour, match_type, draw, round_id, format, match_no: match_no + 1 })
+    set(state, { tie, format, match_no: match_no + 1 })
     emits("refresh")
     set(isOpen, false)
   } catch (error) {
-    set(errors, error instanceof PostgrestError ? error.details : (error as any).message)
+    set(errors, error)
 
     toast.add({
       title: "Error creating match",
@@ -242,35 +249,13 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
 const formFields = computed<FormFieldInterface<Schema>[]>(
   () =>
     [
-      {
-        label: "Format",
-        key: "format",
-        type: "radio",
-        items: [
-          { label: "Best of 3", value: 3 },
-          { label: "Best of 5", value: 5 }
-        ]
-      },
-      ...(tournamentStore.tours.length > 1 ? [{ label: "Tour", key: "tour", type: "radio", item: tournamentStore.tours, required: true }] : []),
-      { label: "Draw", key: "draw", type: "radio", items: DRAW_TYPES, required: true },
-      { label: "S/D", key: "match_type", type: "radio", items: MATCH_TYPES, required: true },
       { label: "Match No.", key: "match_no", type: "number", required: true },
       {
-        label: "Round",
-        key: "round_id",
+        label: "Tie",
+        key: "tie",
         type: "inputMenu",
-        items: rounds.value.filter(round => {
-          if (id === "9210") return true
-
-          const isTourMatch = !state.value.tour || state.value.tour === round.tour
-          const isMatchTypeMatch = !state.value.match_type || state.value.match_type === round.match_type
-          const isDrawMatch = !state.value.draw || state.value.draw === round.draw
-
-          return isTourMatch && isMatchTypeMatch && isDrawMatch
-        }),
-        loading: roundsPending.value,
-        valueKey: "id",
-        labelKey: "round",
+        items: ties.value,
+        loading: tiesPending.value,
         required: true,
         class: tournamentStore.tours.length > 1 ? "col-span-1" : "col-span-2"
       },
@@ -280,12 +265,13 @@ const formFields = computed<FormFieldInterface<Schema>[]>(
         type: "inputMenu",
         class: "col-span-2",
         items: entries.value.filter(entry => {
-          const isTourMatch = !state.value.tour || state.value.tour === entry.tour
+          const isCountryMatch = !state.value.tie || state.value.tie.country_1 === entry.country
+
           const isMatchTypeMatch = !state.value.match_type || state.value.match_type === entry.match_type
 
-          return isTourMatch && isMatchTypeMatch
+          return isCountryMatch && isMatchTypeMatch
         }),
-        loading: pending.value,
+        loading: entriesPending.value,
         valueKey: "id",
         labelKey: "label"
       },
@@ -295,12 +281,12 @@ const formFields = computed<FormFieldInterface<Schema>[]>(
         type: "inputMenu",
         class: "col-span-2",
         items: entries.value.filter(entry => {
-          const isTourMatch = !state.value.tour || state.value.tour === entry.tour
+          const isCountryMatch = !state.value.tie || state.value.tie.country_2 === entry.country
           const isMatchTypeMatch = !state.value.match_type || state.value.match_type === entry.match_type
 
-          return isTourMatch && isMatchTypeMatch
+          return isCountryMatch && isMatchTypeMatch
         }),
-        loading: pending.value,
+        loading: entriesPending.value,
         valueKey: "id",
         labelKey: "label"
       },
@@ -368,7 +354,37 @@ const statsFields: Array<{ label: string; key?: keyof MatchStatType; children?: 
         :state="state"
         @submit="onSubmit"
         @error="onError"
+        class="space-y-3"
       >
+        <div
+          class="grid gap-3 items-center"
+          :class="tournamentStore.tours.length > 1 ? 'grid-cols-3' : 'grid-cols-2'"
+        >
+          <form-field
+            v-model="state"
+            :field="{
+              label: 'Format',
+              key: 'format',
+              type: 'radio',
+              items: [
+                { label: 'Best of 3', value: 3 },
+                { label: 'Best of 5', value: 5 }
+              ]
+            }"
+          />
+
+          <form-field
+            v-if="tournamentStore.tours.length > 1"
+            v-model="state"
+            :field="{ label: 'Tour', key: 'tour', type: 'radio', items: tournamentStore.tours }"
+          />
+
+          <form-field
+            v-model="state"
+            :field="{ label: 'S/D', key: 'match_type', type: 'radio', items: MATCH_TYPES, required: true }"
+          />
+        </div>
+
         <div class="grid grid-cols-2 gap-3 items-center">
           <form-field
             v-for="field in formFields"
