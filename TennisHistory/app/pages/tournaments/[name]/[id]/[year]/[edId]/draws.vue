@@ -13,7 +13,7 @@ type CountryDraw = { edition: { link: string | null; type: DrawsType }; draws: A
 type DrawOptions = DrawObject | CountryDraw
 
 const {
-  params: { edId }
+  params: { id, edId }
 } = useRoute("draws")
 
 const supabase = useSupabaseClient()
@@ -162,7 +162,9 @@ const selectedDrawOption = computed(() => {
       <edition-wrapper />
 
       <u-page-body>
-        <draws-country v-if="isCountryDraw(events)" />
+        <draws-lc v-if="id === '9210'" />
+
+        <draws-country v-else-if="isCountryDraw(events)" />
 
         <draws
           v-else
