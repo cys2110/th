@@ -10,6 +10,7 @@ export const CATEGORIES = [
   "ATP Challenger 75",
   "ATP Masters 1000",
   "Finals",
+  "Next Gen Finals",
   "Grand Slam",
   "Laver Cup",
   "WTA 1000",

@@ -59,22 +59,29 @@ const {
       return []
     }
 
-    return data.map(entry => ({
-      id: entry.id,
-      seed: entry.seeds[0]?.seed,
-      country: entry.countries,
-      players: entry.player_entry_mapping.map(
-        player =>
-          ({
-            id: player.id,
-            rank: player.rank,
-            doubles_rank: player.doubles_rank,
-            player_id: player.players.id,
-            first_name: player.players.first_name,
-            last_name: player.players.last_name
-          }) as CountryTeam
-      )
-    }))
+    return data
+      .map(entry => ({
+        id: entry.id,
+        seed: entry.seeds[0]?.seed,
+        country: entry.countries,
+        players: entry.player_entry_mapping.map(
+          player =>
+            ({
+              id: player.id,
+              rank: player.rank,
+              doubles_rank: player.doubles_rank,
+              player_id: player.players.id,
+              first_name: player.players.first_name,
+              last_name: player.players.last_name
+            }) as CountryTeam
+        )
+      }))
+      .sort((a, b) => {
+        if (!a.seed && !b.seed && a.seed === b.seed) return a.country!.name.localeCompare(b.country!.name)
+        if (a.seed === null) return 1
+        if (b.seed === null) return -1
+        return a.seed! - b.seed!
+      })
   },
   { default: () => [] }
 )

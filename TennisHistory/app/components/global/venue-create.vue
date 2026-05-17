@@ -25,24 +25,6 @@ const isOpen = ref(false)
 const isUploading = ref(false)
 const errors = ref()
 
-const { data: countries, pending } = await useAsyncData(
-  "countries",
-  async () => {
-    const { data, error } = await supabase.from("countries").select("*").order("name", { ascending: true })
-
-    if (error || !data) {
-      console.error("Error fetching countries:", error)
-      return []
-    }
-
-    return data.map(country => ({
-      ...country,
-      icon: getFlagCode(country)
-    }))
-  },
-  { default: () => [] }
-)
-
 const state = ref<Partial<Schema>>({})
 
 const handleReset = () => {
@@ -88,18 +70,7 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
 
 const formFields = computed<FormFieldInterface<Schema>[]>(() => [
   { label: "Name", key: "name", type: "text", class: "col-span-2" },
-  { label: "City", key: "city", type: "text", required: true },
-  {
-    label: "Country",
-    key: "country_id",
-    type: "inputMenu",
-    required: true,
-    valueKey: "id",
-    icon: ICONS.globe,
-    loading: pending.value,
-    items: countries.value,
-    labelKey: "name"
-  }
+  { label: "City", key: "city", type: "text", required: true }
 ])
 </script>
 
@@ -129,6 +100,18 @@ const formFields = computed<FormFieldInterface<Schema>[]>(() => [
           v-model="state"
           orientation="horizontal"
         />
+
+        <u-form-field
+          label="Country"
+          name="country_id"
+          required
+          orientation="horizontal"
+        >
+          <country-search
+            v-model="state.country_id"
+            value-key
+          />
+        </u-form-field>
       </u-form>
 
       <u-alert

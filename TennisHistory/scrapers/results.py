@@ -43,7 +43,7 @@ def get_atp_results():
     matches = []
     links = []
 
-    url = f"https://www.atptour.com/en/scores/archive/x/{tournament_id}/{year}/results?matchType={match_type}"
+    url = f"https://www.atptour.com/en/scores/archive/x/{tournament_id}/{year}/results?matchType={match_type.lower()}"
 
     driver = webdriver.Chrome()
     driver.get(url)
