@@ -1,4 +1,8 @@
 <script setup lang="ts">
+const {
+  params: { id }
+} = useRoute("edition")
+
 const viewType = ref("Players")
 </script>
 
@@ -12,6 +16,8 @@ const viewType = ref("Players")
   </div>
 
   <edition-entries-players v-if="viewType === 'Players'" />
+
+  <edition-entries-country-teams v-else-if="COUNTRY_DRAWS.includes(id)" />
 
   <edition-entries-teams v-else />
 </template>

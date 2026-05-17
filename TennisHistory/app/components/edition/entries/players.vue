@@ -344,7 +344,7 @@ const handleSave = async () => {
       getFacetedRowModel: getFacetedRowModel(),
       getFacetedUniqueValues: getFacetedUniqueValues()
     }"
-    :ui="{ root: 'max-w-fit mx-auto max-h-[calc(100vh-25rem)]' }"
+    :ui="{ root: 'mx-auto max-h-[calc(100vh-25rem)]' }"
   >
     <template #loading>
       <u-icon

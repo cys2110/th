@@ -94,6 +94,10 @@ const showVenues = computed(() => {
             hydrate-on-idle
             @refresh="refresh"
           />
+          <lazy-edition-country-rounds-create
+            v-if="COUNTRY_DRAWS.includes(id)"
+            hydrate-on-idle
+          />
           <lazy-scrape-results
             v-if="id === '9210' || COUNTRY_DRAWS.includes(id)"
             hydrate-on-idle
@@ -102,10 +106,6 @@ const showVenues = computed(() => {
             v-if="id === '9210' || COUNTRY_DRAWS.includes(id)"
             hydrate-on-idle
             :start-date="edition!.start_date"
-          />
-          <lazy-edition-country-rounds-create
-            v-if="COUNTRY_DRAWS.includes(id)"
-            hydrate-on-idle
           />
         </u-field-group>
       </div>
