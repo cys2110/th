@@ -72,7 +72,7 @@ const handleAuthState = async () => {
     mode="drawer"
   >
     <template #right>
-      <!-- <search /> -->
+      <search />
 
       <u-button
         v-if="showViewSwitcher"

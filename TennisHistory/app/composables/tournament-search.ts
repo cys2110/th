@@ -13,7 +13,6 @@ export const useTournamentSearch = () => {
   const pending = ref(false)
 
   const fetchSearchResults = async () => {
-    console.log("fetching")
     set(results, [])
     set(pending, true)
 
