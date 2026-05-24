@@ -4,6 +4,8 @@ const props = defineProps<{
   pending: boolean
 }>()
 
+const emits = defineEmits<{ refresh: [] }>()
+
 const {
   ui: { icons }
 } = useAppConfig()
@@ -27,7 +29,7 @@ const getEditionEvents = (id: number) => props.editions.filter(edition => editio
       :events="getEditionEvents(edition)"
     />
 
-    <tournament-winners-loading
+    <tournament-winners-loading-card
       v-else
       v-for="_ in 6"
       :key="_"

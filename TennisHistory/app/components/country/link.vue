@@ -11,7 +11,7 @@ withDefaults(
 <template>
   <u-link
     :to="{ name: 'country', params: { id: country.id, name: kebabCase(country.name!) } }"
-    class="w-fit flex items-center gap-1"
+    class="w-fit flex items-center gap-1.5"
   >
     <u-icon
       :name="getFlagCode(country)"

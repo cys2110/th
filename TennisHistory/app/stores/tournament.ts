@@ -1,8 +1,3 @@
-type OptionType = {
-  value: number
-  label: string
-}
-
 export const useTournamentStore = defineStore("tournament", () => {
   const paramName = ref("")
   const tournamentName = ref("")

@@ -34,12 +34,11 @@ const modelValue = defineModel<any>()
       v-model="modelValue[field.key]"
     />
 
-    <!--<form-input-number
+    <form-input-number
       v-else-if="field.type === 'number'"
       v-model="modelValue[field.key]"
       :placeholder="field.placeholder ?? field.label"
       :disabled="field.disabled"
-      :icon="field.icon"
       :currency="field.currency"
     />
 
@@ -66,7 +65,7 @@ const modelValue = defineModel<any>()
       :convert-value="field.key === 'links' ? cleanLink : undefined"
       :icon="field.icon"
       class="w-full"
-    />-->
+    />
 
     <form-textarea
       v-else-if="field.type === 'textarea'"
@@ -84,7 +83,7 @@ const modelValue = defineModel<any>()
       :icon="field.icon"
     />
 
-    <!--<u-radio-group
+    <u-radio-group
       v-else-if="field.type === 'radio'"
       :items="field.items"
       v-model="modelValue[field.key]"
@@ -109,6 +108,6 @@ const modelValue = defineModel<any>()
       v-model="modelValue[field.key]"
       :items="field.items.map((item: any) => ({ value: item, label: item }))"
       value-key="value"
-    /> -->
+    />
   </u-form-field>
 </template>

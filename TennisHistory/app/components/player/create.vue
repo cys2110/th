@@ -14,7 +14,7 @@ const errors = ref()
 const playerId = ref()
 
 defineShortcuts({
-  ctrl_p: () => set(isOpen, !isOpen.value),
+  ctrl_a: () => set(isOpen, !isOpen.value),
   ctrl_r: () => set(playerId, undefined),
   ctrl_enter: () => handleSubmit()
 })

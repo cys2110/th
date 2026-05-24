@@ -17,7 +17,7 @@ withDefaults(defineProps<{ players: Array<Required<BasePlayerType>>; strikethrou
       />
     </div>
 
-    <div :class="players.length === 1 ? 'ml-6' : 'ml-10'">
+    <div :class="players.length === 1 ? 'ml-7' : 'ml-10'">
       <template
         v-for="(player, index) in players"
         :key="player.id"
@@ -25,7 +25,7 @@ withDefaults(defineProps<{ players: Array<Required<BasePlayerType>>; strikethrou
         <span v-if="index > 0"> / </span>
 
         <u-link
-          :to="{ name: 'player', params: { id: player.id, name: kebabCase(`${player.first_name} ${player.last_name}`) } }"
+          :to="{ name: 'player', params: { id: player.id, name: kebabCase(player.full_name || '—') } }"
           class="hover-link primary-link"
           :class="{ 'line-through': strikethrough }"
         >

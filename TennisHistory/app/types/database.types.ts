@@ -448,7 +448,21 @@ export type Database = {
             foreignKeyName: "events_edition_id_fkey"
             columns: ["edition_id"]
             isOneToOne: false
+            referencedRelation: "country_winners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "events_edition_id_fkey"
+            columns: ["edition_id"]
+            isOneToOne: false
             referencedRelation: "editions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "events_edition_id_fkey"
+            columns: ["edition_id"]
+            isOneToOne: false
+            referencedRelation: "elimination_winners"
             referencedColumns: ["id"]
           },
         ]
@@ -1462,6 +1476,49 @@ export type Database = {
       }
     }
     Views: {
+      country_winners: {
+        Row: {
+          country_id: string | null
+          id: number | null
+          tournament_id: number | null
+          year: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "editions_tournament_id_fkey"
+            columns: ["tournament_id"]
+            isOneToOne: false
+            referencedRelation: "tournaments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "entries_country_id_fkey"
+            columns: ["country_id"]
+            isOneToOne: false
+            referencedRelation: "countries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      elimination_winners: {
+        Row: {
+          id: number | null
+          match_type: Database["public"]["Enums"]["match_type_enum"] | null
+          team: Json | null
+          tour: Database["public"]["Enums"]["tour_enum"] | null
+          tournament_id: number | null
+          year: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "editions_tournament_id_fkey"
+            columns: ["tournament_id"]
+            isOneToOne: false
+            referencedRelation: "tournaments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       player_list_view: {
         Row: {
           country: Json | null

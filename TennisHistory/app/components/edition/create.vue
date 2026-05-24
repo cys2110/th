@@ -1,10 +1,9 @@
 <script setup lang="ts">
 import type { FormErrorEvent, FormSubmitEvent } from "@nuxt/ui"
-import { PostgrestError } from "@supabase/supabase-js"
 import { any, array, number, object, string, url, z } from "zod"
 
 const schema = object({
-  id: number("Edition ID must be a number").int("Edition ID must be an integer").positive("Edition ID must be a positive number"),
+  number: number("Edition ID must be a number").int("Edition ID must be an integer").positive("Edition ID must be a positive number").optional(),
   year: number("Year must be a number").int("Year must be an integer").positive("Year must be a positive number"),
   tours: array(TourEnum).default([]),
   dates: any().optional(),
@@ -58,10 +57,13 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
   set(isUploading, true)
 
   try {
-    const { dates, tours, ...rest } = event.data
+    const { dates, tours, number, ...rest } = event.data
+
+    const edId = `${id}${event.data.year}${number || ""}`
 
     const { error } = await supabase.from("editions").insert({
       ...rest,
+      id: Number(edId),
       start_date: dates?.start?.toString() || null,
       end_date: dates?.end?.toString() || null,
       tournament_id: Number(id),
@@ -71,7 +73,15 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
         : []
     })
 
-    if (error) throw error
+    if (error) {
+      set(errors, error)
+
+      toast.add({
+        title: `Error creating ${tournamentStore.name} ${event.data.year}`,
+        icon: icons.error,
+        color: "error"
+      })
+    }
 
     toast.add({
       title: `${tournamentStore.name} ${event.data.year} successfully created!`,
@@ -85,16 +95,8 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
         id,
         name,
         year: event.data.year,
-        edId: event.data.id
+        edId
       }
-    })
-  } catch (error) {
-    set(errors, error instanceof PostgrestError ? error.details : (error as any).message)
-
-    toast.add({
-      title: `Error creating ${tournamentStore.name} ${event.data.year}`,
-      icon: icons.error,
-      color: "error"
     })
   } finally {
     set(isUploading, false)
@@ -129,6 +131,14 @@ const formFields = computed<Array<FormFieldInterface<Schema>>>(
     <u-button :icon="icons.plus" />
 
     <template #body>
+      <u-alert
+        v-if="errors"
+        color="error"
+        :title="`Error saving ${id}${state.year}${state.number || ''}`"
+        :description="errors"
+        class="mb-5"
+      />
+
       <u-form
         id="edition-form"
         ref="form"
@@ -143,7 +153,7 @@ const formFields = computed<Array<FormFieldInterface<Schema>>>(
           :class="tournamentStore.tours.length > 1 ? 'grid-cols-3' : 'grid-cols-2'"
         >
           <form-field
-            :field="{ label: 'ID', key: 'id', type: 'text', subType: 'number', required: true }"
+            :field="{ label: 'Edition Number', key: 'number', type: 'text', subType: 'number' }"
             v-model="state"
           />
 
@@ -182,14 +192,6 @@ const formFields = computed<Array<FormFieldInterface<Schema>>>(
           </u-field-group>
         </form-field>
       </u-form>
-
-      <u-alert
-        v-if="errors"
-        color="error"
-        :title="`Error saving ${state.id}`"
-        :description="errors"
-        class="mt-5"
-      />
     </template>
 
     <template #footer="{ close }">

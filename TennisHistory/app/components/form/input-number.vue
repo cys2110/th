@@ -23,6 +23,7 @@ const {
     :placeholder
     :step="currency ? 0.01 : undefined"
     :disabled
+    :decrement="false"
     :format-options="
       currency ?
         {
