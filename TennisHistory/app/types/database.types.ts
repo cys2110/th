@@ -79,6 +79,13 @@ export type Database = {
             foreignKeyName: "defaults_player_id_fkey"
             columns: ["player_id"]
             isOneToOne: false
+            referencedRelation: "player_list_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "defaults_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
             referencedRelation: "players"
             referencedColumns: ["id"]
           },
@@ -182,6 +189,13 @@ export type Database = {
             foreignKeyName: "entries_captain_fkey"
             columns: ["captain"]
             isOneToOne: false
+            referencedRelation: "player_list_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "entries_captain_fkey"
+            columns: ["captain"]
+            isOneToOne: false
             referencedRelation: "players"
             referencedColumns: ["id"]
           },
@@ -197,6 +211,13 @@ export type Database = {
             columns: ["event_id"]
             isOneToOne: false
             referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "entries_vc_fkey"
+            columns: ["vc"]
+            isOneToOne: false
+            referencedRelation: "player_list_view"
             referencedColumns: ["id"]
           },
           {
@@ -731,23 +752,33 @@ export type Database = {
       people: {
         Row: {
           first_name: string
+          full_name: string | null
           id: string
           last_name: string
           player_id: string | null
         }
         Insert: {
           first_name: string
+          full_name?: string | null
           id?: string
           last_name: string
           player_id?: string | null
         }
         Update: {
           first_name?: string
+          full_name?: string | null
           id?: string
           last_name?: string
           player_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "people_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "player_list_view"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "people_player_id_fkey"
             columns: ["player_id"]
@@ -791,6 +822,13 @@ export type Database = {
             foreignKeyName: "player_coach_mapping_player_id_fkey"
             columns: ["player_id"]
             isOneToOne: false
+            referencedRelation: "player_list_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "player_coach_mapping_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
             referencedRelation: "players"
             referencedColumns: ["id"]
           },
@@ -824,6 +862,13 @@ export type Database = {
             columns: ["country_id"]
             isOneToOne: false
             referencedRelation: "countries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "player_country_mapping_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "player_list_view"
             referencedColumns: ["id"]
           },
           {
@@ -879,6 +924,13 @@ export type Database = {
             foreignKeyName: "player_entry_mapping_player_id_fkey"
             columns: ["player_id"]
             isOneToOne: false
+            referencedRelation: "player_list_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "player_entry_mapping_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
             referencedRelation: "players"
             referencedColumns: ["id"]
           },
@@ -896,6 +948,7 @@ export type Database = {
           dob: string | null
           dod: string | null
           first_name: string | null
+          full_name: string | null
           height: number | null
           hof: number | null
           id: string
@@ -921,6 +974,7 @@ export type Database = {
           dob?: string | null
           dod?: string | null
           first_name?: string | null
+          full_name?: string | null
           height?: number | null
           hof?: number | null
           id: string
@@ -946,6 +1000,7 @@ export type Database = {
           dob?: string | null
           dod?: string | null
           first_name?: string | null
+          full_name?: string | null
           height?: number | null
           hof?: number | null
           id?: string
@@ -1000,6 +1055,13 @@ export type Database = {
             columns: ["event_id"]
             isOneToOne: false
             referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "retirements_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "player_list_view"
             referencedColumns: ["id"]
           },
           {
@@ -1330,6 +1392,13 @@ export type Database = {
             foreignKeyName: "walkovers_player_id_fkey"
             columns: ["player_id"]
             isOneToOne: false
+            referencedRelation: "player_list_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "walkovers_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
             referencedRelation: "players"
             referencedColumns: ["id"]
           },
@@ -1379,6 +1448,13 @@ export type Database = {
             foreignKeyName: "withdrawals_player_id_fkey"
             columns: ["player_id"]
             isOneToOne: false
+            referencedRelation: "player_list_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "withdrawals_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
             referencedRelation: "players"
             referencedColumns: ["id"]
           },
@@ -1386,7 +1462,21 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      player_list_view: {
+        Row: {
+          country: Json | null
+          first_name: string | null
+          first_tournament: number | null
+          full_name: string | null
+          id: string | null
+          last_name: string | null
+          last_tournament: number | null
+          retired: number | null
+          tour: Database["public"]["Enums"]["tour_enum"] | null
+          turned_pro: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       [_ in never]: never

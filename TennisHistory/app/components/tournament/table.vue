@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { TableColumn, TableRow } from "@nuxt/ui"
-import { LazyTournamentCreate } from "#components"
+import { LazyTournamentCreate, UButton, UFieldGroup } from "#components"
 
 const props = defineProps<{
   tournaments: Array<TournamentInterface>
@@ -22,7 +22,7 @@ const {
 
 const filters = defineModel<TournamentFiltersInterface>("filters")
 
-const { results, pending: loading, searchTerm } = useTournamentSearch()
+const { results, pending: loading, searchTerm, fetchSearchResults } = useTournamentSearch()
 const { isAdmin } = useAuthState()
 
 const router = useRouter()
@@ -41,7 +41,10 @@ const columns: Array<TableColumn<TournamentInterface>> = [
     accessorKey: "tours",
     footer: () => {
       if (isAdmin.value) {
-        return h(LazyTournamentCreate, { hydrateOnIdle: true })
+        return h(UFieldGroup, { class: "w-fit" }, () => [
+          h(UButton, { icon: icons.reload, onClick: () => emits("refresh") }),
+          h(LazyTournamentCreate, { hydrateOnIdle: true })
+        ])
       }
     }
   },
@@ -146,6 +149,8 @@ const handleSelectRow = (_e: Event, row: TableRow<TournamentInterface>) => {
           :loading
           v-model:search-term="searchTerm"
           variant="none"
+          label-key="name"
+          @update:open="fetchSearchResults"
         />
         <u-button
           variant="ghost"

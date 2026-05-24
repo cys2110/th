@@ -1,14 +1,10 @@
 <script setup lang="ts">
-const props = defineProps<{ player: PlayersItemType }>()
-
-const {
-  ui: { colors }
-} = useAppConfig()
+const props = defineProps<{ player: PlayerListType }>()
 
 const currentYear = new Date().getFullYear()
 
 const activeStatus = computed(() => {
-  if (props.player.retired && props.player.retired < currentYear) return "Inactive"
+  if (!props.player.last_tournament || props.player.last_tournament < currentYear) return "Inactive"
 
   return "Active"
 })
@@ -22,14 +18,14 @@ const activeStatus = computed(() => {
   >
     <u-page-card
       :icon="player.country ? getFlagCode(player.country) : undefined"
-      :title="`${player.first_name} ${player.last_name}`"
+      :title="player.full_name || '—'"
       highlight
-      :highlight-color="<keyof typeof colors>player.tour"
+      :highlight-color="player.tour"
       :to="{
         name: 'player',
         params: {
           id: player.id,
-          name: player.last_name ? kebabCase(`${player.first_name}-${player.last_name}`) : '—'
+          name: kebabCase(player.full_name || '—')
         }
       }"
       :ui="{
@@ -41,11 +37,11 @@ const activeStatus = computed(() => {
     >
       <template
         #footer
-        v-if="player.turned_pro"
+        v-if="player.first_tournament && player.last_tournament"
       >
-        <span>{{ player.turned_pro }}</span>
-        <span v-if="!player.retired || player.retired >= currentYear"> - present</span>
-        <span v-else-if="player.turned_pro !== player.retired"> - {{ player.retired }}</span>
+        <span>{{ player.first_tournament }}</span>
+        <span v-if="player.last_tournament >= currentYear"> - present</span>
+        <span v-else-if="player.first_tournament !== player.last_tournament"> - {{ player.last_tournament }}</span>
       </template>
     </u-page-card>
   </u-chip>

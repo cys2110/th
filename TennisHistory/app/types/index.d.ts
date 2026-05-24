@@ -56,6 +56,59 @@ declare global {
     surface: "Clay" | "Grass" | "Hard" | "Carpet"
   }
 
+  interface BasePlayerType {
+    id: string
+    first_name: string | null
+    last_name: string | null
+    country: CountryType | null
+    full_name: string | null
+  }
+
+  interface PlayerInterface extends BasePlayerType {
+    tour: TourType
+    turned_pro: number | null
+    retired: number | null
+    activeYears: Array<number>
+    ch_singles: number | null
+    ch_singles_date: string | null
+    ch_doubles: number | null
+    ch_doubles_date: string | null
+    current_singles: number | null
+    current_doubles: number | null
+    turned_pro: number | null
+    retired: number | null
+    dob: string | null
+    dod: string | null
+    height: number | null
+    hof: number | null
+    pm: number | null
+    site_link: string | null
+    wiki_link: string | null
+    official_link: string | null
+    countries: Array<{
+      start_date: string | null
+      end_date: string | null
+      id: string
+      country: CountryType
+    }>
+    coaches: Array<{
+      id: string
+      years: string | null
+      status: "Current" | "Former"
+      coach: PersonInterface & { player_id: string | null }
+    }>
+    bh: "One" | "Two" | null
+    rh: "Right" | "Left" | null
+    updated_at: string
+    first_tournament: number | null
+    last_tournament: number | null
+  }
+
+  type PlayerListType = Pick<
+    PlayerInterface,
+    "id" | "first_name" | "last_name" | "tour" | "turned_pro" | "retired" | "country" | "first_tournament" | "last_tournament" | "full_name"
+  >
+
   type ArchiveEditionType = Pick<EditionInterface, "id" | "category" | "end_date" | "sponsor_name" | "start_date" | "tours" | "year"> & {
     tournament: Pick<TournamentInterface, "id" | "name">
     events: Array<Pick<EventInterface, "category" | "end_date" | "level" | "sponsor_name" | "surfaces" | "start_date" | "tour" | "venues">>
@@ -81,15 +134,17 @@ declare global {
   }
 
   interface PlayerFiltersInterface {
-    tours: Array<TourType>
+    tour?: TourType
     players: Array<{
       id: string
-      label: string
+      name: string
       icon: string
     }>
     countries: Array<string>
     turned_pro?: number
     retired?: number
+    first_tournament?: number
+    last_tournament?: number
   }
 
   interface CountryFiltersInterface {

@@ -6,13 +6,14 @@ interface SearchResults {
 export const useTournamentSearch = () => {
   const supabase = useSupabaseClient()
 
-  const searchTerm = ref()
+  const searchTerm = ref("")
 
   const results = ref<Array<SearchResults>>([])
 
   const pending = ref(false)
 
   const fetchSearchResults = async () => {
+    console.log("fetching")
     set(results, [])
     set(pending, true)
 
@@ -42,6 +43,7 @@ export const useTournamentSearch = () => {
   return {
     searchTerm,
     results,
-    pending
+    pending,
+    fetchSearchResults
   }
 }

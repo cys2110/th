@@ -1,14 +1,10 @@
 <script setup lang="ts">
 useHead({ title: "Tournaments" })
 
-const {
-  ui: { icons }
-} = useAppConfig()
-
 const supabase = useSupabaseClient()
 
 const viewModeStore = useViewModeStore()
-const { results, pending: loading, searchTerm } = useTournamentSearch()
+const { results, pending: loading, searchTerm, fetchSearchResults } = useTournamentSearch()
 
 const offset = ref(0)
 
@@ -133,6 +129,8 @@ const loadMore = () => {
             :loading
             v-model:search-term="searchTerm"
             highlight
+            label-key="name"
+            @update:open="fetchSearchResults"
           />
         </template>
       </u-page-header>

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 const props = defineProps<{
-  players: Array<PlayersItemType>
+  players: Array<PlayerListType>
   pending: boolean
   canLoadMore: boolean
 }>()
@@ -29,14 +29,14 @@ useInfiniteScroll(el, () => emits("load-more"), {
     class="scrollbar"
   >
     <u-page-grid class="xl:grid-cols-4 2xl:grid-cols-5">
-      <players-card
+      <player-card
         v-if="players.length"
         v-for="player in players"
         :key="player.id"
         :player
       />
 
-      <players-loading
+      <loading-card
         v-if="pending"
         v-for="_ in 6"
         :key="_"
