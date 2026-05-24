@@ -1,6 +1,6 @@
 interface SearchResults {
   id: number
-  label: string
+  name: string
 }
 
 export const useTournamentSearch = () => {
@@ -8,16 +8,13 @@ export const useTournamentSearch = () => {
 
   const searchTerm = ref()
 
-  const tournamentFilters = ref<Array<SearchResults>>([])
-
   const results = ref<Array<SearchResults>>([])
 
-  const loading = ref(false)
+  const pending = ref(false)
 
   const fetchSearchResults = async () => {
-    results.value = []
-
-    set(loading, true)
+    set(results, [])
+    set(pending, true)
 
     const { data, error } = await supabase
       .from("tournaments")
@@ -28,27 +25,23 @@ export const useTournamentSearch = () => {
 
     if (error || !data) {
       console.error("Error fetching tournaments search results:", error)
-      set(loading, false)
+      set(pending, false)
       return
     }
 
-    if (data) results.value = data.map(t => ({ id: t.id, label: t.name }))
+    if (data) set(results, data)
 
-    set(loading, false)
+    set(pending, false)
   }
 
-  watch(
-    searchTerm,
-    () => {
-      if (searchTerm.value) fetchSearchResults()
-    },
-    { immediate: true }
-  )
+  // Watch is not immediate - the function is first triggered when the search dropdown is opened
+  watch(searchTerm, () => {
+    fetchSearchResults()
+  })
 
   return {
-    results,
-    loading,
     searchTerm,
-    tournamentFilters
+    results,
+    pending
   }
 }

@@ -67,14 +67,14 @@ declare global {
     abolished?: number
     tournaments: Array<{
       id: number
-      label: string
+      name: string
     }>
   }
 
   interface TournamentInterface {
     id: number
     name: string
-    tours: Array<TourType> | null
+    tours: Array<TourType>
     abolished: number | null
     established: number | null
     website: string | null
@@ -147,6 +147,49 @@ declare global {
       avg2_speed: number | null
       max_speed: number | null
     }>
+  }
+
+  interface RoundRobinGroup {
+    group: string
+    matches: Array<RoundRobinMatch>
+  }
+
+  interface RoundRobinMatch {
+    format: 3 | 5
+    match_no: number
+    winner_id: string
+    stats: boolean
+    team_1_id: string
+    team_2_id: string
+    incomplete: IncompleteType | null
+    scores: Array<{
+      set_no: number
+      set: number
+      tb: number | null
+      entry_id: string
+    }>
+    team_1: {
+      seed: number | null
+      status: StatusType | null
+      team: Array<{
+        rank: number | null
+        id: string
+        first_name: string
+        last_name: string
+        country: CountryInterface
+      }>
+    }
+    team_2: {
+      seed: number | null
+      status: StatusType | null
+      team: Array<{
+        rank: number | null
+        id: string
+        first_name: string
+        last_name: string
+        country: CountryInterface
+      }>
+    }
   }
 }
 

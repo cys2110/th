@@ -4,6 +4,7 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
 
   modules: ["@nuxt/eslint", "@nuxt/image", "@nuxtjs/supabase", "@pinia/nuxt", "@vueuse/nuxt", "nuxt-echarts", "@nuxt/ui"],
+
   // Set page transitions
   app: {
     pageTransition: {

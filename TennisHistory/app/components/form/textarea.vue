@@ -2,7 +2,6 @@
 withDefaults(
   defineProps<{
     placeholder: string
-    icon?: string
     rows?: number
   }>(),
   {
@@ -21,7 +20,6 @@ const {
   <u-textarea
     v-model="modelValue"
     :placeholder
-    :icon
     :rows
     class="w-full"
   >

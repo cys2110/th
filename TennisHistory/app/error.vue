@@ -10,7 +10,10 @@ defineProps<{
   <u-app>
     <Header />
 
-    <u-error :error />
+    <u-error
+      icon="icon-park-twotone:file-failed"
+      :error
+    />
 
     <Footer />
   </u-app>

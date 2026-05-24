@@ -2,12 +2,16 @@
 import type { NavigationMenuItem } from "@nuxt/ui"
 
 const route = useRoute()
+const router = useRouter()
 
 const {
   ui: { icons }
 } = useAppConfig()
 
+const supabase = useSupabaseClient()
+
 const viewModeStore = useViewModeStore()
+const { isLoggedIn } = useAuthState()
 
 // Navigation menu items
 const navLinks = computed<Array<NavigationMenuItem>>(() => [
@@ -52,6 +56,14 @@ const showViewSwitcher = computed(() => {
   const viewSwitcherRoutes = ["tournaments", "tournament", "results", "players", "countries"]
   return viewSwitcherRoutes.includes(currentRouteName)
 })
+
+const handleAuthState = async () => {
+  if (isLoggedIn.value) {
+    await supabase.auth.signOut()
+  } else {
+    router.push({ name: "signin" })
+  }
+}
 </script>
 
 <template>
@@ -60,7 +72,7 @@ const showViewSwitcher = computed(() => {
     mode="drawer"
   >
     <template #right>
-      <search />
+      <!-- <search /> -->
 
       <u-button
         v-if="showViewSwitcher"
@@ -68,6 +80,13 @@ const showViewSwitcher = computed(() => {
         :icon="viewModeStore.isTableView ? ICONS.table : ICONS.cards"
         @click="viewModeStore.toggleViewMode"
         color="neutral"
+      />
+
+      <u-button
+        :icon="isLoggedIn ? 'solar:logout-2-line-duotone' : 'solar:login-2-line-duotone'"
+        @click="handleAuthState"
+        color="neutral"
+        variant="ghost"
       />
 
       <u-color-mode-button />

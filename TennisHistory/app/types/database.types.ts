@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.1"
+    PostgrestVersion: "14.5"
   }
   public: {
     Tables: {
@@ -37,7 +37,7 @@ export type Database = {
       }
       defaults: {
         Row: {
-          draw: Database["public"]["Enums"]["draw_enum"] | null
+          draw: Database["public"]["Enums"]["draw_enum"]
           entry_id: string
           event_id: string
           id: string
@@ -45,7 +45,7 @@ export type Database = {
           reason: string | null
         }
         Insert: {
-          draw?: Database["public"]["Enums"]["draw_enum"] | null
+          draw: Database["public"]["Enums"]["draw_enum"]
           entry_id: string
           event_id: string
           id?: string
@@ -53,7 +53,7 @@ export type Database = {
           reason?: string | null
         }
         Update: {
-          draw?: Database["public"]["Enums"]["draw_enum"] | null
+          draw?: Database["public"]["Enums"]["draw_enum"]
           entry_id?: string
           event_id?: string
           id?: string
@@ -95,8 +95,8 @@ export type Database = {
           sponsor_name: string | null
           start_date: string | null
           tfc: number | null
-          tournament_id: number | null
-          tours: Database["public"]["Enums"]["tour_enum"][] | null
+          tournament_id: number
+          tours: Database["public"]["Enums"]["tour_enum"][]
           updated_at: string
           wiki_link: string | null
           year: number
@@ -111,8 +111,8 @@ export type Database = {
           sponsor_name?: string | null
           start_date?: string | null
           tfc?: number | null
-          tournament_id?: number | null
-          tours?: Database["public"]["Enums"]["tour_enum"][] | null
+          tournament_id: number
+          tours?: Database["public"]["Enums"]["tour_enum"][]
           updated_at?: string
           wiki_link?: string | null
           year: number
@@ -127,8 +127,8 @@ export type Database = {
           sponsor_name?: string | null
           start_date?: string | null
           tfc?: number | null
-          tournament_id?: number | null
-          tours?: Database["public"]["Enums"]["tour_enum"][] | null
+          tournament_id?: number
+          tours?: Database["public"]["Enums"]["tour_enum"][]
           updated_at?: string
           wiki_link?: string | null
           year?: number
@@ -210,25 +210,25 @@ export type Database = {
       }
       entry_status: {
         Row: {
-          draw: Database["public"]["Enums"]["draw_enum"] | null
+          draw: Database["public"]["Enums"]["draw_enum"]
           entry_id: string
           event_id: string
           id: string
-          status: Database["public"]["Enums"]["status_enum"] | null
+          status: Database["public"]["Enums"]["status_enum"]
         }
         Insert: {
-          draw?: Database["public"]["Enums"]["draw_enum"] | null
+          draw: Database["public"]["Enums"]["draw_enum"]
           entry_id: string
           event_id: string
           id?: string
-          status?: Database["public"]["Enums"]["status_enum"] | null
+          status: Database["public"]["Enums"]["status_enum"]
         }
         Update: {
-          draw?: Database["public"]["Enums"]["draw_enum"] | null
+          draw?: Database["public"]["Enums"]["draw_enum"]
           entry_id?: string
           event_id?: string
           id?: string
-          status?: Database["public"]["Enums"]["status_enum"] | null
+          status?: Database["public"]["Enums"]["status_enum"]
         }
         Relationships: [
           {
@@ -249,19 +249,19 @@ export type Database = {
       }
       event_supervisor_mapping: {
         Row: {
-          event_id: string | null
+          event_id: string
           id: string
-          supervisor_id: string | null
+          supervisor_id: string
         }
         Insert: {
-          event_id?: string | null
+          event_id: string
           id?: string
-          supervisor_id?: string | null
+          supervisor_id: string
         }
         Update: {
-          event_id?: string | null
+          event_id?: string
           id?: string
-          supervisor_id?: string | null
+          supervisor_id?: string
         }
         Relationships: [
           {
@@ -282,19 +282,19 @@ export type Database = {
       }
       event_surface_mapping: {
         Row: {
-          event_id: string | null
+          event_id: string
           id: string
-          surface_id: string | null
+          surface_id: string
         }
         Insert: {
-          event_id?: string | null
+          event_id: string
           id?: string
-          surface_id?: string | null
+          surface_id: string
         }
         Update: {
-          event_id?: string | null
+          event_id?: string
           id?: string
-          surface_id?: string | null
+          surface_id?: string
         }
         Relationships: [
           {
@@ -315,19 +315,19 @@ export type Database = {
       }
       event_venue_mapping: {
         Row: {
-          event_id: string | null
+          event_id: string
           id: string
-          venue_id: string | null
+          venue_id: string
         }
         Insert: {
-          event_id?: string | null
+          event_id: string
           id?: string
-          venue_id?: string | null
+          venue_id: string
         }
         Update: {
-          event_id?: string | null
+          event_id?: string
           id?: string
-          venue_id?: string | null
+          venue_id?: string
         }
         Relationships: [
           {
@@ -434,21 +434,21 @@ export type Database = {
       }
       ldas: {
         Row: {
-          draw: Database["public"]["Enums"]["draw_enum"] | null
+          draw: Database["public"]["Enums"]["draw_enum"]
           entry_id: string
           event_id: string
           id: string
           rank: number | null
         }
         Insert: {
-          draw?: Database["public"]["Enums"]["draw_enum"] | null
+          draw: Database["public"]["Enums"]["draw_enum"]
           entry_id: string
           event_id: string
           id?: string
           rank?: number | null
         }
         Update: {
-          draw?: Database["public"]["Enums"]["draw_enum"] | null
+          draw?: Database["public"]["Enums"]["draw_enum"]
           entry_id?: string
           event_id?: string
           id?: string
@@ -619,15 +619,15 @@ export type Database = {
         Row: {
           court: string | null
           date: string | null
-          draw: Database["public"]["Enums"]["draw_enum"] | null
+          draw: Database["public"]["Enums"]["draw_enum"]
           duration: string | null
-          format: number | null
+          format: number
           group_name: string | null
           id: string
           incomplete: Database["public"]["Enums"]["incomplete_enum"] | null
           loser_id: string | null
           match_no: number
-          match_type: Database["public"]["Enums"]["match_type_enum"] | null
+          match_type: Database["public"]["Enums"]["match_type_enum"]
           round_id: string
           team_1_id: string | null
           team_2_id: string | null
@@ -639,15 +639,15 @@ export type Database = {
         Insert: {
           court?: string | null
           date?: string | null
-          draw?: Database["public"]["Enums"]["draw_enum"] | null
+          draw: Database["public"]["Enums"]["draw_enum"]
           duration?: string | null
-          format?: number | null
+          format?: number
           group_name?: string | null
           id?: string
           incomplete?: Database["public"]["Enums"]["incomplete_enum"] | null
           loser_id?: string | null
           match_no: number
-          match_type?: Database["public"]["Enums"]["match_type_enum"] | null
+          match_type: Database["public"]["Enums"]["match_type_enum"]
           round_id: string
           team_1_id?: string | null
           team_2_id?: string | null
@@ -659,15 +659,15 @@ export type Database = {
         Update: {
           court?: string | null
           date?: string | null
-          draw?: Database["public"]["Enums"]["draw_enum"] | null
+          draw?: Database["public"]["Enums"]["draw_enum"]
           duration?: string | null
-          format?: number | null
+          format?: number
           group_name?: string | null
           id?: string
           incomplete?: Database["public"]["Enums"]["incomplete_enum"] | null
           loser_id?: string | null
           match_no?: number
-          match_type?: Database["public"]["Enums"]["match_type_enum"] | null
+          match_type?: Database["public"]["Enums"]["match_type_enum"]
           round_id?: string
           team_1_id?: string | null
           team_2_id?: string | null
@@ -730,21 +730,21 @@ export type Database = {
       }
       people: {
         Row: {
-          first_name: string | null
+          first_name: string
           id: string
-          last_name: string | null
+          last_name: string
           player_id: string | null
         }
         Insert: {
-          first_name?: string | null
+          first_name: string
           id?: string
-          last_name?: string | null
+          last_name: string
           player_id?: string | null
         }
         Update: {
-          first_name?: string | null
+          first_name?: string
           id?: string
-          last_name?: string | null
+          last_name?: string
           player_id?: string | null
         }
         Relationships: [
@@ -759,24 +759,24 @@ export type Database = {
       }
       player_coach_mapping: {
         Row: {
-          coach_id: string | null
+          coach_id: string
           id: string
-          player_id: string | null
-          status: string | null
+          player_id: string
+          status: string
           years: string | null
         }
         Insert: {
-          coach_id?: string | null
+          coach_id: string
           id?: string
-          player_id?: string | null
-          status?: string | null
+          player_id: string
+          status?: string
           years?: string | null
         }
         Update: {
-          coach_id?: string | null
+          coach_id?: string
           id?: string
-          player_id?: string | null
-          status?: string | null
+          player_id?: string
+          status?: string
           years?: string | null
         }
         Relationships: [
@@ -798,24 +798,24 @@ export type Database = {
       }
       player_country_mapping: {
         Row: {
-          country_id: string | null
+          country_id: string
           end_date: string | null
           id: string
-          player_id: string | null
+          player_id: string
           start_date: string | null
         }
         Insert: {
-          country_id?: string | null
+          country_id: string
           end_date?: string | null
           id?: string
-          player_id?: string | null
+          player_id: string
           start_date?: string | null
         }
         Update: {
-          country_id?: string | null
+          country_id?: string
           end_date?: string | null
           id?: string
-          player_id?: string | null
+          player_id?: string
           start_date?: string | null
         }
         Relationships: [
@@ -905,7 +905,7 @@ export type Database = {
           retired: number | null
           rh: string | null
           site_link: string | null
-          tour: Database["public"]["Enums"]["tour_enum"] | null
+          tour: Database["public"]["Enums"]["tour_enum"]
           turned_pro: number | null
           updated_at: string
           wiki_link: string | null
@@ -930,7 +930,7 @@ export type Database = {
           retired?: number | null
           rh?: string | null
           site_link?: string | null
-          tour?: Database["public"]["Enums"]["tour_enum"] | null
+          tour: Database["public"]["Enums"]["tour_enum"]
           turned_pro?: number | null
           updated_at?: string
           wiki_link?: string | null
@@ -955,7 +955,7 @@ export type Database = {
           retired?: number | null
           rh?: string | null
           site_link?: string | null
-          tour?: Database["public"]["Enums"]["tour_enum"] | null
+          tour?: Database["public"]["Enums"]["tour_enum"]
           turned_pro?: number | null
           updated_at?: string
           wiki_link?: string | null
@@ -964,7 +964,7 @@ export type Database = {
       }
       retirements: {
         Row: {
-          draw: Database["public"]["Enums"]["draw_enum"] | null
+          draw: Database["public"]["Enums"]["draw_enum"]
           entry_id: string
           event_id: string
           id: string
@@ -972,7 +972,7 @@ export type Database = {
           reason: string | null
         }
         Insert: {
-          draw?: Database["public"]["Enums"]["draw_enum"] | null
+          draw: Database["public"]["Enums"]["draw_enum"]
           entry_id: string
           event_id: string
           id?: string
@@ -980,7 +980,7 @@ export type Database = {
           reason?: string | null
         }
         Update: {
-          draw?: Database["public"]["Enums"]["draw_enum"] | null
+          draw?: Database["public"]["Enums"]["draw_enum"]
           entry_id?: string
           event_id?: string
           id?: string
@@ -1013,7 +1013,7 @@ export type Database = {
       }
       rounds: {
         Row: {
-          draw: Database["public"]["Enums"]["draw_enum"] | null
+          draw: Database["public"]["Enums"]["draw_enum"]
           event_id: string
           id: string
           match_type: Database["public"]["Enums"]["match_type_enum"] | null
@@ -1021,11 +1021,11 @@ export type Database = {
           pm: number | null
           pm_tiered: number[] | null
           points: number | null
-          round: Database["public"]["Enums"]["round_enum"] | null
+          round: Database["public"]["Enums"]["round_enum"]
           tour: Database["public"]["Enums"]["tour_enum"] | null
         }
         Insert: {
-          draw?: Database["public"]["Enums"]["draw_enum"] | null
+          draw: Database["public"]["Enums"]["draw_enum"]
           event_id: string
           id?: string
           match_type?: Database["public"]["Enums"]["match_type_enum"] | null
@@ -1033,11 +1033,11 @@ export type Database = {
           pm?: number | null
           pm_tiered?: number[] | null
           points?: number | null
-          round?: Database["public"]["Enums"]["round_enum"] | null
+          round: Database["public"]["Enums"]["round_enum"]
           tour?: Database["public"]["Enums"]["tour_enum"] | null
         }
         Update: {
-          draw?: Database["public"]["Enums"]["draw_enum"] | null
+          draw?: Database["public"]["Enums"]["draw_enum"]
           event_id?: string
           id?: string
           match_type?: Database["public"]["Enums"]["match_type_enum"] | null
@@ -1045,7 +1045,7 @@ export type Database = {
           pm?: number | null
           pm_tiered?: number[] | null
           points?: number | null
-          round?: Database["public"]["Enums"]["round_enum"] | null
+          round?: Database["public"]["Enums"]["round_enum"]
           tour?: Database["public"]["Enums"]["tour_enum"] | null
         }
         Relationships: [
@@ -1060,31 +1060,31 @@ export type Database = {
       }
       seeds: {
         Row: {
-          draw: Database["public"]["Enums"]["draw_enum"] | null
+          draw: Database["public"]["Enums"]["draw_enum"]
           entry_id: string
           event_id: string
           id: string
           match_type: Database["public"]["Enums"]["match_type_enum"] | null
           rank: number | null
-          seed: number | null
+          seed: number
         }
         Insert: {
-          draw?: Database["public"]["Enums"]["draw_enum"] | null
+          draw: Database["public"]["Enums"]["draw_enum"]
           entry_id: string
           event_id: string
           id?: string
           match_type?: Database["public"]["Enums"]["match_type_enum"] | null
           rank?: number | null
-          seed?: number | null
+          seed: number
         }
         Update: {
-          draw?: Database["public"]["Enums"]["draw_enum"] | null
+          draw?: Database["public"]["Enums"]["draw_enum"]
           entry_id?: string
           event_id?: string
           id?: string
           match_type?: Database["public"]["Enums"]["match_type_enum"] | null
           rank?: number | null
-          seed?: number | null
+          seed?: number
         }
         Relationships: [
           {
@@ -1123,40 +1123,40 @@ export type Database = {
       }
       ties: {
         Row: {
-          country_1_id: string | null
-          country_2_id: string | null
+          country_1_id: string
+          country_2_id: string
           date: string | null
           group_name: string | null
           id: string
-          loser_id: string | null
+          loser_id: string
           round_id: string
-          tie_number: number | null
+          tie_number: number
           venue_id: string | null
-          winner_id: string | null
+          winner_id: string
         }
         Insert: {
-          country_1_id?: string | null
-          country_2_id?: string | null
+          country_1_id: string
+          country_2_id: string
           date?: string | null
           group_name?: string | null
           id?: string
-          loser_id?: string | null
+          loser_id: string
           round_id: string
-          tie_number?: number | null
+          tie_number: number
           venue_id?: string | null
-          winner_id?: string | null
+          winner_id: string
         }
         Update: {
-          country_1_id?: string | null
-          country_2_id?: string | null
+          country_1_id?: string
+          country_2_id?: string
           date?: string | null
           group_name?: string | null
           id?: string
-          loser_id?: string | null
+          loser_id?: string
           round_id?: string
-          tie_number?: number | null
+          tie_number?: number
           venue_id?: string | null
-          winner_id?: string | null
+          winner_id?: string
         }
         Relationships: [
           {
@@ -1209,7 +1209,7 @@ export type Database = {
           established: number | null
           id: number
           name: string
-          tours: Database["public"]["Enums"]["tour_enum"][] | null
+          tours: Database["public"]["Enums"]["tour_enum"][]
           updated_at: string
           website: string | null
         }
@@ -1218,7 +1218,7 @@ export type Database = {
           established?: number | null
           id: number
           name: string
-          tours?: Database["public"]["Enums"]["tour_enum"][] | null
+          tours?: Database["public"]["Enums"]["tour_enum"][]
           updated_at?: string
           website?: string | null
         }
@@ -1227,28 +1227,52 @@ export type Database = {
           established?: number | null
           id?: number
           name?: string
-          tours?: Database["public"]["Enums"]["tour_enum"][] | null
+          tours?: Database["public"]["Enums"]["tour_enum"][]
           updated_at?: string
           website?: string | null
+        }
+        Relationships: []
+      }
+      users: {
+        Row: {
+          email: string
+          first_name: string
+          id: string
+          last_name: string
+          username: string
+        }
+        Insert: {
+          email: string
+          first_name: string
+          id: string
+          last_name: string
+          username: string
+        }
+        Update: {
+          email?: string
+          first_name?: string
+          id?: string
+          last_name?: string
+          username?: string
         }
         Relationships: []
       }
       venues: {
         Row: {
           city: string
-          country_id: string | null
+          country_id: string
           id: string
           name: string | null
         }
         Insert: {
           city: string
-          country_id?: string | null
+          country_id: string
           id?: string
           name?: string | null
         }
         Update: {
           city?: string
-          country_id?: string | null
+          country_id?: string
           id?: string
           name?: string | null
         }
@@ -1264,7 +1288,7 @@ export type Database = {
       }
       walkovers: {
         Row: {
-          draw: Database["public"]["Enums"]["draw_enum"] | null
+          draw: Database["public"]["Enums"]["draw_enum"]
           entry_id: string
           event_id: string
           id: string
@@ -1272,7 +1296,7 @@ export type Database = {
           reason: string | null
         }
         Insert: {
-          draw?: Database["public"]["Enums"]["draw_enum"] | null
+          draw: Database["public"]["Enums"]["draw_enum"]
           entry_id: string
           event_id: string
           id?: string
@@ -1280,7 +1304,7 @@ export type Database = {
           reason?: string | null
         }
         Update: {
-          draw?: Database["public"]["Enums"]["draw_enum"] | null
+          draw?: Database["public"]["Enums"]["draw_enum"]
           entry_id?: string
           event_id?: string
           id?: string
@@ -1313,7 +1337,7 @@ export type Database = {
       }
       withdrawals: {
         Row: {
-          draw: Database["public"]["Enums"]["draw_enum"] | null
+          draw: Database["public"]["Enums"]["draw_enum"]
           entry_id: string
           event_id: string
           id: string
@@ -1321,7 +1345,7 @@ export type Database = {
           reason: string | null
         }
         Insert: {
-          draw?: Database["public"]["Enums"]["draw_enum"] | null
+          draw: Database["public"]["Enums"]["draw_enum"]
           entry_id: string
           event_id: string
           id?: string
@@ -1329,7 +1353,7 @@ export type Database = {
           reason?: string | null
         }
         Update: {
-          draw?: Database["public"]["Enums"]["draw_enum"] | null
+          draw?: Database["public"]["Enums"]["draw_enum"]
           entry_id?: string
           event_id?: string
           id?: string
@@ -1365,203 +1389,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      get_country_big_titles: {
-        Args: { categories: string[]; country_id: string }
-        Returns: {
-          category: string
-          country: Json
-          edition_id: number
-          first_name: string
-          id: string
-          last_name: string
-          match_type: Database["public"]["Enums"]["match_type_enum"]
-          tour: Database["public"]["Enums"]["tour_enum"]
-          tournament: Json
-          year: number
-        }[]
-      }
-      get_country_winners: {
-        Args: { tournament_id: number }
-        Returns: {
-          country: Json
-          id: number
-          year: number
-        }[]
-      }
-      get_elimination_winners: {
-        Args: { tournament_id: number }
-        Returns: {
-          id: number
-          match_type: Database["public"]["Enums"]["match_type_enum"]
-          team: Json
-          tour: Database["public"]["Enums"]["tour_enum"]
-          year: number
-        }[]
-      }
-      get_head_to_head_details: {
-        Args: { team1_ids: string[]; team2_ids: string[] }
-        Returns: {
-          matches: Json
-          team1: Json
-          team2: Json
-        }[]
-      }
-      get_head_to_head_table: {
-        Args: { tour: Database["public"]["Enums"]["tour_enum"] }
-        Returns: {
-          losses: number
-          opponent_country: Json
-          opponent_first_name: string
-          opponent_id: string
-          opponent_last_name: string
-          opponent_rank: number
-          player_country: Json
-          player_first_name: string
-          player_id: string
-          player_last_name: string
-          player_rank: number
-          wins: number
-        }[]
-      }
-      get_player_finals: {
-        Args: { player_id: string }
-        Returns: {
-          category: string
-          end_date: string
-          id: number
-          level: Database["public"]["Enums"]["level_enum"]
-          match_type: Database["public"]["Enums"]["match_type_enum"]
-          partner: Json
-          surfaces: string[]
-          title: boolean
-          tournament: Json
-          year: number
-        }[]
-      }
-      get_player_h2h: {
-        Args: { player_id: string }
-        Returns: {
-          losses: number
-          player: Json
-          total: number
-          wins: number
-        }[]
-      }
-      get_player_wl: {
-        Args: { player_id: string }
-        Returns: {
-          draw: Database["public"]["Enums"]["draw_enum"]
-          level: Database["public"]["Enums"]["level_enum"]
-          losses: number
-          match_type: Database["public"]["Enums"]["match_type_enum"]
-          titles: number
-          wins: number
-        }[]
-      }
-      get_recent_events: {
-        Args: { player_id: string }
-        Returns: {
-          category: string
-          edition_id: number
-          level: Database["public"]["Enums"]["level_enum"]
-          round: string
-          start_date: string
-          surfaces: string[]
-          tournament_id: number
-          tournament_name: string
-          year: number
-        }[]
-      }
-      get_tournament_finalists: {
-        Args: { tournament_id: number }
-        Returns: {
-          country: Json
-          doubles_finals: number
-          doubles_titles: number
-          first_name: string
-          id: string
-          last_name: string
-          singles_finals: number
-          singles_titles: number
-          tour: Database["public"]["Enums"]["tour_enum"]
-        }[]
-      }
-      get_tournament_lowest_ranked: {
-        Args: { tournament_id: number }
-        Returns: {
-          country: Json
-          edition_id: number
-          first_name: string
-          id: string
-          last_name: string
-          match_type: Database["public"]["Enums"]["match_type_enum"]
-          rank: number
-          round: string
-          tour: Database["public"]["Enums"]["tour_enum"]
-          year: number
-        }[]
-      }
-      get_tournament_seed_stats: {
-        Args: { tournament_id: number }
-        Returns: {
-          id: number
-          match_type: Database["public"]["Enums"]["match_type_enum"]
-          round: string
-          seeded_entries: Json
-          tour: Database["public"]["Enums"]["tour_enum"]
-          year: number
-        }[]
-      }
-      get_tournament_status_stats: {
-        Args: { tournament_id: number }
-        Returns: {
-          id: number
-          match_type: Database["public"]["Enums"]["match_type_enum"]
-          status: Database["public"]["Enums"]["status_enum"]
-          team: Json
-          tour: Database["public"]["Enums"]["tour_enum"]
-          year: number
-        }[]
-      }
-      get_tournament_winners: {
-        Args: { tournament_id: number }
-        Returns: {
-          edition_id: number
-          end_date: string
-          entry_id: string
-          event_id: string
-          match_type: Database["public"]["Enums"]["match_type_enum"]
-          scores: Json
-          start_date: string
-          team: Json
-          tour: Database["public"]["Enums"]["tour_enum"]
-          year: number
-        }[]
-      }
-      search_people: {
-        Args: { search_term: string }
-        Returns: {
-          first_name: string | null
-          id: string
-          last_name: string | null
-          player_id: string | null
-        }[]
-        SetofOptions: {
-          from: "*"
-          to: "people"
-          isOneToOne: false
-          isSetofReturn: true
-        }
-      }
-      search_players: {
-        Args: { search_term: string }
-        Returns: {
-          country: Json
-          first_name: string
-          id: string
-          last_name: string
-        }[]
-      }
+      [_ in never]: never
     }
     Enums: {
       continent_enum:
@@ -1587,6 +1415,7 @@ export type Database = {
         | "Round robin"
         | "Country draw"
         | "Laver Cup"
+        | "Davis Cup"
       environment_enum: "Indoor" | "Outdoor"
       incomplete_enum: "B" | "WO" | "D" | "R"
       level_enum: "Tour" | "Challenger" | "ITF"
@@ -1767,6 +1596,7 @@ export const Constants = {
         "Round robin",
         "Country draw",
         "Laver Cup",
+        "Davis Cup",
       ],
       environment_enum: ["Indoor", "Outdoor"],
       incomplete_enum: ["B", "WO", "D", "R"],

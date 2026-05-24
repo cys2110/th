@@ -1,7 +1,22 @@
 <script setup lang="ts">
 import type { FormErrorEvent, FormSubmitEvent } from "@nuxt/ui"
-import { PostgrestError } from "@supabase/supabase-js"
 import { array, number, object, string, url, z } from "zod"
+
+const schema = object({
+  id: number("Tournament ID must be a number.").int("Tournament ID must be an integer.").positive("Tournament ID must be positive."),
+  name: string().min(1, "Tournament name is required."),
+  tours: array(TourEnum).default([]),
+  abolished: number("Abolished year must be a number.").optional(),
+  established: number("Established year must be a number.").optional(),
+  website: url("Website must be a valid URL.").optional()
+})
+type Schema = z.infer<typeof schema>
+
+defineShortcuts({
+  ctrl_a: () => set(isOpen, !isOpen.value),
+  ctrl_r: () => set(state, {}),
+  ctrl_enter: () => form.value?.submit()
+})
 
 const {
   ui: { icons }
@@ -16,22 +31,6 @@ const isUploading = ref(false)
 const errors = ref()
 const form = useTemplateRef("form")
 
-defineShortcuts({
-  ctrl_a: () => set(isOpen, !isOpen.value),
-  ctrl_r: () => set(state, {}),
-  ctrl_enter: () => form.value?.submit()
-})
-
-const schema = object({
-  id: number("Tournament ID must be a number.").int("Tournament ID must be an integer.").positive("Tournament ID must be positive."),
-  name: string().min(1, "Tournament name is required."),
-  tours: array(TourEnum).default([]),
-  abolished: number("Abolished year must be a number.").optional(),
-  established: number("Established year must be a number.").optional(),
-  website: url("Website must be a valid URL.").optional()
-})
-type Schema = z.infer<typeof schema>
-
 const state = ref<Partial<Schema>>({})
 
 const handleReset = () => {
@@ -44,11 +43,18 @@ const onError = (event: FormErrorEvent) => set(errors, event.errors)
 const onSubmit = async (event: FormSubmitEvent<Schema>) => {
   set(isUploading, true)
 
-  try {
-    const { error } = await supabase.from("tournaments").insert(event.data)
+  const { error } = await supabase.from("tournaments").insert(event.data)
 
-    if (error) throw error
+  if (error) {
+    console.error("Error creating tournament:", error)
+    set(errors, error)
 
+    toast.add({
+      title: `Error creating ${event.data.name}`,
+      icon: icons.error,
+      color: "error"
+    })
+  } else {
     toast.add({
       title: `${event.data.name} successfully created!`,
       icon: icons.success,
@@ -62,20 +68,12 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
         name: kebabCase(event.data.name)
       }
     })
-  } catch (error) {
-    set(errors, error instanceof PostgrestError ? error.details : (error as any).message)
-
-    toast.add({
-      title: `Error creating ${event.data.name}`,
-      icon: icons.error,
-      color: "error"
-    })
-  } finally {
-    set(isUploading, false)
   }
+
+  set(isUploading, false)
 }
 
-const formFields: FormFieldInterface<Schema>[] = [
+const formFields: Array<FormFieldInterface<Schema>> = [
   { label: "ID", key: "id", type: "text", subType: "number", required: true },
   { label: "Tours", key: "tours", type: "checkbox", items: TOUR_OPTIONS, required: true, icon: ICONS.tour },
   { label: "Name", key: "name", type: "text", required: true, class: "col-span-2" },
@@ -90,12 +88,17 @@ const formFields: FormFieldInterface<Schema>[] = [
     :title="`Create ${state.name || 'Tournament'}`"
     v-model:open="isOpen"
   >
-    <u-button
-      :icon="icons.plus"
-      :ui="{ leadingIcon: 'size-4' }"
-    />
+    <u-button :icon="icons.plus" />
 
     <template #body>
+      <u-alert
+        v-if="errors"
+        color="error"
+        :title="`Error creating ${state.name}`"
+        :description="errors"
+        class="mb-5"
+      />
+
       <u-form
         id="tournament-form"
         ref="form"
@@ -113,14 +116,6 @@ const formFields: FormFieldInterface<Schema>[] = [
           />
         </div>
       </u-form>
-
-      <u-alert
-        v-if="errors"
-        color="error"
-        :title="`Error creating ${state.name}`"
-        :description="errors"
-        class="mt-5"
-      />
     </template>
 
     <template #footer="{ close }">

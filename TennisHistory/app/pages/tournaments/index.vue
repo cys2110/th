@@ -8,8 +8,7 @@ const {
 const supabase = useSupabaseClient()
 
 const viewModeStore = useViewModeStore()
-
-const { results, loading, searchTerm } = useTournamentSearch()
+const { results, pending: loading, searchTerm } = useTournamentSearch()
 
 const offset = ref(0)
 
@@ -48,21 +47,23 @@ const { pending, execute, refresh } = await useAsyncData(
       .select("*", { count: "exact" })
       .range(offset.value, offset.value + 29)
 
-    if (filters.value.tournaments.length)
+    const { tournaments: filterTournaments, tours, established, abolished } = filters.value
+
+    if (filterTournaments.length)
       query.in(
         "id",
-        filters.value.tournaments.map(v => v.id)
+        filterTournaments.map(v => v.id)
       )
 
-    if (filters.value.tours.length) query.contains("tours", filters.value.tours)
+    if (tours.length) query.contains("tours", tours)
 
-    if (filters.value.established) query.gte("established", filters.value.established)
+    if (established) query.gte("established", filters.value.established)
 
-    if (filters.value.abolished) query.lte("abolished", filters.value.abolished)
+    if (abolished) query.lte("abolished", abolished)
 
     if (sorting.value.length) sorting.value.forEach(s => query.order(s.field, { ascending: s.direction }))
 
-    query.order("id", { ascending: true }) // Add sorting for consistent ordering
+    query.order("id", { ascending: true }) // Add id sorting for consistent ordering
 
     const { data, count: countData, error } = await query
 
@@ -74,7 +75,7 @@ const { pending, execute, refresh } = await useAsyncData(
     set(canLoadMore, data.length + tournaments.value.length < (countData || 0))
     set(count, countData || 0)
 
-    tournaments.value = tournaments.value.concat(data)
+    set(tournaments, tournaments.value.concat(data))
 
     return data
   },
@@ -82,12 +83,13 @@ const { pending, execute, refresh } = await useAsyncData(
     immediate: false,
     lazy: true,
     default: () => [],
-    watch: [offset]
+    watch: [offset] // triggers when offset changes
   }
 )
 
 execute()
 
+// Reset search results when filters change
 watchDeep([filters, sorting], () => {
   set(tournaments, [])
   set(offset, 0)
@@ -108,19 +110,6 @@ const loadMore = () => {
         title="Tournaments"
         :ui="{ description: 'flex justify-end gap-4' }"
       >
-        <template #links>
-          <dev-only>
-            <u-field-group class="w-fit">
-              <u-button
-                :icon="icons.reload"
-                @click="refresh()"
-              />
-
-              <lazy-tournament-create hydrate-on-idle />
-            </u-field-group>
-          </dev-only>
-        </template>
-
         <template
           #description
           v-if="!viewModeStore.isTableView"
@@ -149,7 +138,7 @@ const loadMore = () => {
       </u-page-header>
 
       <u-page-body>
-        <tournaments-table
+        <tournament-table
           v-if="viewModeStore.isTableView"
           :tournaments
           :pending
@@ -162,7 +151,7 @@ const loadMore = () => {
           @refresh="refresh"
         />
 
-        <tournaments-grid
+        <tournament-grid
           v-else
           :tournaments
           :pending

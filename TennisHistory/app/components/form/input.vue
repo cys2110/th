@@ -3,7 +3,6 @@ withDefaults(
   defineProps<{
     type?: string
     placeholder: string
-    icon?: string
     disabled?: boolean
   }>(),
   {
@@ -25,7 +24,6 @@ const {
     :placeholder
     :disabled
     v-model="modelValue"
-    :icon
     class="w-full"
   >
     <template
