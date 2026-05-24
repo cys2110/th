@@ -1,10 +1,16 @@
 <script setup lang="ts">
 import { CalendarDate, parseDate } from "@internationalized/date"
 
-defineProps<{
-  min?: string
-  max?: string
-}>()
+withDefaults(
+  defineProps<{
+    min?: string
+    max?: string
+    showIcons?: boolean
+  }>(),
+  {
+    showIcons: true
+  }
+)
 
 const breakpoints = useBreakpoints(breakpointsTailwind, { ssrWidth: useSSRWidth() })
 const mdAndDown = breakpoints.smallerOrEqual("md")
@@ -22,9 +28,12 @@ const inputDateRef = useTemplateRef("inputDateRef")
     locale="en-GB"
     :min-value="min ? parseDate(min) : undefined"
     :max-value="max ? parseDate(max) : undefined"
-    class="w-full"
+    class="max-w-full w-fit"
   >
-    <template #trailing>
+    <template
+      #trailing
+      v-if="showIcons"
+    >
       <u-popover :reference="inputDateRef?.inputsRef[3]?.$el">
         <u-button
           color="neutral"

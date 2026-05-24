@@ -52,6 +52,7 @@ const handleSorting = (field: string) => {
   }
 }
 
+const count = ref(0)
 const players = ref<Array<PlayerListType>>([])
 const canLoadMore = ref(false)
 const offset = ref(0)
@@ -91,16 +92,17 @@ const { pending, execute, refresh } = await useAsyncData(
       query.order("first_name", { ascending: true })
     }
 
-    const { data, count, error } = await query
+    const { data, count: countData, error } = await query
 
     if (error || !data) {
       console.error("Error fetching players:", error)
       return []
     }
 
-    set(canLoadMore, players.value.length + data.length < (count || 0))
+    set(canLoadMore, players.value.length + data.length < (countData || 0))
 
     set(players, players.value.concat(data as unknown as Array<PlayerListType>))
+    set(count, countData || 0)
 
     return data
   },
@@ -189,6 +191,7 @@ const loadMore = () => {
           @handle-sorting="handleSorting"
           v-model:filters="filters"
           @refresh="refresh"
+          :count
         />
 
         <player-grid

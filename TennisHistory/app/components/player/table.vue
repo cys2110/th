@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { LazyPlayerCreate, UButton, UFieldGroup } from "#components"
 import type { TableColumn, TableRow } from "@nuxt/ui"
 
 const props = defineProps<{
@@ -8,6 +9,7 @@ const props = defineProps<{
   countries: Array<CountryInterface & { icon: string }>
   countriesPending: boolean
   sorting: Array<SortingInterface>
+  count: number
 }>()
 
 const emits = defineEmits<{
@@ -22,6 +24,7 @@ const {
 
 const filters = defineModel<PlayerFiltersInterface>("filters")
 
+const { isAdmin } = useAuthState()
 const { results, pending: loading, searchTerm, fetchSearchResults } = usePlayerSearch()
 
 const router = useRouter()
@@ -38,9 +41,23 @@ onMounted(() => {
 })
 
 const columns: Array<TableColumn<PlayerListType>> = [
-  { accessorKey: "tour" },
+  {
+    accessorKey: "tour",
+    footer: () => {
+      if (isAdmin.value) {
+        return h(UFieldGroup, { class: "w-fit" }, () => [
+          h(UButton, { icon: icons.reload, onClick: () => emits("refresh") }),
+          h(LazyPlayerCreate, { hydrateOnIdle: true })
+        ])
+      }
+    }
+  },
   { accessorKey: "country" },
-  { id: "name", accessorFn: row => `${row.first_name} ${row.last_name}` },
+  {
+    id: "name",
+    accessorFn: row => `${row.first_name} ${row.last_name}`,
+    footer: () => `${props.count.toLocaleString()} player${props.count === 1 ? "" : "s"}`
+  },
   { accessorKey: "turned_pro" },
   { accessorKey: "retired" },
   { accessorKey: "first_tournament" },

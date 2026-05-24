@@ -5,12 +5,12 @@ const props = defineProps<{
   startValue?:
     | {
         id: string
-        label: string
+        full_name: string
       }
     | undefined
 }>()
 
-const { results, loading, refresh, searchTerm } = usePersonSearch()
+const { results, pending, fetchSearchResults, searchTerm } = usePersonSearch()
 
 const modelValue = defineModel<any>()
 </script>
@@ -19,15 +19,17 @@ const modelValue = defineModel<any>()
   <u-input-menu
     v-model="modelValue"
     v-model:search-term="searchTerm"
-    :loading="loading"
+    @update:open="fetchSearchResults"
+    :loading="pending"
     clear
     :placeholder
     :icon
     :items="results"
     class="w-full"
+    label-key="full_name"
   >
     <template #content-bottom>
-      <person-create @refresh="refresh" />
+      <person-create @refresh="fetchSearchResults" />
     </template>
   </u-input-menu>
 </template>

@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { parseDate } from "@internationalized/date"
-import { PostgrestError } from "@supabase/supabase-js"
 
 const {
   params: { id }
@@ -13,13 +12,17 @@ const {
 const toast = useToast()
 const supabase = useSupabaseClient()
 
+const { isAdmin } = useAuthState()
 const playerStore = usePlayerStore()
+const { countries, pending: countriesPending } = useCountryList()
+
 const currentYear = new Date().getFullYear()
 const updatedPlayer = ref<Record<string, any>>({})
 const isSaving = ref(false)
 
 const key = computed(() => `${id}-details`)
 
+// TODO: Add win-loss and titles
 const {
   data: player,
   pending,
@@ -39,7 +42,7 @@ const {
 
   if (error || !data) {
     console.error("Error fetching player:", error)
-    return null
+    return
   }
 
   const { player_country_mapping, player_coach_mapping, ...rest } = data
@@ -58,26 +61,8 @@ const {
       status: mapping.status,
       coach: mapping.people
     }))
-  } as PlayerInterface
+  } as Omit<PlayerInterface, "first_tournament" | "last_tournament" | "country">
 })
-
-const { data: countries, pending: countriesPending } = await useAsyncData(
-  "countries",
-  async () => {
-    const { data, error } = await supabase.from("countries").select("*").order("name", { ascending: true })
-
-    if (error || !data) {
-      console.error("Error fetching countries:", error)
-      return []
-    }
-
-    return data.map(country => ({
-      ...country,
-      icon: getFlagCode(country)
-    }))
-  },
-  { default: () => [] }
-)
 
 const playerAge = computed(() => {
   if (player.value?.dob) {
@@ -86,6 +71,39 @@ const playerAge = computed(() => {
     return "—"
   }
 })
+
+const handleCheckboxSelect = (fields: (keyof Omit<PlayerInterface, "first_tournament" | "last_tournament" | "country">)[]) => {
+  for (const field of fields) {
+    if (field in updatedPlayer.value) {
+      delete updatedPlayer.value[field]
+    } else {
+      if (field === "dob" || field === "dod") {
+        updatedPlayer.value[field] = player.value?.[field] ? parseDate(player.value[field]) : undefined
+      } else if (field === "countries") {
+        updatedPlayer.value[field] =
+          player.value?.countries?.map(country => ({
+            id: country.id,
+            start_date: country.start_date ? parseDate(country.start_date) : undefined,
+            end_date: country.end_date ? parseDate(country.end_date) : undefined,
+            country_id: country.country.id
+          })) || []
+      } else if (field === "coaches") {
+        updatedPlayer.value[field] =
+          player.value?.coaches?.map(coach => ({
+            id: coach.id,
+            years: coach.years,
+            status: coach.status,
+            coach_id: {
+              id: coach.coach.id,
+              full_name: coach.coach.full_name
+            }
+          })) || []
+      } else {
+        updatedPlayer.value[field] = player.value?.[field]
+      }
+    }
+  }
+}
 
 const handleSubmit = async () => {
   set(isSaving, true)
@@ -209,7 +227,10 @@ const handleSubmit = async () => {
 
 <template>
   <div class="flex justify-end mb-6">
-    <u-field-group class="w-fit">
+    <u-field-group
+      v-if="isAdmin"
+      class="w-fit"
+    >
       <u-button
         :icon="icons.reload"
         @click="refresh()"
@@ -224,121 +245,68 @@ const handleSubmit = async () => {
   </div>
 
   <div
-    class="flex-1 lg:divide-y divide-default text-sm rounded-md overflow-hidden *:grid *:grid-cols-2 *:divide-y *:divide-default *:lg:divide-none *:lg:grid-cols-4 *:*:odd:bg-elevated *:*:odd:dark:bg-muted/50 *:*:px-4 *:*:py-1 *:*:even:font-medium *:*:even:text-muted"
+    class="flex-1 lg:divide-y divide-default text-sm rounded-md overflow-hidden *:grid *:grid-cols-2 *:divide-y *:divide-default *:lg:divide-none *:lg:grid-cols-4 *:*:px-4 *:*:py-1 *:*:odd:bg-elevated *:*:odd:dark:bg-muted/50 *:*:even:font-medium *:*:even:text-muted [&_.detail]:flex [&_.detail]:items-center [&_.detail]:gap-2 [&_.detail]:*:first:flex-1"
   >
-    <dev-only>
-      <div>
-        <div>Name</div>
-        <div v-if="pending">
-          <u-skeleton class="w-full h-4" />
-        </div>
-        <div
-          v-else
-          class="flex items-center gap-2"
-        >
-          <u-field-group v-if="'first_name' in updatedPlayer && 'last_name' in updatedPlayer">
-            <form-input
-              v-model="updatedPlayer.first_name"
-              placeholder="First name"
-            />
-
-            <form-input
-              v-model="updatedPlayer.last_name"
-              placeholder="Last name"
-            />
-          </u-field-group>
-
-          <div
-            v-else
-            class="flex-1"
-          >
-            {{ player?.first_name }} {{ player?.last_name }}
-          </div>
-
-          <u-checkbox
-            :icon="ICONS.player"
-            :model-value="'first_name' in updatedPlayer && 'last_name' in updatedPlayer"
-            @update:model-value="
-              () => {
-                if ('first_name' in updatedPlayer) {
-                  delete updatedPlayer['first_name']
-                  delete updatedPlayer['last_name']
-                } else {
-                  updatedPlayer['first_name'] = player?.first_name
-                  updatedPlayer['last_name'] = player?.last_name
-                }
-              }
-            "
-          />
-        </div>
-
-        <div>Updated at</div>
-        <div v-if="pending">
-          <u-skeleton class="w-full h-4" />
-        </div>
-        <div v-else>
-          <u-badge
-            v-if="player?.updated_at"
-            :label="formatDateTime(player.updated_at)"
-            color="success"
-          />
-        </div>
-      </div>
-    </dev-only>
-
-    <div>
-      <div>Country</div>
-      <div v-if="pending">
-        <u-skeleton class="w-full h-4" />
-      </div>
-      <div v-else>
-        <country-link
-          v-if="player?.countries.find(country => !country.end_date)"
-          :country="player.countries.find(country => !country.end_date)!.country"
-        />
-        <div v-else>—</div>
-      </div>
-
-      <div>Height</div>
+    <div v-if="isAdmin">
+      <div>Name</div>
       <div v-if="pending">
         <u-skeleton class="w-full h-4" />
       </div>
       <div
         v-else
-        class="flex items-center gap-2"
+        class="detail"
       >
-        <u-field-group v-if="'height' in updatedPlayer">
-          <form-input-number
-            v-model="updatedPlayer.height"
-            placeholder="Height"
+        <u-field-group v-if="'first_name' in updatedPlayer && 'last_name' in updatedPlayer">
+          <form-input
+            v-model="updatedPlayer.first_name"
+            placeholder="First name"
           />
-          <u-badge
-            label="cm"
-            color="neutral"
-            variant="outline"
+          <form-input
+            v-model="updatedPlayer.last_name"
+            placeholder="Last name"
           />
         </u-field-group>
+        <div v-else>{{ player?.full_name }}</div>
+        <u-checkbox
+          :icon="ICONS.player"
+          :model-value="'first_name' in updatedPlayer && 'last_name' in updatedPlayer"
+          @update:model-value="() => handleCheckboxSelect(['first_name', 'last_name'])"
+        />
+      </div>
 
-        <div
-          v-else
-          class="flex-1"
-        >
-          <div>{{ player?.height ? `${player.height} cm` : "—" }}</div>
-          <div v-if="player?.height">{{ convertToFt(player.height) }}</div>
+      <div>Links</div>
+      <div v-if="pending">
+        <u-skeleton class="w-full h-4" />
+      </div>
+      <div
+        v-else
+        class="detail"
+      >
+        <div v-if="'wiki_link' in updatedPlayer && 'official_link' in updatedPlayer">
+          <form-textarea
+            v-model="updatedPlayer.wiki_link"
+            placeholder="Wikipedia link"
+          />
+
+          <form-textarea
+            v-model="updatedPlayer.official_link"
+            placeholder="Official link"
+          />
+        </div>
+
+        <div v-else>
+          <div class="truncate text-ellipsis">
+            {{ player?.wiki_link || "—" }}
+          </div>
+          <div class="truncate text-ellipsis">
+            {{ player?.official_link || "—" }}
+          </div>
         </div>
 
         <u-checkbox
           :icon="ICONS.player"
-          :model-value="'height' in updatedPlayer"
-          @update:model-value="
-            () => {
-              if ('height' in updatedPlayer) {
-                delete updatedPlayer['height']
-              } else {
-                updatedPlayer['height'] = player?.height
-              }
-            }
-          "
+          :model-value="'wiki_link' in updatedPlayer && 'official_link' in updatedPlayer"
+          @update:model-value="() => handleCheckboxSelect(['wiki_link', 'official_link'])"
         />
       </div>
     </div>
@@ -350,24 +318,21 @@ const handleSubmit = async () => {
       </div>
       <div
         v-else
-        class="flex items-center gap-2"
+        class="detail"
       >
         <u-field-group v-if="'dob' in updatedPlayer && 'dod' in updatedPlayer">
           <form-date-picker
             v-model="updatedPlayer.dob"
-            placeholder="Date of birth"
+            :show-icons="false"
           />
 
           <form-date-picker
             v-model="updatedPlayer.dod"
-            placeholder="Date of death"
+            :show-icons="false"
           />
         </u-field-group>
 
-        <div
-          v-else
-          class="flex-1"
-        >
+        <div v-else>
           <div>{{ playerAge }}</div>
           <div v-if="player?.dob">
             {{ formatDate(player.dob, player?.dod || undefined) }}
@@ -378,35 +343,23 @@ const handleSubmit = async () => {
         </div>
 
         <u-checkbox
-          :icon="ICONS.player"
+          v-if="isAdmin"
           :model-value="'dob' in updatedPlayer && 'dod' in updatedPlayer"
-          @update:model-value="
-            () => {
-              if ('dob' in updatedPlayer) {
-                delete updatedPlayer['dob']
-                delete updatedPlayer['dod']
-              } else {
-                updatedPlayer['dob'] = player?.dob ? parseDate(player.dob) : null
-                updatedPlayer['dod'] = player?.dod ? parseDate(player.dod) : null
-              }
-            }
-          "
+          @update:model-value="() => handleCheckboxSelect(['dob', 'dod'])"
         />
       </div>
 
-      <div>
-        {{
-          player?.turned_pro && !player.retired ? "Turned Pro"
-          : player?.retired && !player.turned_pro ? "Retired"
-          : "Pro Years"
-        }}
-      </div>
+      <div>{{
+        player?.turned_pro && !player.retired ? "Turned Pro"
+        : player?.retired && !player.turned_pro ? "Retired"
+        : "Pro Years"
+      }}</div>
       <div v-if="pending">
         <u-skeleton class="w-full h-4" />
       </div>
       <div
         v-else
-        class="flex items-center gap-2"
+        class="detail"
       >
         <u-field-group v-if="'turned_pro' in updatedPlayer && 'retired' in updatedPlayer">
           <form-input-number
@@ -420,10 +373,7 @@ const handleSubmit = async () => {
           />
         </u-field-group>
 
-        <div
-          v-else
-          class="flex-1"
-        >
+        <div v-else>
           <div v-if="player?.turned_pro || player?.retired">
             <div>
               <span v-if="player.turned_pro">{{ player.turned_pro }}</span>
@@ -438,19 +388,9 @@ const handleSubmit = async () => {
         </div>
 
         <u-checkbox
-          :icon="ICONS.player"
+          v-if="isAdmin"
           :model-value="'turned_pro' in updatedPlayer && 'retired' in updatedPlayer"
-          @update:model-value="
-            () => {
-              if ('turned_pro' in updatedPlayer) {
-                delete updatedPlayer['turned_pro']
-                delete updatedPlayer['retired']
-              } else {
-                updatedPlayer['turned_pro'] = player?.turned_pro
-                updatedPlayer['retired'] = player?.retired
-              }
-            }
-          "
+          @update:model-value="() => handleCheckboxSelect(['turned_pro', 'retired'])"
         />
       </div>
     </div>
@@ -462,7 +402,7 @@ const handleSubmit = async () => {
       </div>
       <div
         v-else
-        class="flex items-center gap-2"
+        class="detail"
       >
         <u-radio-group
           v-if="'rh' in updatedPlayer"
@@ -470,27 +410,13 @@ const handleSubmit = async () => {
           :items="['Right', 'Left']"
           orientation="horizontal"
           loop
-          class="flex-1"
         />
-
-        <div
-          v-else
-          class="flex-1"
-          >{{ player?.rh ? `${player.rh}-handed` : "—" }}</div
-        >
-
+        <div v-else>{{ player?.rh ? `${player.rh}-handed` : "—" }}</div>
         <u-checkbox
+          v-if="isAdmin"
           :icon="ICONS.player"
           :model-value="'rh' in updatedPlayer"
-          @update:model-value="
-            () => {
-              if ('rh' in updatedPlayer) {
-                delete updatedPlayer['rh']
-              } else {
-                updatedPlayer['rh'] = player?.rh
-              }
-            }
-          "
+          @update:model-value="() => handleCheckboxSelect(['rh'])"
         />
       </div>
 
@@ -500,36 +426,63 @@ const handleSubmit = async () => {
       </div>
       <div
         v-else
-        class="flex items-center gap-2"
+        class="detail"
       >
         <u-radio-group
           v-if="'bh' in updatedPlayer"
           v-model="updatedPlayer.bh"
-          :items="['One', 'Two']"
+          :items="['Right', 'Left']"
           orientation="horizontal"
           loop
-          class="flex-1"
         />
-
-        <div
-          v-else
-          class="flex-1"
-          >{{ player?.bh ? `${player.bh}-handed` : "—" }}</div
-        >
-
+        <div v-else>{{ player?.bh ? `${player.bh}-handed` : "—" }}</div>
         <u-checkbox
+          v-if="isAdmin"
           :icon="ICONS.player"
           :model-value="'bh' in updatedPlayer"
-          @update:model-value="
-            () => {
-              if ('bh' in updatedPlayer) {
-                delete updatedPlayer['bh']
-              } else {
-                updatedPlayer['bh'] = player?.bh
-              }
-            }
-          "
+          @update:model-value="() => handleCheckboxSelect(['bh'])"
         />
+      </div>
+    </div>
+
+    <div>
+      <div>Height</div>
+      <div v-if="pending">
+        <u-skeleton class="w-full h-4" />
+      </div>
+      <div
+        v-else
+        class="detail"
+      >
+        <u-field-group v-if="'height' in updatedPlayer">
+          <form-input-number
+            v-model="updatedPlayer.height"
+            placeholder="Height"
+          />
+          <u-badge
+            label="cm"
+            color="neutral"
+            variant="outline"
+          />
+        </u-field-group>
+        <div v-else>
+          <div>{{ player?.height ? `${player.height} cm` : "—" }}</div>
+          <div v-if="player?.height">{{ convertToFt(player.height) }}</div>
+        </div>
+        <u-checkbox
+          v-if="isAdmin"
+          :icon="ICONS.player"
+          :model-value="'height' in updatedPlayer"
+          @update:model-value="() => handleCheckboxSelect(['height'])"
+        />
+      </div>
+
+      <div>Prize Money</div>
+      <div v-if="pending">
+        <u-skeleton class="w-full h-4" />
+      </div>
+      <div v-else>
+        {{ isDefined(player?.pm) ? player.pm.toLocaleString("en-GB", { style: "currency", currency: "USD" }) : "—" }}
       </div>
     </div>
 
@@ -557,9 +510,11 @@ const handleSubmit = async () => {
         <u-skeleton class="w-full h-4" />
       </div>
       <div v-else>
-        <div>{{ player?.ch_singles?.toLocaleString() ?? "—" }}</div>
-        <div v-if="player?.ch_singles_date">
-          {{ formatDate(player.ch_singles_date) }}
+        <div>
+          <div>{{ player?.ch_singles?.toLocaleString() ?? "—" }}</div>
+          <div v-if="player?.ch_singles_date">
+            {{ formatDate(player.ch_singles_date) }}
+          </div>
         </div>
       </div>
 
@@ -568,134 +523,52 @@ const handleSubmit = async () => {
         <u-skeleton class="w-full h-4" />
       </div>
       <div v-else>
-        <div>{{ player?.ch_doubles?.toLocaleString() ?? "—" }}</div>
-        <div v-if="player?.ch_doubles_date">
-          {{ formatDate(player.ch_doubles_date) }}
+        <div>
+          <div>{{ player?.ch_doubles?.toLocaleString() ?? "—" }}</div>
+          <div v-if="player?.ch_doubles_date">
+            {{ formatDate(player.ch_doubles_date) }}
+          </div>
         </div>
       </div>
     </div>
 
     <div>
-      <div>Prize Money</div>
-      <div v-if="pending">
-        <u-skeleton class="w-full h-4" />
-      </div>
-      <div v-else>
-        {{ isDefined(player?.pm) ? player.pm.toLocaleString("en-GB", { style: "currency", currency: "USD" }) : "—" }}
-      </div>
-
       <div>Hall of Fame Induction</div>
       <div v-if="pending">
         <u-skeleton class="w-full h-4" />
       </div>
       <div
         v-else
-        class="flex items-center gap-2"
+        class="detail"
       >
-        <form-input-number
+        <form-input
           v-if="'hof' in updatedPlayer"
-          v-model="updatedPlayer.hof"
-          placeholder="Hall of Fame induction"
+          type="number"
+          placeholder="Hall of fame induction"
         />
 
-        <div
-          v-else
-          class="flex-1"
-        >
-          {{ player?.hof || "—" }}
-        </div>
+        <div v-else>{{ player?.hof || "—" }}</div>
 
         <u-checkbox
+          v-if="isAdmin"
           :icon="ICONS.player"
           :model-value="'hof' in updatedPlayer"
-          @update:model-value="
-            () => {
-              if ('hof' in updatedPlayer) {
-                delete updatedPlayer['hof']
-              } else {
-                updatedPlayer['hof'] = player?.hof
-              }
-            }
-          "
+          @update:model-value="() => handleCheckboxSelect(['hof'])"
+        />
+      </div>
+
+      <div>Updated at</div>
+      <div v-if="pending">
+        <u-skeleton class="w-full h-4" />
+      </div>
+      <div v-else>
+        <u-badge
+          v-if="player?.updated_at"
+          :label="formatDateTime(player.updated_at)"
+          color="success"
         />
       </div>
     </div>
-
-    <dev-only>
-      <div>
-        <div>Wikipedia Link</div>
-        <div v-if="pending">
-          <u-skeleton class="w-full h-4" />
-        </div>
-        <div
-          v-else
-          class="flex items-center gap-2"
-        >
-          <form-textarea
-            v-if="'wiki_link' in updatedPlayer"
-            v-model="updatedPlayer.wiki_link"
-            placeholder="Wikipedia link"
-          />
-
-          <div
-            v-else
-            class="flex-1"
-          >
-            {{ player?.wiki_link || "—" }}
-          </div>
-
-          <u-checkbox
-            :icon="ICONS.player"
-            :model-value="'wiki_link' in updatedPlayer"
-            @update:model-value="
-              () => {
-                if ('wiki_link' in updatedPlayer) {
-                  delete updatedPlayer['wiki_link']
-                } else {
-                  updatedPlayer['wiki_link'] = player?.wiki_link
-                }
-              }
-            "
-          />
-        </div>
-
-        <div>Official Link</div>
-        <div v-if="pending">
-          <u-skeleton class="w-full h-4" />
-        </div>
-        <div
-          v-else
-          class="flex items-center gap-2"
-        >
-          <form-textarea
-            v-if="'official_link' in updatedPlayer"
-            v-model="updatedPlayer.official_link"
-            placeholder="Official link"
-          />
-
-          <div
-            v-else
-            class="flex-1"
-          >
-            {{ player?.official_link || "—" }}
-          </div>
-
-          <u-checkbox
-            :icon="ICONS.player"
-            :model-value="'official_link' in updatedPlayer"
-            @update:model-value="
-              () => {
-                if ('official_link' in updatedPlayer) {
-                  delete updatedPlayer['official_link']
-                } else {
-                  updatedPlayer['official_link'] = player?.official_link
-                }
-              }
-            "
-          />
-        </div>
-      </div>
-    </dev-only>
 
     <div>
       <div :class="{ 'col-span-2': 'coaches' in updatedPlayer || 'countries' in updatedPlayer }">Coaches</div>
@@ -704,26 +577,18 @@ const handleSubmit = async () => {
       </div>
       <div
         v-else
-        class="flex items-center gap-2"
+        class="detail"
         :class="{ 'col-span-2': 'coaches' in updatedPlayer || 'countries' in updatedPlayer }"
       >
         <div
           v-if="'coaches' in updatedPlayer"
-          class="flex-1 *:my-0.5"
+          class="*:my-0.5"
         >
           <u-field-group v-for="(coach, index) in updatedPlayer.coaches">
             <person-search
               v-model="updatedPlayer.coaches[index].coach_id"
               placeholder="Select coach"
               :icon="ICONS.coach"
-              :start-value="
-                coach.coach_id ?
-                  {
-                    id: coach.coach_id,
-                    label: coach.label
-                  }
-                : undefined
-              "
             />
 
             <form-input
@@ -752,16 +617,13 @@ const handleSubmit = async () => {
                 years: undefined,
                 status: 'Current',
                 coach_id: undefined,
-                label: undefined
+                full_name: undefined
               })
             "
           />
         </div>
 
-        <div
-          v-else
-          class="flex-1"
-        >
+        <div v-else>
           <div
             v-if="player?.coaches.length"
             v-for="coach in player.coaches"
@@ -769,52 +631,41 @@ const handleSubmit = async () => {
           >
             <u-link
               v-if="coach.coach.player_id"
-              :to="{ name: 'player', params: { id: coach.id, name: kebabCase(`${coach.coach.first_name} ${coach.coach.last_name}`) } }"
+              :to="{ name: 'player', params: { id: coach.id, name: kebabCase(coach.coach.full_name) } }"
               class="hover-link primary-link"
             >
-              {{ coach.coach.first_name }} {{ coach.coach.last_name }}
+              {{ coach.coach.full_name }}
             </u-link>
-            <span v-else> {{ coach.coach.first_name }} {{ coach.coach.last_name }} </span>
+            <span v-else> {{ coach.coach.full_name }} </span>
             <span> ({{ coach.years || coach.status }})</span>
           </div>
+          <div v-else>—</div>
         </div>
 
         <u-checkbox
+          v-if="isAdmin"
           :icon="ICONS.player"
           :model-value="'coaches' in updatedPlayer"
-          @update:model-value="
-            () => {
-              if ('coaches' in updatedPlayer) {
-                delete updatedPlayer['coaches']
-              } else {
-                updatedPlayer['coaches'] =
-                  player?.coaches?.map(coach => ({
-                    id: coach.id,
-                    years: coach.years,
-                    status: coach.status,
-                    coach_id: coach.coach.id,
-                    label: `${coach.coach.first_name} ${coach.coach.last_name}`
-                  })) || []
-              }
-            }
-          "
+          @update:model-value="() => handleCheckboxSelect(['coaches'])"
         />
       </div>
 
-      <div :class="{ 'col-span-2': 'coaches' in updatedPlayer || 'countries' in updatedPlayer }">Previous Representations</div>
+      <div :class="{ 'col-span-2': 'coaches' in updatedPlayer || 'countries' in updatedPlayer }">{{
+        "countries" in updatedPlayer ? "Countries" : "Previous Representations"
+      }}</div>
       <div v-if="pending">
         <u-skeleton class="w-full h-4" />
       </div>
       <div
         v-else
-        class="flex items-center gap-2"
+        class="detail"
         :class="{ 'col-span-2': 'coaches' in updatedPlayer || 'countries' in updatedPlayer }"
       >
         <div
           v-if="'countries' in updatedPlayer"
-          class="flex-1 *:my-0.5"
+          class="*:my-0.5"
         >
-          <u-field-group v-for="(country, index) in updatedPlayer.countries">
+          <u-field-group v-for="(_, index) in updatedPlayer.countries">
             <u-input-menu
               v-model="updatedPlayer.countries[index].country_id"
               :items="countries"
@@ -851,10 +702,7 @@ const handleSubmit = async () => {
           />
         </div>
 
-        <div
-          v-else
-          class="flex-1"
-        >
+        <div v-else>
           <div
             v-if="player?.countries.filter(country => country.end_date).length"
             v-for="country in player.countries.filter(country => country.end_date)"
@@ -873,23 +721,10 @@ const handleSubmit = async () => {
         </div>
 
         <u-checkbox
+          v-if="isAdmin"
           :icon="ICONS.player"
           :model-value="'countries' in updatedPlayer"
-          @update:model-value="
-            () => {
-              if ('countries' in updatedPlayer) {
-                delete updatedPlayer['countries']
-              } else {
-                updatedPlayer['countries'] =
-                  player?.countries?.map(country => ({
-                    id: country.id,
-                    start_date: country.start_date ? parseDate(country.start_date) : undefined,
-                    end_date: country.end_date ? parseDate(country.end_date) : undefined,
-                    country_id: country.country.id
-                  })) || []
-              }
-            }
-          "
+          @update:model-value="() => handleCheckboxSelect(['countries'])"
         />
       </div>
     </div>

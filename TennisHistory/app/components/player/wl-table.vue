@@ -2,7 +2,7 @@
 
 <template>
   <div>
-    Component: global/search
+    Component: player/wl-table
   </div>
 </template>
 

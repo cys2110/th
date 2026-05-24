@@ -48,7 +48,7 @@ const columns: Array<TableColumn<TournamentInterface>> = [
       }
     }
   },
-  { accessorKey: "name", footer: () => `${props.count} tournament${props.count === 1 ? "" : "s"}` },
+  { accessorKey: "name", footer: () => `${props.count.toLocaleString()} tournament${props.count === 1 ? "" : "s"}` },
   { accessorKey: "established" },
   { accessorKey: "abolished" }
 ]

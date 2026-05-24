@@ -9,6 +9,7 @@ const {
   ui: { icons, colors }
 } = useAppConfig()
 
+const { isAdmin } = useAuthState()
 const playerStore = usePlayerStore()
 playerStore.paramName = params.name
 
@@ -43,13 +44,20 @@ useHead({
 const { data: player } = await useAsyncData(params.id, async () => {
   const supabase = useSupabaseClient()
 
+  const { data: playerListData, error: playerListError } = await supabase
+    .from("player_list_view")
+    .select("first_tournament, last_tournament, country")
+    .eq("id", params.id)
+    .single()
+
+  if (playerListError || !playerListData) {
+    console.error("Error fetching player view:", playerListError)
+  }
+
   const { data, error } = await supabase
     .from("players")
-    .select(
-      "first_name, last_name, tour, ch_singles_date, ch_doubles_date, dod, turned_pro, retired, site_link, wiki_link, official_link, ...player_entry_mapping(entries(events(editions(year)))), player_country_mapping(countries(*))"
-    )
+    .select("first_name, last_name, full_name, tour, ch_singles_date, ch_doubles_date, dod, site_link, wiki_link, official_link")
     .eq("id", params.id)
-    .is("player_country_mapping.end_date", null)
     .single()
 
   if (error || !data) {
@@ -57,22 +65,20 @@ const { data: player } = await useAsyncData(params.id, async () => {
     return null
   }
 
-  const eventYears = useSorted(useArrayUnique(data.entries.map(entry => entry.events.editions?.year).filter(Boolean) as number[])).value
-
   return {
     first_name: data.first_name,
     last_name: data.last_name,
+    full_name: data.full_name,
     tour: data.tour,
-    activeYears: eventYears,
     ch_singles_date: data.ch_singles_date,
     ch_doubles_date: data.ch_doubles_date,
-    turned_pro: data.turned_pro,
-    retired: data.retired,
     dod: data.dod,
-    country: data.player_country_mapping[0]?.countries,
+    country: playerListData!.country as unknown as CountryInterface,
     site_link: data.site_link,
     wiki_link: data.wiki_link,
-    official_link: data.official_link
+    official_link: data.official_link,
+    first_tournament: playerListData!.first_tournament,
+    last_tournament: playerListData!.last_tournament
   }
 })
 
@@ -80,10 +86,13 @@ watch(
   player,
   () => {
     if (player.value) {
-      playerStore.firstName = player.value.first_name || ""
-      playerStore.lastName = player.value.last_name || ""
-      playerStore.tour = player.value.tour
-      playerStore.activeYears = player.value.activeYears
+      const { full_name, tour, first_tournament, last_tournament } = player.value
+
+      playerStore.playerName = full_name || ""
+      playerStore.tour = tour
+      playerStore.isActive = !!(last_tournament && last_tournament === new Date().getFullYear())
+      playerStore.activeYears =
+        first_tournament && last_tournament ? Array.from({ length: last_tournament - first_tournament + 1 }, (_, i) => first_tournament + i) : []
     }
   },
   { immediate: true }
@@ -99,7 +108,7 @@ const scrapeEnabled = computed(() => {
   if (
     (singlesChDate && singlesChDate < cutoffDate) ||
     (doublesChDate && doublesChDate < cutoffDate) ||
-    (player.value?.retired && player.value.retired < 2024) ||
+    (player.value?.last_tournament && player.value.last_tournament < 2024) ||
     player.value?.dod
   ) {
     return false
@@ -140,12 +149,17 @@ const handleScrape = async () => {
 <template>
   <u-page-header
     headline="Players"
-    :title="playerStore.fullName"
     :ui="{
       root: 'border-none mb-0 pb-0',
       description: 'text-md w-fit flex items-center gap-2'
     }"
   >
+    <template #title>
+      <div v-if="player?.first_name && player?.last_name"> {{ player.first_name }} {{ player.last_name.toUpperCase() }} </div>
+
+      <div v-else>{{ playerStore.fullName }}</div>
+    </template>
+
     <template
       #description
       v-if="player"
@@ -156,7 +170,7 @@ const handleScrape = async () => {
         icon-only
       />
 
-      <u-chip :color="playerStore.active ? 'Active' : 'Inactive'">
+      <u-chip :color="playerStore.isActive ? 'Active' : 'Inactive'">
         <u-badge
           v-if="playerStore.tour"
           :label="playerStore.tour"
@@ -167,10 +181,10 @@ const handleScrape = async () => {
       <div>
         Years Active:
         {{
-          playerStore.activeYears.length ?
-            playerStore.activeYears.length > 1 ?
-              `${playerStore.activeYears[0]}-${playerStore.activeYears[playerStore.activeYears.length - 1]}`
-            : playerStore.activeYears[0]
+          player.first_tournament && player.last_tournament ?
+            player.first_tournament === player.last_tournament ?
+              player.first_tournament
+            : `${player.first_tournament}-${player.last_tournament}`
           : "—"
         }}
         ({{ playerStore.activeYears.length }} year{{ playerStore.activeYears.length === 1 ? "" : "s" }})
@@ -184,17 +198,24 @@ const handleScrape = async () => {
         :content="false"
         v-model="activeRoute"
         :ui="{ list: 'justify-end' }"
-      />
+      >
+        <template #default="{ item }">
+          <u-link
+            :to="{ name: item.value as any, params: { id: params.id, name: player?.full_name || params.name } }"
+            class="text-inherit hover:text-inherit"
+          >
+            {{ item.label }}
+          </u-link>
+        </template>
+      </u-tabs>
     </template>
 
     <template #links>
-      <dev-only>
-        <u-button
-          v-if="scrapeEnabled"
-          :icon="isScraping ? ICONS.downloading : ICONS.download"
-          @click="handleScrape"
-        />
-      </dev-only>
+      <u-button
+        v-if="scrapeEnabled && isAdmin"
+        :icon="isScraping ? ICONS.downloading : ICONS.download"
+        @click="handleScrape"
+      />
 
       <u-button
         v-if="player?.site_link"

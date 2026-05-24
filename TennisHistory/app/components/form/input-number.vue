@@ -4,7 +4,6 @@ withDefaults(
     placeholder: string
     currency?: string
     disabled?: boolean
-    icon?: string
   }>(),
   {
     disabled: false
@@ -24,8 +23,6 @@ const {
     :placeholder
     :step="currency ? 0.01 : undefined"
     :disabled
-    :icon
-    :decrement="!!icon"
     :format-options="
       currency ?
         {
@@ -46,13 +43,6 @@ const {
         @click="modelValue = undefined"
       />
       <template v-else>{{ " " }}</template>
-    </template>
-
-    <template #decrement>
-      <u-icon
-        :name="icon"
-        class="text-base"
-      />
     </template>
   </u-input-number>
 </template>

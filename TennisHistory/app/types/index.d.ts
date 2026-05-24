@@ -48,6 +48,7 @@ declare global {
     id: string
     first_name: string
     last_name: string
+    full_name: string
   }
 
   interface SurfaceInterface {
@@ -68,7 +69,6 @@ declare global {
     tour: TourType
     turned_pro: number | null
     retired: number | null
-    activeYears: Array<number>
     ch_singles: number | null
     ch_singles_date: string | null
     ch_doubles: number | null
@@ -89,7 +89,7 @@ declare global {
       start_date: string | null
       end_date: string | null
       id: string
-      country: CountryType
+      country: CountryInterface
     }>
     coaches: Array<{
       id: string

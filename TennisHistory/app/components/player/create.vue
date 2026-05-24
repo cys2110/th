@@ -75,25 +75,24 @@ const handleSubmit = async () => {
     <u-button :trailing-icon="icons.plus" />
 
     <template #body>
+      <u-alert
+        v-if="errors"
+        color="error"
+        :title="`Error creating ${playerId}`"
+        class="mb-5"
+        :description="errors"
+      />
+
       <u-form-field
-        label="Player ID"
+        label="ID"
         orientation="horizontal"
         :ui="{ container: 'flex-1' }"
       >
         <form-input
           placeholder="Enter Player ID"
-          :icon="ICONS.id"
           v-model="playerId"
         />
       </u-form-field>
-
-      <u-alert
-        v-if="errors"
-        color="error"
-        :title="`Error creating ${playerId}`"
-        class="mt-5"
-        :description="errors"
-      />
     </template>
 
     <template #footer="{ close }">
