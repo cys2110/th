@@ -86,7 +86,16 @@ watch(
         :content="false"
         v-model="activeRoute"
         :ui="{ list: 'justify-end' }"
-      />
+      >
+        <template #default="{ item }">
+          <u-link
+            :to="{ name: item.value as any, params }"
+            class="text-inherit hover:text-inherit"
+          >
+            {{ item.label }}
+          </u-link>
+        </template>
+      </u-tabs>
     </template>
 
     <template #links>

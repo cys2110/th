@@ -70,8 +70,8 @@ const formFields: Array<FormFieldInterface<Schema>> = [
   { label: "Tournament ID", key: "tournament_id", type: "text", required: true, class: "col-span-2" },
   { label: "Match Type", key: "match_type", type: "radio", items: MATCH_TYPES, required: true },
   { label: "Draw", key: "draw", type: "radio", items: DRAW_TYPES, required: true },
-  { label: "Draw Range", key: "draw_range", type: "tags", max: 2, required: true, icon: ICONS.people },
-  { label: "Matches to Skip", key: "skip", type: "tags", icon: ICONS.trophyOff }
+  { label: "Draw Range", key: "draw_range", type: "tags", max: 2, required: true, icon: ICONS.people, class: "col-span-2" },
+  { label: "Matches to Skip", key: "skip", type: "tags", icon: ICONS.trophyOff, class: "col-span-2" }
 ]
 </script>
 

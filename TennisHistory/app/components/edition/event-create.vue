@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import type { FormErrorEvent, FormSubmitEvent } from "@nuxt/ui"
-import { PostgrestError } from "@supabase/supabase-js"
 import { any, array, number, object, string, url, z } from "zod"
 
 const schema = object({
@@ -53,8 +52,6 @@ const toast = useToast()
 const supabase = useSupabaseClient()
 
 const tournamentStore = useTournamentStore()
-const venueSearch = useVenueSearch()
-const supervisorsSearch = usePersonSearch()
 
 const isOpen = ref(false)
 const isUploading = ref(false)
@@ -74,9 +71,7 @@ const handleReset = () => {
   set(errors, undefined)
 }
 
-const onError = (event: FormErrorEvent) => {
-  set(errors, event.errors)
-}
+const onError = (event: FormErrorEvent) => set(errors, event.errors)
 
 const onSubmit = async (event: FormSubmitEvent<Schema>) => {
   set(isUploading, true)
@@ -85,8 +80,6 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
     const { surfaces, supervisors, venues, tour, dates, ...rest } = event.data
 
     const eventTour = tour || tournamentStore.tours[0]
-
-    console.log(eventTour)
 
     const eventId =
       COUNTRY_DRAWS.includes(id) ? `${edId}-Country`
@@ -103,8 +96,13 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
     })
 
     if (error) {
-      console.error("Error adding event", error)
-      throw error
+      set(errors, error)
+
+      toast.add({
+        title: `Error creating ${tournamentStore.name} ${year} ${event.data.tour}`,
+        icon: icons.error,
+        color: "error"
+      })
     }
 
     const { error: venuesMappingError } = await supabase
@@ -149,14 +147,6 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
     emits("refresh")
     handleReset()
     set(isOpen, false)
-  } catch (error) {
-    set(errors, error instanceof PostgrestError ? error.details : (error as any).message)
-
-    toast.add({
-      title: `Error creating ${tournamentStore.name} ${year} ${event.data.tour}`,
-      icon: icons.error,
-      color: "error"
-    })
   } finally {
     set(isUploading, false)
   }
@@ -208,6 +198,14 @@ const formFields = computed<Array<FormFieldInterface<Schema>>>(
     <u-button :icon="icons.plus" />
 
     <template #body>
+      <u-alert
+        v-if="errors"
+        color="error"
+        :title="`Error creating event ${edId}${state.tour || ''}`"
+        :description="errors"
+        class="mb-5"
+      />
+
       <u-form
         id="event-form"
         ref="form"
@@ -241,7 +239,7 @@ const formFields = computed<Array<FormFieldInterface<Schema>>>(
             v-model="state"
           >
             <u-field-group v-if="field.label === 'Award'">
-              <u-select-menu
+              <u-input-menu
                 placeholder="e.g., $"
                 :items="CURRENCY_OPTIONS"
                 v-model="state.currency"
@@ -260,50 +258,22 @@ const formFields = computed<Array<FormFieldInterface<Schema>>>(
               />
             </u-field-group>
 
-            <u-input-menu
+            <venue-search
               v-else-if="field.key === 'venues'"
               v-model="state[field.key]"
-              :items="venueSearch.results.value"
-              placeholder="Select venues"
               multiple
-              :icon="ICONS.venue"
-              :loading="venueSearch.loading.value"
-              clear
-              v-model:search-term="venueSearch.searchTerm.value"
-              class="w-full"
-            >
-              <template #content-bottom>
-                <venue-create @refresh="venueSearch.refresh" />
-              </template>
-            </u-input-menu>
+              placeholder="Select venues"
+            />
 
-            <u-input-menu
+            <person-search
               v-else-if="field.key === 'supervisors'"
               v-model="state[field.key]"
-              :items="supervisorsSearch.results.value"
-              placeholder="Select supervisors"
               multiple
-              :icon="ICONS.supervisor"
-              :loading="supervisorsSearch.loading.value"
-              clear
-              v-model:search-term="supervisorsSearch.searchTerm.value"
-              class="w-full"
-            >
-              <template #content-bottom>
-                <person-create @refresh="supervisorsSearch.refresh" />
-              </template>
-            </u-input-menu>
+              placeholder="Select supervisors"
+            />
           </form-field>
         </div>
       </u-form>
-
-      <u-alert
-        v-if="errors"
-        color="error"
-        :title="`Error creating event ${edId}${state.tour || ''}`"
-        :description="errors"
-        class="mt-5"
-      />
     </template>
 
     <template #footer="{ close }">

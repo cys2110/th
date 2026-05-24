@@ -81,6 +81,7 @@ const modelValue = defineModel<any>()
       orientation="horizontal"
       loop
       :icon="field.icon"
+      highlight
     />
 
     <u-radio-group
@@ -91,6 +92,7 @@ const modelValue = defineModel<any>()
       loop
       :value-key="field.valueKey"
       :label-key="field.labelKey"
+      highlight
     />
 
     <form-date-picker

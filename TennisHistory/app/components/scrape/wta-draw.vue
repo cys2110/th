@@ -7,7 +7,6 @@ const {
   params: { edId, year }
 } = useRoute("edition")
 
-const router = useRouter()
 const toast = useToast()
 
 const isOpen = ref(false)
@@ -65,7 +64,7 @@ const handleSubmit = async () => {
 
     <template #body>
       <u-form-field
-        label="Tournament ID"
+        label="ID"
         orientation="horizontal"
         :ui="{ container: 'flex-1' }"
       >

@@ -28,7 +28,7 @@ const inputDateRef = useTemplateRef("inputDateRef")
     locale="en-GB"
     :min-value="min ? parseDate(min) : undefined"
     :max-value="max ? parseDate(max) : undefined"
-    class="max-w-full w-fit"
+    class="w-full"
   >
     <template
       #trailing

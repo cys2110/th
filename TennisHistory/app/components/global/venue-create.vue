@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import type { FormErrorEvent, FormSubmitEvent } from "@nuxt/ui"
-import { PostgrestError } from "@supabase/supabase-js"
 import { object, string, z } from "zod"
 
 const schema = object({
@@ -44,7 +43,15 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
   try {
     const { error } = await supabase.from("venues").insert(event.data)
 
-    if (error) throw error
+    if (error) {
+      set(errors, error)
+
+      toast.add({
+        title: `Error creating ${venueName}`,
+        icon: icons.error,
+        color: "error"
+      })
+    }
 
     toast.add({
       title: `${venueName} successfully created!`,
@@ -55,14 +62,6 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
     emits("refresh")
     handleReset()
     set(isOpen, false)
-  } catch (error) {
-    set(errors, error instanceof PostgrestError ? error.details : (error as any).message)
-
-    toast.add({
-      title: `Error creating ${venueName}`,
-      icon: icons.error,
-      color: "error"
-    })
   } finally {
     set(isUploading, false)
   }
@@ -86,6 +85,14 @@ const formFields = computed<FormFieldInterface<Schema>[]>(() => [
     />
 
     <template #body>
+      <u-alert
+        v-if="errors"
+        color="error"
+        :title="`Error saving ${state.name ? `${state.name}, ${state.city}` : state.city}`"
+        :description="errors"
+        class="mb-5"
+      />
+
       <u-form
         id="venue-form"
         :schema
@@ -113,14 +120,6 @@ const formFields = computed<FormFieldInterface<Schema>[]>(() => [
           />
         </u-form-field>
       </u-form>
-
-      <u-alert
-        v-if="errors"
-        color="error"
-        :title="`Error saving ${state.name ? `${state.name}, ${state.city}` : state.city}`"
-        :description="errors"
-        class="mt-5"
-      />
     </template>
 
     <template #footer="{ close }">

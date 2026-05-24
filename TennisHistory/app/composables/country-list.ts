@@ -29,6 +29,7 @@ export const useCountryList = () => {
 
   return {
     countries,
-    pending
+    pending,
+    fetchCountries
   }
 }

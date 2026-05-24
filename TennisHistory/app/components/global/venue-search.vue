@@ -1,17 +1,10 @@
 <script setup lang="ts">
 const props = defineProps<{
   placeholder: string
-  icon?: string
   multiple?: boolean
-  startValue?:
-    | {
-        id: string
-        full_name: string
-      }
-    | undefined
 }>()
 
-const { results, pending, fetchSearchResults, searchTerm } = usePersonSearch()
+const { results, pending, fetchSearchResults, searchTerm } = useVenueSearch()
 
 const modelValue = defineModel<any>()
 </script>
@@ -24,14 +17,14 @@ const modelValue = defineModel<any>()
     :loading="pending"
     clear
     :placeholder
-    :icon
+    :icon="ICONS.venue"
     :multiple
     :items="results"
     class="w-full"
-    label-key="full_name"
+    label-key="label"
   >
     <template #content-bottom>
-      <person-create @refresh="fetchSearchResults" />
+      <venue-create @refresh="fetchSearchResults" />
     </template>
   </u-input-menu>
 </template>

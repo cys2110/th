@@ -109,7 +109,7 @@ const handleSubmit = async () => {
   set(isSaving, true)
 
   try {
-    const playerToUpdate: Partial<Record<string, any>> = {}
+    const playerToUpdate: Record<string, any> = {}
 
     for (const [key, value] of Object.entries(updatedPlayer.value)) {
       if (key === "countries") {
@@ -226,18 +226,20 @@ const handleSubmit = async () => {
 </script>
 
 <template>
-  <div class="flex justify-end mb-6">
-    <u-field-group
-      v-if="isAdmin"
-      class="w-fit"
-    >
+  <div
+    v-if="isAdmin"
+    class="flex justify-end mb-6"
+  >
+    <u-field-group class="w-fit">
       <u-button
         :icon="icons.reload"
         @click="refresh()"
       />
 
       <u-button
-        :icon="isSaving ? ICONS.uploading : ICONS.save"
+        :icon="ICONS.save"
+        :loading="isSaving"
+        :loading-icon="ICONS.uploading"
         @click="handleSubmit"
         :disabled="isSaving || Object.keys(updatedPlayer).length === 0"
       />
@@ -268,6 +270,7 @@ const handleSubmit = async () => {
         </u-field-group>
         <div v-else>{{ player?.full_name }}</div>
         <u-checkbox
+          highlight
           :icon="ICONS.player"
           :model-value="'first_name' in updatedPlayer && 'last_name' in updatedPlayer"
           @update:model-value="() => handleCheckboxSelect(['first_name', 'last_name'])"
@@ -304,6 +307,7 @@ const handleSubmit = async () => {
         </div>
 
         <u-checkbox
+          highlight
           :icon="ICONS.player"
           :model-value="'wiki_link' in updatedPlayer && 'official_link' in updatedPlayer"
           @update:model-value="() => handleCheckboxSelect(['wiki_link', 'official_link'])"
@@ -343,6 +347,7 @@ const handleSubmit = async () => {
         </div>
 
         <u-checkbox
+          highlight
           v-if="isAdmin"
           :model-value="'dob' in updatedPlayer && 'dod' in updatedPlayer"
           @update:model-value="() => handleCheckboxSelect(['dob', 'dod'])"
@@ -388,6 +393,7 @@ const handleSubmit = async () => {
         </div>
 
         <u-checkbox
+          highlight
           v-if="isAdmin"
           :model-value="'turned_pro' in updatedPlayer && 'retired' in updatedPlayer"
           @update:model-value="() => handleCheckboxSelect(['turned_pro', 'retired'])"
@@ -413,6 +419,7 @@ const handleSubmit = async () => {
         />
         <div v-else>{{ player?.rh ? `${player.rh}-handed` : "—" }}</div>
         <u-checkbox
+          highlight
           v-if="isAdmin"
           :icon="ICONS.player"
           :model-value="'rh' in updatedPlayer"
@@ -437,6 +444,7 @@ const handleSubmit = async () => {
         />
         <div v-else>{{ player?.bh ? `${player.bh}-handed` : "—" }}</div>
         <u-checkbox
+          highlight
           v-if="isAdmin"
           :icon="ICONS.player"
           :model-value="'bh' in updatedPlayer"
@@ -470,6 +478,7 @@ const handleSubmit = async () => {
           <div v-if="player?.height">{{ convertToFt(player.height) }}</div>
         </div>
         <u-checkbox
+          highlight
           v-if="isAdmin"
           :icon="ICONS.player"
           :model-value="'height' in updatedPlayer"
@@ -550,6 +559,7 @@ const handleSubmit = async () => {
         <div v-else>{{ player?.hof || "—" }}</div>
 
         <u-checkbox
+          highlight
           v-if="isAdmin"
           :icon="ICONS.player"
           :model-value="'hof' in updatedPlayer"
@@ -643,6 +653,7 @@ const handleSubmit = async () => {
         </div>
 
         <u-checkbox
+          highlight
           v-if="isAdmin"
           :icon="ICONS.player"
           :model-value="'coaches' in updatedPlayer"
@@ -666,15 +677,9 @@ const handleSubmit = async () => {
           class="*:my-0.5"
         >
           <u-field-group v-for="(_, index) in updatedPlayer.countries">
-            <u-input-menu
+            <country-search
               v-model="updatedPlayer.countries[index].country_id"
-              :items="countries"
-              :icon="ICONS.globe"
-              :loading="countriesPending"
-              label-key="name"
-              value-key="id"
-              placeholder="Country"
-              class="w-full"
+              value-key
             />
 
             <form-date-picker v-model="updatedPlayer.countries[index].start_date" />
@@ -721,6 +726,7 @@ const handleSubmit = async () => {
         </div>
 
         <u-checkbox
+          highlight
           v-if="isAdmin"
           :icon="ICONS.player"
           :model-value="'countries' in updatedPlayer"

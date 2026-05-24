@@ -13,24 +13,7 @@ const {
 
 const supabase = useSupabaseClient()
 
-const {
-  data: countries,
-  pending,
-  refresh
-} = await useAsyncData(
-  "countries",
-  async () => {
-    const { data, error } = await supabase.from("countries").select("*").order("name", { ascending: true })
-
-    if (error || !data) {
-      console.error("Error fetching countries:", error)
-      return []
-    }
-
-    return data.map(country => ({ ...country, icon: getFlagCode(country) }))
-  },
-  { default: () => [] }
-)
+const { countries, pending, fetchCountries } = useCountryList()
 
 const selectedItems = ref<CountryWithIcon | null>()
 
@@ -64,7 +47,7 @@ watch(
         :icon="icons.reload"
         label="Refresh"
         block
-        @click="refresh()"
+        @click="fetchCountries()"
       />
     </template>
   </u-input-menu>

@@ -1339,18 +1339,21 @@ export type Database = {
           country_id: string
           id: string
           name: string | null
+          slug: string | null
         }
         Insert: {
           city: string
           country_id: string
           id?: string
           name?: string | null
+          slug?: string | null
         }
         Update: {
           city?: string
           country_id?: string
           id?: string
           name?: string | null
+          slug?: string | null
         }
         Relationships: [
           {

@@ -30,8 +30,6 @@ const {
 const toast = useToast()
 const supabase = useSupabaseClient()
 
-const { results, loading, searchTerm } = useVenueSearch()
-
 const isOpen = ref(false)
 const isUploading = ref(false)
 const errors = ref()
@@ -68,9 +66,7 @@ const handleReset = () => {
   set(errors, undefined)
 }
 
-const onError = (event: FormErrorEvent) => {
-  set(errors, event.errors)
-}
+const onError = (event: FormErrorEvent) => set(errors, event.errors)
 
 const onSubmit = async (event: FormSubmitEvent<Schema>) => {
   set(isUploading, true)
@@ -202,15 +198,9 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
             label="Venue"
             name="venue"
           >
-            <u-input-menu
+            <venue-search
               v-model="state[index]!.venue"
-              v-model:search-term="searchTerm"
-              :items="results"
-              :icon="ICONS.venue"
-              :loading="loading"
               placeholder="Venue"
-              class="w-full"
-              clear
             />
           </u-form-field>
 
