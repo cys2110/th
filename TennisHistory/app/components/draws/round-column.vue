@@ -2,16 +2,16 @@
 const props = defineProps<{
   roundIndex: number
   matches: DrawMatch[]
-  contestants: Draw["contestants"]
-  selectedContestantId?: string | null
+  entries: DrawData["entries"]
+  selectedEntryId?: string | null
   baseIndexValue: number
-  handleHighlightPath: (contestantId: string | null) => void
+  handleHighlightPath: (entryId: string | null) => void
 }>()
 
 const [defineRoundTemplate, reuseRoundTemplate] = createReusableTemplate()
 
 const showBronzeWrapper = computed(() => {
-  return props.matches.some(m => m.isBronzeMatch && m.order === 1)
+  return props.matches.some(m => m.isBronzeMatch)
 })
 
 const isVisible = computed(() => props.roundIndex >= props.baseIndexValue - 1 && props.roundIndex <= props.baseIndexValue + 1)
@@ -24,12 +24,12 @@ const isVisible = computed(() => props.roundIndex >= props.baseIndexValue - 1 &&
       :class="{ collapsed: !isVisible, hidden: !isVisible }"
       :round-index="roundIndex"
     >
-      <edition-draws-match-card
+      <draws-match-card
         v-for="match in matches"
-        :key="match.order"
+        :key="match.match_no"
         :match
-        :contestants
-        :selected-contestant-id="selectedContestantId"
+        :entries
+        :selected-entry-id="selectedEntryId"
         :handle-highlight-path
       />
     </div>
@@ -39,6 +39,7 @@ const isVisible = computed(() => props.roundIndex >= props.baseIndexValue - 1 &&
     v-if="showBronzeWrapper"
     class="flex overflow-hidden"
   >
+    <!-- TODO: Finish -->
     <div class="grid auto-rows-fr z-2 *:first:w-6.25 *:first:min-w-0 *:first:*:left-0 *:first:*:width-0 *:first:*:**:shadow-none">
       <div class="p-0">
         <div>

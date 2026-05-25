@@ -418,7 +418,7 @@ declare global {
   interface DrawEntry {
     status: StatusType | null
     seed: number | null
-    players: Array<Required<BasePlayerType>>
+    team: Array<Required<BasePlayerType>>
   }
 
   interface DrawScore {
@@ -435,6 +435,10 @@ declare global {
 
   interface DrawMatch {
     match_no: number
+    date: string | null
+    duration: string | null
+    court: string | null
+    umpire: string | null
     sides: Array<DrawSide>
     incomplete: IncompleteType | null
     isBronzeMatch?: boolean
