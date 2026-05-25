@@ -10,8 +10,52 @@ const schema = object({
   draw: DrawEnum,
   round_id: string(),
   format: literal([3, 5]).default(3),
-  team_1_id: string().optional(),
-  team_2_id: string().optional(),
+  team_1: object({
+    id: string(),
+    event_id: string(),
+    match_type: MatchTypeEnum.nullable(),
+    tour: TourEnum.nullable(),
+    players: array(
+      object({
+        id: string(),
+        first_name: string(),
+        last_name: string(),
+        full_name: string(),
+        country: array(
+          object({
+            id: string(),
+            name: string(),
+            continent: ContinentEnum,
+            alpha_2: string().nullable()
+          })
+        )
+      })
+    ),
+    label: string()
+  }),
+  team_2: object({
+    id: string(),
+    event_id: string(),
+    match_type: MatchTypeEnum.nullable(),
+    tour: TourEnum.nullable(),
+    players: array(
+      object({
+        id: string(),
+        first_name: string(),
+        last_name: string(),
+        full_name: string(),
+        country: array(
+          object({
+            id: string(),
+            name: string(),
+            continent: ContinentEnum,
+            alpha_2: string().nullable()
+          })
+        )
+      })
+    ),
+    label: string()
+  }),
   winner: literal([1, 2]).optional(),
   incomplete: IncompleteEnum.optional(),
   court: string().optional(),
@@ -73,36 +117,7 @@ const { data: rounds, pending: roundsPending } = await useAsyncData(
   { default: () => [] }
 )
 
-const entriesKey = computed(() => `${edId}-entries`)
-
-// Get entry list
-const { data: entries, pending } = await useAsyncData(
-  entriesKey,
-  async () => {
-    const { data, error } = await supabase
-      .from("entries")
-      .select("id, event_id, match_type, player_entry_mapping(players(id, first_name, last_name)), events!inner(edition_id, tour)")
-      .eq("events.edition_id", Number(edId))
-
-    if (error) {
-      console.error("Error fetching entries:", error)
-      return []
-    }
-
-    return data.map(entry => ({
-      id: entry.id,
-      match_type: entry.match_type,
-      tour: entry.events.tour,
-      event_id: entry.event_id,
-      players: entry.player_entry_mapping.map(pem => ({
-        id: pem.players.id,
-        name: `${pem.players.first_name} ${pem.players.last_name}`
-      })),
-      label: entry.player_entry_mapping.map(pem => `${pem.players.first_name} ${pem.players.last_name}`).join(" / ")
-    }))
-  },
-  { default: () => [] }
-)
+const { entries, pending, fetchEntries } = useEntryList(Number(edId))
 
 const state = ref<Partial<Schema>>({
   format: 3,
@@ -111,16 +126,16 @@ const state = ref<Partial<Schema>>({
 })
 
 watch(
-  () => [state.value.format, state.value.team_1_id, state.value.team_2_id],
+  () => [state.value.format, state.value.team_1, state.value.team_2],
   () => {
-    const { format, team_1_id, team_2_id } = state.value
+    const { format, team_1, team_2 } = state.value
 
-    if (format && team_1_id && team_2_id) {
+    if (format && team_1 && team_2) {
       state.value.sets = Array.from({ length: format }, (_, i) => ({ set_no: i + 1, super_tb: false }))
     }
 
-    if (team_1_id && team_2_id) {
-      state.value.stats = [{ entry_id: team_1_id }, { entry_id: team_2_id }]
+    if (team_1 && team_2) {
+      state.value.stats = [{ entry_id: team_1.id }, { entry_id: team_2.id }]
     }
   },
   { deep: true }
@@ -139,7 +154,7 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
   set(isUploading, true)
   set(errors, undefined)
 
-  const { tour, winner, date, umpire, sets, stats, ...rest } = event.data
+  const { tour, winner, date, umpire, sets, stats, team_1, team_2, ...rest } = event.data
 
   const matchTour = event.data.tour || tournamentStore.tours[0]
 
@@ -148,20 +163,22 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
       .from("matches")
       .insert({
         ...rest,
+        team_1_id: team_1.id,
+        team_2_id: team_2.id,
         tour: matchTour,
         date: date?.toString() || null,
         umpire_id: umpire?.id || null,
         winner_id:
           winner ?
             winner === 1 ?
-              rest.team_1_id
-            : rest.team_2_id
+              team_1.id
+            : team_2.id
           : null,
         loser_id:
-          winner && rest.team_1_id && rest.team_2_id ?
+          winner && team_1.id && team_2.id ?
             winner === 1 ?
-              rest.team_2_id
-            : rest.team_1_id
+              team_2.id
+            : team_1.id
           : null
       })
       .select("id")
@@ -183,8 +200,8 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
             : null
 
           return [
-            { match_id: matchId, entry_id: rest.team_1_id!, set_no: set.set_no, set: set.t1, tb: set.t1 === 7 ? maxTb : set.tb },
-            { match_id: matchId, entry_id: rest.team_2_id!, set_no: set.set_no, set: set.t2, tb: set.t2 === 7 ? maxTb : set.tb }
+            { match_id: matchId, entry_id: team_1.id!, set_no: set.set_no, set: set.t1, tb: set.t1 === 7 ? maxTb : set.tb },
+            { match_id: matchId, entry_id: team_2.id!, set_no: set.set_no, set: set.t2, tb: set.t2 === 7 ? maxTb : set.tb }
           ]
         })
       )
@@ -251,7 +268,7 @@ const formFields = computed<FormFieldInterface<Schema>[]>(
           { label: "Best of 5", value: 5 }
         ]
       },
-      ...(tournamentStore.tours.length > 1 ? [{ label: "Tour", key: "tour", type: "radio", item: tournamentStore.tours, required: true }] : []),
+      ...(tournamentStore.tours.length > 1 ? [{ label: "Tour", key: "tour", type: "radio", items: tournamentStore.tours, required: true }] : []),
       { label: "Draw", key: "draw", type: "radio", items: DRAW_TYPES, required: true },
       { label: "S/D", key: "match_type", type: "radio", items: MATCH_TYPES, required: true },
       { label: "Match No.", key: "match_no", type: "number", required: true },
@@ -276,33 +293,27 @@ const formFields = computed<FormFieldInterface<Schema>[]>(
       },
       {
         label: state.value.match_type === "Doubles" ? "Team 1" : "Player 1",
-        key: "team_1_id",
-        type: "inputMenu",
+        key: "team_1",
+        type: "slot",
         class: "col-span-2",
         items: entries.value.filter(entry => {
           const isTourMatch = !state.value.tour || state.value.tour === entry.tour
           const isMatchTypeMatch = !state.value.match_type || state.value.match_type === entry.match_type
 
           return isTourMatch && isMatchTypeMatch
-        }),
-        loading: pending.value,
-        valueKey: "id",
-        labelKey: "label"
+        })
       },
       {
         label: state.value.match_type === "Doubles" ? "Team 2" : "Player 2",
-        key: "team_2_id",
-        type: "inputMenu",
+        key: "team_2",
+        type: "slot",
         class: "col-span-2",
         items: entries.value.filter(entry => {
           const isTourMatch = !state.value.tour || state.value.tour === entry.tour
           const isMatchTypeMatch = !state.value.match_type || state.value.match_type === entry.match_type
 
           return isTourMatch && isMatchTypeMatch
-        }),
-        loading: pending.value,
-        valueKey: "id",
-        labelKey: "label"
+        })
       },
       {
         label: "Winner",
@@ -361,6 +372,14 @@ const statsFields: Array<{ label: string; key?: keyof MatchStatType; children?: 
     <u-button :icon="icons.plus" />
 
     <template #body>
+      <u-alert
+        v-if="errors"
+        color="error"
+        :title="`Error saving match`"
+        :description="errors"
+        class="mb-5"
+      />
+
       <u-form
         id="match-form"
         ref="form"
@@ -377,14 +396,58 @@ const statsFields: Array<{ label: string; key?: keyof MatchStatType; children?: 
             v-model="state"
           >
             <person-search
+              v-if="field.label === 'Umpire'"
               v-model="state.umpire"
               placeholder="Umpire"
             />
+
+            <u-input-menu
+              v-else-if="field.key === 'team_1' || field.key === 'team_2'"
+              v-model="state[field.key]"
+              :items="field.items"
+              :placeholder="`Select ${field.label.toLowerCase()}`"
+              :loading="pending"
+              label-key="label"
+              clear
+              :ui="{
+                root: 'w-full',
+                base: state[field.key] && state.match_type === 'Doubles' ? 'pl-10' : '',
+                itemLabel: state.match_type === 'Doubles' ? 'ml-8' : 'ml-4'
+              }"
+            >
+              <template #leading="{ modelValue }">
+                <u-icon
+                  v-if="modelValue"
+                  v-for="(player, index) in modelValue.players"
+                  :key="player.id"
+                  :name="getFlagCode(player.country)"
+                  class="absolute size-4 rounded-sm"
+                  :class="{ 'z-10 left-5': index === 1 }"
+                />
+
+                <u-icon
+                  v-else
+                  :name="ICONS.player"
+                />
+              </template>
+
+              <template #item-leading="{ item }">
+                <div class="relative">
+                  <u-icon
+                    v-for="(player, index) in item.players"
+                    :key="player.id"
+                    :name="getFlagCode(player.country)"
+                    class="absolute size-4 rounded-sm"
+                    :class="{ 'z-10 left-3': index === 1 }"
+                  />
+                </div>
+              </template>
+            </u-input-menu>
           </form-field>
         </div>
 
         <div
-          v-if="state.format && state.team_1_id && state.team_2_id"
+          v-if="state.format && state.team_1 && state.team_2"
           class="space-y-3 my-4"
         >
           <u-form
@@ -500,14 +563,6 @@ const statsFields: Array<{ label: string; key?: keyof MatchStatType; children?: 
           </div>
         </div>
       </u-form>
-
-      <u-alert
-        v-if="errors"
-        color="error"
-        :title="`Error saving match`"
-        :description="errors"
-        class="mt-5"
-      />
     </template>
 
     <template #footer="{ close }">

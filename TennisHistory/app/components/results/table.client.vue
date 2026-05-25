@@ -2,7 +2,7 @@
 import type { TableColumn, TableRow } from "@nuxt/ui"
 import { getFacetedRowModel, getFacetedUniqueValues } from "@tanstack/vue-table"
 import { parseDate } from "@internationalized/date"
-import { LazyMatchCreate, LazyMatchCreateCountry, UButton, UFieldGroup } from "#components"
+import { LazyMatchCreate, LazyMatchCountryCreate, UButton, UFieldGroup } from "#components"
 
 const props = defineProps<{
   matches: Array<ResultsMatchInterface>
@@ -22,9 +22,10 @@ const {
 const router = useRouter()
 const toast = useToast()
 const supabase = useSupabaseClient()
-const { dev } = useRuntimeConfig().public
 
+const { isAdmin } = useAuthState()
 const tournamentStore = useTournamentStore()
+
 const isSaving = ref(false)
 const updatedMatches = ref<Record<string, any>>({})
 
@@ -36,17 +37,17 @@ const mapping = computed(() => {
   return Object.fromEntries(roundMap)
 })
 
-const columns: Array<TableColumn<ResultsMatchInterface>> = [
+const columns = computed<Array<TableColumn<ResultsMatchInterface>>>(() => [
   { id: "checkbox" },
   { accessorKey: "tour" },
   { accessorKey: "match_type" },
   {
     accessorKey: "round.number",
     filterFn: numberFilter,
-    ...(dev && {
+    ...(isAdmin.value && {
       footer: () =>
         h(UFieldGroup, { class: "w-fit" }, () => [
-          h(COUNTRY_DRAWS.includes(id) ? LazyMatchCreateCountry : LazyMatchCreate, { hydrateOnIdle: true, onRefresh: () => emits("refresh") }),
+          h(COUNTRY_DRAWS.includes(id) ? LazyMatchCountryCreate : LazyMatchCreate, { hydrateOnIdle: true, onRefresh: () => emits("refresh") }),
           h(UButton, { icon: icons.reload, onClick: () => emits("refresh") }),
           h(UButton, {
             icon: isSaving.value ? ICONS.uploading : ICONS.save,
@@ -75,11 +76,11 @@ const columns: Array<TableColumn<ResultsMatchInterface>> = [
   { id: "loser", accessorFn: row => row.loser.team.map(p => `${p.last_name}, ${p.first_name}`), filterFn: arrayFilter },
   { id: "score", header: "Score" },
   { id: "h2h" }
-]
+])
 
 const columnVisibility = computed(() => ({
   tour: tournamentStore.tours.length > 1,
-  checkbox: dev,
+  checkbox: isAdmin.value,
   date: props.matches.some(match => match.date) || !!Object.keys(updatedMatches.value).length,
   duration: props.matches.some(match => match.duration) || !!Object.keys(updatedMatches.value).length,
   court: props.matches.some(match => match.court) || !!Object.keys(updatedMatches.value).length,
@@ -91,7 +92,7 @@ const handleSelectRow = (_e: Event, row: TableRow<ResultsMatchInterface>) => {
     return
   }
 
-  if (dev || row.original.stats) {
+  if (row.original.stats) {
     router.push({
       name: "match",
       params: {
@@ -99,7 +100,7 @@ const handleSelectRow = (_e: Event, row: TableRow<ResultsMatchInterface>) => {
         name,
         edId,
         year,
-        tour: row.original.tour!,
+        tour: row.original.tour || (COUNTRY_DRAWS.includes(id) ? "Country" : "LC"),
         match_type: row.original.match_type,
         draw: row.original.draw,
         match_no: row.original.match_no
@@ -126,14 +127,14 @@ const handleSave = async () => {
     console.error(errors)
 
     toast.add({
-      title: "Error updating rounds",
+      title: "Error updating matches",
       description: `${Object.keys(updatedMatches.value).length - errors.length} successfully updated. ${errors.length} failed.`,
       icon: icons.error,
       color: "error"
     })
   } else {
     toast.add({
-      title: "Rounds successfully updated",
+      title: "Matches successfully updated",
       icon: icons.success,
       color: "success"
     })
@@ -160,12 +161,19 @@ const handleSave = async () => {
     v-model:column-visibility="columnVisibility"
     :meta="{
       class: {
-        tr: (row: TableRow<ResultsMatchInterface>) =>
-          dev && !row.original.stats ? 'bg-warning/20 cursor-pointer'
-          : row.original.stats ? 'cursor-pointer'
-          : ''
+        tr: (row: TableRow<ResultsMatchInterface>) => {
+          if (row.original.stats) {
+            return 'data-[selectable=true]:cursor-pointer'
+          } else {
+            if (isAdmin && row.original.incomplete !== 'WO') {
+              return 'bg-warning/20'
+            }
+            return ''
+          }
+        }
       }
     }"
+    :ui="{ tbody: '[&>tr]:even:bg-elevated/25 [&>tr]:data-[selectable=true]:hover:bg-elevated/50' }"
   >
     <template #loading>
       <u-icon
@@ -385,7 +393,7 @@ const handleSave = async () => {
 
     <template #winner-cell="{ row }">
       <div class="flex items-center gap-1">
-        <players-link :players="row.original.winner.team" />
+        <player-link :players="row.original.winner.team" />
 
         <small v-if="row.original.winner.seed || row.original.winner.status">
           ({{
@@ -414,7 +422,7 @@ const handleSave = async () => {
 
     <template #loser-cell="{ row }">
       <div class="flex items-center gap-1">
-        <players-link :players="row.original.loser.team" />
+        <player-link :players="row.original.loser.team" />
 
         <small v-if="row.original.loser.seed || row.original.loser.status">
           ({{
@@ -430,18 +438,10 @@ const handleSave = async () => {
 
     <template #score-cell="{ row }">
       <div class="flex justify-center items-center gap-1">
-        <template
-          v-for="set_no in Array.from({ length: row.original.format }, (_, i) => 1 + i)"
-          :key="set_no"
-        >
-          <div v-if="row.original.scores.some(s => s.set_no === set_no)">
-            <span>{{ row.original.scores.find(s => s.set_no === set_no && s.entry_id === row.original.winner.id)?.set }}</span>
-            <span>{{ row.original.scores.find(s => s.set_no === set_no && s.entry_id === row.original.loser.id)?.set }}</span>
-            <sup v-if="row.original.scores.find(s => s.set_no === set_no && isDefined(s.tb))">{{
-              Math.min(...row.original.scores.filter(s => s.set_no === set_no).map(s => s.tb || 0))
-            }}</sup>
-          </div>
-        </template>
+        <short-score
+          :format="row.original.format"
+          :scores="row.original.scores"
+        />
 
         <u-badge
           v-if="row.original.incomplete"
@@ -458,8 +458,8 @@ const handleSave = async () => {
         :to="{
           name: 'head-to-head',
           params: {
-            t1_name: row.original.winner.team.map(player => kebabCase(`${player.first_name} ${player.last_name}`)).join('+'),
-            t2_name: row.original.loser.team.map(player => kebabCase(`${player.first_name} ${player.last_name}`)).join('+'),
+            t1_name: row.original.winner.team.map(player => kebabCase(player.full_name || '—')).join('+'),
+            t2_name: row.original.loser.team.map(player => kebabCase(player.full_name || '—')).join('+'),
             t1_id: row.original.winner.team.map(player => player.id).join('+'),
             t2_id: row.original.loser.team.map(player => player.id).join('+')
           }

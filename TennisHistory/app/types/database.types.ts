@@ -1537,6 +1537,76 @@ export type Database = {
         }
         Relationships: []
       }
+      scores_by_teams: {
+        Row: {
+          match_id: string | null
+          set_no: number | null
+          t1_id: string | null
+          t1_set: number | null
+          t1_tb: number | null
+          t2_id: string | null
+          t2_set: number | null
+          t2_tb: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "match_scores_entry_id_fkey"
+            columns: ["t1_id"]
+            isOneToOne: false
+            referencedRelation: "entries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "match_scores_entry_id_fkey"
+            columns: ["t2_id"]
+            isOneToOne: false
+            referencedRelation: "entries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "match_scores_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "matches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      scores_by_winner: {
+        Row: {
+          match_id: string | null
+          set_no: number | null
+          t1_id: string | null
+          t1_set: number | null
+          t1_tb: number | null
+          t2_id: string | null
+          t2_set: number | null
+          t2_tb: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "match_scores_entry_id_fkey"
+            columns: ["t1_id"]
+            isOneToOne: false
+            referencedRelation: "entries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "match_scores_entry_id_fkey"
+            columns: ["t2_id"]
+            isOneToOne: false
+            referencedRelation: "entries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "match_scores_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "matches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       [_ in never]: never

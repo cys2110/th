@@ -144,10 +144,19 @@ const columnVisibility = ref({
 const columnHelper = createColumnHelper<IndividualPlayerEntryInterface>()
 const columns: TableColumn<IndividualPlayerEntryInterface>[] = [
   { accessorKey: "tour" },
-  {
-    id: "player",
-    accessorFn: row => `${row.last_name}, ${row.first_name}`,
-    filterFn: "arrIncludesSome",
+  columnHelper.group({
+    id: "players",
+    columns: [
+      {
+        id: "player",
+        accessorFn: row => `${row.last_name}, ${row.first_name}`,
+        filterFn: "arrIncludesSome",
+        footer: ({ table }) => {
+          const rowCount = table.getFilteredRowModel().rows.length
+          return `${rowCount.toLocaleString()} player${rowCount === 1 ? "" : "s"}`
+        }
+      }
+    ],
     ...(isAdmin.value && {
       footer: () =>
         h(UFieldGroup, { class: "w-fit mx-auto" }, () => [
@@ -177,7 +186,7 @@ const columns: TableColumn<IndividualPlayerEntryInterface>[] = [
           })
         ])
     })
-  },
+  }),
   columnHelper.group({
     id: "singles",
     header: () => h(UBadge, { label: "Singles", color: "Singles", class: "w-full" }),
@@ -345,7 +354,11 @@ const handleSave = async () => {
       getFacetedRowModel: getFacetedRowModel(),
       getFacetedUniqueValues: getFacetedUniqueValues()
     }"
-    :ui="{ root: 'mx-auto max-h-[calc(100vh-25rem)]' }"
+    :ui="{
+      root: 'mx-auto max-h-[calc(100vh-25rem)]',
+      tbody: '[&>tr]:data-[selectable=true]:cursor-pointer [&>tr]:data-[selectable=true]:hover:bg-elevated/50 [&>tr]:even:bg-elevated/25',
+      th: 'py-1.5'
+    }"
   >
     <template #loading>
       <u-icon

@@ -1,9 +1,5 @@
 <script setup lang="ts">
-defineProps<{
-  match: EditionResultMatchInterface
-}>()
-
-const { dev } = useRuntimeConfig().public
+defineProps<{ match: ResultsMatchInterface }>()
 
 const {
   ui: { icons }
@@ -17,10 +13,7 @@ const {
 <template>
   <u-card
     :ui="{
-      root:
-        dev && !match.stats ? 'ring-warning'
-        : !match.tour ? 'ring-primary'
-        : `ring-${match.tour}`,
+      root: !match.tour ? 'ring-primary' : `ring-${match.tour}`,
       header: 'text-sm',
       body: 'text-sm',
       footer: 'flex justify-center'
@@ -33,26 +26,14 @@ const {
       </div>
       <div class="flex justify-between">
         <div>Court: {{ match.court ?? "—" }}</div>
-        <div>Umpire: {{ match.umpire ? `${match.umpire.first_name} ${match.umpire.last_name}` : "—" }}</div>
+        <div>Umpire: {{ match.umpire?.full_name || "—" }}</div>
       </div>
     </template>
 
     <div class="grid grid-rows-2 grid-flow-col gap-3 items-center">
       <!-- Players -->
-      <div>
-        <player-link
-          v-for="player in match.winner.team"
-          :key="player.id"
-          :player
-        />
-      </div>
-      <div>
-        <player-link
-          v-for="player in match.loser.team"
-          :key="player.id"
-          :player
-        />
-      </div>
+      <player-link :players="match.winner.team" />
+      <player-link :players="match.loser.team" />
 
       <!--Status-->
       <div class="text-sm text-muted">
@@ -77,7 +58,7 @@ const {
       <div>
         <u-badge
           v-if="match.incomplete"
-          :label="`${match.incomplete}.`"
+          :label="match.incomplete"
           color="error"
         />
       </div>
@@ -91,9 +72,9 @@ const {
           v-for="set_no in Array.from({ length: match.format }, (_, i) => 1 + i)"
           :key="set_no"
         >
-          {{ match.scores.find(s => s.set_no === set_no && s.entry_id === match.winner.id)?.set
-          }}<sup v-if="isDefined(isDefined(match.scores.find(s => s.set_no === set_no && s.entry_id === match.winner.id)?.tb))">{{
-            match.scores.find(s => s.set_no === set_no && s.entry_id === match.winner.id)?.tb
+          {{ match.scores.find(s => s.set_no === set_no)?.t1_set
+          }}<sup v-if="isDefined(isDefined(match.scores.find(s => s.set_no === set_no)?.t1_tb))">{{
+            match.scores.find(s => s.set_no === set_no)?.t1_tb
           }}</sup>
         </div>
       </div>
@@ -106,9 +87,9 @@ const {
           v-for="set_no in Array.from({ length: match.format }, (_, i) => 1 + i)"
           :key="set_no"
         >
-          {{ match.scores.find(s => s.set_no === set_no && s.entry_id === match.loser.id)?.set
-          }}<sup v-if="isDefined(isDefined(match.scores.find(s => s.set_no === set_no && s.entry_id === match.loser.id)?.tb))">{{
-            match.scores.find(s => s.set_no === set_no && s.entry_id === match.loser.id)?.tb
+          {{ match.scores.find(s => s.set_no === set_no)?.t2_set
+          }}<sup v-if="isDefined(isDefined(match.scores.find(s => s.set_no === set_no)?.t2_tb))">{{
+            match.scores.find(s => s.set_no === set_no)?.t2_tb
           }}</sup>
         </div>
       </div>
@@ -119,11 +100,20 @@ const {
         <u-button
           label="Stats"
           :icon="ICONS.stats"
-          :disabled="!match.stats && !dev"
+          :disabled="!match.stats"
           block
           :to="{
             name: 'match',
-            params: { name, id, year, edId, mid: match.id }
+            params: {
+              name,
+              id,
+              year,
+              edId,
+              tour: match.tour || (COUNTRY_DRAWS.includes(id) ? 'Country' : 'LC'),
+              match_type: match.match_type,
+              draw: match.draw,
+              match_no: match.match_no
+            }
           }"
         />
 
@@ -132,12 +122,12 @@ const {
           :icon="ICONS.h2h"
           block
           :to="{
-            name: 'h2h-players',
+            name: 'head-to-head',
             params: {
-              t1Name: match.winner.team.map(p => kebabCase(`${p.first_name}-${p.last_name}`)).join('+'),
-              t2Name: match.loser.team.map(p => kebabCase(`${p.first_name}-${p.last_name}`)).join('+'),
-              t1Id: match.winner.team.map(p => p.id).join('+'),
-              t2Id: match.loser.team.map(p => p.id).join('+')
+              t1_name: match.winner.team.map(p => kebabCase(p.full_name || '—')).join('+'),
+              t2_name: match.loser.team.map(p => kebabCase(p.full_name || '—')).join('+'),
+              t1_id: match.winner.team.map(p => p.id).join('+'),
+              t2_id: match.loser.team.map(p => p.id).join('+')
             }
           }"
         />

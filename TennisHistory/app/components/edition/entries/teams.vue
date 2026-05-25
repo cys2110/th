@@ -140,6 +140,7 @@ const columns: TableColumn<TeamEntryInterface>[] = [
     }"
     sticky
     render-fallback-value="—"
+    :ui="{ tbody: '[&>tr]:even:bg-elevated/25' }"
   >
     <template #loading>
       <u-icon

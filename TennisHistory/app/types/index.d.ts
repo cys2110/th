@@ -381,6 +381,17 @@ declare global {
     tb: number | null
   }
 
+  interface ConsolidatedScore {
+    match_id: string
+    t1_id: string
+    t2_id: string
+    set_no: number
+    t1_set: number
+    t2_set: number
+    t1_tb: number | null
+    t2_tb: number | null
+  }
+
   interface ResultsMatchInterface {
     id: string
     match_no: number
@@ -400,6 +411,7 @@ declare global {
       id: string
       first_name: string
       last_name: string
+      full_name: string
     } | null
     winner: {
       id: string
@@ -414,28 +426,7 @@ declare global {
       team: Array<Required<BasePlayerType & { rank: number | null }>>
     }
     stats: boolean
-    scores: Array<ScoreInterface>
-  }
-
-  interface EditionResultTeamPlayerInterface {
-    id: string
-    first_name: string
-    last_name: string
-    country: CountryType
-    rank: number | null
-  }
-
-  interface EditionResultSideInterface {
-    id: string
-    status?: StatusType
-    seed?: number
-    team: Array<EditionResultTeamPlayerInterface>
-    rank?: number | null
-  }
-
-  interface EditionResultStepperItemInterface {
-    title: RoundType
-    matches: Array<ResultsMatchInterface>
+    scores: Array<ConsolidatedScore>
   }
 
   interface DrawEntry {
