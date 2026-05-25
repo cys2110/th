@@ -157,17 +157,44 @@ const getMatch = (entry1: string, entry2: string): RoundRobinMatch | undefined =
 
 <template>
   <dashboard-subpanel :title="group.group">
-    <div>
-      <div class="font-semibold">Standings</div>
-      <ol class="text-sm">
-        <li
+    <table class="w-full [&_th]:px-2 [&_th]:py-1 [&_td]:px-2 [&_td]:py-1 text-sm">
+      <thead class="border-b border-muted">
+        <tr class="divide-x divide-default">
+          <th>Standing</th>
+          <th>{{ group.matches[0]?.team_1?.team && group.matches[0]?.team_1?.team.length > 1 ? "Team" : "Player" }}</th>
+          <th>RR W-L</th>
+          <th>Set W-L</th>
+          <th>Games W-L</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-default">
+        <tr
           v-for="(entry, index) in groupStandings"
-          class="flex items-center gap-2"
+          :key="entry.entry_id"
+          class="divide-x divide-default"
         >
-          {{ index + 1 }}. <players-link :players="entry.team" />
-        </li>
-      </ol>
-    </div>
+          <td class="text-center">{{ index + 1 }}.</td>
+          <td><player-link :players="entry.team" /></td>
+          <td class="text-center"> {{ entryStats.get(entry.entry_id)?.matchesWon }}-{{ entryStats.get(entry.entry_id)?.matchesLost }}</td>
+          <td class="text-center">
+            {{ entryStats.get(entry.entry_id)?.setsWon }}-{{ entryStats.get(entry.entry_id)?.setsLost }} ({{
+              (
+                (entryStats.get(entry.entry_id)?.setsWon / (entryStats.get(entry.entry_id)?.setsWon + entryStats.get(entry.entry_id)?.setsLost)) *
+                100
+              ).toFixed(2)
+            }}%)
+          </td>
+          <td class="text-center">
+            {{ entryStats.get(entry.entry_id)?.gamesWon }}-{{ entryStats.get(entry.entry_id)?.gamesLost }} ({{
+              (
+                (entryStats.get(entry.entry_id)?.gamesWon / (entryStats.get(entry.entry_id)?.gamesWon + entryStats.get(entry.entry_id)?.gamesLost)) *
+                100
+              ).toFixed(2)
+            }}%)
+          </td>
+        </tr>
+      </tbody>
+    </table>
 
     <div class="text-sm my-6">
       <table class="w-full [&_th]:px-2 [&_th]:py-1 [&_td]:px-2 [&_td]:py-1">
@@ -179,11 +206,8 @@ const getMatch = (entry1: string, entry2: string): RoundRobinMatch | undefined =
               v-for="entry in contestants"
               :key="entry.entry_id"
             >
-              {{ entry.team.map(p => `${p.first_name.charAt(0)}. ${p.last_name}`).join("/") }}
+              {{ entry.team.map(p => `${p.first_name!.charAt(0)}. ${p.last_name}`).join("/") }}
             </th>
-            <th>RR W-L</th>
-            <th>Set W-L</th>
-            <th>Games W-L</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-default">
@@ -194,53 +218,19 @@ const getMatch = (entry1: string, entry2: string): RoundRobinMatch | undefined =
           >
             <td class="text-center">{{ id === "605" ? entry.seed : entry.rank }}</td>
             <td>
-              <players-link :players="entry.team" />
+              <player-link :players="entry.team" />
             </td>
             <td
               v-for="(e, index) in contestants"
               :key="index"
-              :class="{
-                'bg-primary': e.entry_id === entry.entry_id,
-                'font-medium text-success': getMatch(entry.entry_id, e.entry_id)?.winner_id === entry.entry_id
-              }"
+              :class="{ 'bg-primary': e.entry_id === entry.entry_id }"
             >
-              <div class="flex justify-center items-center gap-1">
-                <div
-                  v-if="entry.entry_id !== e.entry_id"
-                  v-for="i in Array.from({ length: getMatch(entry.entry_id, e.entry_id)?.format || 3 }, (_, index) => index + 1)"
-                  :key="index"
-                >
-                  <span>{{ getMatch(entry.entry_id, e.entry_id)?.scores.find(s => s.set_no === i && s.entry_id === entry.entry_id)?.set }}</span>
-                  <span>{{ getMatch(entry.entry_id, e.entry_id)?.scores.find(s => s.set_no === i && s.entry_id === e.entry_id)?.set }}</span>
-                  <sup v-if="getMatch(entry.entry_id, e.entry_id)?.scores.find(s => s.set_no === i && isDefined(s.tb))">
-                    {{
-                      Math.min(
-                        ...(getMatch(entry.entry_id, e.entry_id)
-                          ?.scores.filter(s => s.set_no === i)
-                          .map(s => s.tb || 0) || [])
-                      )
-                    }}
-                  </sup>
-                </div>
-              </div>
-            </td>
-            <td class="text-center"> {{ entryStats.get(entry.entry_id)?.matchesWon }}-{{ entryStats.get(entry.entry_id)?.matchesLost }} </td>
-            <td class="text-center">
-              {{ entryStats.get(entry.entry_id)?.setsWon }}-{{ entryStats.get(entry.entry_id)?.setsLost }} ({{
-                (
-                  (entryStats.get(entry.entry_id)?.setsWon / (entryStats.get(entry.entry_id)?.setsWon + entryStats.get(entry.entry_id)?.setsLost)) *
-                  100
-                ).toFixed(2)
-              }}%)
-            </td>
-            <td class="text-center">
-              {{ entryStats.get(entry.entry_id)?.gamesWon }}-{{ entryStats.get(entry.entry_id)?.gamesLost }} ({{
-                (
-                  (entryStats.get(entry.entry_id)?.gamesWon /
-                    (entryStats.get(entry.entry_id)?.gamesWon + entryStats.get(entry.entry_id)?.gamesLost)) *
-                  100
-                ).toFixed(2)
-              }}%)
+              <draws-round-robin-score-cell
+                v-if="getMatch(entry.entry_id, e.entry_id)"
+                :match="getMatch(entry.entry_id, e.entry_id)!"
+                :team_1_id="entry.entry_id"
+                :team_2_id="e.entry_id"
+              />
             </td>
           </tr>
         </tbody>

@@ -5,34 +5,34 @@ const props = defineProps<{
   draw: DrawType
 }>()
 
-const {
-  params: { edId }
-} = useRoute("draws")
+const route = useRoute("draws")
+
+const edId = computed(() => route.params.edId)
 
 const supabase = useSupabaseClient()
 
-const key = computed(() => `${edId}-${JSON.stringify(props)}-rr-matches`)
-
-const { data: groups, execute } = await useAsyncData<Array<RoundRobinGroup>>(
-  key,
+const { data: groups } = useAsyncData<Array<RoundRobinGroup>>(
+  () => `rr-matches-${edId.value}-${JSON.stringify(props)}`,
   async () => {
+    if (!edId.value) return []
+
     let query = supabase
       .from("rounds")
       .select(
         `
-      round,
-      events!inner(edition_id),
-      matches(
-        *,
-        match_scores(*),
-        match_stats(*),
-        team1:team_1_id(player_entry_mapping(countries(*), players(id, first_name, last_name), rank), seeds(*), entry_status(*)),
-        team2:team_2_id(player_entry_mapping(countries(*), players(id, first_name, last_name), rank), seeds(*), entry_status(*))
-      )
-    `
+        round,
+        events!inner(edition_id),
+        matches(
+          *,
+          match_scores(*),
+          match_stats(count),
+          team1:team_1_id(player_entry_mapping(countries(*), players(id, first_name, last_name, full_name), rank), seeds(*), entry_status(*)),
+          team2:team_2_id(player_entry_mapping(countries(*), players(id, first_name, last_name, full_name), rank), seeds(*), entry_status(*))
+        )
+      `
       )
       .eq("round", "Round robin")
-      .eq("events.edition_id", Number(edId))
+      .eq("events.edition_id", Number(edId.value))
 
     if (props.matchType) query = query.eq("match_type", props.matchType)
     if (props.tour) query = query.eq("tour", props.tour)
@@ -59,13 +59,16 @@ const { data: groups, execute } = await useAsyncData<Array<RoundRobinGroup>>(
       matches: matches
         .filter(m => m.group_name === group)
         .map(m => {
-          const { match_no, winner_id, team_1_id, team_2_id, incomplete, format, match_stats, match_scores, team1, team2 } = m
+          const { match_no, winner_id, team_1_id, team_2_id, incomplete, format, match_stats, match_scores, team1, team2, tour, draw, match_type } = m
 
           return {
             format,
             match_no,
             winner_id,
-            stats: !!match_stats.length,
+            tour,
+            draw,
+            match_type,
+            stats: match_stats[0]!.count > 0,
             team_1_id,
             team_2_id,
             incomplete,
@@ -81,6 +84,7 @@ const { data: groups, execute } = await useAsyncData<Array<RoundRobinGroup>>(
                 id: player.players.id,
                 first_name: player.players.first_name,
                 last_name: player.players.last_name,
+                full_name: player.players.full_name,
                 country: player.countries
               }))
             },
@@ -95,6 +99,7 @@ const { data: groups, execute } = await useAsyncData<Array<RoundRobinGroup>>(
                 id: player.players.id,
                 first_name: player.players.first_name,
                 last_name: player.players.last_name,
+                full_name: player.players.full_name,
                 country: player.countries
               }))
             }
@@ -102,10 +107,8 @@ const { data: groups, execute } = await useAsyncData<Array<RoundRobinGroup>>(
         })
     }))
   },
-  { default: () => [], immediate: false }
+  { default: () => [], watch: [edId], server: false }
 )
-
-execute()
 </script>
 
 <template>

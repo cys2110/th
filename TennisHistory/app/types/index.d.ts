@@ -212,38 +212,24 @@ declare global {
   interface RoundRobinMatch {
     format: 3 | 5
     match_no: number
+    tour: TourType
+    match_type: MatchEnumType
+    draw: DrawType
     winner_id: string
     stats: boolean
     team_1_id: string
     team_2_id: string
     incomplete: IncompleteType | null
-    scores: Array<{
-      set_no: number
-      set: number
-      tb: number | null
-      entry_id: string
-    }>
+    scores: Array<ScoreInterface>
     team_1: {
       seed: number | null
       status: StatusType | null
-      team: Array<{
-        rank: number | null
-        id: string
-        first_name: string
-        last_name: string
-        country: CountryInterface
-      }>
+      team: Array<Required<BasePlayerType> & { rank: number | null }>
     }
     team_2: {
       seed: number | null
       status: StatusType | null
-      team: Array<{
-        rank: number | null
-        id: string
-        first_name: string
-        last_name: string
-        country: CountryInterface
-      }>
+      team: Array<Required<BasePlayerType> & { rank: number | null }>
     }
   }
 

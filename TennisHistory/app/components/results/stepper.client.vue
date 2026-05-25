@@ -43,14 +43,12 @@ const consolidatedMatches = computed(() => {
     <u-form-field
       v-if="tournamentStore.tours.length > 1"
       label="Tour"
-      size="lg"
     >
       <u-checkbox-group
         v-model="selectedTour"
         :items="tournamentStore.tours"
         :icon="ICONS.tour"
         orientation="horizontal"
-        size="sm"
         highlight
       />
     </u-form-field>
@@ -58,20 +56,18 @@ const consolidatedMatches = computed(() => {
     <u-form-field
       v-if="matches.some(m => m.match_type === 'Singles') && matches.some(m => m.match_type === 'Doubles')"
       label="S/D"
-      size="lg"
     >
       <u-checkbox-group
         v-model="selectedMatchType"
         :items="[...MATCH_TYPES]"
         :icon="ICONS.people"
         orientation="horizontal"
-        size="sm"
         highlight
       />
     </u-form-field>
   </div>
 
-  <div class="max-h-[calc(100vh-20%)]">
+  <div>
     <u-stepper
       v-if="consolidatedMatches.length"
       :items="consolidatedMatches"
@@ -82,7 +78,7 @@ const consolidatedMatches = computed(() => {
         {{ ROUND_ABBREVIATION_MAPPING[item.title] }}
       </template>
       <template #content="{ item }">
-        <u-page-grid>
+        <u-page-grid class="max-h-[calc(100vh-28rem)] overflow-y-auto">
           <results-card
             v-for="match in item.matches"
             :key="match.id"

@@ -1,37 +1,78 @@
 <script setup lang="ts">
 definePageMeta({ name: "draws" })
 
-const {
-  params: { id, edId }
-} = useRoute("draws")
+const route = useRoute("draws")
+
+const edId = computed(() => route.params.edId)
 
 const supabase = useSupabaseClient()
 
 const tournamentStore = useTournamentStore()
 
-const selectedTour = ref<TourType | undefined>(tournamentStore.tours[0])
+const matchTypeOptions = ref<Array<MatchEnumType>>([])
+const drawOptions = ref<Array<DrawType>>([])
+
+const selectedTour = ref<TourType | undefined>()
 const selectedMatchType = ref<MatchEnumType>("Singles")
 const selectedDraw = ref<DrawType>("Main")
 
-const key = `${edId}-draw-options`
+watch(
+  () => tournamentStore.tours,
+  () => {
+    if (tournamentStore.tours.length) {
+      selectedTour.value = tournamentStore.tours[0]
+    }
+  },
+  { immediate: true }
+)
 
 const { data: events } = await useAsyncData(
-  key,
+  () => `draw-options-${edId.value}`,
   async () => {
+    if (!edId.value) {
+      return []
+    }
+
     const { data, error } = await supabase
       .from("events")
       .select("id, tour, s_draw, s_link, d_draw, d_link, qs_draw, qs_link, qd_draw, qd_link, editions(draw_link, draw_type)")
-      .eq("edition_id", Number(edId))
+      .eq("edition_id", Number(edId.value))
 
     if (error || !data) {
       console.error("Error fetching draw options", error)
-      // return { draws: [], matchTypes: [] } as DrawOptions
       return []
     }
 
     return data
   },
-  { default: () => [] }
+  { default: () => [], watch: [edId], server: false }
+)
+
+watch(
+  events,
+  () => {
+    if (events.value.length) {
+      if (events.value.some(event => event.qs_draw)) {
+        set(drawOptions, ["Main", "Qualifying"])
+      }
+
+      let matchTypes: Array<MatchEnumType> = []
+
+      if (events.value.some(event => event.s_draw)) {
+        matchTypes.push("Singles")
+      }
+
+      if (events.value.some(event => event.d_draw)) {
+        matchTypes.push("Doubles")
+      }
+
+      if (matchTypes.length) {
+        set(matchTypeOptions, matchTypes)
+        set(selectedMatchType, matchTypes[0])
+      }
+    }
+  },
+  { immediate: true }
 )
 
 const selectedDrawType = computed(() => {
@@ -86,69 +127,73 @@ const pdfLink = computed(() => {
 <template>
   <u-container>
     <u-page>
-      <template #left>
-        <u-page-aside>
+      <edition-wrapper />
+
+      <u-page-body>
+        <div class="flex justify-end items-center gap-5">
           <u-form-field
             v-if="tournamentStore.tours.length > 1"
             label="Tour"
           >
-            <u-listbox
+            <u-radio-group
               v-model="selectedTour"
-              :items="tournamentStore.tours.map(t => ({ label: t, value: t }))"
-              value-key="value"
+              :items="tournamentStore.tours"
+              orientation="horizontal"
+              highlight
             />
           </u-form-field>
+
           <u-form-field
-            v-if="events.some(event => event.s_draw && event.d_draw)"
+            v-if="matchTypeOptions.length > 1"
             label="S/D"
           >
-            <u-listbox
+            <u-radio-group
               v-model="selectedMatchType"
-              :items="MATCH_TYPES.map(t => ({ label: t, value: t }))"
-              value-key="value"
+              :items="matchTypeOptions"
+              orientation="horizontal"
+              highlight
             />
           </u-form-field>
+
           <u-form-field
-            v-if="events.some(event => event.qs_draw || event.qd_draw)"
+            v-if="drawOptions.length > 1"
             label="Draw"
           >
-            <u-listbox
+            <u-radio-group
               v-model="selectedDraw"
-              :items="DRAW_TYPES.map(t => ({ label: t, value: t }))"
-              value-key="value"
+              :items="drawOptions"
+              orientation="horizontal"
+              highlight
             />
           </u-form-field>
+
           <u-button
             v-if="pdfLink"
             :icon="ICONS.pdf"
-            label="Download PDF"
-            block
             :href="pdfLink"
             target="_blank"
           />
-        </u-page-aside>
-      </template>
+        </div>
 
-      <edition-wrapper />
+        <div class="max-h-[calc(100vh-20rem)] overflow-y-auto">
+          <draws-lc v-if="route.params.id === '9210'" />
 
-      <u-page-body>
-        <draws-lc v-if="id === '9210'" />
+          <draws-country v-else-if="COUNTRY_DRAWS.includes(route.params.id)" />
 
-        <draws-country v-else-if="COUNTRY_DRAWS.includes(id)" />
-
-        <!-- <draws
+          <draws
             v-else
             :tour="selectedTour!"
             :match-type="selectedMatchType"
             :draw="selectedDraw"
-          /> -->
+          />
 
-        <draws-round-robin
-          v-if="selectedTour && selectedDrawType === 'Round robin'"
-          :tour="selectedTour!"
-          :match-type="selectedMatchType"
-          :draw="selectedDraw"
-        />
+          <draws-round-robin
+            v-if="selectedTour && selectedDrawType === 'Round robin'"
+            :tour="selectedTour"
+            :match-type="selectedMatchType"
+            :draw="selectedDraw"
+          />
+        </div>
       </u-page-body>
     </u-page>
   </u-container>

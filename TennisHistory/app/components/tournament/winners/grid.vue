@@ -18,9 +18,9 @@ const getEditionEvents = (id: number) => props.editions.filter(edition => editio
 </script>
 
 <template>
-  <u-page-columns
+  <u-page-grid
     v-if="editions.length || pending"
-    class="2xl:columns-4"
+    class="2xl:grid-cols-4 p-5"
   >
     <tournament-winners-card
       v-if="editions.length"
@@ -34,7 +34,7 @@ const getEditionEvents = (id: number) => props.editions.filter(edition => editio
       v-for="_ in 6"
       :key="_"
     />
-  </u-page-columns>
+  </u-page-grid>
 
   <u-empty
     v-else
