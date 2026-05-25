@@ -223,7 +223,6 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
               base: state.entry && state.match_type === 'Doubles' ? 'pl-10' : '',
               itemLabel: state.match_type === 'Doubles' ? 'ml-8' : 'ml-4'
             }"
-            class="w-full"
           >
             <template #leading="{ modelValue }">
               <u-icon

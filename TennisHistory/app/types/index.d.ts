@@ -356,6 +356,7 @@ declare global {
     id: string
     first_name: string
     last_name: string
+    full_name: string
     country: CountryType
     tour: TourType
     currency: CurrencyType

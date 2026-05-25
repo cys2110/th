@@ -4,7 +4,7 @@ import { array, number, object, string, z } from "zod"
 
 const playerSchema = object({
   id: string(),
-  label: string(),
+  name: string(),
   icon: string()
 })
 type PlayerSchema = z.infer<typeof playerSchema>
@@ -69,12 +69,12 @@ const initialState = {
     points: 0,
     captain: {
       id: "",
-      label: "",
+      name: "",
       icon: ""
     },
     vice_captain: {
       id: "",
-      label: "",
+      name: "",
       icon: ""
     },
     singles: [],
@@ -86,12 +86,12 @@ const initialState = {
     points: 0,
     captain: {
       id: "",
-      label: "",
+      name: "",
       icon: ""
     },
     vice_captain: {
       id: "",
-      label: "",
+      name: "",
       icon: ""
     },
     singles: [],
@@ -284,6 +284,14 @@ const removeSelection = (team: "europe" | "world") => {
     <u-button :icon="icons.plus" />
 
     <template #body>
+      <u-alert
+        v-if="errors"
+        color="error"
+        :title="`Error saving entries`"
+        :description="errors"
+        class="mb-5"
+      />
+
       <u-form
         id="entries-form"
         ref="form"
@@ -383,7 +391,7 @@ const removeSelection = (team: "europe" | "world") => {
                 v-model="state.europe.doubles[index]"
                 :items="europeDoublesPlayers.results.value"
                 v-model:search-term="europeDoublesPlayers.searchTerm.value"
-                :loading="europeDoublesPlayers.loading.value"
+                :loading="europeDoublesPlayers.pending.value"
                 multiple
                 class="w-full"
               />
@@ -515,7 +523,7 @@ const removeSelection = (team: "europe" | "world") => {
                 v-model="state.world.doubles[index]"
                 :items="worldDoublesPlayers.results.value"
                 v-model:search-term="worldDoublesPlayers.searchTerm.value"
-                :loading="worldDoublesPlayers.loading.value"
+                :loading="worldDoublesPlayers.pending.value"
                 multiple
                 class="w-full"
               />
@@ -557,14 +565,6 @@ const removeSelection = (team: "europe" | "world") => {
           />
         </u-form-field>
       </u-form>
-
-      <u-alert
-        v-if="errors"
-        color="error"
-        :title="`Error saving entries`"
-        :description="errors"
-        class="mt-5"
-      />
     </template>
 
     <template #footer="{ close }">

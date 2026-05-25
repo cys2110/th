@@ -33,9 +33,7 @@ const handleReset = () => {
   set(errors, undefined)
 }
 
-const onError = (event: FormErrorEvent) => {
-  set(errors, event.errors)
-}
+const onError = (event: FormErrorEvent) => set(errors, event.errors)
 
 const onSubmit = async (event: FormSubmitEvent<Schema>) => {
   set(isUploading, true)
@@ -94,7 +92,8 @@ const formFields: Array<FormFieldInterface<Schema>> = [
       { value: "250", label: "ATP 250" },
       { value: "CH", label: "Challenger" },
       { value: "FU", label: "Futures" },
-      { value: "LC", label: "Laver Cup" }
+      { value: "LC", label: "Laver Cup" },
+      { value: "UC", label: "United Cup" }
     ],
     required: true,
     valueKey: "value"
@@ -113,6 +112,14 @@ const formFields: Array<FormFieldInterface<Schema>> = [
     />
 
     <template #body>
+      <u-alert
+        v-if="errors"
+        color="error"
+        :title="`Error saving entry`"
+        :description="errors"
+        class="mb-5"
+      />
+
       <u-form
         id="activity-form"
         :schema
@@ -129,14 +136,6 @@ const formFields: Array<FormFieldInterface<Schema>> = [
           />
         </div>
       </u-form>
-
-      <u-alert
-        v-if="errors"
-        color="error"
-        :title="`Error saving entry`"
-        :description="errors"
-        class="mt-5"
-      />
     </template>
 
     <template #footer="{ close }">

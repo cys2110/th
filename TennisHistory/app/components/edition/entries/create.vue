@@ -6,7 +6,7 @@ const schema = object({
   event_id: string().optional(),
   player: object({
     id: string(),
-    label: string(),
+    name: string(),
     icon: string()
   }),
   match_type: MatchTypeEnum,
@@ -15,7 +15,7 @@ const schema = object({
   pm: number("Prize money must be a number").nonnegative("Prize money cannot be a negative number").optional(),
   teammate: object({
     id: string(),
-    label: string(),
+    name: string(),
     icon: string()
   }).optional(),
   teammate_rank: number("Rank must be a number").int("Rank must be an integer").nonnegative("Rank cannot be a negative number").optional()
@@ -25,7 +25,7 @@ type Schema = z.infer<typeof schema>
 const emits = defineEmits<{ refresh: [] }>()
 
 const {
-  params: { id, edId }
+  params: { edId }
 } = useRoute("edition")
 
 const {
@@ -145,6 +145,14 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
     <u-button :icon="icons.plus" />
 
     <template #body>
+      <u-alert
+        v-if="errors"
+        color="error"
+        :title="`Error saving entry`"
+        :description="errors"
+        class="mb-5"
+      />
+
       <u-form
         id="entry-form"
         ref="form"
@@ -238,14 +246,6 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
           </u-form-field>
         </div>
       </u-form>
-
-      <u-alert
-        v-if="errors"
-        color="error"
-        :title="`Error saving entry`"
-        :description="errors"
-        class="mt-5"
-      />
     </template>
 
     <template #footer="{ close }">

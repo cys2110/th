@@ -4,7 +4,7 @@ import { array, number, object, string, z } from "zod"
 
 const playerSchema = object({
   id: string(),
-  label: string(),
+  name: string(),
   icon: string()
 })
 
@@ -49,26 +49,6 @@ defineShortcuts({
   ctrl_enter: () => form.value?.submit()
 })
 
-const { data: countries, pending: countriesPending } = await useAsyncData(
-  "countries",
-  async () => {
-    const { data, error } = await supabase.from("countries").select("*").order("name", { ascending: true })
-
-    if (error || !data) {
-      console.error("Error fetching countries:", error)
-      return []
-    }
-
-    const dataWithIcons = data.map(country => ({
-      ...country,
-      icon: getFlagCode(country)
-    }))
-
-    return dataWithIcons
-  },
-  { default: () => [] }
-)
-
 const state = ref<Schema>([])
 
 const handleReset = () => {
@@ -76,9 +56,7 @@ const handleReset = () => {
   set(errors, undefined)
 }
 
-const onError = (event: FormErrorEvent) => {
-  set(errors, event.errors)
-}
+const onError = (event: FormErrorEvent) => set(errors, event.errors)
 
 const onSubmit = async (event: FormSubmitEvent<Schema>) => {
   set(isUploading, true)
@@ -101,7 +79,16 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
       })
     )
 
-    if (error) throw error
+    if (error) {
+      set(errors, error)
+      toast.add({
+        title: `Error creating entries`,
+        icon: icons.error,
+        color: "error"
+      })
+
+      return
+    }
 
     const { error: mappingError } = await supabase.from("player_entry_mapping").insert(
       event.data.flatMap(entry => {
@@ -123,26 +110,47 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
       })
     )
 
-    if (mappingError) throw mappingError
+    if (mappingError) {
+      console.error("mapping error", mappingError)
+      toast.add({
+        title: `Error creating player entry mappings`,
+        icon: icons.error,
+        color: "error"
+      })
+    }
 
-    const entriesWithSeeds = event.data.filter(entry => entry.seed)
+    const entriesWithSeeds = event.data.filter(entry => !!entry.seed)
 
     if (entriesWithSeeds.length) {
       const { error: seedsError } = await supabase
         .from("seeds")
-        .insert(entriesWithSeeds.map(entry => ({ entry_id: `${eventId} ${entry.country}`, event_id: eventId, seed: entry.seed, draw: "Main" })))
+        .insert(entriesWithSeeds.map(entry => ({ entry_id: `${eventId} ${entry.country}`, event_id: eventId, seed: entry.seed!, draw: "Main" })))
 
-      if (seedsError) throw seedsError
+      if (seedsError) {
+        console.error("seeds error", seedsError)
+        toast.add({
+          title: `Error creating seeds`,
+          icon: icons.error,
+          color: "error"
+        })
+      }
     }
 
     const withdrawals = event.data.flatMap(entry => entry.withdrawals)
 
     if (withdrawals.length) {
-      const { error: withdrawalEntries } = await supabase
+      const { error: withdrawalError } = await supabase
         .from("withdrawals")
-        .insert(withdrawals.map(wd => ({ event_id: eventId, entry_id: `${eventId} ${wd.player.id}`, reason: wd.reason })))
+        .insert(withdrawals.map(wd => ({ event_id: eventId, entry_id: `${eventId} ${wd.player.id}`, reason: wd.reason, draw: "Main" })))
 
-      if (withdrawalEntries) throw withdrawalEntries
+      if (withdrawalError) {
+        console.error("withdrawal error", withdrawalError)
+        toast.add({
+          title: `Error creating withdrawals`,
+          icon: icons.error,
+          color: "error"
+        })
+      }
     }
 
     toast.add({
@@ -154,13 +162,6 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
     emits("refresh")
     handleReset()
     set(isOpen, false)
-  } catch (error) {
-    set(errors, error)
-    toast.add({
-      title: `Error creating entries`,
-      icon: icons.error,
-      color: "error"
-    })
   } finally {
     set(isUploading, false)
   }
@@ -175,6 +176,14 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
     <u-button :icon="icons.plus" />
 
     <template #body>
+      <u-alert
+        v-if="errors"
+        color="error"
+        :title="`Error creating entries for ${edId}`"
+        :description="errors"
+        class="mb-5"
+      />
+
       <u-form
         id="entries-form"
         ref="form"
@@ -197,16 +206,9 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
             key="country"
             required
           >
-            <u-input-menu
+            <country-search
               v-model="state[index]!.country"
-              :items="countries"
-              :icon="ICONS.globe"
-              :loading="countriesPending"
-              label-key="name"
-              value-key="id"
-              placeholder="Country"
-              clear
-              class="w-full"
+              value-key
             />
           </u-form-field>
 
@@ -227,7 +229,7 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
           </u-form-field>
 
           <u-form-field
-            v-for="(team, i) in state[index]!.doubles"
+            v-for="(_, i) in state[index]!.doubles"
             :key="i"
             :name="`${index}.doubles.${i}`"
             :label="i === 0 ? 'Doubles' : undefined"
@@ -294,7 +296,7 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
               state[index]!.withdrawals.push({
                 player: {
                   id: '',
-                  label: '',
+                  name: '',
                   icon: ''
                 }
               })
@@ -317,14 +319,6 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
           "
         />
       </u-form>
-
-      <u-alert
-        v-if="errors"
-        color="error"
-        :title="`Error creating entries for ${edId}`"
-        :description="errors"
-        class="mt-5"
-      />
     </template>
 
     <template #footer="{ close }">
