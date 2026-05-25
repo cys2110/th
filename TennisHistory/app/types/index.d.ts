@@ -152,6 +152,13 @@ declare global {
     continents: Array<ContinentType>
   }
 
+  interface MatchSideInterface {
+    id: string
+    status: StatusType | null
+    seed: number | null
+    team: Array<Required<BasePlayerType> & { rank: number | null }>
+  }
+
   interface MatchInterface {
     court: string | null
     date: string | null
@@ -170,11 +177,11 @@ declare global {
     level: LevelType
     sponsor_name: string | null
     tournament: string | null
-    scores: Array<ScoreInterface>
-    team1: EditionResultSideInterface
-    team2: EditionResultSideInterface
+    scores: Array<ConsolidatedScore>
+    team1: MatchSideInterface
+    team2: MatchSideInterface
     winner_id: string
-    surfaces: SurfaceInterface[]
+    surface: SurfaceInterface
     stats: Array<{
       match_id: string
       entry_id: string
@@ -210,6 +217,7 @@ declare global {
   }
 
   interface RoundRobinMatch {
+    id: string
     format: 3 | 5
     match_no: number
     tour: TourType

@@ -4,6 +4,8 @@ import { getFacetedRowModel, getFacetedUniqueValues } from "@tanstack/vue-table"
 import { parseDate } from "@internationalized/date"
 import { LazyMatchCreate, LazyMatchCountryCreate, UButton, UFieldGroup } from "#components"
 
+// TODO: Group for round robin
+
 const props = defineProps<{
   matches: Array<ResultsMatchInterface>
   pending: boolean
@@ -103,7 +105,7 @@ const handleSelectRow = (_e: Event, row: TableRow<ResultsMatchInterface>) => {
         tour: row.original.tour || (COUNTRY_DRAWS.includes(id) ? "Country" : "LC"),
         match_type: row.original.match_type,
         draw: row.original.draw,
-        match_no: row.original.match_no
+        match_id: row.original.id
       }
     })
   }

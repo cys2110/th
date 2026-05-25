@@ -67,9 +67,11 @@ const {
         label: formatDate(matches[0]!.date),
         points,
         matches: matches.map((match: any) => {
-          const { team1, team2, match_type, winner_id, scores_by_teams, match_stats, team_1_id, team_2_id, match_no, incomplete, tour, draw } = match
+          const { team1, team2, match_type, winner_id, scores_by_teams, match_stats, team_1_id, team_2_id, match_no, incomplete, tour, draw, id } =
+            match
 
           return {
+            id,
             tour,
             draw,
             match_no,
@@ -140,7 +142,7 @@ const handleSelectRow = (_e: Event, row: TableRow<Round["matches"][number]>) => 
         tour: "LC",
         match_type: row.original.match_type,
         draw: "Main",
-        match_no: row.original.match_no
+        match_id: row.original.id
       }
     })
   }

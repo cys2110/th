@@ -6,9 +6,9 @@ const props = defineProps<{
   pending: boolean
 }>()
 
-const {
-  params: { year, mid }
-} = useRoute("match")
+// const {
+//   params: { year, mid }
+// } = useRoute("match")
 
 // const isBold = (row: MatchStatsType["stats"][number], player: string) => {
 //   const lowStats = ["Double faults", "Unforced errors"]

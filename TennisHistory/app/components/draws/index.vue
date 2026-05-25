@@ -192,7 +192,7 @@ const isVisible = (index: number) => index >= baseIndexValue.value - 1 && index 
       </div>
     </div>
 
-    <div class="col-start-1 col-end-5 row-2 overflow-y-hidden overflow-x-hidden pointer-events-none">
+    <div class="col-start-1 col-end-5 row-2 overflow-x-hidden pointer-events-none max-h-[calc(100vh-23rem)] overflow-y-auto">
       <div class="grid grid-flow-col auto-cols-fr relative z-2 min-w-full min-h-full grid-rows-1 overflow-hidden py-5 px-0">
         <draws-round-column
           v-for="(round, index) in data.rounds"
