@@ -27,7 +27,7 @@ withDefaults(defineProps<{ players: Array<Required<BasePlayerType>>; strikethrou
           class="hover-link primary-link"
           :class="{ 'line-through': strikethrough }"
         >
-          {{ player.first_name }} {{ player.last_name }}
+          {{ player.full_name || "—" }}
         </u-link>
       </template>
     </div>

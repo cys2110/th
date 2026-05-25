@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import type { FormErrorEvent, FormSubmitEvent } from "@nuxt/ui"
-import { PostgrestError } from "@supabase/supabase-js"
 import { number, object, string, z } from "zod"
 
 const schema = object({
@@ -34,44 +33,14 @@ const errors = ref()
 const form = useTemplateRef("form")
 
 defineShortcuts({
-  ctrl_i: () => set(isOpen, !isOpen.value),
+  ctrl_a: () => set(isOpen, !isOpen.value),
   ctrl_r: () => set(state, {}),
   ctrl_enter: () => form.value?.submit()
 })
 
-// Get entry list
-const entriesKey = computed(() => `${edId}-entries`)
+const { entries, pending, fetchEntries } = useEntryList(Number(edId))
 
-// Get entry list
-const { data: entries, pending } = await useAsyncData(
-  entriesKey,
-  async () => {
-    const { data, error } = await supabase
-      .from("entries")
-      .select("id, event_id, match_type, player_entry_mapping(players(id, first_name, last_name)), events!inner(edition_id, tour)")
-      .eq("events.edition_id", Number(edId))
-
-    if (error) {
-      console.error("Error fetching entries:", error)
-      return []
-    }
-
-    return data.map(entry => ({
-      id: entry.id,
-      match_type: entry.match_type,
-      tour: entry.events.tour,
-      event_id: entry.event_id,
-      players: entry.player_entry_mapping.map(pem => ({
-        id: pem.players.id,
-        name: `${pem.players.first_name} ${pem.players.last_name}`
-      })),
-      label: entry.player_entry_mapping.map(pem => `${pem.players.first_name} ${pem.players.last_name}`).join(" / ")
-    }))
-  },
-  { default: () => [] }
-)
-
-const playerOptions = ref<{ id: string; name: string }[]>([])
+const playerOptions = ref<Array<Required<BasePlayerType>>>([])
 
 const state = ref<Partial<Schema>>({})
 
@@ -86,9 +55,7 @@ const handleReset = () => {
   set(errors, undefined)
 }
 
-const onError = (event: FormErrorEvent) => {
-  set(errors, event.errors)
-}
+const onError = (event: FormErrorEvent) => set(errors, event.errors)
 
 const onSubmit = async (event: FormSubmitEvent<Schema>) => {
   set(isUploading, true)
@@ -111,7 +78,7 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
       const { error: statusError } = await supabase.from("entry_status").insert({
         event_id: event.data.event_id,
         entry_id: event.data.entry_id,
-        status: event.data.status,
+        status: event.data.status!,
         draw: event.data.draw
       })
 
@@ -167,7 +134,7 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
   }
 
   if (error) {
-    set(errors, error instanceof PostgrestError ? error.details : (error as any).message)
+    set(errors, error)
     set(isUploading, false)
     return
   }
@@ -193,6 +160,14 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
     <u-button :icon="icons.plus" />
 
     <template #body>
+      <u-alert
+        v-if="errors"
+        color="error"
+        title="Error saving round"
+        :description="errors"
+        class="mb-5"
+      />
+
       <u-form
         id="entry-info-form"
         ref="form"
@@ -302,14 +277,6 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
           </template>
         </div>
       </u-form>
-
-      <u-alert
-        v-if="errors"
-        color="error"
-        title="Error saving round"
-        :description="errors"
-        class="mt-5"
-      />
     </template>
 
     <template #footer="{ close }">

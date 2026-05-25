@@ -341,22 +341,6 @@ declare global {
     withdrew: boolean
   }
 
-  interface EntryInfoInterface {
-    key: string
-    label: string
-    entries: Array<{
-      id: string
-      entry_id: string
-      team: Array<BasePlayerType>
-      draw: DrawType
-      tour: TourType
-      rank?: number | null
-      reason?: string | null
-      teammate?: string | null
-      pr?: boolean
-    }>
-  }
-
   interface IndividualEntryInterface {
     id?: string | null
     entry_id?: string | null

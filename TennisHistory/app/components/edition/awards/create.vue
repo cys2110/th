@@ -136,6 +136,14 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
     <u-button :icon="icons.plus" />
 
     <template #body>
+      <u-alert
+        v-if="errors"
+        color="error"
+        title="Error saving round"
+        :description="errors"
+        class="mb-5"
+      />
+
       <u-form
         id="award-form"
         ref="form"
@@ -228,14 +236,6 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
           />
         </u-form-field>
       </u-form>
-
-      <u-alert
-        v-if="errors"
-        color="error"
-        title="Error saving round"
-        :description="errors"
-        class="mt-5"
-      />
     </template>
 
     <template #footer="{ close }">

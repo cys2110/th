@@ -13,6 +13,7 @@ const schema = object({
   currency: CurrencyEnum.optional(),
   pm: number().optional(),
   tfc: number().optional(),
+  undefeated_bonus: number().optional(),
   venues: array(
     object({
       id: string(),
@@ -174,7 +175,7 @@ const formFields = computed<Array<FormFieldInterface<Schema>>>(
       {
         label: "Award",
         type: "slot",
-        errorPattern: /^(currency|tfc)$/,
+        errorPattern: /^(currency|pm|tfc|undefeated_bonus)$/,
         class: "col-span-2"
       },
       { label: "Supervisors", key: "supervisors", type: "slot", class: "col-span-2" },
@@ -255,6 +256,11 @@ const formFields = computed<Array<FormFieldInterface<Schema>>>(
                 placeholder="Enter TFC"
                 :currency="state.currency || 'USD'"
                 v-model="state.tfc"
+              />
+              <form-input-number
+                placeholder="Enter undefeated bonus"
+                :currency="state.currency || 'USD'"
+                v-model="state.undefeated_bonus"
               />
             </u-field-group>
 

@@ -143,7 +143,10 @@ const option = computed(() => ({
     description="Awards"
     fullscreen
   >
-    <u-button :icon="ICONS.scatterChart" />
+    <u-button
+      :icon="ICONS.scatterChart"
+      :disabled="!pending && !awards.length"
+    />
 
     <template #body>
       <v-chart
