@@ -2,13 +2,16 @@
 import { UButton, UFieldGroup } from "#components"
 import type { TableColumn } from "@nuxt/ui"
 
-interface CountryTeam {
-  id: string
-  player_id: string
-  first_name: string
-  last_name: string
-  rank: number | null
-  doubles_rank: number | null
+interface LaverTeam {
+  team_name: string
+  players: Array<
+    Required<BasePlayerType> & {
+      rank: number | null
+      doubles_rank: number | null
+      withdrawn: boolean
+      mapping_id: string
+    }
+  >
 }
 
 const {
@@ -18,10 +21,10 @@ const {
 const {
   ui: { icons }
 } = useAppConfig()
-const { dev } = useRuntimeConfig().public
 
 const supabase = useSupabaseClient()
 
+const { isAdmin } = useAuthState()
 const tournamentStore = useTournamentStore()
 
 const updatedMappings = ref<Record<string, { singles: number | null; doubles: number | null }>>({})
@@ -33,60 +36,50 @@ const {
   data: entries,
   pending,
   refresh
-} = await useAsyncData(
+} = await useAsyncData<Array<LaverTeam>>(
   key,
   async () => {
     const { data, error } = await supabase
       .from("entries")
-      .select(
-        `
-      id,
-      countries(*),
-      seeds(seed),
-      player_entry_mapping(
-        id,
-        rank,
-        doubles_rank,
-        players(id, first_name, last_name)
-      )
-    `
-      )
-      .eq("event_id", `${edId}-Country`)
-      .not("country_id", "is", null)
+      .select("team_name, player_entry_mapping(*, countries(*), players(id, first_name, last_name, full_name)), events!inner(edition_id)")
+      .not("team_name", "is", null)
+      .eq("events.edition_id", Number(edId))
+      .order("team_name", { ascending: true })
 
     if (error || !data) {
-      console.error("Error fetching edition country entries:", error)
+      console.error("Error fetching entries:", error)
       return []
     }
 
-    return data
-      .map(entry => ({
-        id: entry.id,
-        seed: entry.seeds[0]?.seed,
-        country: entry.countries,
-        players: entry.player_entry_mapping.map(
-          player =>
-            ({
-              id: player.id,
-              rank: player.rank,
-              doubles_rank: player.doubles_rank,
-              player_id: player.players.id,
-              first_name: player.players.first_name,
-              last_name: player.players.last_name
-            }) as CountryTeam
-        )
-      }))
-      .sort((a, b) => {
-        if (!a.seed && !b.seed && a.seed === b.seed) return a.country!.name.localeCompare(b.country!.name)
-        if (a.seed === null) return 1
-        if (b.seed === null) return -1
-        return a.seed! - b.seed!
-      })
+    const { data: withdrawals, error: withdrawalsError } = await supabase
+      .from("withdrawals")
+      .select("events!inner(edition_id), entries(player_entry_mapping(player_id))")
+      .eq("events.edition_id", Number(edId))
+
+    if (withdrawalsError) {
+      console.error("Error fetching withdrawals:", withdrawalsError)
+    }
+
+    return data.map(
+      entry =>
+        ({
+          team_name: entry.team_name,
+          players: entry.player_entry_mapping.map(entry => ({
+            mapping_id: entry.id,
+            id: entry.players.id,
+            full_name: entry.players.full_name,
+            country: entry.countries,
+            withdrawn: !!withdrawals?.find(withdrawal => withdrawal.entries.player_entry_mapping.find(pem => pem.player_id === entry.players.id)),
+            rank: entry.rank,
+            doubles_rank: entry.doubles_rank
+          }))
+        }) as LaverTeam
+    )
   },
   { default: () => [] }
 )
 
-const columns: Array<TableColumn<CountryTeam>> = [
+const columns: Array<TableColumn<LaverTeam["players"][number]>> = [
   {
     id: "checkbox",
     footer: () =>
@@ -94,19 +87,20 @@ const columns: Array<TableColumn<CountryTeam>> = [
         h(UButton, { icon: icons.reload, onClick: () => refresh() }),
         h(UButton, {
           icon: ICONS.save,
+          loadingIcon: ICONS.uploading,
           onClick: handleSave,
           disabled: !Object.keys(updatedMappings.value).length || isSaving.value,
           loading: isSaving.value
         })
       ])
   },
-  { id: "player", accessorFn: row => `${row.first_name} ${row.last_name}`, header: "Player" },
-  { accessorKey: "rank", header: "Singles Rank", cell: ({ cell }) => cell.getValue<number>()?.toLocaleString ?? cell.renderValue() },
-  { accessorKey: "doubles_rank", header: "Doubles Rank", cell: ({ cell }) => cell.getValue<number>()?.toLocaleString ?? cell.renderValue() }
+  { accessorKey: "full_name", header: "Player" },
+  { accessorKey: "rank", header: "Singles Rank" },
+  { accessorKey: "doubles_rank", header: "Doubles Rank" }
 ]
 
 const columnVisibility = computed(() => ({
-  checkbox: dev
+  checkbox: isAdmin.value
 }))
 
 const handleSave = async () => {
@@ -140,21 +134,12 @@ const handleSave = async () => {
     <u-page-card
       v-if="entries.length"
       v-for="entry in entries"
-      :key="entry.id"
-      :title="entry.country?.name"
+      :key="entry.team_name"
+      :title="entry.team_name"
       highlight
-      :ui="{ leading: 'flex w-full justify-between items-center', body: 'w-full' }"
+      :icon="entry.team_name === 'Europe' ? ICONS.europe : ICONS.globe"
+      :ui="{ body: 'w-full' }"
     >
-      <template #leading>
-        <u-icon :name="getFlagCode(entry.country!)" />
-
-        <u-badge
-          v-if="entry.seed"
-          :label="entry.seed"
-          color="success"
-        />
-      </template>
-
       <template #description>
         <u-table
           :data="entry.players"
@@ -174,7 +159,7 @@ const handleSave = async () => {
           <template #empty>
             <u-empty
               :icon="ICONS.peopleOff"
-              :message="`No players played for ${entry.country?.name}.`"
+              :message="`No players played for ${entry.team_name}.`"
               description="If you think this is an error, refresh the page. Otherwise, please be patient as we continue to add more data."
               class="mx-2"
             >
@@ -191,13 +176,13 @@ const handleSave = async () => {
           <template #checkbox-header>
             <div class="flex justify-center">
               <u-checkbox
-                :model-value="entry.players.every(player => player.id in updatedMappings)"
+                :model-value="entry.players.every(player => player.mapping_id in updatedMappings)"
                 @update:model-value="
                   () => {
-                    if (entry.players.every(player => player.id in updatedMappings)) {
-                      entry.players.forEach(player => delete updatedMappings[player.id])
+                    if (entry.players.every(player => player.mapping_id in updatedMappings)) {
+                      entry.players.forEach(player => delete updatedMappings[player.mapping_id])
                     } else {
-                      entry.players.forEach(player => (updatedMappings[player.id] = { singles: player.rank, doubles: player.doubles_rank }))
+                      entry.players.forEach(player => (updatedMappings[player.mapping_id] = { singles: player.rank, doubles: player.doubles_rank }))
                     }
                   }
                 "
@@ -209,13 +194,13 @@ const handleSave = async () => {
           <template #checkbox-cell="{ row }">
             <div class="w-fit mx-auto">
               <u-checkbox
-                :model-value="row.original.id in updatedMappings"
+                :model-value="row.original.mapping_id in updatedMappings"
                 @update:model-value="
                   () => {
-                    if (row.original.id in updatedMappings) {
-                      delete updatedMappings[row.original.id]
+                    if (row.original.mapping_id in updatedMappings) {
+                      delete updatedMappings[row.original.mapping_id]
                     } else {
-                      updatedMappings[row.original.id] = { singles: row.original.rank, doubles: row.original.doubles_rank }
+                      updatedMappings[row.original.mapping_id] = { singles: row.original.rank, doubles: row.original.doubles_rank }
                     }
                   }
                 "
@@ -224,11 +209,21 @@ const handleSave = async () => {
             </div>
           </template>
 
+          <template #full_name-cell="{ row }">
+            <u-link
+              :to="{ name: 'player', params: { id: row.original.id, name: kebabCase(row.original.full_name || '—') } }"
+              class="hover-link primary-link"
+              :class="{ 'line-through': row.original.withdrawn }"
+            >
+              {{ row.original.full_name }}
+            </u-link>
+          </template>
+
           <template #rank-cell="{ row }">
             <form-input-number
-              v-if="row.original.id in updatedMappings"
+              v-if="row.original.mapping_id in updatedMappings"
               placeholder="Singles"
-              v-model="updatedMappings[row.original.id]!.singles"
+              v-model="updatedMappings[row.original.mapping_id]!.singles"
             />
 
             <template v-else>{{ row.original.rank?.toLocaleString() ?? "—" }}</template>
@@ -236,9 +231,9 @@ const handleSave = async () => {
 
           <template #doubles_rank-cell="{ row }">
             <form-input-number
-              v-if="row.original.id in updatedMappings"
+              v-if="row.original.mapping_id in updatedMappings"
               placeholder="Doubles"
-              v-model="updatedMappings[row.original.id]!.doubles"
+              v-model="updatedMappings[row.original.mapping_id]!.doubles"
             />
 
             <template v-else>{{ row.original.doubles_rank?.toLocaleString() ?? "—" }}</template>
@@ -257,7 +252,7 @@ const handleSave = async () => {
   <u-empty
     v-else
     :icon="ICONS.globeOff"
-    :message="`No countries entered ${tournamentStore.name} ${year}.`"
+    :message="`No teams entered ${tournamentStore.name} ${year}.`"
     description="If you think this is an error, refresh the page. Otherwise, please be patient as we continue to add more data."
   >
     <template #actions>

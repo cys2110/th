@@ -7,13 +7,12 @@ const {
   params: { edId, year }
 } = useRoute("edition")
 
-const toast = useToast()
-
 const {
   ui: { icons }
 } = useAppConfig()
 
 const supabase = useSupabaseClient()
+const toast = useToast()
 
 const { isAdmin } = useAuthState()
 const tournamentStore = useTournamentStore()

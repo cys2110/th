@@ -367,8 +367,8 @@ declare global {
     id: string
     match_type: MatchEnumType
     tour: TourType
-    team: Array<BasePlayerType & { rank: number | null }>
-    seed: Array<number | string | null>
+    team: Array<Required<BasePlayerType> & { rank: number | null }>
+    seed: number | string | null
     statuses: Array<string | StatusType | null>
     draws: Array<DrawType | null>
   }

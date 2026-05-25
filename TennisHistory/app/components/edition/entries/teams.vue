@@ -3,24 +3,43 @@ import type { TableColumn, TableRow } from "@nuxt/ui"
 import { getFacetedRowModel, getFacetedUniqueValues } from "@tanstack/vue-table"
 
 const {
-  params: { edId }
+  params: { edId, year }
 } = useRoute("edition")
 
 const {
-  ui: { colors }
+  ui: { icons }
 } = useAppConfig()
-
-const toast = useToast()
 
 const supabase = useSupabaseClient()
 
-const { data: entries, pending } = await useAsyncData<Array<TeamEntryInterface>>("team-entries", async () => {
+const tournamentStore = useTournamentStore()
+
+const key = computed(() => `${edId}-team-entries`)
+
+const {
+  data: entries,
+  pending,
+  refresh
+} = await useAsyncData<Array<TeamEntryInterface>>(key, async () => {
   const { data, error } = await supabase
     .from("entries")
     .select(
-      "id, match_type, player_entry_mapping(players(id, first_name, last_name), countries(*), rank), events!inner(edition_id, tour), entry_status(status, draw), seeds(seed, draw), t1:matches!team_1_id(draw), t2:matches!team_2_id(draw)"
+      `
+      *,
+      player_entry_mapping(
+        countries(*),
+        players(id, full_name, first_name, last_name),
+        rank
+      ),
+      events!inner(edition_id, tour),
+      entry_status(status, draw),
+      seeds(seed, draw),
+      t1:matches!team_1_id(draw),
+      t2:matches!team_2_id(draw)
+    `
     )
     .eq("events.edition_id", Number(edId))
+    .order("id", { ascending: true })
 
   if (error || !data) {
     console.error("Error fetching team entries:", error)
@@ -37,10 +56,11 @@ const { data: entries, pending } = await useAsyncData<Array<TeamEntryInterface>>
           id: pem.players.id,
           first_name: pem.players.first_name,
           last_name: pem.players.last_name,
+          full_name: pem.players.full_name,
           country: pem.countries,
           rank: pem.rank
         })),
-        seed: entry.seeds.map(s => (s.draw === "Qualifying" ? `Q-${s.seed}` : s.seed)),
+        seed: entry.seeds.map(s => (s.draw === "Qualifying" ? `Q-${s.seed}` : s.seed))[0],
         statuses: entry.entry_status.map(es => (es.draw === "Qualifying" ? `Q-${es.status}` : es.status)),
         draws: useArrayUnique([...(entry.t1.map(m => m.draw) || []), ...(entry.t2.map(m => m.draw) || [])]).value.filter(Boolean)
       }) as TeamEntryInterface
@@ -49,10 +69,8 @@ const { data: entries, pending } = await useAsyncData<Array<TeamEntryInterface>>
 
 const columns: TableColumn<TeamEntryInterface>[] = [
   { accessorKey: "tour" },
-  {
-    accessorKey: "match_type"
-  },
-  { id: "team", accessorFn: row => row.team.map(player => `${player.last_name}, ${player.first_name}`).join(" / ") },
+  { accessorKey: "match_type" },
+  { id: "team", accessorFn: row => row.team.map(player => `${player.last_name}, ${player.first_name}`), filterFn: arrayFilter },
   {
     accessorKey: "draws",
     filterFn: (row, columnId, filterValue) => {
@@ -64,8 +82,7 @@ const columns: TableColumn<TeamEntryInterface>[] = [
     }
   },
   {
-    id: "seed",
-    accessorFn: row => row.seed?.[0],
+    accessorKey: "seed",
     sortingFn: (rowA, rowB, columnId) => {
       const valueA = rowA.getValue(columnId)
       const valueB = rowB.getValue(columnId)
@@ -91,8 +108,7 @@ const columns: TableColumn<TeamEntryInterface>[] = [
     filterFn: (row, columnId, filterValue) => {
       const values = (row.getValue(columnId) as string[]) || []
 
-      if (!filterValue) return true
-      if (!filterValue.length) return true
+      if (!filterValue?.length) return true
       if (values.some(v => filterValue.includes(v))) return true
       return false
     }
@@ -111,34 +127,6 @@ const columns: TableColumn<TeamEntryInterface>[] = [
     }
   }
 ]
-
-const handleSelectRow = (_e: Event, row: TableRow<TeamEntryInterface>) => {
-  toast.clear()
-
-  toast.add({
-    title: "Go to...",
-    duration: Infinity,
-    progress: false,
-    actions: row.original.team.map(p => ({
-      label: `${p.first_name} ${p.last_name}`,
-      icon: ICONS.player,
-      to: {
-        name: "player",
-        params: {
-          id: p.id,
-          name: p.first_name ? kebabCase(`${p.first_name} ${p.last_name}`) : "—"
-        }
-      }
-    }))
-  })
-}
-
-onUnmounted(() => {
-  toast.clear()
-})
-onBeforeRouteLeave(() => {
-  toast.clear()
-})
 </script>
 
 <template>
@@ -146,7 +134,6 @@ onBeforeRouteLeave(() => {
     :data="entries"
     :columns
     :loading="pending"
-    @select="handleSelectRow"
     :faceted-options="{
       getFacetedUniqueValues: getFacetedUniqueValues(),
       getFacetedRowModel: getFacetedRowModel()
@@ -155,66 +142,81 @@ onBeforeRouteLeave(() => {
     render-fallback-value="—"
   >
     <template #loading>
-      <loading-icon />
-    </template>
-
-    <template #empty>
-      <empty
-        message="No entries found"
-        :icon="ICONS.peopleOff"
+      <u-icon
+        :name="icons.loading"
+        class="size-8"
       />
     </template>
 
+    <template #empty>
+      <u-empty
+        :icon="ICONS.peopleOff"
+        :title="`There were no entries in ${tournamentStore.name} ${year}`"
+        description="If you think this is an error, refresh the page. Otherwise, please be patient as we continue to add more data."
+        class="mx-2"
+      >
+        <template #actions>
+          <u-button
+            label="Refresh"
+            :icon="icons.reload"
+            @click="refresh()"
+          />
+        </template>
+      </u-empty>
+    </template>
+
     <template #tour-header="{ column }">
-      <table-client-filter-header
+      <table-filter-header
         :column
         label="Tour"
+        :icon="ICONS.tour"
       />
     </template>
 
     <template #tour-cell="{ row }">
       <u-badge
-        :label="<string>row.original.tour"
-        :color="<keyof typeof colors>row.original.tour"
+        :label="row.original.tour"
+        :color="row.original.tour"
       />
     </template>
 
     <template #match_type-header="{ column }">
-      <table-client-filter-header
+      <table-filter-header
         :column
         label="S/D"
+        :icon="ICONS.people"
       />
     </template>
 
     <template #match_type-cell="{ row }">
       <u-badge
-        :label="<string>row.original.match_type"
-        :color="<keyof typeof colors>row.original.match_type"
+        :label="row.original.match_type"
+        :color="row.original.match_type"
       />
     </template>
 
     <template #team-header="{ column }">
       <div class="flex justify-center items-center gap-0.5">
-        <table-client-name-filter-header
+        <table-filter-header
           :column
           label="Team"
+          type="name"
+          :icon="ICONS.player"
+          multiple
         />
-        <table-client-sort-header :column />
+        <table-sort-header :column />
       </div>
     </template>
 
     <template #team-cell="{ row }">
-      <player-link
-        v-for="player in row.original.team"
-        :key="player.id"
-        :player
-      />
+      <player-link :players="row.original.team" />
     </template>
 
     <template #draws-header="{ column }">
-      <table-client-filter-header
+      <table-filter-header
         :column
         label="Draws"
+        :icon="ICONS.level"
       />
     </template>
 
@@ -234,29 +236,33 @@ onBeforeRouteLeave(() => {
     </template>
 
     <template #seed-header="{ column }">
-      <table-client-sort-header
+      <table-sort-header
         :column
         label="Seed"
       />
     </template>
 
     <template #statuses-header="{ column }">
-      <table-client-filter-header
+      <table-filter-header
         :column
         label="Statuses"
       />
     </template>
 
     <template #rank-header="{ column }">
-      <table-client-sort-header
+      <table-sort-header
         :column
         label="Rank"
       />
     </template>
 
-    <template #rank-cell="{ row }">
-      <div>
-        <div v-for="player in row.original.team">{{ player.rank }}</div>
+    <template #rank-cell="{ row, cell }">
+      <div class="flex justify-center items-center gap-2">
+        <div>
+          <div v-for="player in row.original.team">{{ player.rank }}</div>
+        </div>
+
+        <div v-if="row.original.match_type === 'Doubles'"> [{{ cell.getValue() }}] </div>
       </div>
     </template>
   </u-table>

@@ -2,7 +2,7 @@
 
 <template>
   <div>
-    Component: edition/entries/teams
+    Component: edition/entries/players
   </div>
 </template>
 

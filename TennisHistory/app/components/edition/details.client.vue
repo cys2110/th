@@ -242,9 +242,9 @@ const handleSubmit = async () => {
           hydrate-on-idle
         />
         <lazy-scrape-atp-stats
-          v-if="!isEliminationEdition"
+          v-if="!isEliminationEdition && edition"
           hydrate-on-idle
-          :start-date="edition!.start_date"
+          :start-date="edition.start_date"
         />
         <u-button
           :icon="icons.reload"
