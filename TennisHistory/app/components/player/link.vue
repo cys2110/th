@@ -11,9 +11,7 @@ withDefaults(defineProps<{ players: Array<Required<BasePlayerType>>; strikethrou
         :country="player.country"
         icon-only
         class="absolute"
-        :class="{
-          'z-10 left-3': index === 1
-        }"
+        :class="{ 'z-10 left-3': index === 1 }"
       />
     </div>
 

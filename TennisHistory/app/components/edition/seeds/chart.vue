@@ -7,38 +7,23 @@ const props = defineProps<{
 const {
   params: { year }
 } = useRoute("edition")
-const toast = useToast()
 
 const tournamentStore = useTournamentStore()
-
-const open = ref(false)
 
 // Chart configuration
 const themeKey = inject(THEME_KEY)
 
-const theme = computed(() => {
-  const key = themeKey as keyof typeof COLOURS
-  return COLOURS[key] ?? COLOURS.dark
-})
+const theme = COLOURS.light
 
 const option = computed(() => ({
   backgroundColor: "transparent",
   grid: { containLabel: true, right: "20%" },
-  textStyle: { color: theme.value.slate },
-  color: [
-    theme.value.indigo,
-    theme.value.fuchsia,
-    theme.value.emerald,
-    theme.value.violet,
-    theme.value.orange,
-    theme.value.teal,
-    theme.value.cyan,
-    theme.value.rose
-  ],
+  textStyle: { color: theme.slate },
+  color: [theme.indigo, theme.fuchsia, theme.emerald, theme.violet, theme.orange, theme.teal, theme.cyan, theme.rose],
   dataset: [
     {
       source: props.seeds,
-      dimensions: ["draw", "seed", "rank", "team", "match_type", "tour", "q_seed"]
+      dimensions: ["draw", "seed", "rank", "team", "match_type", "tour"]
     },
     ...tournamentStore.tours
       .map(tour => [
@@ -142,33 +127,7 @@ const option = computed(() => ({
     .flat()
 }))
 
-const handleClick = (params: any) => {
-  toast.clear()
-
-  toast.add({
-    title: "Go to...",
-    duration: Infinity,
-    progress: false,
-    actions: params.data.team.map((player: BasePlayerType) => ({
-      label: `${player.first_name} ${player.last_name}`,
-      icon: ICONS.player,
-      to: {
-        name: "player",
-        params: { id: player.id, name: kebabCase(`${player.first_name} ${player.last_name}`) }
-      }
-    }))
-  })
-}
-
-watch(open, () => {
-  if (!open.value) toast.clear()
-})
-onBeforeRouteLeave(() => {
-  toast.clear()
-})
-onUnmounted(() => {
-  toast.clear()
-})
+const disabled = computed(() => !props.pending && (!props.seeds.length || props.seeds.every(s => !s.rank)))
 </script>
 
 <template>
@@ -176,9 +135,11 @@ onUnmounted(() => {
     :title="`${tournamentStore.name} ${year}`"
     description="Seeds"
     fullscreen
-    v-model:open="open"
   >
-    <u-button :icon="ICONS.stackedBarChart" />
+    <u-button
+      :icon="ICONS.stackedBarChart"
+      :disabled
+    />
 
     <template #body>
       <v-chart
@@ -187,7 +148,6 @@ onUnmounted(() => {
         :option="option"
         autoresize
         :loading="pending"
-        @click="handleClick"
       >
         <template #tooltip="params">
           <u-badge
@@ -211,7 +171,7 @@ onUnmounted(() => {
                 />
               </div>
               <div class="flex justify-between gap-5">
-                <span>{{ (param as any).data.team.map((player: PersonType) => `${player.first_name} ${player.last_name}`).join(" | ") }}</span>
+                <span>{{ (param as any).data.team.map((player: BasePlayerType) => player.full_name).join(" | ") }}</span>
                 <span>{{ (param as any).data.rank }}</span>
               </div>
             </div>

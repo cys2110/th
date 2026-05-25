@@ -1,11 +1,32 @@
 <script setup lang="ts">
 import type { FormErrorEvent, FormSubmitEvent } from "@nuxt/ui"
-import { PostgrestError } from "@supabase/supabase-js"
-import { number, object, string, z } from "zod"
+import { array, number, object, string, z } from "zod"
 
 const schema = object({
   event_id: string().optional(),
-  entry_id: string(),
+  entry: object({
+    id: string(),
+    event_id: string(),
+    match_type: MatchTypeEnum.nullable(),
+    tour: TourEnum.nullable(),
+    players: array(
+      object({
+        id: string(),
+        first_name: string(),
+        last_name: string(),
+        full_name: string(),
+        country: array(
+          object({
+            id: string(),
+            name: string(),
+            continent: ContinentEnum,
+            alpha_2: string().nullable()
+          })
+        )
+      })
+    ),
+    label: string()
+  }),
   seed: number(),
   draw: DrawEnum,
   match_type: MatchTypeEnum,
@@ -32,7 +53,7 @@ const errors = ref()
 const form = useTemplateRef("form")
 
 defineShortcuts({
-  ctrl_s: () => set(isOpen, !isOpen.value),
+  ctrl_a: () => set(isOpen, !isOpen.value),
   ctrl_r: () => set(state, {}),
   ctrl_enter: () => form.value?.submit()
 })
@@ -55,36 +76,7 @@ const { data: events, pending: eventsPending } = await useAsyncData(
   { default: () => [] }
 )
 
-const entriesKey = computed(() => `${edId}-entries`)
-
-// Get entry list
-const { data: entries, pending } = await useAsyncData(
-  entriesKey,
-  async () => {
-    const { data, error } = await supabase
-      .from("entries")
-      .select("id, event_id, match_type, player_entry_mapping(players(id, first_name, last_name)), events!inner(edition_id, tour)")
-      .eq("events.edition_id", Number(edId))
-
-    if (error) {
-      console.error("Error fetching entries:", error)
-      return []
-    }
-
-    return data.map(entry => ({
-      id: entry.id,
-      match_type: entry.match_type,
-      tour: entry.events.tour,
-      event_id: entry.event_id,
-      players: entry.player_entry_mapping.map(pem => ({
-        id: pem.players.id,
-        name: `${pem.players.first_name} ${pem.players.last_name}`
-      })),
-      label: entry.player_entry_mapping.map(pem => `${pem.players.first_name} ${pem.players.last_name}`).join(" / ")
-    }))
-  },
-  { default: () => [] }
-)
+const { entries, pending, fetchEntries } = useEntryList(Number(edId))
 
 const state = ref<Partial<Schema>>({})
 
@@ -94,23 +86,30 @@ const handleReset = () => {
   set(errors, undefined)
 }
 
-const onError = (event: FormErrorEvent) => {
-  set(errors, event.errors)
-}
+const onError = (event: FormErrorEvent) => set(errors, event.errors)
 
 const onSubmit = async (event: FormSubmitEvent<Schema>) => {
   set(isUploading, true)
   set(errors, undefined)
 
   try {
-    const { match_type, event_id, ...rest } = event.data
+    const { match_type, event_id, entry, ...rest } = event.data
     const { error } = await supabase.from("seeds").insert({
       ...rest,
       match_type,
-      event_id: event_id ?? events.value[0]!.id
+      event_id: event_id ?? events.value[0]!.id,
+      entry_id: entry.id
     })
 
-    if (error) throw error
+    if (error) {
+      set(errors, error)
+
+      toast.add({
+        title: `Error creating ${event.data.event_id} ${event.data.draw} ${event.data.seed}`,
+        icon: icons.error,
+        color: "error"
+      })
+    }
 
     toast.add({
       title: `${event.data.event_id} ${event.data.draw} ${event.data.seed} successfully created!`,
@@ -121,14 +120,6 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
     emits("refresh")
     handleReset()
     set(isOpen, false)
-  } catch (error) {
-    set(errors, error instanceof PostgrestError ? error.details : (error as any).message)
-
-    toast.add({
-      title: `Error creating ${event.data.event_id} ${event.data.draw} ${event.data.seed}`,
-      icon: icons.error,
-      color: "error"
-    })
   } finally {
     set(isUploading, false)
   }
@@ -143,6 +134,14 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
     <u-button :icon="icons.plus" />
 
     <template #body>
+      <u-alert
+        v-if="errors"
+        color="error"
+        title="Error saving round"
+        :description="errors"
+        class="mb-5"
+      />
+
       <u-form
         id="seed-form"
         ref="form"
@@ -207,7 +206,7 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
           class="col-span-2"
         >
           <u-input-menu
-            v-model="state.entry_id"
+            v-model="state.entry"
             :items="
               entries.filter(entry => {
                 const isMatchTypeMatch = !state.match_type || state.match_type === entry.match_type
@@ -216,13 +215,44 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
               })
             "
             :placeholder="`Select ${state.match_type === 'Doubles' ? 'Team' : 'Player'}`"
-            :icon="ICONS.player"
             :loading="pending"
-            value-key="id"
             label-key="label"
             clear
+            :ui="{
+              root: 'w-full',
+              base: state.entry && state.match_type === 'Doubles' ? 'pl-10' : '',
+              itemLabel: state.match_type === 'Doubles' ? 'ml-8' : 'ml-4'
+            }"
             class="w-full"
-          />
+          >
+            <template #leading="{ modelValue }">
+              <u-icon
+                v-if="modelValue"
+                v-for="(player, index) in modelValue.players"
+                :key="player.id"
+                :name="getFlagCode(player.country)"
+                class="absolute size-4 rounded-sm"
+                :class="{ 'z-10 left-5': index === 1 }"
+              />
+
+              <u-icon
+                v-else
+                :name="ICONS.player"
+              />
+            </template>
+
+            <template #item-leading="{ item }">
+              <div class="relative">
+                <u-icon
+                  v-for="(player, index) in item.players"
+                  :key="player.id"
+                  :name="getFlagCode(player.country)"
+                  class="absolute size-4 rounded-sm"
+                  :class="{ 'z-10 left-3': index === 1 }"
+                />
+              </div>
+            </template>
+          </u-input-menu>
         </u-form-field>
 
         <div class="grid grid-cols-2 items-center gap-3">
@@ -247,14 +277,6 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
           </u-form-field>
         </div>
       </u-form>
-
-      <u-alert
-        v-if="errors"
-        color="error"
-        title="Error saving round"
-        :description="errors"
-        class="mt-5"
-      />
     </template>
 
     <template #footer="{ close }">
