@@ -225,6 +225,7 @@ const handleUpdateSelection = (key: string, value: string | null) => {
             :model-value="<string>route.query.year || undefined"
             @update:model-value="handleUpdateSelection('year', $event)"
             :icon="ICONS.years"
+            highlight
           />
 
           <u-select-menu
@@ -234,6 +235,7 @@ const handleUpdateSelection = (key: string, value: string | null) => {
             @update:model-value="handleUpdateSelection('level', $event)"
             :icon="ICONS.level"
             clear
+            highlight
           />
 
           <u-select-menu
@@ -243,6 +245,7 @@ const handleUpdateSelection = (key: string, value: string | null) => {
             @update:model-value="handleUpdateSelection('category', $event)"
             :icon="ICONS.category"
             clear
+            highlight
           />
 
           <u-select-menu
@@ -251,6 +254,7 @@ const handleUpdateSelection = (key: string, value: string | null) => {
             :model-value="<MatchEnumType>route.query.match_type || undefined"
             @update:model-value="handleUpdateSelection('match_type', $event)"
             :icon="ICONS.people"
+            highlight
           />
 
           <u-select-menu
@@ -261,6 +265,7 @@ const handleUpdateSelection = (key: string, value: string | null) => {
             :icon="ICONS.court"
             clear
             :ui="{ content: 'w-fit' }"
+            highlight
           />
 
           <u-select-menu
@@ -273,6 +278,7 @@ const handleUpdateSelection = (key: string, value: string | null) => {
             value-key="id"
             clear
             :ui="{ content: 'w-fit' }"
+            highlight
           />
         </div>
 
@@ -304,6 +310,7 @@ const handleUpdateSelection = (key: string, value: string | null) => {
             v-if="!events.length && !pending"
             :title="`${playerStore.fullName} has not played any matches`"
             :icon="ICONS.calendarOff"
+            @refresh="refresh"
           />
         </u-page-list>
       </u-page-body>

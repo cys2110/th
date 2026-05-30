@@ -155,7 +155,8 @@ const columns: Array<TableColumn<ActivityMatchInterface>> = [
         }"
       >
         <template #round-cell="{ row }">
-          {{ lgAndDown ? ROUND_ABBREVIATION_MAPPING[row.original.round] : row.original.round }}
+          <div>{{ lgAndDown ? ROUND_ABBREVIATION_MAPPING[row.original.round] : row.original.round }}</div>
+          <div v-if="row.original.group_name || row.original.tie">{{ row.original.group_name || row.original.tie }}</div>
         </template>
 
         <template #win-cell="{ row }">
