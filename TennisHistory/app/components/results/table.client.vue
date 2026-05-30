@@ -167,8 +167,8 @@ const handleSave = async () => {
           if (row.original.stats) {
             return 'data-[selectable=true]:cursor-pointer'
           } else {
-            if (isAdmin && row.original.incomplete !== 'WO') {
-              return 'bg-warning/20'
+            if (isAdmin && (!row.original.incomplete || row.original.incomplete !== 'WO')) {
+              return 'bg-warning/20!'
             }
             return ''
           }

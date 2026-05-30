@@ -1,4 +1,6 @@
-CREATE OR REPLACE VIEW scores_by_winner AS
+CREATE OR REPLACE VIEW scores_by_winner
+WITH (security_invoker = true)
+AS
 SELECT
     ws.match_id,
     ws.entry_id AS t1_id,
@@ -12,7 +14,9 @@ FROM matches m
 LEFT JOIN match_scores ws ON ws.match_id = m.id AND ws.entry_id = m.winner_id
 LEFT JOIN match_scores ls ON ls.match_id = m.id AND ls.entry_id = m.loser_id AND ws.set_no = ls.set_no;
 
-CREATE OR REPLACE VIEW scores_by_teams AS
+CREATE OR REPLACE VIEW scores_by_teams
+WITH (security_invoker = true)
+AS
 SELECT
     t1.match_id,
     t1.entry_id AS t1_id,

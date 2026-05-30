@@ -21,14 +21,12 @@ const schema = object({
         first_name: string(),
         last_name: string(),
         full_name: string(),
-        country: array(
-          object({
-            id: string(),
-            name: string(),
-            continent: ContinentEnum,
-            alpha_2: string().nullable()
-          })
-        )
+        country: object({
+          id: string(),
+          name: string(),
+          continent: ContinentEnum,
+          alpha_2: string().nullable()
+        })
       })
     ),
     label: string()
@@ -44,14 +42,12 @@ const schema = object({
         first_name: string(),
         last_name: string(),
         full_name: string(),
-        country: array(
-          object({
-            id: string(),
-            name: string(),
-            continent: ContinentEnum,
-            alpha_2: string().nullable()
-          })
-        )
+        country: object({
+          id: string(),
+          name: string(),
+          continent: ContinentEnum,
+          alpha_2: string().nullable()
+        })
       })
     ),
     label: string()

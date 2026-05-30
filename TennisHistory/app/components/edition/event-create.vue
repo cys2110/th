@@ -25,7 +25,7 @@ const schema = object({
   supervisors: array(
     object({
       id: string(),
-      label: string()
+      full_name: string()
     })
   ).default([]),
   s_draw: DrawsEnum.optional(),

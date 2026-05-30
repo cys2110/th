@@ -1,4 +1,6 @@
-CREATE OR REPLACE view player_list_view AS
+CREATE OR REPLACE view player_list_view
+WITH (security_invoker = true)
+AS
 SELECT
     p.id,
     p.first_name,

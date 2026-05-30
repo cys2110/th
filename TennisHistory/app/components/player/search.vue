@@ -39,7 +39,7 @@ const {
 
       <u-icon
         v-else
-        :name="modelValue?.icon || ICONS.globe"
+        :name="modelValue?.icon || ICONS.player"
       />
     </template>
 

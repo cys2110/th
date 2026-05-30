@@ -112,7 +112,7 @@ const {
               tour: match.tour || (COUNTRY_DRAWS.includes(id) ? 'Country' : 'LC'),
               match_type: match.match_type,
               draw: match.draw,
-              match_no: match.match_no
+              match_id: match.id
             }
           }"
         />

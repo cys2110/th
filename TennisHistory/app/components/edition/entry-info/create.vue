@@ -1,11 +1,32 @@
 <script setup lang="ts">
 import type { FormErrorEvent, FormSubmitEvent } from "@nuxt/ui"
-import { number, object, string, z } from "zod"
+import { array, number, object, string, z } from "zod"
 
 const schema = object({
   relationship: string(),
-  entry_id: string(),
-  event_id: string(),
+  entry: object({
+    id: string(),
+    event_id: string(),
+    match_type: MatchTypeEnum.nullable(),
+    tour: TourEnum.nullable(),
+    players: array(
+      object({
+        id: string(),
+        first_name: string(),
+        last_name: string(),
+        full_name: string(),
+        country: object({
+          id: string(),
+          name: string(),
+          continent: ContinentEnum,
+          alpha_2: string().nullable()
+        })
+      })
+    ),
+    label: string()
+  }),
+  tour: TourEnum.optional(),
+  match_type: MatchTypeEnum,
   draw: DrawEnum,
   status: StatusEnum.optional(),
   rank: number().optional(),
@@ -27,6 +48,8 @@ const {
 const toast = useToast()
 const supabase = useSupabaseClient()
 
+const tournamentStore = useTournamentStore()
+
 const isOpen = ref(false)
 const isUploading = ref(false)
 const errors = ref()
@@ -40,15 +63,7 @@ defineShortcuts({
 
 const { entries, pending, fetchEntries } = useEntryList(Number(edId))
 
-const playerOptions = ref<Array<Required<BasePlayerType>>>([])
-
 const state = ref<Partial<Schema>>({})
-
-const handleEntrySelect = () => {
-  const entry = entries.value.find(entry => entry.id === state.value.entry_id)
-  state.value.event_id = entry!.event_id
-  playerOptions.value = entry!.players
-}
 
 const handleReset = () => {
   set(state, {})
@@ -66,8 +81,8 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
   switch (event.data.relationship) {
     case "Last Direct Acceptance":
       const { error: ldaError } = await supabase.from("ldas").insert({
-        event_id: event.data.event_id,
-        entry_id: event.data.entry_id,
+        event_id: event.data.entry.event_id,
+        entry_id: event.data.entry.id,
         draw: event.data.draw,
         rank: event.data.rank
       })
@@ -76,8 +91,8 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
       break
     case "Status":
       const { error: statusError } = await supabase.from("entry_status").insert({
-        event_id: event.data.event_id,
-        entry_id: event.data.entry_id,
+        event_id: event.data.entry.event_id,
+        entry_id: event.data.entry.id,
         status: event.data.status!,
         draw: event.data.draw
       })
@@ -96,8 +111,8 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
       } as const
 
       const { error: withdrawalError } = await supabase.from(mapping[event.data.relationship as keyof typeof mapping]).insert({
-        event_id: event.data.event_id,
-        entry_id: event.data.entry_id,
+        event_id: event.data.entry.event_id,
+        entry_id: event.data.entry.id,
         draw: event.data.draw,
         reason: event.data.reason,
         player_id: event.data.player_id
@@ -115,7 +130,7 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
                 : event.data.relationship === "Retirement" ? "R"
                 : "D"
             })
-            .eq("loser_id", event.data.entry_id)
+            .eq("loser_id", event.data.entry.id)
             .eq("draw", event.data.draw)
 
           if (updateMatchError) {
@@ -175,22 +190,26 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
         :state="state"
         @submit="onSubmit"
         @error="onError"
+        class="space-y-3"
       >
-        <div class="grid grid-cols-2 items-center gap-3">
-          <u-form-field
-            name="relationship"
-            label="Info Type"
-            required
-          >
-            <u-input-menu
-              v-model="state.relationship"
-              :items="['Status', 'Default', 'Last Direct Acceptance', 'Retirement', 'Walkover', 'Withdrawal']"
-              placeholder="Select info type"
-              clear
-              class="w-full"
-            />
-          </u-form-field>
+        <u-form-field
+          name="relationship"
+          label="Info Type"
+          required
+        >
+          <u-input-menu
+            v-model="state.relationship"
+            :items="['Status', 'Default', 'Last Direct Acceptance', 'Retirement', 'Walkover', 'Withdrawal']"
+            placeholder="Select info type"
+            clear
+            class="w-full"
+          />
+        </u-form-field>
 
+        <div
+          class="grid items-center gap-3"
+          :class="tournamentStore.tours.length > 1 ? 'grid-cols-3' : 'grid-cols-2'"
+        >
           <u-form-field
             name="draw"
             label="Draw"
@@ -205,20 +224,96 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
           </u-form-field>
 
           <u-form-field
+            v-if="tournamentStore.tours.length > 1"
+            name="tour"
+            label="Tour"
+            required
+          >
+            <u-radio-group
+              v-model="state.tour"
+              :items="tournamentStore.tours"
+              orientation="horizontal"
+              loop
+            />
+          </u-form-field>
+
+          <u-form-field
+            name="match_type"
+            label="S/D"
+            required
+          >
+            <u-radio-group
+              v-model="state.match_type"
+              :items="[...MATCH_TYPES]"
+              orientation="horizontal"
+              loop
+            />
+          </u-form-field>
+        </div>
+
+        <div class="grid grid-cols-2 items-center gap-3">
+          <u-form-field
             name="entry_id"
             label="Entry"
             required
             class="col-span-2"
           >
             <u-input-menu
-              v-model="state.entry_id"
-              @update:model-value="handleEntrySelect"
-              :items="entries"
+              v-model="state.entry"
+              :items="
+                entries.filter(entry => {
+                  const isMatchTypeMatch = !state.match_type || state.match_type === entry.match_type
+                  const isTourMatch = !state.tour || state.tour === entry.tour
+                  return isMatchTypeMatch && isTourMatch
+                })
+              "
+              :placeholder="`Select ${state.match_type === 'Doubles' ? 'Team' : 'Player'}`"
               :loading="pending"
-              placeholder="Select entry"
-              value-key="id"
-              class="w-full"
-            />
+              label-key="label"
+              clear
+              :ui="{
+                root: 'w-full',
+                base: state.entry && state.match_type === 'Doubles' ? 'pl-10' : '',
+                itemLabel: state.match_type === 'Doubles' ? 'ml-8' : 'ml-4'
+              }"
+            >
+              <template #leading="{ modelValue }">
+                <u-icon
+                  v-if="modelValue"
+                  v-for="(player, index) in modelValue.players"
+                  :key="player.id"
+                  :name="getFlagCode(player.country)"
+                  class="absolute size-4 rounded-sm"
+                  :class="{ 'z-10 left-5': index === 1 }"
+                />
+
+                <u-icon
+                  v-else
+                  :name="ICONS.player"
+                />
+              </template>
+
+              <template #item-leading="{ item }">
+                <div class="relative">
+                  <u-icon
+                    v-for="(player, index) in item.players"
+                    :key="player.id"
+                    :name="getFlagCode(player.country)"
+                    class="absolute size-4 rounded-sm"
+                    :class="{ 'z-10 left-3': index === 1 }"
+                  />
+                </div>
+              </template>
+
+              <template #content-bottom>
+                <u-button
+                  :icon="icons.reload"
+                  label="Refresh"
+                  block
+                  @click="fetchEntries"
+                />
+              </template>
+            </u-input-menu>
           </u-form-field>
 
           <u-form-field
@@ -266,9 +361,9 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
             >
               <u-input-menu
                 v-model="state.player_id"
-                :items="playerOptions"
+                :items="state.entry?.players || []"
                 value-key="id"
-                label-key="name"
+                label-key="full_name"
                 clear
                 placeholder="Select player"
                 class="w-full"

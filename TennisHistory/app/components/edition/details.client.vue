@@ -44,6 +44,7 @@ const {
     `
     )
     .eq("id", Number(edId))
+    .order("tour", { referencedTable: "events", ascending: true })
     .single()
 
   if (error || !data) {
@@ -573,7 +574,7 @@ const handleSubmit = async () => {
 
   <div
     v-if="!COUNTRY_DRAWS.includes(id) && id !== '9210'"
-    class="flex flex-wrap mt-5"
+    class="flex flex-wrap xl:flex-nowrap mt-5"
   >
     <edition-event-details
       v-for="event in edition?.events"

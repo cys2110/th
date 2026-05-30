@@ -10,6 +10,7 @@ from selenium.common.exceptions import TimeoutException
 from bs4 import BeautifulSoup
 from dotenv import load_dotenv
 from supabase import create_client
+from supabase.lib.client_options import SyncClientOptions
 from pathlib import Path
 from lib import round_name_mapping, extract_atp_id_from_link
 
@@ -21,12 +22,19 @@ load_status = load_dotenv(env_path, override=True)
 print("Loaded:", load_status)
 
 SUPABASE_URL = os.getenv("SUPABASE_URL")
-SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+SUPABASE_KEY = os.getenv("SUPABASE_SECRET_KEY") or os.getenv("SUPABASE_KEY")
 
 print("SUPABASE_URL:", SUPABASE_URL)
-print("SUPABASE_KEY exists:", bool(SUPABASE_KEY))
+print("SUPABASE_KEY prefix:", SUPABASE_KEY[:10] if SUPABASE_KEY else None)
 
-supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+supabase = create_client(
+    SUPABASE_URL,
+    SUPABASE_KEY,
+    options=SyncClientOptions(
+        auto_refresh_token=False,
+        persist_session=False,
+    )
+)
 
 # Endpoint to scrape ATP draws
 @app.route("/atp/draws", methods=["POST"])

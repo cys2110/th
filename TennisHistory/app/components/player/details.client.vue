@@ -438,7 +438,7 @@ const handleSubmit = async () => {
         <u-radio-group
           v-if="'bh' in updatedPlayer"
           v-model="updatedPlayer.bh"
-          :items="['Right', 'Left']"
+          :items="['One', 'Two']"
           orientation="horizontal"
           loop
         />

@@ -6,9 +6,7 @@ withDefaults(
     row: TableRow<T>
     disabled?: boolean
   }>(),
-  {
-    disabled: false
-  }
+  { disabled: false }
 )
 
 const {

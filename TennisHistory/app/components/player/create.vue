@@ -28,7 +28,7 @@ const handleSubmit = async () => {
   const { error } = await supabase.from("players").insert({ id: playerId.value, tour })
 
   if (error) {
-    set(errors, error.details)
+    set(errors, error)
     set(isUploading, false)
     return
   }

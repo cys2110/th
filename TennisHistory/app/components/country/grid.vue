@@ -1,12 +1,12 @@
 <script setup lang="ts">
 const props = defineProps<{
-  countries: Array<CountryType>
+  countries: Array<CountryInterface>
   pending: boolean
   filters: CountryFiltersInterface
 }>()
 
 const filteredCountries = computed(() =>
-  (props.countries || []).filter(country => {
+  props.countries.filter(country => {
     const isCountryMatch = !props.filters.countries.length || props.filters.countries.some(c => c === country.id)
     const isContinentMatch = !props.filters.continents.length || props.filters.continents.some(c => c === country.continent)
     return isCountryMatch && isContinentMatch
@@ -19,8 +19,7 @@ const filteredCountries = computed(() =>
     v-if="filteredCountries.length || pending"
     class="xl:grid-cols-4"
   >
-    <countries-card
-      v-if="filteredCountries.length"
+    <country-card
       v-for="country in filteredCountries"
       :key="country.id"
       :country
@@ -35,7 +34,7 @@ const filteredCountries = computed(() =>
 
   <empty
     v-else
-    message="No countries found"
+    title="No countries available"
     :icon="ICONS.globeOff"
   />
 </template>

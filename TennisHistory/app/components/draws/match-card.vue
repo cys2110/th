@@ -4,9 +4,10 @@ const props = defineProps<{
   entries: DrawData["entries"]
   selectedEntryId?: string | null
   handleHighlightPath: (contestantId: string | null) => void
+  index: number
 }>()
 
-const isEven = computed(() => props.match.match_no % 2 === 0 && !props.match.isBronzeMatch)
+const isEven = computed(() => props.index % 2 === 0 && !props.match.isBronzeMatch)
 </script>
 
 <template>
@@ -51,7 +52,6 @@ const isEven = computed(() => props.match.match_no % 2 === 0 && !props.match.isB
           v-if="match.incomplete"
           :label="match.incomplete"
           color="error"
-          variant="solid"
           size="lg"
         />
       </div>

@@ -195,7 +195,7 @@ const handleSubmit = async () => {
 </script>
 
 <template>
-  <div class="w-full xl:w-1/2 px-5">
+  <div class="w-full xl:min-w-1/2 px-5">
     <dashboard-subpanel>
       <template #title>
         <div class="flex items-center gap-2">

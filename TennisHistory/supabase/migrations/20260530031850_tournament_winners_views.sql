@@ -1,4 +1,6 @@
-CREATE OR REPLACE VIEW country_winners AS
+CREATE OR REPLACE VIEW country_winners
+WITH (security_invoker = true)
+AS
 SELECT
     ed.tournament_id,
     ed.year,
@@ -10,7 +12,9 @@ LEFT JOIN rounds r ON e.id = r.event_id AND r.round = 'Final'
 LEFT JOIN ties t ON r.id = t.round_id
 LEFT JOIN entries te ON te.id = t.winner_id;
 
-CREATE OR REPLACE VIEW elimination_winners AS
+CREATE OR REPLACE VIEW elimination_winners
+WITH (security_invoker = true)
+AS
 SELECT
     ed.tournament_id,
     ed.year,

@@ -25,12 +25,13 @@ const isVisible = computed(() => props.roundIndex >= props.baseIndexValue - 1 &&
       :round-index="roundIndex"
     >
       <draws-match-card
-        v-for="match in matches"
+        v-for="(match, index) in matches"
         :key="match.match_no"
         :match
         :entries
         :selected-entry-id="selectedEntryId"
         :handle-highlight-path
+        :index
       />
     </div>
   </define-round-template>

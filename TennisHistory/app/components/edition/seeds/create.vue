@@ -15,14 +15,12 @@ const schema = object({
         first_name: string(),
         last_name: string(),
         full_name: string(),
-        country: array(
-          object({
-            id: string(),
-            name: string(),
-            continent: ContinentEnum,
-            alpha_2: string().nullable()
-          })
-        )
+        country: object({
+          id: string(),
+          name: string(),
+          continent: ContinentEnum,
+          alpha_2: string().nullable()
+        })
       })
     ),
     label: string()
@@ -250,6 +248,15 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
                   :class="{ 'z-10 left-3': index === 1 }"
                 />
               </div>
+            </template>
+
+            <template #content-bottom>
+              <u-button
+                :icon="icons.reload"
+                label="Refresh"
+                block
+                @click="fetchEntries"
+              />
             </template>
           </u-input-menu>
         </u-form-field>

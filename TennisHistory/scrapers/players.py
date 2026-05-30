@@ -12,6 +12,7 @@ from selenium.common.exceptions import TimeoutException
 from bs4 import BeautifulSoup
 from dotenv import load_dotenv
 from supabase import create_client
+from supabase.lib.client_options import SyncClientOptions
 from pathlib import Path
 from datetime import datetime
 
@@ -23,12 +24,19 @@ load_status = load_dotenv(env_path, override=True)
 print("Loaded:", load_status)
 
 SUPABASE_URL = os.getenv("SUPABASE_URL")
-SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+SUPABASE_KEY = os.getenv("SUPABASE_SECRET_KEY") or os.getenv("SUPABASE_KEY")
 
 print("SUPABASE_URL:", SUPABASE_URL)
-print("SUPABASE_KEY exists:", bool(SUPABASE_KEY))
+print("SUPABASE_KEY prefix:", SUPABASE_KEY[:10] if SUPABASE_KEY else None)
 
-supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+supabase = create_client(
+    SUPABASE_URL,
+    SUPABASE_KEY,
+    options=SyncClientOptions(
+        auto_refresh_token=False,
+        persist_session=False,
+    )
+)
 
 SELENIUM_REMOTE_URL = os.getenv("SELENIUM_REMOTE_URL")
 
@@ -181,14 +189,17 @@ def get_atp_player(player_id):
 
         if params.get('coach') is not None and len(params['coach']) > 0:
             for coach in params['coach']:
-                coachData = (supabase.rpc("search_people", {
-                    "search_term": coach
-                }).execute())
+                coachData = (supabase
+                    .table("people")
+                    .select("id")
+                    .ilike("full_name", f"%{coach}%")
+                    .maybe_single()
+                    .execute())
 
-                if coachData.data is not None and len(coachData.data) == 1:
+                if coachData.data and coachData.data.get("id"):
                     coachResponse = (supabase.table("player_coach_mapping").insert({
                         'player_id': player_id,
-                        'coach_id': coachData.data[0]['id'],
+                        'coach_id': coachData.data['id'],
                         'status': 'Current'
                     }).execute())
 
