@@ -154,6 +154,16 @@ declare global {
     matches: Array<ActivityMatchInterface>
   }
 
+  interface RecordInterface {
+    tournament_id: number
+    tournament_name: string
+    edition_id: number
+    year: number
+    match_type: MatchTypeEnum
+    furthest_round: RoundType
+    win: boolean
+  }
+
   type ArchiveEditionType = Pick<EditionInterface, "id" | "category" | "end_date" | "sponsor_name" | "start_date" | "tours" | "year"> & {
     tournament: Pick<TournamentInterface, "id" | "name">
     events: Array<Pick<EventInterface, "category" | "end_date" | "level" | "sponsor_name" | "surfaces" | "start_date" | "tour" | "venues">>

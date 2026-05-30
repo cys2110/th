@@ -168,6 +168,7 @@ const handleUpdateSelection = (key: string, value: string | string[] | null) => 
 
         <div class="flex justify-center max-h-[70vh] overflow-y-auto">
           <u-timeline
+            v-if="filteredEvents.length"
             :items="filteredEvents"
             :default-value="events.length - 1"
             :ui="{
@@ -235,6 +236,13 @@ const handleUpdateSelection = (key: string, value: string | string[] | null) => 
               </div>
             </template>
           </u-timeline>
+
+          <empty
+            v-else
+            :icon="ICONS.trophyOff"
+            :title="`${playerStore.fullName} has not won any titles or played any finals`"
+            @refresh="refresh"
+          />
         </div>
       </u-page-body>
     </u-page>
