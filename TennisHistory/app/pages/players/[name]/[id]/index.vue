@@ -6,7 +6,7 @@ definePageMeta({ name: "player" })
 const tabItems: Array<TabsItem> = [
   { label: "Details", icon: ICONS.profile, slot: "details" },
   { label: "Win-Loss", icon: ICONS.stats, slot: "wl" },
-  { label: "Most Request H2H", icon: ICONS.h2h, slot: "h2h" },
+  { label: "Most Frequent H2H", icon: ICONS.h2h, slot: "h2h" },
   { label: "Recent Events", icon: ICONS.years, slot: "recent" }
 ]
 </script>

@@ -22,7 +22,6 @@ const isSaving = ref(false)
 
 const key = computed(() => `${id}-details`)
 
-// TODO: Add win-loss and titles
 const {
   data: player,
   pending,
@@ -45,7 +44,27 @@ const {
     return
   }
 
+  const { data: wlData, error: wlError } = await supabase
+    .from("activity")
+    .select("match_type, win, incomplete, round")
+    .eq("player_id", id)
+    .eq("level", "Tour")
+
+  if (wlError) {
+    console.error("Error fetching player win-loss:", wlError)
+  }
+
   const { player_country_mapping, player_coach_mapping, ...rest } = data
+  const singlesMatches = (wlData || []).filter(m => m.match_type === "Singles")
+  const doublesMatches = (wlData || []).filter(m => m.match_type === "Doubles")
+
+  const singlesWins = singlesMatches.filter(m => m.win && (!m.incomplete || !["B", "WO"].includes(m.incomplete))).length
+  const singlesLosses = singlesMatches.filter(m => !m.win && (!m.incomplete || !["B", "WO"].includes(m.incomplete))).length
+  const singlesTitles = singlesMatches.filter(m => m.win && m.round === "Final").length
+
+  const doublesWins = doublesMatches.filter(m => m.win && (!m.incomplete || !["B", "WO"].includes(m.incomplete))).length
+  const doublesLosses = doublesMatches.filter(m => !m.win && (!m.incomplete || !["B", "WO"].includes(m.incomplete))).length
+  const doublesTitles = doublesMatches.filter(m => m.win && m.round === "Final").length
 
   return {
     ...rest,
@@ -60,7 +79,17 @@ const {
       years: mapping.years,
       status: mapping.status,
       coach: mapping.people
-    }))
+    })),
+    singles: {
+      wins: singlesWins,
+      losses: singlesLosses,
+      titles: singlesTitles
+    },
+    doubles: {
+      wins: doublesWins,
+      losses: doublesLosses,
+      titles: doublesTitles
+    }
   } as Omit<PlayerInterface, "first_tournament" | "last_tournament" | "country">
 })
 
@@ -519,11 +548,9 @@ const handleSubmit = async () => {
         <u-skeleton class="w-full h-4" />
       </div>
       <div v-else>
-        <div>
-          <div>{{ player?.ch_singles?.toLocaleString() ?? "—" }}</div>
-          <div v-if="player?.ch_singles_date">
-            {{ formatDate(player.ch_singles_date) }}
-          </div>
+        <div>{{ player?.ch_singles?.toLocaleString() ?? "—" }}</div>
+        <div v-if="player?.ch_singles_date">
+          {{ formatDate(player.ch_singles_date) }}
         </div>
       </div>
 
@@ -532,12 +559,48 @@ const handleSubmit = async () => {
         <u-skeleton class="w-full h-4" />
       </div>
       <div v-else>
-        <div>
-          <div>{{ player?.ch_doubles?.toLocaleString() ?? "—" }}</div>
-          <div v-if="player?.ch_doubles_date">
-            {{ formatDate(player.ch_doubles_date) }}
-          </div>
+        <div>{{ player?.ch_doubles?.toLocaleString() ?? "—" }}</div>
+        <div v-if="player?.ch_doubles_date">
+          {{ formatDate(player.ch_doubles_date) }}
         </div>
+      </div>
+    </div>
+
+    <div>
+      <div>Singles W-L</div>
+      <div v-if="pending">
+        <u-skeleton class="w-full h-4" />
+      </div>
+      <div v-else>
+        <span>{{ player?.singles.wins }}-{{ player?.singles.losses }}</span>
+        <span> ({{ percentage(player?.singles.wins || 0, (player?.singles.losses || 0) + (player?.singles.wins || 0)) }}%)</span>
+      </div>
+
+      <div>Doubles W-L</div>
+      <div v-if="pending">
+        <u-skeleton class="w-full h-4" />
+      </div>
+      <div v-else>
+        <span>{{ player?.doubles.wins }}-{{ player?.doubles.losses }}</span>
+        <span> ({{ percentage(player?.doubles.wins || 0, (player?.doubles.losses || 0) + (player?.doubles.wins || 0)) }}%)</span>
+      </div>
+    </div>
+
+    <div>
+      <div>Singles Titles</div>
+      <div v-if="pending">
+        <u-skeleton class="w-full h-4" />
+      </div>
+      <div v-else>
+        {{ player?.singles.titles || "—" }}
+      </div>
+
+      <div>Doubles Titles</div>
+      <div v-if="pending">
+        <u-skeleton class="w-full h-4" />
+      </div>
+      <div v-else>
+        {{ player?.doubles.titles || "—" }}
       </div>
     </div>
 

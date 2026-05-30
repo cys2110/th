@@ -103,6 +103,16 @@ declare global {
     updated_at: string
     first_tournament: number | null
     last_tournament: number | null
+    singles: {
+      wins: number
+      losses: number
+      titles: number
+    }
+    doubles: {
+      wins: number
+      losses: number
+      titles: number
+    }
   }
 
   type PlayerListType = Pick<

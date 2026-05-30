@@ -282,7 +282,7 @@ const handleUpdateSelection = (key: string, value: string | null) => {
           />
         </div>
 
-        <u-page-list class="max-h-[70vh] overflow-y-auto p-4 space-y-4">
+        <u-page-list class="max-h-[70vh] overflow-y-auto p-4 space-y-4 max-w-7xl mx-auto">
           <div class="flex justify-evenly *:text-center ring ring-primary rounded-lg py-2">
             <div>
               <div class="font-semibold">{{ statistics.wins }} - {{ statistics.losses }}</div>
