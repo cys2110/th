@@ -79,6 +79,13 @@ export type Database = {
             foreignKeyName: "defaults_player_id_fkey"
             columns: ["player_id"]
             isOneToOne: false
+            referencedRelation: "country_big_titles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "defaults_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
             referencedRelation: "player_list_view"
             referencedColumns: ["id"]
           },
@@ -189,6 +196,13 @@ export type Database = {
             foreignKeyName: "entries_captain_fkey"
             columns: ["captain"]
             isOneToOne: false
+            referencedRelation: "country_big_titles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "entries_captain_fkey"
+            columns: ["captain"]
+            isOneToOne: false
             referencedRelation: "player_list_view"
             referencedColumns: ["id"]
           },
@@ -211,6 +225,13 @@ export type Database = {
             columns: ["event_id"]
             isOneToOne: false
             referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "entries_vc_fkey"
+            columns: ["vc"]
+            isOneToOne: false
+            referencedRelation: "country_big_titles"
             referencedColumns: ["id"]
           },
           {
@@ -790,6 +811,13 @@ export type Database = {
             foreignKeyName: "people_player_id_fkey"
             columns: ["player_id"]
             isOneToOne: false
+            referencedRelation: "country_big_titles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "people_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
             referencedRelation: "player_list_view"
             referencedColumns: ["id"]
           },
@@ -836,6 +864,13 @@ export type Database = {
             foreignKeyName: "player_coach_mapping_player_id_fkey"
             columns: ["player_id"]
             isOneToOne: false
+            referencedRelation: "country_big_titles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "player_coach_mapping_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
             referencedRelation: "player_list_view"
             referencedColumns: ["id"]
           },
@@ -876,6 +911,13 @@ export type Database = {
             columns: ["country_id"]
             isOneToOne: false
             referencedRelation: "countries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "player_country_mapping_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "country_big_titles"
             referencedColumns: ["id"]
           },
           {
@@ -932,6 +974,13 @@ export type Database = {
             columns: ["entry_id"]
             isOneToOne: false
             referencedRelation: "entries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "player_entry_mapping_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "country_big_titles"
             referencedColumns: ["id"]
           },
           {
@@ -1069,6 +1118,13 @@ export type Database = {
             columns: ["event_id"]
             isOneToOne: false
             referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "retirements_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "country_big_titles"
             referencedColumns: ["id"]
           },
           {
@@ -1409,6 +1465,13 @@ export type Database = {
             foreignKeyName: "walkovers_player_id_fkey"
             columns: ["player_id"]
             isOneToOne: false
+            referencedRelation: "country_big_titles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "walkovers_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
             referencedRelation: "player_list_view"
             referencedColumns: ["id"]
           },
@@ -1465,6 +1528,13 @@ export type Database = {
             foreignKeyName: "withdrawals_player_id_fkey"
             columns: ["player_id"]
             isOneToOne: false
+            referencedRelation: "country_big_titles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "withdrawals_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
             referencedRelation: "player_list_view"
             referencedColumns: ["id"]
           },
@@ -1479,6 +1549,49 @@ export type Database = {
       }
     }
     Views: {
+      country_big_titles: {
+        Row: {
+          category: string | null
+          country_id: string | null
+          edition_id: number | null
+          first_name: string | null
+          id: string | null
+          last_name: string | null
+          match_type: Database["public"]["Enums"]["match_type_enum"] | null
+          start_date: string | null
+          tour: Database["public"]["Enums"]["tour_enum"] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "events_edition_id_fkey"
+            columns: ["edition_id"]
+            isOneToOne: false
+            referencedRelation: "country_winners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "events_edition_id_fkey"
+            columns: ["edition_id"]
+            isOneToOne: false
+            referencedRelation: "editions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "events_edition_id_fkey"
+            columns: ["edition_id"]
+            isOneToOne: false
+            referencedRelation: "elimination_winners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "player_entry_mapping_country_id_fkey"
+            columns: ["country_id"]
+            isOneToOne: false
+            referencedRelation: "countries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       country_winners: {
         Row: {
           country_id: string | null

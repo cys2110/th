@@ -1,9 +1,9 @@
 <script setup lang="ts">
+import { TableRowToggle } from "#components"
 import type { TableColumn, TableRow } from "@nuxt/ui"
-import { getFacetedRowModel, getFacetedUniqueValues, getGroupedRowModel, type Column, type Row } from "@tanstack/vue-table"
-import { TableFilterHeader, TableGroupHeader, TableRowToggle, TableSortHeader, UIcon } from "#components"
+import { getFacetedRowModel, getFacetedUniqueValues, getGroupedRowModel, type Row } from "@tanstack/vue-table"
 
-defineProps<{
+const props = defineProps<{
   countries: Array<CountryInterface>
   pending: boolean
 }>()
@@ -11,24 +11,10 @@ defineProps<{
 const router = useRouter()
 
 const columns: Array<TableColumn<CountryInterface>> = [
-  { accessorKey: "icon", header: "", cell: ({ cell }) => h(UIcon, { name: cell.getValue() }) },
-  {
-    accessorKey: "name",
-    aggregationFn: "uniqueCount",
-    header: ({ column }) =>
-      h("div", { class: "flex gap-0.5 w-fit mx-auto" }, [
-        h(TableFilterHeader, { column: column as Column<unknown>, label: "Country", icon: ICONS.globe }),
-        h(TableSortHeader, { column: column as Column<unknown> })
-      ])
-  },
+  { accessorKey: "icon", header: "" },
+  { accessorKey: "name", aggregationFn: "uniqueCount" },
   {
     accessorKey: "continent",
-    header: ({ column }) =>
-      h("div", { class: "flex gap-0.5 w-fit mx-auto" }, [
-        h(TableGroupHeader, { column: column as Column<unknown> }),
-        h(TableFilterHeader, { column: column as Column<unknown>, label: "Continent", icon: ICONS.world }),
-        h(TableSortHeader, { column: column as Column<unknown> })
-      ]),
     cell: ({ row, table }) => {
       if (row.getIsGrouped()) {
         return h(TableRowToggle, { row: row as Row<unknown> }, () => row.original.continent)
@@ -69,6 +55,7 @@ const handleSelectRow = (_e: Event, row: TableRow<CountryInterface>) => {
     }"
     :ui="{
       root: 'lg:max-w-1/2 mx-auto',
+      tbody: '[&>tr]:data-[selectable=true]:cursor-pointer [&>tr]:data-[selectable=true]:hover:bg-elevated/50 [&>tr]:even:bg-elevated/25',
       td: 'empty:p-0'
     }"
   >
@@ -82,6 +69,42 @@ const handleSelectRow = (_e: Event, row: TableRow<CountryInterface>) => {
         :icon="ICONS.globeOff"
         class="mx-2"
       />
+    </template>
+
+    <template #icon-cell="{ row }">
+      <u-icon :name="row.original.icon" />
+    </template>
+
+    <template #name-header="{ column }">
+      <div class="flex gap-0.5 w-fit mx-auto">
+        <u-select-menu
+          placeholder="Country"
+          variant="none"
+          clear
+          :model-value="<string>column.getFilterValue()"
+          @update:model-value="value => column.setFilterValue(value)"
+          :icon="ICONS.globe"
+          value-key="name"
+          label-key="name"
+          :items="countries"
+        />
+
+        <table-sort-header :column />
+      </div>
+    </template>
+
+    <template #continent-header="{ column }">
+      <div class="flex gap-0.5 w-fit mx-auto">
+        <table-group-header :column />
+
+        <table-filter-header
+          :column
+          label="Continent"
+          :icon="ICONS.world"
+        />
+
+        <table-sort-header :column />
+      </div>
     </template>
   </u-table>
 </template>

@@ -35,6 +35,7 @@ declare global {
     name: string
     continent: ContinentType
     alpha_2: string | null
+    icon?: string
   }
 
   interface VenueInterface {

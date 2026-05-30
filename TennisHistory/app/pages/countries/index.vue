@@ -1,5 +1,5 @@
 <script setup lang="ts">
-useHead({ title: "Counrties" })
+useHead({ title: "Countries" })
 
 const { countries, pending } = useCountryList()
 const viewModeStore = useViewModeStore()
