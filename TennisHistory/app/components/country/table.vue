@@ -3,10 +3,12 @@ import { TableRowToggle } from "#components"
 import type { TableColumn, TableRow } from "@nuxt/ui"
 import { getFacetedRowModel, getFacetedUniqueValues, getGroupedRowModel, type Row } from "@tanstack/vue-table"
 
-const props = defineProps<{
+defineProps<{
   countries: Array<CountryInterface>
   pending: boolean
 }>()
+
+defineEmits<{ refresh: [] }>()
 
 const router = useRouter()
 
@@ -68,6 +70,7 @@ const handleSelectRow = (_e: Event, row: TableRow<CountryInterface>) => {
         title="No countries found"
         :icon="ICONS.globeOff"
         class="mx-2"
+        @refresh="$emit('refresh')"
       />
     </template>
 

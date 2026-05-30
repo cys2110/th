@@ -5,6 +5,8 @@ const props = defineProps<{
   filters: CountryFiltersInterface
 }>()
 
+defineEmits<{ refresh: [] }>()
+
 const filteredCountries = computed(() =>
   props.countries.filter(country => {
     const isCountryMatch = !props.filters.countries.length || props.filters.countries.some(c => c === country.id)
@@ -36,5 +38,6 @@ const filteredCountries = computed(() =>
     v-else
     title="No countries available"
     :icon="ICONS.globeOff"
+    @refresh="$emit('refresh')"
   />
 </template>

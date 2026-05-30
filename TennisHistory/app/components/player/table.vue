@@ -94,33 +94,18 @@ const handleSelectRow = (_e: Event, row: TableRow<PlayerListType>) => {
     :loading="pending"
     @select="handleSelectRow"
     render-fallback-value="—"
-    :ui="{
-      root: '2xl:max-w-2/3 mx-auto',
-      tbody: '[&>tr]:data-[selectable=true]:cursor-pointer [&>tr]:data-[selectable=true]:hover:bg-elevated/50 [&>tr]:even:bg-elevated/25'
-    }"
+    :ui="{ tbody: '[&>tr]:data-[selectable=true]:cursor-pointer [&>tr]:data-[selectable=true]:hover:bg-elevated/50 [&>tr]:even:bg-elevated/25' }"
   >
     <template #loading>
-      <u-icon
-        :name="icons.loading"
-        class="size-8"
-      />
+      <loading-icon />
     </template>
 
     <template #empty>
-      <u-empty
+      <empty
         :icon="ICONS.peopleOff"
         title="No players found"
-        description="If you think this is an error, refresh the page. Otherwise, please be patient as we continue to add more data."
-        class="mx-2"
-      >
-        <template #actions>
-          <u-button
-            label="Refresh"
-            :icon="icons.reload"
-            @click="$emit('refresh')"
-          />
-        </template>
-      </u-empty>
+        @refresh="$emit('refresh')"
+      />
     </template>
 
     <template #tour-header>

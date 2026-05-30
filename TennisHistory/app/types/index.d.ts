@@ -110,6 +110,50 @@ declare global {
     "id" | "first_name" | "last_name" | "tour" | "turned_pro" | "retired" | "country" | "first_tournament" | "last_tournament" | "full_name"
   >
 
+  interface ActivityMatchInterface {
+    round: RoundType
+    draw: DrawType
+    match_id: string
+    format: number
+    incomplete: IncompleteType | null
+    tie_id: string | null
+    tie: string | null
+    group_name: string | null
+    win: boolean
+    stats: boolean
+    opponent_id: string | null
+    opponents: Array<Required<BasePlayerType> & { rank: number | null }> | null
+    scores: Array<ConsolidatedScore>
+  }
+
+  interface ActivityInterface {
+    tournament_id: number
+    tournament_name: string
+    edition_id: number
+    category: string | null
+    currency: CurrencyType | null
+    sponsor_name: string | null
+    start_date: string
+    end_date: string
+    year: number
+    level: LevelType
+    surface: string | null
+    venues: Array<VenueInterface>
+    rank: number | null
+    points: number | null
+    pm: number | null
+    seed: number | null
+    q_seed: number | null
+    status: StatusType | null
+    q_status: StatusType | null
+    partner_id: string | null
+    partner_first_name: string | null
+    partner_last_name: string | null
+    partner_country: CountryInterface | null
+    partner_rank: number | null
+    matches: Array<ActivityMatchInterface>
+  }
+
   type ArchiveEditionType = Pick<EditionInterface, "id" | "category" | "end_date" | "sponsor_name" | "start_date" | "tours" | "year"> & {
     tournament: Pick<TournamentInterface, "id" | "name">
     events: Array<Pick<EventInterface, "category" | "end_date" | "level" | "sponsor_name" | "surfaces" | "start_date" | "tour" | "venues">>

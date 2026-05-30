@@ -3,7 +3,11 @@ const props = defineProps<{ country: CountryInterface }>()
 
 const supabase = useSupabaseClient()
 
-const { data: players, pending } = await useAsyncData(
+const {
+  data: players,
+  pending,
+  refresh
+} = await useAsyncData(
   () => `${props.country.id}-number-ones`,
   async () => {
     const { data, error } = await supabase
@@ -51,6 +55,7 @@ const { data: players, pending } = await useAsyncData(
       v-else
       :title="`No players have achived the No. 1 ranking representing ${country.name}`"
       :icon="ICONS.peopleOff"
+      @refresh="refresh"
     />
   </dashboard-subpanel>
 </template>

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 useHead({ title: "Countries" })
 
-const { countries, pending } = useCountryList()
+const { countries, pending, fetchCountries } = useCountryList()
 const viewModeStore = useViewModeStore()
 
 const filters = ref<CountryFiltersInterface>({
@@ -49,6 +49,7 @@ const filters = ref<CountryFiltersInterface>({
           v-if="viewModeStore.isTableView"
           :countries
           :pending
+          @refresh="fetchCountries"
         />
 
         <country-grid
@@ -56,6 +57,7 @@ const filters = ref<CountryFiltersInterface>({
           :countries
           :pending
           :filters
+          @refresh="fetchCountries"
         />
       </u-page-body>
     </u-page>

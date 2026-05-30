@@ -29,7 +29,11 @@ const {
 const supabase = useSupabaseClient()
 const router = useRouter()
 
-const { data: bigTitles, pending } = await useAsyncData<Array<BigTitleInterface>>(
+const {
+  data: bigTitles,
+  pending,
+  refresh
+} = await useAsyncData<Array<BigTitleInterface>>(
   () => `${props.country.id}-big-titles`,
   async () => {
     const { data, error } = await supabase
@@ -171,6 +175,8 @@ const handleSelectRow = (_e: Event, row: TableRow<BigTitleInterface>) => {
         <empty
           :title="`No players have won big titles representing ${country.name}`"
           :icon="ICONS.trophyOff"
+          class="mx-2"
+          @refresh="refresh"
         />
       </template>
 

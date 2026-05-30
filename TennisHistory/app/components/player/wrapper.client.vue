@@ -201,7 +201,7 @@ const handleScrape = async () => {
       >
         <template #default="{ item }">
           <u-link
-            :to="{ name: item.value as any, params: { id: params.id, name: player?.full_name || params.name } }"
+            :to="{ name: item.value as any, params }"
             class="text-inherit hover:text-inherit"
           >
             {{ item.label }}
