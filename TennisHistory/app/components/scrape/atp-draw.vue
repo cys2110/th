@@ -59,10 +59,21 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
 
         set(isOpen, false)
       } else {
+        const missingPlayerId = response.error?.match(/Key \(player_id\)=\(([^)]+)\)/)?.[1]
         toast.add({
           title: "Error scraping draw",
+          description: response.error,
           icon: icons.error,
-          color: "error"
+          color: "error",
+          ...(missingPlayerId && {
+            actions: [
+              {
+                label: "Copy",
+                icon: icons.copy,
+                onClick: () => navigator.clipboard.writeText(missingPlayerId)
+              }
+            ]
+          })
         })
       }
     })

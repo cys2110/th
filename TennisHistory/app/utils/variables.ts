@@ -19,9 +19,22 @@ export const CATEGORIES = [
   "WTA 500",
   "United Cup",
   "ATP Cup",
+  "ATP World Tour Masters 1000",
+  "ATP World Tour 500",
+  "ATP World Tour 250",
+  "ATP Masters Series",
+  "ATP International Series Gold",
+  "ATP International Series",
   "WTA Premier 5",
+  "WTA Premier Mandatory",
   "WTA International",
-  "ATP World Series"
+  "Tennis Masters Series",
+  "ATP Championship Series",
+  "ATP World Series",
+  "ATP Super 9",
+  "ATP Championship Series, Single Week",
+  "World Championship Tennis",
+  "Grand Prix - Super Series"
 ] as const
 
 export const CONTINENTS = ["Africa", "Asia", "Europe", "North America", "Oceania", "South America"] as const

@@ -104,7 +104,8 @@ export const getFlagCode = (country: CountryInterface) => {
     URS: "soviet-union",
     YUG: "yu",
     TCH: "cs",
-    NMI: "mp"
+    NMI: "mp",
+    AHO: "an"
   }
 
   if (country.id in circleFlagsMapping) {

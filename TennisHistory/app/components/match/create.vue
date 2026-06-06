@@ -30,7 +30,7 @@ const schema = object({
       })
     ),
     label: string()
-  }),
+  }).optional(),
   team_2: object({
     id: string(),
     event_id: string(),
@@ -51,7 +51,7 @@ const schema = object({
       })
     ),
     label: string()
-  }),
+  }).optional(),
   winner: literal([1, 2]).optional(),
   incomplete: IncompleteEnum.optional(),
   court: string().optional(),
@@ -159,22 +159,22 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
       .from("matches")
       .insert({
         ...rest,
-        team_1_id: team_1.id,
-        team_2_id: team_2.id,
+        team_1_id: team_1?.id,
+        team_2_id: team_2?.id,
         tour: matchTour,
         date: date?.toString() || null,
         umpire_id: umpire?.id || null,
         winner_id:
           winner ?
             winner === 1 ?
-              team_1.id
-            : team_2.id
+              team_1?.id
+            : team_2?.id
           : null,
         loser_id:
-          winner && team_1.id && team_2.id ?
+          winner && team_1?.id && team_2?.id ?
             winner === 1 ?
-              team_2.id
-            : team_1.id
+              team_2?.id
+            : team_1?.id
           : null
       })
       .select("id")
@@ -196,8 +196,8 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
             : null
 
           return [
-            { match_id: matchId, entry_id: team_1.id!, set_no: set.set_no, set: set.t1, tb: set.t1 === 7 ? maxTb : set.tb },
-            { match_id: matchId, entry_id: team_2.id!, set_no: set.set_no, set: set.t2, tb: set.t2 === 7 ? maxTb : set.tb }
+            { match_id: matchId, entry_id: team_1!.id!, set_no: set.set_no, set: set.t1, tb: set.t1 === 7 ? maxTb : set.tb },
+            { match_id: matchId, entry_id: team_2!.id!, set_no: set.set_no, set: set.t2, tb: set.t2 === 7 ? maxTb : set.tb }
           ]
         })
       )

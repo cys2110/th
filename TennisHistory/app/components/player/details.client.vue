@@ -14,7 +14,6 @@ const supabase = useSupabaseClient()
 
 const { isAdmin } = useAuthState()
 const playerStore = usePlayerStore()
-const { countries, pending: countriesPending } = useCountryList()
 
 const currentYear = new Date().getFullYear()
 const updatedPlayer = ref<Record<string, any>>({})
@@ -396,14 +395,16 @@ const handleSubmit = async () => {
         class="detail"
       >
         <u-field-group v-if="'turned_pro' in updatedPlayer && 'retired' in updatedPlayer">
-          <form-input-number
+          <form-input
             v-model="updatedPlayer.turned_pro"
             placeholder="Turned pro"
+            type="number"
           />
 
-          <form-input-number
+          <form-input
             v-model="updatedPlayer.retired"
             placeholder="Retired"
+            type="number"
           />
         </u-field-group>
 
@@ -415,7 +416,7 @@ const handleSubmit = async () => {
               <span v-if="player.retired">{{ player.retired }}</span>
             </div>
             <div v-if="player.turned_pro && (player.retired || playerStore.activeYears.includes(currentYear))">
-              ({{ currentYear - player.turned_pro }} years pro)
+              ({{ (player.retired || currentYear) - player.turned_pro }} years pro)
             </div>
           </div>
           <div v-else>—</div>
@@ -704,7 +705,7 @@ const handleSubmit = async () => {
           >
             <u-link
               v-if="coach.coach.player_id"
-              :to="{ name: 'player', params: { id: coach.id, name: kebabCase(coach.coach.full_name) } }"
+              :to="{ name: 'player', params: { id: coach.coach.player_id, name: kebabCase(coach.coach.full_name) } }"
               class="hover-link primary-link"
             >
               {{ coach.coach.full_name }}

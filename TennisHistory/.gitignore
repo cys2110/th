@@ -13,6 +13,9 @@ node_modules
 logs
 *.log
 
+# Scraper manual fallbacks
+scrapers/manual-html/
+
 # Misc
 .DS_Store
 .fleet

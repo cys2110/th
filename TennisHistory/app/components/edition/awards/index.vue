@@ -61,7 +61,7 @@ const mapping = computed(() => {
   return Object.fromEntries(roundMap)
 })
 
-const columns: Array<TableColumn<AwardInterface>> = [
+const columns = computed<Array<TableColumn<AwardInterface>>>(() => [
   { id: "checkbox" },
   { accessorKey: "tour" },
   { accessorKey: "match_type" },
@@ -85,7 +85,7 @@ const columns: Array<TableColumn<AwardInterface>> = [
   },
   { accessorKey: "pm", header: "Prize Money" },
   { accessorKey: "points", header: "Points" }
-]
+])
 
 const columnVisibility = computed(() => ({
   checkbox: isAdmin.value,

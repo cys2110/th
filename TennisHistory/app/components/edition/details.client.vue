@@ -453,7 +453,11 @@ const handleSubmit = async () => {
                 placeholder="Wikipedia link"
               />
 
-              <div v-else>{{ edition?.wiki_link || "—" }}</div>
+              <div
+                v-else
+                class="truncate text-ellipsis"
+                >{{ edition?.wiki_link || "—" }}</div
+              >
 
               <u-checkbox
                 highlight

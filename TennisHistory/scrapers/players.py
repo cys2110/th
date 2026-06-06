@@ -38,7 +38,7 @@ supabase = create_client(
     )
 )
 
-SELENIUM_REMOTE_URL = os.getenv("SELENIUM_REMOTE_URL")
+SELENIUM_REMOTE_URL = os.getenv("SELENIUM_REMOTE_URL", "http://localhost:4444/wd/hub")
 
 # Function to handle cookies
 def handle_cookies(driver):

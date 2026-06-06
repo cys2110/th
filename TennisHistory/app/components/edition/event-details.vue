@@ -432,8 +432,8 @@ const handleSubmit = async () => {
               v-if="isAdmin"
               highlight
               :icon="ICONS.racquet"
-              :model-value="'currency' in updatedEvent && 'pm' in updatedEvent"
-              @update:model-value="() => handleCheckboxCheck(['currency', 'pm'])"
+              :model-value="'currency' in updatedEvent && 'pm' in updatedEvent && 'tfc' in updatedEvent"
+              @update:model-value="() => handleCheckboxCheck(['currency', 'pm', 'tfc'])"
             />
           </div>
         </div>
@@ -462,8 +462,8 @@ const handleSubmit = async () => {
               v-if="isAdmin"
               highlight
               :icon="ICONS.racquet"
-              :model-value="'currency' in updatedEvent && 'tfc' in updatedEvent"
-              @update:model-value="() => handleCheckboxCheck(['currency', 'tfc'])"
+              :model-value="'currency' in updatedEvent && 'tfc' in updatedEvent && 'pm' in updatedEvent"
+              @update:model-value="() => handleCheckboxCheck(['currency', 'tfc', 'pm'])"
             />
           </div>
         </div>
@@ -557,7 +557,7 @@ const handleSubmit = async () => {
                 v-if="'s_draw' in updatedEvent"
                 v-model="updatedEvent.s_draw"
                 placeholder="Singles draw"
-                :items="[...DRAW_TYPES]"
+                :items="[...DRAWS]"
                 class="w-full"
               />
 
@@ -605,7 +605,7 @@ const handleSubmit = async () => {
                 v-if="'d_draw' in updatedEvent"
                 v-model="updatedEvent.d_draw"
                 placeholder="Doubles draw"
-                :items="[...DRAW_TYPES]"
+                :items="[...DRAWS]"
                 class="w-full"
               />
 
@@ -653,7 +653,7 @@ const handleSubmit = async () => {
                 v-if="'qs_draw' in updatedEvent"
                 v-model="updatedEvent.qs_draw"
                 placeholder="Qualifying singles draw"
-                :items="[...DRAW_TYPES]"
+                :items="[...DRAWS]"
                 class="w-full"
               />
 
@@ -701,7 +701,7 @@ const handleSubmit = async () => {
                 v-if="'qd_draw' in updatedEvent"
                 v-model="updatedEvent.qd_draw"
                 placeholder="Qualifying doubles draw"
-                :items="[...DRAW_TYPES]"
+                :items="[...DRAWS]"
                 class="w-full"
               />
 

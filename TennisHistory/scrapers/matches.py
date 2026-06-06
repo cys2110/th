@@ -38,20 +38,37 @@ supabase = create_client(
     )
 )
 
+SELENIUM_BROWSER = os.getenv("SELENIUM_BROWSER", "safari").strip().lower()
 SELENIUM_REMOTE_URL = os.getenv("SELENIUM_REMOTE_URL", "http://localhost:4444/wd/hub")
 
-def create_remote_chrome_driver():
+def create_chrome_driver():
     options = webdriver.ChromeOptions()
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--no-sandbox")
 
-    driver = webdriver.Remote(
-        command_executor=SELENIUM_REMOTE_URL,
-        options=options
-    )
+    if SELENIUM_REMOTE_URL:
+        driver = webdriver.Remote(
+            command_executor=SELENIUM_REMOTE_URL,
+            options=options
+        )
+    else:
+        driver = webdriver.Chrome(options=options)
+
     driver.set_page_load_timeout(30)
 
     return driver
+
+def create_safari_driver():
+    driver = webdriver.Safari()
+    driver.set_page_load_timeout(30)
+
+    return driver
+
+def create_driver():
+    if SELENIUM_BROWSER == "safari":
+        return create_safari_driver()
+
+    return create_chrome_driver()
 
 @app.route("/atp/stats", methods=["POST"])
 def get_atp_stats():
@@ -66,7 +83,7 @@ def get_atp_stats():
         driver = None
 
         try:
-            driver = create_remote_chrome_driver()
+            driver = create_driver()
             driver.get(f"https://www.atptour.com{match}")
             time.sleep(10)
 
@@ -218,7 +235,7 @@ def scrape_old_atp_matches():
         driver = None
 
         try:
-            driver = create_remote_chrome_driver()
+            driver = create_driver()
             driver.get(f"https://www.atptour.com{link}")
             time.sleep(10)
 
@@ -369,7 +386,7 @@ def get_wta_stats():
     match_stats = []
     failed_matches = []
 
-    driver = webdriver.Chrome()
+    driver = create_driver()
 
     urlPrefix = 'LS' if match_type == 'Singles' and draw_type == 'Main' else 'LD' if match_type == 'Doubles' and draw_type == 'Main' else 'RS'
 

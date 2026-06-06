@@ -239,27 +239,31 @@ def get_atp_draw():
         )
     except Exception as e:
         print(e)
+        if e.code == '23503':
+            return jsonify({ "success": False, "error": f"Duplicate match: {e.details}" })
         raise
 
     # Create seeds
     try:
-        seeds_response = (
-            supabase
-            .table("seeds")
-            .insert(seeds_to_insert)
-            .execute()
-        )
+        if len(seeds_to_insert):
+            seeds_response = (
+                supabase
+                .table("seeds")
+                .insert(seeds_to_insert)
+                .execute()
+            )
     except Exception as e:
         print(e)
 
     # Create statuses
     try:
-        statuses_response = (
-            supabase
-            .table("entry_status")
-            .insert(statuses_to_insert)
-            .execute()
-        )
+        if len(statuses_to_insert):
+            statuses_response = (
+                supabase
+                .table("entry_status")
+                .insert(statuses_to_insert)
+                .execute()
+            )
     except Exception as e:
         print(e)
 
