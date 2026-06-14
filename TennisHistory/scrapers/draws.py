@@ -154,7 +154,9 @@ def get_atp_draw():
                         match_info['incomplete'] = 'B'
                     elif not player_text in ('Qualifier', 'TBA', 'Alternate'):
                         player_link = player.find('a')
-                        player_id = extract_atp_id_from_link(player_link['href'])
+
+                        if player_link:
+                            player_id = extract_atp_id_from_link(player_link['href'])
 
                         entry_id += f" {player_id}"
                         player_ids.append(player_id)

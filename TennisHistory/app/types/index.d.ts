@@ -198,20 +198,6 @@ declare global {
     website: string | null
   }
 
-  interface PlayerFiltersInterface {
-    tour?: TourType
-    players: Array<{
-      id: string
-      name: string
-      icon: string
-    }>
-    countries: Array<string>
-    turned_pro?: number
-    retired?: number
-    first_tournament?: number
-    last_tournament?: number
-  }
-
   interface CountryFiltersInterface {
     countries: Array<string>
     continents: Array<ContinentType>

@@ -34,7 +34,8 @@ export const CATEGORIES = [
   "ATP Super 9",
   "ATP Championship Series, Single Week",
   "World Championship Tennis",
-  "Grand Prix - Super Series"
+  "Grand Prix - Super Series",
+  "ATP Challenger 80"
 ] as const
 
 export const CONTINENTS = ["Africa", "Asia", "Europe", "North America", "Oceania", "South America"] as const

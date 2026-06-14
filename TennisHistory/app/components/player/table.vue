@@ -8,26 +8,23 @@ const props = defineProps<{
   canLoadMore: boolean
   countries: Array<CountryInterface & { icon: string }>
   countriesPending: boolean
-  sorting: Array<SortingInterface>
   count: number
 }>()
 
 const emits = defineEmits<{
   "load-more": []
-  "handle-sorting": [field: string]
   refresh: []
 }>()
+
+const route = useRoute("players")
+const router = useRouter()
 
 const {
   ui: { icons }
 } = useAppConfig()
 
-const filters = defineModel<PlayerFiltersInterface>("filters")
-
 const { isAdmin } = useAuthState()
-const { results, pending: loading, searchTerm, fetchSearchResults } = usePlayerSearch()
-
-const router = useRouter()
+const updateRouteQuery = useRouteQueryUpdater()
 
 const table = useTemplateRef("table")
 
@@ -65,11 +62,35 @@ const columns: Array<TableColumn<PlayerListType>> = [
 ]
 
 const getSortingIcon = (field: string) => {
-  const currentSort = props.sorting.find(sort => sort.field === field)
+  const currentSort = route.query.sort
 
   if (!currentSort) return ICONS.sort
 
-  return currentSort.direction ? ICONS.sortAsc : ICONS.sortDesc
+  const [currentField, currentDirection] = (currentSort as string).split("-")
+
+  if (currentField !== field) return ICONS.sort
+
+  return currentDirection === "asc" ? ICONS.sortAsc : ICONS.sortDesc
+}
+
+const handleSorting = (field: string) => {
+  const currentSort = route.query.sort
+
+  if (currentSort) {
+    const [currentField, currentDirection] = (currentSort as string).split("-")
+
+    if (currentField === field) {
+      if (currentDirection === "asc") {
+        updateRouteQuery("sort", `${field}-desc`)
+      } else {
+        updateRouteQuery("sort", null)
+      }
+    } else {
+      updateRouteQuery("sort", `${field}-asc`)
+    }
+  } else {
+    updateRouteQuery("sort", `${field}-asc`)
+  }
 }
 
 const handleSelectRow = (_e: Event, row: TableRow<PlayerListType>) => {
@@ -110,8 +131,8 @@ const handleSelectRow = (_e: Event, row: TableRow<PlayerListType>) => {
 
     <template #tour-header>
       <u-select
-        v-if="filters"
-        v-model="filters.tour"
+        :model-value="<TourType>route.query.tour"
+        @update:model-value="updateRouteQuery('tour', $event)"
         :items="['ATP', 'WTA']"
         placeholder="Tour"
         variant="none"
@@ -130,13 +151,12 @@ const handleSelectRow = (_e: Event, row: TableRow<PlayerListType>) => {
 
     <template #country-header>
       <u-select-menu
-        v-if="filters"
-        v-model="filters.countries"
+        :model-value="<string>route.query.country"
+        @update:model-value="updateRouteQuery('country', $event)"
         :items="countries"
         value-key="id"
         label-key="name"
         placeholder="Country"
-        multiple
         :icon="ICONS.globe"
         clear
         variant="none"
@@ -153,35 +173,20 @@ const handleSelectRow = (_e: Event, row: TableRow<PlayerListType>) => {
     </template>
 
     <template #name-header>
-      <div class="flex items-center justify-center gap-0.5">
-        <u-select-menu
-          v-if="filters"
-          v-model="filters.players"
-          :items="results"
-          placeholder="Player"
-          multiple
-          :icon="ICONS.player"
-          clear
-          :loading
-          v-model:search-term="searchTerm"
-          variant="none"
-          label-key="name"
-          @update:open="fetchSearchResults"
-        />
-        <u-button
-          variant="ghost"
-          color="neutral"
-          :icon="getSortingIcon('name')"
-          @click="() => $emit('handle-sorting', 'name')"
-        />
-      </div>
+      <u-button
+        variant="ghost"
+        color="neutral"
+        :trailing-icon="getSortingIcon('name')"
+        label="Player"
+        @click="handleSorting('name')"
+      />
     </template>
 
     <template #turned_pro-header>
       <div class="flex justify-center items-center gap-0.5">
         <u-select-menu
-          v-if="filters"
-          v-model="filters.turned_pro"
+          :model-value="<string>route.query.turned_pro ? Number(route.query.turned_pro) : null"
+          @update:model-value="updateRouteQuery('turned_pro', $event)"
           :items="OPEN_ERA_YEARS"
           :icon="ICONS.years"
           placeholder="Turned pro"
@@ -191,8 +196,8 @@ const handleSelectRow = (_e: Event, row: TableRow<PlayerListType>) => {
         <u-button
           variant="ghost"
           color="neutral"
-          :icon="getSortingIcon('turned_pro')"
-          @click="() => $emit('handle-sorting', 'turned_pro')"
+          :trailing-icon="getSortingIcon('turned_pro')"
+          @click="handleSorting('turned_pro')"
         />
       </div>
     </template>
@@ -200,8 +205,8 @@ const handleSelectRow = (_e: Event, row: TableRow<PlayerListType>) => {
     <template #retired-header>
       <div class="flex justify-center items-center gap-0.5">
         <u-select-menu
-          v-if="filters"
-          v-model="filters.retired"
+          :model-value="<string>route.query.retired ? Number(route.query.retired) : null"
+          @update:model-value="updateRouteQuery('retired', $event)"
           :items="OPEN_ERA_YEARS"
           :icon="ICONS.years"
           placeholder="Retired"
@@ -211,8 +216,8 @@ const handleSelectRow = (_e: Event, row: TableRow<PlayerListType>) => {
         <u-button
           variant="ghost"
           color="neutral"
-          :icon="getSortingIcon('retired')"
-          @click="() => $emit('handle-sorting', 'retired')"
+          :trailing-icon="getSortingIcon('retired')"
+          @click="handleSorting('retired')"
         />
       </div>
     </template>
@@ -220,8 +225,8 @@ const handleSelectRow = (_e: Event, row: TableRow<PlayerListType>) => {
     <template #first_tournament-header>
       <div class="flex justify-center items-center gap-0.5">
         <u-select-menu
-          v-if="filters"
-          v-model="filters.first_tournament"
+          :model-value="<string>route.query.first_tournament ? Number(route.query.first_tournament) : null"
+          @update:model-value="updateRouteQuery('first_tournament', $event)"
           :items="OPEN_ERA_YEARS"
           :icon="ICONS.years"
           placeholder="First Tournament Played"
@@ -231,8 +236,8 @@ const handleSelectRow = (_e: Event, row: TableRow<PlayerListType>) => {
         <u-button
           variant="ghost"
           color="neutral"
-          :icon="getSortingIcon('retired')"
-          @click="() => $emit('handle-sorting', 'retired')"
+          :trailing-icon="getSortingIcon('first_tournament')"
+          @click="handleSorting('first_tournament')"
         />
       </div>
     </template>
@@ -240,8 +245,8 @@ const handleSelectRow = (_e: Event, row: TableRow<PlayerListType>) => {
     <template #last_tournament-header>
       <div class="flex justify-center items-center gap-0.5">
         <u-select-menu
-          v-if="filters"
-          v-model="filters.last_tournament"
+          :model-value="<string>route.query.last_tournament ? Number(route.query.last_tournament) : null"
+          @update:model-value="updateRouteQuery('last_tournament', $event)"
           :items="OPEN_ERA_YEARS"
           :icon="ICONS.years"
           placeholder="Last Tournament Played"
@@ -251,8 +256,8 @@ const handleSelectRow = (_e: Event, row: TableRow<PlayerListType>) => {
         <u-button
           variant="ghost"
           color="neutral"
-          :icon="getSortingIcon('retired')"
-          @click="() => $emit('handle-sorting', 'retired')"
+          :trailing-icon="getSortingIcon('last_tournament')"
+          @click="handleSorting('last_tournament')"
         />
       </div>
     </template>

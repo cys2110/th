@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { TabsItem } from "@nuxt/ui"
+import type { BreadcrumbItem, TabsItem } from "@nuxt/ui"
 
 const { name, params } = useRoute("player")
 const router = useRouter()
@@ -12,6 +12,8 @@ const {
 const { isAdmin } = useAuthState()
 const playerStore = usePlayerStore()
 playerStore.paramName = params.name
+
+const breadcrumbs = ref<Array<BreadcrumbItem>>([{ label: "Players", icon: ICONS.player, to: { name: "players" } }])
 
 const playerPages: Array<TabsItem> = [
   { label: "Overview", value: "player", icon: ICONS.profile },
@@ -148,12 +150,15 @@ const handleScrape = async () => {
 
 <template>
   <u-page-header
-    headline="Players"
     :ui="{
       root: 'border-none mb-0 pb-0',
       description: 'text-md w-fit flex items-center gap-2'
     }"
   >
+    <template #headline>
+      <u-breadcrumb :items="breadcrumbs" />
+    </template>
+
     <template #title>
       <div v-if="player?.first_name && player?.last_name"> {{ player.first_name }} {{ player.last_name.toUpperCase() }} </div>
 

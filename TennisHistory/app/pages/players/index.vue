@@ -1,56 +1,13 @@
 <script setup lang="ts">
-useHead({ title: "Players" })
+useHead({ title: "Players", meta: [{ name: "description", content: "Players who have played in the Open Era" }] })
 
+const route = useRoute("players")
 const supabase = useSupabaseClient()
 
 const viewModeStore = useViewModeStore()
+const updateRouteQuery = useRouteQueryUpdater()
 
-const { results, pending: loading, searchTerm, fetchSearchResults } = usePlayerSearch()
 const { countries, pending: countriesPending } = useCountryList()
-
-const filters = ref<PlayerFiltersInterface>({
-  players: [],
-  countries: []
-})
-
-const sorting = ref<Array<SortingInterface>>([
-  { field: "last_name", direction: true },
-  { field: "first_name", direction: true }
-])
-
-const handleSorting = (field: string) => {
-  const currentSort = sorting.value?.find(sort => {
-    const sortField = field === "name" ? "last_name" : field
-
-    return sort.field === sortField
-  })
-
-  const secondarySort = field === "name" ? sorting.value?.find(sort => sort.field === "first_name") : null
-
-  if (currentSort) {
-    if (currentSort.direction) {
-      currentSort.direction = false
-
-      if (secondarySort) {
-        secondarySort.direction = false
-      }
-    } else {
-      sorting.value = sorting.value?.filter(sort => {
-        if (field === "name") {
-          return sort.field !== "last_name" && sort.field !== "first_name"
-        } else {
-          return sort.field !== field
-        }
-      })
-    }
-  } else {
-    if (field === "name") {
-      sorting.value.push({ field: "last_name", direction: true }, { field: "first_name", direction: true })
-    } else {
-      sorting.value.push({ field, direction: true })
-    }
-  }
-}
 
 const count = ref(0)
 const players = ref<Array<PlayerListType>>([])
@@ -58,38 +15,37 @@ const canLoadMore = ref(false)
 const offset = ref(0)
 
 const { pending, execute, refresh } = await useAsyncData(
-  "players",
+  () => `players-${JSON.stringify(route.query)}`,
   async () => {
     let query = supabase
       .from("player_list_view")
       .select("*", { count: "exact", head: false })
       .range(offset.value, offset.value + 29)
 
-    const { players: filterPlayers, tour, countries: filterCountries, turned_pro, retired, first_tournament, last_tournament } = filters.value
+    if (route.query.tour) query = query.eq("tour", route.query.tour as TourType)
 
-    if (filterPlayers.length)
-      query = query.in(
-        "id",
-        filterPlayers.map(v => v.id)
-      )
+    if (route.query.country) query = query.eq("country->>id", route.query.country as string)
 
-    if (tour) query = query.eq("tour", tour)
+    if (route.query.turned_pro) query = query.gte("turned_pro", Number(route.query.turned_pro))
 
-    if (filterCountries.length) query = query.in("country->>id", filterCountries)
+    if (route.query.retired) query = query.gte("retired", Number(route.query.retired))
 
-    if (turned_pro) query = query.gte("turned_pro", turned_pro)
+    if (route.query.first_tournament) query.gte("first_tournament", Number(route.query.first_tournament))
 
-    if (retired) query = query.gte("retired", retired)
+    if (route.query.last_tournament) query.lte("last_tournament", Number(route.query.last_tournament))
 
-    if (first_tournament) query.gte("first_tournament", first_tournament)
+    if (route.query.sort) {
+      const [field, direction] = (route.query.sort as string).split("-")
 
-    if (last_tournament) query.lte("last_tournament", last_tournament)
-
-    if (sorting.value.length) {
-      sorting.value.forEach(s => query.order(s.field, { ascending: s.direction }))
+      if (field === "name") {
+        query = query.order("last_name", { ascending: direction === "asc" })
+        query = query.order("first_name", { ascending: direction === "asc" })
+      } else {
+        query = query.order(field as string, { ascending: direction === "asc" })
+      }
     } else {
-      query.order("last_name", { ascending: true })
-      query.order("first_name", { ascending: true })
+      query = query.order("last_name", { ascending: true })
+      query = query.order("first_name", { ascending: true })
     }
 
     const { data, count: countData, error } = await query
@@ -116,11 +72,20 @@ const { pending, execute, refresh } = await useAsyncData(
 
 execute()
 
-watchDeep([filters, sorting], () => {
-  set(players, [])
-  set(offset, 0)
-  refresh()
-})
+watchDeep(
+  [
+    () => route.query.tour,
+    () => route.query.turned_pro,
+    () => route.query.retired,
+    () => route.query.first_tournament,
+    () => route.query.last_tournament,
+    () => route.query.country
+  ],
+  () => {
+    set(players, [])
+    set(offset, 0)
+  }
+)
 
 const loadMore = () => {
   if (pending.value) return
@@ -141,7 +106,8 @@ const loadMore = () => {
           v-if="!viewModeStore.isTableView"
         >
           <u-select
-            v-model="filters.tour"
+            :model-value="<TourType>route.query.tour"
+            @update:model-value="updateRouteQuery('tour', $event)"
             :items="['ATP', 'WTA']"
             placeholder="Filter by Tour"
             :icon="ICONS.tour"
@@ -149,31 +115,15 @@ const loadMore = () => {
           />
 
           <u-select-menu
-            v-model="filters.countries"
+            :model-value="<string>route.query.country"
+            @update:model-value="updateRouteQuery('country', $event)"
             :items="countries"
             value-key="id"
             label-key="name"
             placeholder="Filter by Country"
-            multiple
             :icon="ICONS.globe"
             clear
             highlight
-            class="max-w-1/3"
-          />
-
-          <u-select-menu
-            v-model="filters.players"
-            :items="results"
-            placeholder="Filter by Player"
-            multiple
-            :icon="ICONS.player"
-            clear
-            highlight
-            :loading
-            v-model:search-term="searchTerm"
-            class="max-w-1/3"
-            @update:open="fetchSearchResults"
-            label-key="name"
           />
         </template>
       </u-page-header>
@@ -186,10 +136,7 @@ const loadMore = () => {
           :can-load-more
           :countries
           :countries-pending
-          :sorting
           @load-more="loadMore"
-          @handle-sorting="handleSorting"
-          v-model:filters="filters"
           @refresh="refresh"
           :count
         />

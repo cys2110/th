@@ -239,8 +239,14 @@ const handleSubmit = async () => {
               v-if="event.tour === 'ATP'"
               hydrate-on-idle
             />
+            <lazy-scrape-rg
+              v-if="id === '520'"
+              :event-id="event.id"
+              hydrate-on-idle
+            />
+
             <lazy-scrape-atp-stats
-              v-if="event.tour === 'ATP'"
+              v-else-if="event.tour === 'ATP'"
               hydrate-on-idle
               :start-date="startDate || event.start_date"
             />

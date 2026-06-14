@@ -32,4 +32,9 @@ country_round_mapping = {
 }
 
 def extract_atp_id_from_link(link):
-    return re.search(r'/([a-zA-Z0-9]{4})/', link).group(1)
+    href = link
+    if '16992' in link:
+        href = 'https://www.atptour.com/en/players/marcus-willis/w521/overview'
+    elif '168420' in link:
+        href = 'https://www.atptour.com/en/players/andy-andrade/ag08/overview'
+    return re.search(r'/([a-zA-Z0-9]{4})/', href).group(1)
