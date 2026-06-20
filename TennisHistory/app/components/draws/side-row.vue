@@ -57,7 +57,7 @@ const handleSideClick = () => {
         <country-link
           v-for="(player, index) in entry?.team"
           :key="player.id"
-          :country="player.country"
+          :country="player.country!"
           icon-only
           class="absolute"
           :class="{ 'z-10 left-3': index === 1 }"

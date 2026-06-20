@@ -4,7 +4,7 @@ defineProps<{ country: CountryInterface }>()
 
 <template>
   <u-page-card
-    :icon="getFlagCode(country)"
+    :icon="country.icon"
     :title="country.name"
     :description="country.continent"
     highlight

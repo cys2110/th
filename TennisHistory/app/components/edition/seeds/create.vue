@@ -19,7 +19,8 @@ const schema = object({
           id: string(),
           name: string(),
           continent: ContinentEnum,
-          alpha_2: string().nullable()
+          alpha_2: string().nullable(),
+          icon: string()
         })
       })
     ),
@@ -227,7 +228,7 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
                 v-if="modelValue"
                 v-for="(player, index) in modelValue.players"
                 :key="player.id"
-                :name="getFlagCode(player.country)"
+                :name="player.country?.icon"
                 class="absolute size-4 rounded-sm"
                 :class="{ 'z-10 left-5': index === 1 }"
               />
@@ -243,7 +244,7 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
                 <u-icon
                   v-for="(player, index) in item.players"
                   :key="player.id"
-                  :name="getFlagCode(player.country)"
+                  :name="player.country?.icon"
                   class="absolute size-4 rounded-sm"
                   :class="{ 'z-10 left-3': index === 1 }"
                 />

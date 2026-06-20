@@ -1,3 +1,5 @@
+DROP VIEW IF EXISTS player_list_view;
+
 CREATE OR REPLACE view player_list_view
 WITH (security_invoker = true)
 AS
@@ -11,7 +13,7 @@ SELECT
     p.retired,
     min(ed.year) AS first_tournament,
     max(ed.year) AS last_tournament,
-    json_build_object('id', c.id, 'name', c.name, 'alpha_2', c.alpha_2, 'continent', c.continent) AS country
+    json_build_object('id', c.id, 'name', c.name, 'alpha_2', c.alpha_2, 'continent', c.continent, 'icon', c.icon) AS country
 FROM players p
 LEFT JOIN player_entry_mapping pem ON pem.player_id = p.id
 LEFT JOIN entries e ON e.id = pem.entry_id

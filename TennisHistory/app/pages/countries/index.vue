@@ -1,13 +1,11 @@
 <script setup lang="ts">
 useHead({ title: "Countries" })
 
+const route = useRoute("countries")
+
 const { countries, pending, fetchCountries } = useCountryList()
 const viewModeStore = useViewModeStore()
-
-const filters = ref<CountryFiltersInterface>({
-  countries: [],
-  continents: []
-})
+const updateRouteQuery = useRouteQueryUpdater()
 </script>
 
 <template>
@@ -20,25 +18,14 @@ const filters = ref<CountryFiltersInterface>({
         >
           <div class="flex justify-end gap-2">
             <u-select-menu
-              v-model="filters.countries"
-              value-key="id"
-              label-key="name"
-              placeholder="Filter by country"
-              multiple
-              :icon="ICONS.globe"
-              :items="countries"
-              class="w-fit max-w-1/2"
-              clear
-            />
-
-            <u-select-menu
-              v-model="filters.continents"
+              :model-value="<Array<ContinentType>>route.query.continent"
+              @update:model-value="updateRouteQuery('continent', $event)"
               placeholder="Filter by continent"
               multiple
               :icon="ICONS.world"
               :items="[...CONTINENTS]"
-              class="w-fit max-w-1/2"
               clear
+              highlight
             />
           </div>
         </template>
@@ -56,7 +43,6 @@ const filters = ref<CountryFiltersInterface>({
           v-else
           :countries
           :pending
-          :filters
           @refresh="fetchCountries"
         />
       </u-page-body>

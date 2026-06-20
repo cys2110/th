@@ -31,21 +31,17 @@ const tournamentStore = useTournamentStore()
 const isSaving = ref(false)
 const updatedMatches = ref<Record<string, any>>({})
 
-const mapping = computed(() => {
-  const roundMap = new Map()
-
-  props.matches.forEach(match => roundMap.set(match.round.number, match.round.round))
-
-  return Object.fromEntries(roundMap)
-})
-
 const columns = computed<Array<TableColumn<ResultsMatchInterface>>>(() => [
   { id: "checkbox" },
   { accessorKey: "tour" },
   { accessorKey: "match_type" },
   {
-    accessorKey: "round.number",
-    filterFn: numberFilter,
+    accessorKey: "round.round",
+    sortingFn: (rowA, rowB, columnId) => {
+      const aValue = rowA.original.round.number
+      const bValue = rowB.original.round.number
+      return aValue - bValue
+    },
     ...(isAdmin.value && {
       footer: () =>
         h(UFieldGroup, { class: "w-fit" }, () => [
@@ -296,20 +292,17 @@ const handleSave = async () => {
       />
     </template>
 
-    <template #round_number-header="{ column }">
+    <template #round_round-header="{ column }">
       <div class="flex justify-center items-center gap-0.5">
         <table-filter-header
           :column
           label="Round"
           :icon="ICONS.level"
-          :mapping
-          multiple
+          query="round"
         />
         <table-sort-header :column />
       </div>
     </template>
-
-    <template #round_number-cell="{ row }">{{ row.original.round.round }}</template>
 
     <template #date-header="{ column }">
       <table-sort-header

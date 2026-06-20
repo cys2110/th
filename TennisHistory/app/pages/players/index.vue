@@ -1,5 +1,5 @@
 <script setup lang="ts">
-useHead({ title: "Players", meta: [{ name: "description", content: "Players who have played in the Open Era" }] })
+useHead({ title: "Players" })
 
 const route = useRoute("players")
 const supabase = useSupabaseClient()
@@ -17,18 +17,18 @@ const offset = ref(0)
 const { pending, execute, refresh } = await useAsyncData(
   () => `players-${JSON.stringify(route.query)}`,
   async () => {
-    let query = supabase
+    const query = supabase
       .from("player_list_view")
       .select("*", { count: "exact", head: false })
       .range(offset.value, offset.value + 29)
 
-    if (route.query.tour) query = query.eq("tour", route.query.tour as TourType)
+    if (route.query.tour) query.eq("tour", route.query.tour as TourType)
 
-    if (route.query.country) query = query.eq("country->>id", route.query.country as string)
+    if (route.query.country) query.eq("country->>id", route.query.country as string)
 
-    if (route.query.turned_pro) query = query.gte("turned_pro", Number(route.query.turned_pro))
+    if (route.query.turned_pro) query.gte("turned_pro", Number(route.query.turned_pro))
 
-    if (route.query.retired) query = query.gte("retired", Number(route.query.retired))
+    if (route.query.retired) query.gte("retired", Number(route.query.retired))
 
     if (route.query.first_tournament) query.gte("first_tournament", Number(route.query.first_tournament))
 
@@ -38,14 +38,14 @@ const { pending, execute, refresh } = await useAsyncData(
       const [field, direction] = (route.query.sort as string).split("-")
 
       if (field === "name") {
-        query = query.order("last_name", { ascending: direction === "asc" })
-        query = query.order("first_name", { ascending: direction === "asc" })
+        query.order("last_name", { ascending: direction === "asc" })
+        query.order("first_name", { ascending: direction === "asc" })
       } else {
-        query = query.order(field as string, { ascending: direction === "asc" })
+        query.order(field as string, { ascending: direction === "asc" })
       }
     } else {
-      query = query.order("last_name", { ascending: true })
-      query = query.order("first_name", { ascending: true })
+      query.order("last_name", { ascending: true })
+      query.order("first_name", { ascending: true })
     }
 
     const { data, count: countData, error } = await query

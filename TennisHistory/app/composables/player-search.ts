@@ -42,7 +42,7 @@ export const usePlayerSearch = (tour?: Ref<TourType> | TourType) => {
     results.value = data.map(v => ({
       id: v.id,
       name: v.full_name!,
-      icon: getFlagCode(v.player_country_mapping[0]?.countries as unknown as CountryInterface)
+      icon: v.player_country_mapping[0]?.countries.icon as string
     }))
 
     set(pending, false)

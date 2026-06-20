@@ -1,0 +1,2 @@
+ALTER TABLE countries
+ALTER COLUMN icon SET NOT NULL;

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { TabsItem } from "@nuxt/ui"
+import type { BreadcrumbItem, TabsItem } from "@nuxt/ui"
 
 definePageMeta({ name: "tournament" })
 
@@ -35,6 +35,8 @@ const tabItems = computed<Array<TabsItem>>(() => [
   }
 ])
 
+const breadcrumbs: Array<BreadcrumbItem> = [{ label: "Tournaments", to: { name: "tournaments" } }]
+
 const { data: tournament } = await useAsyncData(id, async () => {
   const { data, error } = await supabase.from("tournaments").select("*").eq("id", Number(id)).single()
 
@@ -62,14 +64,24 @@ watch(
   <u-container>
     <u-page>
       <u-page-header
-        headline="Tournaments"
         :title="tournamentStore.name"
         :ui="{
           root: 'border-none mb-0 pb-0',
           description: 'text-md w-fit flex items-center gap-2'
         }"
       >
+        <template #headline>
+          <u-breadcrumb :items="breadcrumbs" />
+        </template>
+
         <template #links>
+          <u-badge
+            v-for="tour in tournament?.tours"
+            :key="tour"
+            :label="tour"
+            :color="tour"
+          />
+
           <u-button
             v-if="tournament?.website"
             :href="tournament.website"
@@ -79,13 +91,6 @@ watch(
         </template>
 
         <template #description>
-          <u-badge
-            v-for="tour in tournament?.tours"
-            :key="tour"
-            :label="tour"
-            :color="tour"
-          />
-
           <div v-if="tournament?.established">
             <span>{{ tournament.established }}</span>
             <span v-if="!tournament.abolished"> - present</span>
@@ -94,9 +99,18 @@ watch(
 
           <u-badge
             v-if="tournament?.updated_at && isAdmin"
-            :label="formatDateTime(tournament.updated_at)"
             color="success"
-          />
+          >
+            <nuxt-time
+              :datetime="tournament.updated_at"
+              year="numeric"
+              month="long"
+              day="numeric"
+              hour="2-digit"
+              minute="2-digit"
+              time-zone="UTC"
+            />
+          </u-badge>
         </template>
 
         <template #default>

@@ -53,7 +53,8 @@ const schema = object({
             id: string(),
             name: string(),
             continent: ContinentEnum,
-            alpha_2: string().nullable()
+            alpha_2: string().nullable(),
+            icon: string()
           })
         )
       })
@@ -286,7 +287,7 @@ const formFields = computed<FormFieldInterface<Schema>[]>(
         type: "slot",
         class: "col-span-2",
         items: entries.value.filter(entry => {
-          const isCountryMatch = !state.value.tie || state.value.tie.country_1 === entry.players[0]?.country.id
+          const isCountryMatch = !state.value.tie || state.value.tie.country_1 === entry.players[0]?.country?.id
 
           const isMatchTypeMatch = !state.value.match_type || state.value.match_type === entry.match_type
 
@@ -299,7 +300,7 @@ const formFields = computed<FormFieldInterface<Schema>[]>(
         type: "slot",
         class: "col-span-2",
         items: entries.value.filter(entry => {
-          const isCountryMatch = !state.value.tie || state.value.tie.country_2 === entry.players[1]?.country.id
+          const isCountryMatch = !state.value.tie || state.value.tie.country_2 === entry.players[1]?.country?.id
           const isMatchTypeMatch = !state.value.match_type || state.value.match_type === entry.match_type
 
           return isCountryMatch && isMatchTypeMatch
@@ -440,7 +441,7 @@ const statsFields: Array<{ label: string; key?: keyof MatchStatType; children?: 
                   v-if="modelValue"
                   v-for="(player, index) in modelValue.players"
                   :key="player.id"
-                  :name="getFlagCode(player.country)"
+                  :name="player.country.icon"
                   class="absolute size-4 rounded-sm"
                   :class="{ 'z-10 left-5': index === 1 }"
                 />
@@ -456,7 +457,7 @@ const statsFields: Array<{ label: string; key?: keyof MatchStatType; children?: 
                   <u-icon
                     v-for="(player, index) in item.players"
                     :key="player.id"
-                    :name="getFlagCode(player.country)"
+                    :name="player.country.icon"
                     class="absolute size-4 rounded-sm"
                     :class="{ 'z-10 left-3': index === 1 }"
                   />

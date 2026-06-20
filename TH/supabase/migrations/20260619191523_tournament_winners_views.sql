@@ -1,3 +1,6 @@
+DROP VIEW IF EXISTS country_winners;
+DROP VIEW IF EXISTS elimination_winners;
+
 CREATE OR REPLACE VIEW country_winners
 WITH (security_invoker = true)
 AS
@@ -5,7 +8,8 @@ SELECT
     ed.tournament_id,
     ed.year,
     ed.id,
-    te.country_id
+    te.country_id,
+    COALESCE(ed.end_date, e.end_date) AS end_date
 FROM editions ed
 LEFT JOIN events e ON ed.id = e.edition_id
 LEFT JOIN rounds r ON e.id = r.event_id AND r.round = 'Final'
@@ -38,7 +42,8 @@ SELECT
                     ELSE 2
                 END
         )
-    END AS team
+    END AS team,
+    COALESCE(ed.end_date, e.end_date) AS end_date
 
 FROM editions ed
 LEFT JOIN events e ON ed.id = e.edition_id
@@ -47,4 +52,4 @@ LEFT JOIN matches m ON r.id = m.round_id
 LEFT JOIN player_entry_mapping pem ON pem.entry_id = m.winner_id
 LEFT JOIN countries c ON c.id = pem.country_id
 LEFT JOIN players p ON p.id = pem.player_id
-GROUP BY ed.id, e.tour, r.match_type, m.winner_id;
+GROUP BY ed.id, e.id, r.match_type, m.winner_id;

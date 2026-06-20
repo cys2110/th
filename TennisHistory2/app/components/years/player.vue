@@ -7,7 +7,7 @@ const props = defineProps<{
 }>()
 
 const {
-  ui: { icons, colors }
+  ui: { icons }
 } = useAppConfig()
 </script>
 
@@ -39,7 +39,7 @@ const {
             }
           }"
           highlight
-          :highlight-color="<keyof typeof colors>player.tour"
+          :highlight-color="player.tour"
         >
           <template #leading>
             <u-icon :name="getFlagCode(player.country!)" />

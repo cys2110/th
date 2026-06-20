@@ -98,29 +98,6 @@ export const getAge = (dob: Date, dod?: Date) => {
   return lgAndDown.value ? `${years}y, ${months}m, ${days}d` : `${years} years, ${months} months, ${days} days`
 }
 
-/** Function to get flag icon for country */
-export const getFlagCode = (country: CountryInterface) => {
-  const circleFlagsMapping: Record<typeof country.id, string> = {
-    URS: "soviet-union",
-    YUG: "yu",
-    TCH: "cs",
-    NMI: "mp",
-    AHO: "an"
-  }
-
-  if (country.id in circleFlagsMapping) {
-    return `circle-flags:${circleFlagsMapping[country.id]}`
-  } else if (!country.alpha_2) {
-    if (country.id === "POC") {
-      return "flag:pc-4x3"
-    }
-    return `twemoji:flag-${kebabCase(country.name)}`
-  } else if (["ch", "np"].includes(country.alpha_2)) {
-    return `flag:${country.alpha_2}-1x1`
-  }
-  return `flag:${country.alpha_2}-4x3`
-}
-
 export const percentage = (value1: number, value2: number) => (value2 === 0 ? 0 : Math.round((value1 / value2) * 100))
 
 export const arrayFilter = (row: Row<any>, columnId: string, filterValue: string[]) => {

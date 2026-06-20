@@ -455,6 +455,7 @@ const handleSave = async () => {
         :column
         label="Draws"
         :icon="ICONS.level"
+        query="singles_draw"
       />
     </template>
 
@@ -485,6 +486,7 @@ const handleSave = async () => {
         :column
         label="Statuses"
         multiple
+        query="status"
       />
     </template>
 
@@ -566,6 +568,7 @@ const handleSave = async () => {
       <table-filter-header
         :column
         label="Draws"
+        query="doubles_draw"
       />
     </template>
 

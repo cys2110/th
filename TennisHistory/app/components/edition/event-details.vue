@@ -52,7 +52,7 @@ const handleCheckboxCheck = (fields: string[]) => {
         updatedEvent.value[field] = props.event.venues.map(venue => ({
           id: venue.id,
           label: venue.name ? `${venue.name}, ${venue.city}` : venue.city,
-          icon: getFlagCode(venue.country)
+          icon: venue.country.icon
         }))
       } else {
         updatedEvent.value[field] = props.event[field as keyof EventInterface]

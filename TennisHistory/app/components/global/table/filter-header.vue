@@ -9,6 +9,7 @@ const props = withDefaults(
     mapping?: Record<any, any>
     type?: string
     multiple?: boolean
+    query?: string
   }>(),
   {
     icon: ICONS.filter,
@@ -16,6 +17,10 @@ const props = withDefaults(
     multiple: false
   }
 )
+
+const route = useRoute()
+
+const updateRouteQuery = useRouteQueryUpdater()
 
 const sortedUniqueValues = computed(() => {
   const uniqueAndSortedValues = useArrayUnique(Array.from(props.column.getFacetedUniqueValues().keys()).filter(Boolean).flat()).value.sort()
@@ -39,19 +44,23 @@ const sortedUniqueValues = computed(() => {
   })
 })
 
-const modelValue = computed({
-  get: () => props.column.getFilterValue() as string[],
-  set: (values: string[]) => props.column.setFilterValue(values)
-})
+watch(
+  () => route.query[props.query || props.label.toLowerCase()],
+  () => {
+    props.column.setFilterValue(route.query[props.query || props.label.toLowerCase()])
+  },
+  { immediate: true }
+)
 </script>
 
 <template>
   <u-select-menu
     :placeholder="label"
+    :model-value="<any>route.query[query || label.toLowerCase()]"
+    @update:model-value="updateRouteQuery(query || label.toLowerCase(), $event)"
     variant="none"
     clear
     :items="sortedUniqueValues"
-    v-model="modelValue"
     :icon
     class="w-fit max-w-50"
     :value-key="type === 'name' || mapping ? 'value' : undefined"

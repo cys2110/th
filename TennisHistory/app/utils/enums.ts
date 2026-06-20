@@ -40,6 +40,6 @@ export const StatusEnum = z.enum(STATUSES)
 
 export type StatusType = z.infer<typeof StatusEnum>
 
-export const TourEnum = z.enum(TOUR_OPTIONS)
+export const TourEnum = z.enum(TOUR_OPTIONS, `Tour must be one of ${TOUR_OPTIONS.join(", ")}`)
 
 export type TourType = z.infer<typeof TourEnum>

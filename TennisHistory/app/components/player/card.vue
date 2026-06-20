@@ -17,7 +17,7 @@ const activeStatus = computed(() => {
     class="w-full"
   >
     <u-page-card
-      :icon="player.country ? getFlagCode(player.country) : undefined"
+      :icon="player.country?.icon"
       :title="player.full_name || '—'"
       highlight
       :highlight-color="player.tour"

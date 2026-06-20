@@ -12,9 +12,7 @@ const props = defineProps<{
 
 const emits = defineEmits<{ refresh: [] }>()
 
-const {
-  params: { id, name }
-} = useRoute("tournament")
+const route = useRoute("tournament")
 
 const {
   ui: { icons }
@@ -27,28 +25,22 @@ const tournamentStore = useTournamentStore()
 
 const currentYear = new Date().getFullYear()
 
-const isLaverWinner = (item: Winner): item is LaverWinnerInterface => {
-  return "team_name" in item
-}
+const isLaverWinner = (item: Winner): item is LaverWinnerInterface => "team_name" in item
 
-const isCountryWinner = (item: Winner): item is CountryWinnerInterface => {
-  return "country" in item
-}
+const isCountryWinner = (item: Winner): item is CountryWinnerInterface => "country" in item
 
-const isEliminationWinner = (item: Winner): item is EditionWinnerInterface => {
-  return "tour" in item
-}
+const isEliminationWinner = (item: Winner): item is EditionWinnerInterface => "tour" in item
 
 const uniqueYears = computed(() => useArrayUnique(props.events.map(ed => ed.year)).value.sort())
 
 const getEditionNumber = (event: Winner) => {
-  const year = event.year.toString()
+  const tournamentAndYear = `${route.params.id}${event.year}`
   const edId = event.id.toString()
 
-  const parts = edId.split(year)
+  const slug = edId.replace(tournamentAndYear, "")
 
-  if (parts.length > 1) {
-    return parts[1]
+  if (slug) {
+    return slug
   }
 }
 
@@ -61,15 +53,18 @@ const columns: Array<TableColumn<Winner>> = [
 
       return false
     },
-    footer: ({ table }) => {
-      const rowCount = table.getFilteredRowModel().rows.length
-
-      return `${rowCount.toLocaleString()} edition${rowCount === 1 ? "" : "s"}`
+    footer: () => {
+      if (isAdmin.value) {
+        return h(UFieldGroup, { class: "w-fit" }, () => [
+          h(UButton, { icon: icons.reload, onClick: () => emits("refresh") }),
+          h(LazyEditionCreate, { hydrateOnIdle: true })
+        ])
+      }
     }
   },
   {
     accessorKey: "tour",
-    cell: ({ row, table }) => {
+    cell: ({ row }) => {
       if (isEliminationWinner(row.original)) {
         return h(UBadge, {
           label: row.original.tour,
@@ -80,7 +75,7 @@ const columns: Array<TableColumn<Winner>> = [
   },
   {
     accessorKey: "match_type",
-    cell: ({ row, table }) => {
+    cell: ({ row }) => {
       if (isEliminationWinner(row.original)) {
         return h(UBadge, {
           label: row.original.match_type,
@@ -93,35 +88,26 @@ const columns: Array<TableColumn<Winner>> = [
     id: "team",
     accessorFn: row => isEliminationWinner(row) && row.team.map(player => `${player.last_name}, ${player.first_name}`),
     filterFn: arrayFilter,
-    footer: () => {
-      if (isAdmin.value) {
-        return h(UFieldGroup, { class: "w-fit" }, () => [
-          h(UButton, { icon: icons.reload, onClick: () => emits("refresh") }),
-          h(LazyEditionCreate, { hydrateOnIdle: true })
-        ])
-      }
+    footer: ({ table }) => {
+      const rowCount = table.getFilteredRowModel().rows.length
+
+      return `${rowCount.toLocaleString()} edition${rowCount === 1 ? "" : "s"}`
     }
   },
   {
     accessorKey: "country.name",
-    footer: () => {
-      if (isAdmin.value) {
-        return h(UFieldGroup, { class: "w-fit" }, () => [
-          h(UButton, { icon: icons.reload, onClick: () => emits("refresh") }),
-          h(LazyEditionCreate, { hydrateOnIdle: true })
-        ])
-      }
+    footer: ({ table }) => {
+      const rowCount = table.getFilteredRowModel().rows.length
+
+      return `${rowCount.toLocaleString()} edition${rowCount === 1 ? "" : "s"}`
     }
   },
   {
     accessorKey: "team_name",
-    footer: () => {
-      if (isAdmin.value) {
-        return h(UFieldGroup, { class: "w-fit" }, () => [
-          h(UButton, { icon: icons.reload, onClick: () => emits("refresh") }),
-          h(LazyEditionCreate, { hydrateOnIdle: true })
-        ])
-      }
+    footer: ({ table }) => {
+      const rowCount = table.getFilteredRowModel().rows.length
+
+      return `${rowCount.toLocaleString()} edition${rowCount === 1 ? "" : "s"}`
     }
   }
 ]
@@ -131,15 +117,14 @@ const columnVisibility = computed(() => ({
   team_name: props.events.length > 0 && isLaverWinner(props.events[0]!),
   team: !props.events.length || isEliminationWinner(props.events[0]!),
   match_type: !props.events.length || isEliminationWinner(props.events[0]!),
-  tour: !props.events.length || isEliminationWinner(props.events[0]!)
+  tour: (!props.events.length || isEliminationWinner(props.events[0]!)) && tournamentStore.tours.length > 1
 }))
 
 const handleSelectRow = (_e: Event, row: TableRow<Winner>) => {
   router.push({
     name: "edition",
     params: {
-      id,
-      name,
+      ...route.params,
       year: row.original.year,
       edId: row.original.id
     }
@@ -175,31 +160,19 @@ const tableClass = computed(() => {
     v-model:column-visibility="columnVisibility"
     :ui="{
       root: tableClass,
-      tbody: '[&>tr]:data-[selectable=true]:cursor-pointer [&>tr]:data-[selectable=true]:hover:bg-elevated/50'
+      tbody: '[&>tr]:data-[selectable=true]:cursor-pointer [&>tr]:data-[selectable=true]:hover:bg-elevated/50 [&>tr]:even:bg-elevated/25'
     }"
   >
     <template #loading>
-      <u-icon
-        :name="icons.loading"
-        class="size-8"
-      />
+      <loading-icon />
     </template>
 
     <template #empty>
-      <u-empty
+      <empty
         :icon="ICONS.calendarOff"
         :title="`No player has won ${tournamentStore.name}`"
-        description="If you think this is an error, refresh the page. Otherwise, please be patient as we continue to add more data."
         class="mx-2"
-      >
-        <template #actions>
-          <u-button
-            label="Refresh"
-            :icon="icons.reload"
-            @click="$emit('refresh')"
-          />
-        </template>
-      </u-empty>
+      />
     </template>
 
     <template #id-header="{ column }">
@@ -219,10 +192,8 @@ const tableClass = computed(() => {
     </template>
 
     <template #id-cell="{ row }">
-      <div>
-        <span>{{ row.original.year }}</span>
-        <span v-if="getEditionNumber(row.original)"> [{{ getEditionNumber(row.original) }}]</span>
-      </div>
+      <span>{{ row.original.year }}</span>
+      <span v-if="getEditionNumber(row.original)"> [{{ getEditionNumber(row.original) }}]</span>
     </template>
 
     <template #tour-header="{ column }">

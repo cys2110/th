@@ -2,17 +2,14 @@
 const props = defineProps<{
   countries: Array<CountryInterface>
   pending: boolean
-  filters: CountryFiltersInterface
 }>()
 
 defineEmits<{ refresh: [] }>()
 
+const route = useRoute("countries")
+
 const filteredCountries = computed(() =>
-  props.countries.filter(country => {
-    const isCountryMatch = !props.filters.countries.length || props.filters.countries.some(c => c === country.id)
-    const isContinentMatch = !props.filters.continents.length || props.filters.continents.some(c => c === country.continent)
-    return isCountryMatch && isContinentMatch
-  })
+  props.countries.filter(country => !route.query.continent?.length || route.query.continent.includes(country.continent))
 )
 </script>
 

@@ -18,13 +18,14 @@ const navLinks = computed<Array<NavigationMenuItem>>(() => [
   {
     label: "Results",
     icon: ICONS.years,
-    active: route.name === "results-archive" || route.path.startsWith("/tournaments"),
-    defaultOpen: true,
-    to: { name: "results-archive" },
-    children: [
-      { label: "Archive", icon: ICONS.calendar, to: { name: "results-archive" } },
-      { label: "Tournaments", icon: ICONS.trophy, to: { name: "tournaments" } }
-    ]
+    active: route.name === "results-archive",
+    to: { name: "results-archive" }
+  },
+  {
+    label: "Tournaments",
+    icon: ICONS.trophy,
+    to: { name: "tournaments" },
+    active: route.path.startsWith("/tournaments")
   },
   {
     label: "Players",
@@ -38,17 +39,15 @@ const navLinks = computed<Array<NavigationMenuItem>>(() => [
     ]
   },
   {
-    label: "Stats/Records",
-    icon: ICONS.stats,
-    to: { name: "statistics-and-records" },
-    active: route.name === "statistics-and-records" || route.path.startsWith("/countries") || route.name === "years",
+    label: "More",
+    icon: icons.ellipsis,
     defaultOpen: true,
     children: [
       { label: "Countries", icon: ICONS.globe, to: { name: "countries" } },
-      { label: "Years", icon: ICONS.years, to: { name: "years" } }
+      { label: "Years", icon: ICONS.years, to: { name: "years" } },
+      { label: "About", icon: icons.info, to: { name: "about" } }
     ]
-  },
-  { label: "About", icon: icons.info, to: { name: "about" } }
+  }
 ])
 
 const showViewSwitcher = computed(() => {

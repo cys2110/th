@@ -1,63 +1,38 @@
 <script setup lang="ts">
 useHead({ title: "Tournaments" })
 
+const route = useRoute("players")
 const supabase = useSupabaseClient()
 
 const viewModeStore = useViewModeStore()
-const { results, pending: loading, searchTerm, fetchSearchResults } = useTournamentSearch()
+const updateRouteQuery = useRouteQueryUpdater()
 
+const count = ref(0)
+const tournaments = ref<Array<TournamentInterface>>([])
+const canLoadMore = ref(false)
 const offset = ref(0)
 
-const filters = ref<TournamentFiltersInterface>({
-  tours: [],
-  tournaments: [],
-  established: undefined,
-  abolished: undefined
-})
-
-const sorting = ref<Array<SortingInterface>>([{ field: "name", direction: true }])
-
-const handleSorting = (field: string) => {
-  const currentSort = sorting.value?.find(sort => sort.field === field)
-
-  if (currentSort) {
-    if (currentSort.direction) {
-      currentSort.direction = false
-    } else {
-      sorting.value = sorting.value?.filter(sort => sort.field !== field)
-    }
-  } else {
-    sorting.value.push({ field, direction: true })
-  }
-}
-
-const tournaments = ref<Array<TournamentInterface>>([])
-const count = ref(0)
-const canLoadMore = ref(false)
-
 const { pending, execute, refresh } = await useAsyncData(
-  "tournaments",
+  () => `tournaments-${JSON.stringify(route.query)}`,
   async () => {
     const query = supabase
       .from("tournaments")
       .select("*", { count: "exact" })
       .range(offset.value, offset.value + 29)
 
-    const { tournaments: filterTournaments, tours, established, abolished } = filters.value
+    if (route.query.tour) query.overlaps("tours", route.query.tour as Array<TourType>)
 
-    if (filterTournaments.length)
-      query.in(
-        "id",
-        filterTournaments.map(v => v.id)
-      )
+    if (route.query.established) query.gte("established", Number(route.query.established))
 
-    if (tours.length) query.contains("tours", tours)
+    if (route.query.abolished) query.lte("abolished", Number(route.query.abolished))
 
-    if (established) query.gte("established", filters.value.established)
+    if (route.query.sort) {
+      const [field, direction] = (route.query.sort as string).split("-")
 
-    if (abolished) query.lte("abolished", abolished)
-
-    if (sorting.value.length) sorting.value.forEach(s => query.order(s.field, { ascending: s.direction }))
+      query.order(field as string, { ascending: direction === "asc" })
+    } else {
+      query.order("name", { ascending: true })
+    }
 
     query.order("id", { ascending: true }) // Add id sorting for consistent ordering
 
@@ -86,7 +61,7 @@ const { pending, execute, refresh } = await useAsyncData(
 execute()
 
 // Reset search results when filters change
-watchDeep([filters, sorting], () => {
+watchDeep([() => route.query.tour, () => route.query.established, () => route.query.abolished], () => {
   set(tournaments, [])
   set(offset, 0)
   refresh()
@@ -111,7 +86,8 @@ const loadMore = () => {
           v-if="!viewModeStore.isTableView"
         >
           <u-select
-            v-model="filters.tours"
+            :model-value="<Array<TourType>>route.query.tour"
+            @update:model-value="updateRouteQuery('tour', $event)"
             :items="[...TOUR_OPTIONS]"
             placeholder="Filter by Tour"
             multiple
@@ -120,17 +96,21 @@ const loadMore = () => {
           />
 
           <u-select-menu
-            v-model="filters.tournaments"
-            :items="results"
-            placeholder="Filter by Tournament"
-            multiple
-            :icon="ICONS.trophy"
-            clear
-            :loading
-            v-model:search-term="searchTerm"
+            :model-value="<string>route.query.established ? Number(route.query.established) : undefined"
+            @update:model-value="updateRouteQuery('established', $event)"
+            :items="ALL_YEARS"
+            placeholder="Established after"
+            :icon="ICONS.years"
             highlight
-            label-key="name"
-            @update:open="fetchSearchResults"
+          />
+
+          <u-select-menu
+            :model-value="<string>route.query.abolished ? Number(route.query.abolished) : undefined"
+            @update:model-value="updateRouteQuery('abolished', $event)"
+            :items="ALL_YEARS"
+            placeholder="Abolished before"
+            :icon="ICONS.years"
+            highlight
           />
         </template>
       </u-page-header>
@@ -141,11 +121,8 @@ const loadMore = () => {
           :tournaments
           :pending
           :can-load-more
-          :sorting
           :count
           @load-more="loadMore"
-          @handle-sorting="handleSorting"
-          v-model:filters="filters"
           @refresh="refresh"
         />
 

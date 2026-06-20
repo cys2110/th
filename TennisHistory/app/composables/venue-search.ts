@@ -36,7 +36,7 @@ export const useVenueSearch = () => {
         data.map(v => ({
           id: v.id,
           label: v.name ? `${v.name}, ${v.city}` : v.city,
-          icon: getFlagCode(v.countries!)
+          icon: v.countries.icon
         }))
       )
     } finally {

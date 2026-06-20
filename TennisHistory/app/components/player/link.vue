@@ -8,7 +8,7 @@ withDefaults(defineProps<{ players: Array<Required<BasePlayerType>>; strikethrou
       <country-link
         v-for="(player, index) in players"
         :key="player.id"
-        :country="player.country"
+        :country="player.country!"
         icon-only
         class="absolute"
         :class="{ 'z-10 left-3': index === 1 }"

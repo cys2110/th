@@ -14,7 +14,7 @@ const router = useRouter()
 
 const columns: Array<TableColumn<CountryInterface>> = [
   { accessorKey: "icon", header: "" },
-  { accessorKey: "name", aggregationFn: "uniqueCount" },
+  { accessorKey: "name", aggregationFn: "uniqueCount", header: "Country" },
   {
     accessorKey: "continent",
     cell: ({ row, table }) => {
@@ -75,25 +75,17 @@ const handleSelectRow = (_e: Event, row: TableRow<CountryInterface>) => {
     </template>
 
     <template #icon-cell="{ row }">
-      <u-icon :name="row.original.icon" />
+      <u-icon
+        v-if="!row.getIsGrouped()"
+        :name="row.original.icon"
+      />
     </template>
 
     <template #name-header="{ column }">
-      <div class="flex gap-0.5 w-fit mx-auto">
-        <u-select-menu
-          placeholder="Country"
-          variant="none"
-          clear
-          :model-value="<string>column.getFilterValue()"
-          @update:model-value="value => column.setFilterValue(value)"
-          :icon="ICONS.globe"
-          value-key="name"
-          label-key="name"
-          :items="countries"
-        />
-
-        <table-sort-header :column />
-      </div>
+      <table-sort-header
+        :column
+        label="Country"
+      />
     </template>
 
     <template #continent-header="{ column }">

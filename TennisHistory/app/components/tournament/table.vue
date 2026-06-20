@@ -7,23 +7,21 @@ const props = defineProps<{
   pending: boolean
   count: number
   canLoadMore: boolean
-  sorting: Array<SortingInterface>
 }>()
 
 const emits = defineEmits<{
   "load-more": []
-  "handle-sorting": [string]
   refresh: []
 }>()
+
+const route = useRoute()
 
 const {
   ui: { icons }
 } = useAppConfig()
 
-const filters = defineModel<TournamentFiltersInterface>("filters")
-
-const { results, pending: loading, searchTerm, fetchSearchResults } = useTournamentSearch()
 const { isAdmin } = useAuthState()
+const updateRouteQuery = useRouteQueryUpdater()
 
 const router = useRouter()
 
@@ -54,11 +52,35 @@ const columns: Array<TableColumn<TournamentInterface>> = [
 ]
 
 const getSortingIcon = (field: string) => {
-  const currentSort = props.sorting.find(sort => sort.field === field)
+  const currentSort = route.query.sort
 
   if (!currentSort) return ICONS.sort
 
-  return currentSort.direction ? ICONS.sortAsc : ICONS.sortDesc
+  const [currentField, currentDirection] = (currentSort as string).split("-")
+
+  if (currentField !== field) return ICONS.sort
+
+  return currentDirection === "asc" ? ICONS.sortAsc : ICONS.sortDesc
+}
+
+const handleSorting = (field: string) => {
+  const currentSort = route.query.sort
+
+  if (currentSort) {
+    const [currentField, currentDirection] = (currentSort as string).split("-")
+
+    if (currentField === field) {
+      if (currentDirection === "asc") {
+        updateRouteQuery("sort", `${field}-desc`)
+      } else {
+        updateRouteQuery("sort", null)
+      }
+    } else {
+      updateRouteQuery("sort", `${field}-asc`)
+    }
+  } else {
+    updateRouteQuery("sort", `${field}-asc`)
+  }
 }
 
 const handleSelectRow = (_e: Event, row: TableRow<TournamentInterface>) => {
@@ -89,33 +111,22 @@ const handleSelectRow = (_e: Event, row: TableRow<TournamentInterface>) => {
     }"
   >
     <template #loading>
-      <u-icon
-        :name="icons.loading"
-        class="size-8"
-      />
+      <loading-icon />
     </template>
 
     <template #empty>
-      <u-empty
+      <empty
         :icon="ICONS.trophyOff"
         title="No tournaments found"
-        description="If you think this is an error, refresh the page. Otherwise, please be patient as we continue to add more data."
+        @refresh="$emit('refresh')"
         class="mx-2"
-      >
-        <template #actions>
-          <u-button
-            label="Refresh"
-            :icon="icons.reload"
-            @click="$emit('refresh')"
-          />
-        </template>
-      </u-empty>
+      />
     </template>
 
     <template #tours-header>
       <u-select
-        v-if="filters"
-        v-model="filters.tours"
+        :model-value="<Array<TourType>>route.query.tour"
+        @update:model-value="updateRouteQuery('tour', $event)"
         :items="[...TOUR_OPTIONS]"
         placeholder="Tour"
         multiple
@@ -137,35 +148,20 @@ const handleSelectRow = (_e: Event, row: TableRow<TournamentInterface>) => {
     </template>
 
     <template #name-header>
-      <div class="flex justify-center items-center gap-0.5 w-fit mx-auto">
-        <u-select-menu
-          v-if="filters"
-          placeholder="Tournament"
-          clear
-          :items="results"
-          v-model="filters.tournaments"
-          multiple
-          :icon="ICONS.trophy"
-          :loading
-          v-model:search-term="searchTerm"
-          variant="none"
-          label-key="name"
-          @update:open="fetchSearchResults"
-        />
-        <u-button
-          variant="ghost"
-          color="neutral"
-          :icon="getSortingIcon('name')"
-          @click="() => $emit('handle-sorting', 'name')"
-        />
-      </div>
+      <u-button
+        variant="ghost"
+        color="neutral"
+        label="Tournament"
+        :icon="getSortingIcon('name')"
+        @click="handleSorting('name')"
+      />
     </template>
 
     <template #established-header>
       <div class="flex items-center gap-0.5 w-fit mx-auto">
         <u-select-menu
-          v-if="filters"
-          v-model="filters.established"
+          :model-value="<string>route.query.established ? Number(route.query.established) : undefined"
+          @update:model-value="updateRouteQuery('established', $event)"
           :items="ALL_YEARS"
           :icon="ICONS.years"
           placeholder="Established"
@@ -176,7 +172,7 @@ const handleSelectRow = (_e: Event, row: TableRow<TournamentInterface>) => {
           variant="ghost"
           color="neutral"
           :icon="getSortingIcon('established')"
-          @click="() => $emit('handle-sorting', 'established')"
+          @click="handleSorting('established')"
         />
       </div>
     </template>
@@ -184,8 +180,8 @@ const handleSelectRow = (_e: Event, row: TableRow<TournamentInterface>) => {
     <template #abolished-header>
       <div class="flex items-center gap-0.5 w-fit mx-auto">
         <u-select-menu
-          v-if="filters"
-          v-model="filters.abolished"
+          :model-value="<string>route.query.abolished ? Number(route.query.abolished) : undefined"
+          @update:model-value="updateRouteQuery('abolished', $event)"
           :items="ALL_YEARS"
           :icon="ICONS.years"
           placeholder="Abolished"
@@ -196,7 +192,7 @@ const handleSelectRow = (_e: Event, row: TableRow<TournamentInterface>) => {
           variant="ghost"
           color="neutral"
           :icon="getSortingIcon('abolished')"
-          @click="() => $emit('handle-sorting', 'abolished')"
+          @click="handleSorting('abolished')"
         />
       </div>
     </template>

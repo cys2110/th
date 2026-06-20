@@ -1,7 +1,7 @@
 export const useCountryList = () => {
   const supabase = useSupabaseClient()
 
-  const countries = ref<Array<CountryInterface & { icon: string }>>([])
+  const countries = ref<Array<CountryInterface>>([])
 
   const pending = ref(false)
 
@@ -16,10 +16,7 @@ export const useCountryList = () => {
         return
       }
 
-      countries.value = data.map(v => ({
-        ...v,
-        icon: getFlagCode(v as unknown as CountryInterface)
-      }))
+      set(countries, data)
     } finally {
       set(pending, false)
     }

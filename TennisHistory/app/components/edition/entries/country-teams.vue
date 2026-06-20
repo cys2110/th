@@ -159,7 +159,7 @@ const handleSave = async () => {
       :ui="{ leading: 'flex w-full justify-between items-center', body: 'w-full' }"
     >
       <template #leading>
-        <u-icon :name="getFlagCode(entry.country!)" />
+        <u-icon :name="entry.country?.icon" />
 
         <u-badge
           v-if="entry.seed"

@@ -14,7 +14,7 @@ withDefaults(
     class="w-fit flex items-center gap-1.5"
   >
     <u-icon
-      :name="getFlagCode(country)"
+      :name="country.icon"
       class="rounded-md size-5"
     />
 

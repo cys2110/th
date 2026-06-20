@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import type { CommandPaletteGroup } from "@nuxt/ui"
 
+const route = useRoute()
+
 const {
   ui: { icons }
 } = useAppConfig()
@@ -57,6 +59,13 @@ const groups = computed<Array<CommandPaletteGroup>>(() => [
     }))
   }
 ])
+
+watch(
+  () => route.fullPath,
+  () => {
+    set(isOpen, false)
+  }
+)
 </script>
 
 <template>

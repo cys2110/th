@@ -6,8 +6,16 @@ const schema = object({
   id: number("Tournament ID must be a number.").int("Tournament ID must be an integer.").positive("Tournament ID must be positive."),
   name: string().min(1, "Tournament name is required."),
   tours: array(TourEnum).default([]),
-  abolished: number("Abolished year must be a number.").optional(),
-  established: number("Established year must be a number.").optional(),
+  abolished: number("Abolished year must be a number.")
+    .int("Abolished year must be an integer.")
+    .gte(1968, "Abolished year must be in the Open Era.")
+    .lte(new Date().getFullYear(), "Abolished year cannot be in the future.")
+    .optional(),
+  established: number("Established year must be a number.")
+    .int("Established year must be an integer.")
+    .gte(1850, "Established year must be greater than 1850.")
+    .lte(new Date().getFullYear(), "Established year cannot be in the future.")
+    .optional(),
   website: url("Website must be a valid URL.").optional()
 })
 type Schema = z.infer<typeof schema>
@@ -45,22 +53,16 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
 
   const { error } = await supabase.from("tournaments").insert(event.data)
 
+  toast.add({
+    title: error ? `Error creating ${event.data.name}` : `${event.data.name} successfully created!`,
+    icon: icons[error ? "error" : "success"],
+    color: error ? "error" : "success"
+  })
+
   if (error) {
     console.error("Error creating tournament:", error)
     set(errors, error)
-
-    toast.add({
-      title: `Error creating ${event.data.name}`,
-      icon: icons.error,
-      color: "error"
-    })
   } else {
-    toast.add({
-      title: `${event.data.name} successfully created!`,
-      icon: icons.success,
-      color: "success"
-    })
-
     router.push({
       name: "tournament",
       params: {
@@ -77,8 +79,8 @@ const formFields: Array<FormFieldInterface<Schema>> = [
   { label: "ID", key: "id", type: "text", subType: "number", required: true },
   { label: "Tours", key: "tours", type: "checkbox", items: TOUR_OPTIONS, required: true, icon: ICONS.tour },
   { label: "Name", key: "name", type: "text", required: true, class: "col-span-2" },
-  { label: "Established", key: "established", type: "text", subType: "number", description: "Year the tournament was established" },
-  { label: "Abolished", key: "abolished", type: "text", subType: "number", description: "Year the tournament was abolished" },
+  { label: "Established", key: "established", type: "inputMenu", items: ALL_YEARS, description: "Year the tournament was established" },
+  { label: "Abolished", key: "abolished", type: "inputMenu", items: ALL_YEARS, description: "Year the tournament was abolished" },
   { label: "Website", key: "website", type: "textarea", class: "col-span-2" }
 ]
 </script>

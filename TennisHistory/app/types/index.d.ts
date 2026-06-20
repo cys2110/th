@@ -35,7 +35,7 @@ declare global {
     name: string
     continent: ContinentType
     alpha_2: string | null
-    icon?: string
+    icon: string
   }
 
   interface VenueInterface {
@@ -62,7 +62,7 @@ declare global {
     id: string
     first_name: string | null
     last_name: string | null
-    country: CountryType | null
+    country: CountryInterface | null
     full_name: string | null
   }
 
@@ -177,16 +177,6 @@ declare global {
   type ArchiveEditionType = Pick<EditionInterface, "id" | "category" | "end_date" | "sponsor_name" | "start_date" | "tours" | "year"> & {
     tournament: Pick<TournamentInterface, "id" | "name">
     events: Array<Pick<EventInterface, "category" | "end_date" | "level" | "sponsor_name" | "surfaces" | "start_date" | "tour" | "venues">>
-  }
-
-  interface TournamentFiltersInterface {
-    tours: Array<TourType>
-    established?: number
-    abolished?: number
-    tournaments: Array<{
-      id: number
-      name: string
-    }>
   }
 
   interface TournamentInterface {
@@ -314,12 +304,14 @@ declare global {
     year: number
     team_name: string | null
     points: number
+    end_date: string
   }
 
   interface CountryWinnerInterface {
     id: number
     year: number
     country: CountryInterface
+    end_date: string
   }
 
   interface EditionWinnerInterface {
@@ -328,6 +320,7 @@ declare global {
     match_type: MatchEnumType
     tour: TourType
     team: Array<Required<BasePlayerType>>
+    end_date: string
   }
 
   interface EventInterface {

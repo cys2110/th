@@ -53,7 +53,7 @@ const { data: entries, pending: entriesPending } = await useAsyncData(
     return data.map(entry => ({
       id: entry.id,
       label: entry.countries?.name,
-      icon: getFlagCode(entry.countries as CountryInterface)
+      icon: entry.countries?.icon
     }))
   },
   { default: () => [] }
