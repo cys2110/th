@@ -45,6 +45,7 @@ def create_chrome_driver():
     options = webdriver.ChromeOptions()
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--no-sandbox")
+    options.add_argument("--window-size=1920,1080")
 
     if SELENIUM_REMOTE_URL:
         driver = webdriver.Remote(
@@ -66,9 +67,13 @@ def create_safari_driver():
 
 def create_driver():
     if SELENIUM_BROWSER == "safari":
-        return create_safari_driver()
+        driver = create_safari_driver()
+    else:
+        driver = create_chrome_driver()
 
-    return create_chrome_driver()
+    driver.set_window_rect(width=1920, height=1080)
+
+    return driver
 
 @app.route("/atp/stats", methods=["POST"])
 def get_atp_stats():
@@ -87,7 +92,7 @@ def get_atp_stats():
             driver.get(f"https://www.atptour.com{match}")
             time.sleep(10)
 
-            WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME, 'RGMatchStats')))
+            WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME, 'atp_layout-container')))
 
             layout = driver.find_element(By.CLASS_NAME, 'atp_layout-container').get_attribute('innerHTML')
             soup = BeautifulSoup(layout, 'html.parser')

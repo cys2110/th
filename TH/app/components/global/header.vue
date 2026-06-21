@@ -79,7 +79,7 @@ const handleAuthState = async () => {
       />
 
       <u-button
-        :icon="isLoggedIn ? 'solar:logout-2-line-duotone' : 'solar:login-2-line-duotone'"
+        :icon="isLoggedIn ? 'solar:logout-line-duotone' : ICONS.logIn"
         @click="handleAuthState"
         color="neutral"
         variant="ghost"

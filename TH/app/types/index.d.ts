@@ -50,6 +50,18 @@ declare global {
     country: CountryInterface
   }
 
+  interface PlayerInterface {
+    id: string
+    first_name: string
+    last_name: string
+    full_name: string
+    country: CountryInterface
+    tour: TourType
+    dob: string | null
+  }
+
+  type BasePlayerType = Pick<PlayerInterface, "id" | "full_name" | "country">
+
   interface TournamentInterface {
     id: number
     name: string

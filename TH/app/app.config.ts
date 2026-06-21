@@ -172,10 +172,10 @@ export default defineAppConfig({
         td: "py-1 text-center"
       },
       defaultVariants: { loadingAnimation: "swing" }
+    },
+    tabs: {
+      // slots: { root: "space-y-6", content: "max-h-[calc(100vh-23rem)] overflow-y-auto" },
+      defaultVariants: { size: "md" }
     }
-    // tabs: {
-    //   slots: { root: "space-y-6", content: "max-h-[calc(100vh-23rem)] overflow-y-auto" },
-    //   defaultVariants: { size: "md" }
-    // }
   }
 })

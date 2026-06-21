@@ -43,3 +43,12 @@ export const arrayFilter = (row: Row<any>, columnId: string, filterValue: string
 
   return false
 }
+
+export const calculatePercentage = (value1: number, value2: number, decimalPlaces?: number) => {
+  const decimal = decimalPlaces || 0
+  let percentage = 0
+
+  if (value2) percentage = (value1 / value2) * 100
+
+  return Number(percentage.toFixed(decimal))
+}

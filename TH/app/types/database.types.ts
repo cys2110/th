@@ -2006,14 +2006,14 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "match_scores_entry_id_fkey"
-            columns: ["t1_id"]
+            columns: ["t2_id"]
             isOneToOne: false
             referencedRelation: "entries"
             referencedColumns: ["id"]
           },
           {
             foreignKeyName: "match_scores_entry_id_fkey"
-            columns: ["t2_id"]
+            columns: ["t1_id"]
             isOneToOne: false
             referencedRelation: "entries"
             referencedColumns: ["id"]
@@ -2048,14 +2048,14 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "match_scores_entry_id_fkey"
-            columns: ["t1_id"]
+            columns: ["t2_id"]
             isOneToOne: false
             referencedRelation: "entries"
             referencedColumns: ["id"]
           },
           {
             foreignKeyName: "match_scores_entry_id_fkey"
-            columns: ["t2_id"]
+            columns: ["t1_id"]
             isOneToOne: false
             referencedRelation: "entries"
             referencedColumns: ["id"]
@@ -2075,6 +2075,122 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      tournament_finalists: {
+        Row: {
+          country_id: string | null
+          edition_id: number | null
+          entry_info: Database["public"]["Enums"]["status_enum"] | null
+          games_lost: number | null
+          games_won: number | null
+          match_type: Database["public"]["Enums"]["match_type_enum"] | null
+          player_id: string | null
+          rank: number | null
+          sets_lost: number | null
+          sets_won: number | null
+          tour: Database["public"]["Enums"]["tour_enum"] | null
+          tournament_id: number | null
+          winner: boolean | null
+          year: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "editions_tournament_id_fkey"
+            columns: ["tournament_id"]
+            isOneToOne: false
+            referencedRelation: "record"
+            referencedColumns: ["tournament_id"]
+          },
+          {
+            foreignKeyName: "editions_tournament_id_fkey"
+            columns: ["tournament_id"]
+            isOneToOne: false
+            referencedRelation: "tournaments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "events_edition_id_fkey"
+            columns: ["edition_id"]
+            isOneToOne: false
+            referencedRelation: "country_winners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "events_edition_id_fkey"
+            columns: ["edition_id"]
+            isOneToOne: false
+            referencedRelation: "editions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "events_edition_id_fkey"
+            columns: ["edition_id"]
+            isOneToOne: false
+            referencedRelation: "elimination_winners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "events_edition_id_fkey"
+            columns: ["edition_id"]
+            isOneToOne: false
+            referencedRelation: "record"
+            referencedColumns: ["edition_id"]
+          },
+          {
+            foreignKeyName: "player_entry_mapping_country_id_fkey"
+            columns: ["country_id"]
+            isOneToOne: false
+            referencedRelation: "countries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "player_entry_mapping_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "activity"
+            referencedColumns: ["partner_id"]
+          },
+          {
+            foreignKeyName: "player_entry_mapping_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "activity"
+            referencedColumns: ["player_id"]
+          },
+          {
+            foreignKeyName: "player_entry_mapping_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "country_big_titles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "player_entry_mapping_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "player_list_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "player_entry_mapping_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tournament_seed_stats: {
+        Row: {
+          id: number | null
+          match_type: Database["public"]["Enums"]["match_type_enum"] | null
+          round: string | null
+          team: Json | null
+          tour: Database["public"]["Enums"]["tour_enum"] | null
+          tournament_id: number | null
+          year: number | null
+        }
+        Relationships: []
       }
     }
     Functions: {

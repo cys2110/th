@@ -7,7 +7,7 @@ const props = withDefaults(
     filter?: boolean
     sort?: boolean
     label: string
-    icon?: string
+    icon?: string | false
     type?: string
     multiple?: boolean
     query?: string
@@ -88,7 +88,7 @@ watch(
       variant="none"
       clear
       :items="sortedUniqueValues"
-      :icon
+      :icon="icon ?? undefined"
       class="w-fit max-w-50"
       :value-key="type === 'name' ? 'value' : undefined"
       :label-key="type === 'name' ? 'label' : undefined"
@@ -100,7 +100,7 @@ watch(
       :label="!filter ? label : undefined"
       color="neutral"
       variant="ghost"
-      :icon="!filter ? icon : undefined"
+      :icon="!filter && icon ? icon : undefined"
       :trailing-icon="sortIcon"
       @click="handleSortClick"
       :ui="{ trailingIcon: 'size-5' }"
