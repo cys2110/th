@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { formatDate, ICONS, kebabCase, OPEN_ERA_YEARS } from "#imports"
+import { formatDate, ICONS, kebabCase, MONTHS, OPEN_ERA_YEARS } from "#imports"
 import type { TableColumn, TableRow } from "@nuxt/ui"
 import { getFacetedRowModel, getFacetedUniqueValues } from "@tanstack/vue-table"
+import { CalendarDate, type DateValue, parseDate } from "@internationalized/date"
 
 definePageMeta({ middleware: ["year-query"] })
 
@@ -10,6 +11,7 @@ useHead({ title: "Results Archive" })
 const route = useRoute("results-archive")
 const router = useRouter()
 const supabase = useSupabaseClient()
+const { ui } = useAppConfig()
 
 const updateRouteQuery = useRouteQueryUpdater()
 
@@ -21,7 +23,11 @@ const getSortDate = (item: ArchiveInterface) =>
     .sort()[0] ??
   ""
 
-const { data: editions, pending } = await useAsyncData<Array<ArchiveInterface>>(
+const {
+  data: editions,
+  pending,
+  refresh
+} = await useAsyncData<Array<ArchiveInterface>>(
   () => `results-archive-${route.query.year}`,
   async () => {
     const { data, error } = await supabase
@@ -117,6 +123,53 @@ const { data: editions, pending } = await useAsyncData<Array<ArchiveInterface>>(
   { default: () => [], watch: [() => route.query.year] }
 )
 
+const filteredEditions = computed(() =>
+  editions.value.filter(e => {
+    let isStartMatch = true
+    let isEndMatch = true
+
+    if (route.query.start_date) {
+      if (e.start_date) {
+        isStartMatch = route.query.start_date <= e.start_date
+      } else if (e.events?.length && e.events.some(event => event.start_date && route.query.start_date! <= event.start_date)) {
+        isStartMatch = true
+      } else {
+        isStartMatch = false
+      }
+    }
+
+    if (route.query.end_date) {
+      if (e.end_date) {
+        isEndMatch = route.query.end_date <= e.end_date
+      } else if (e.events?.length && e.events.some(event => event.end_date && route.query.start_date! <= event.end_date)) {
+        isEndMatch = true
+      } else {
+        isEndMatch = false
+      }
+    }
+
+    return isStartMatch && isEndMatch
+  })
+)
+
+const selectedDate = computed(() => ({
+  start: route.query.start_date ? parseDate(route.query.start_date as string) : undefined,
+  end: route.query.end_date ? parseDate(route.query.end_date as string) : undefined
+}))
+
+const dateRange = computed(() => ({
+  min: new CalendarDate(Number(route.query.year), 1, 1),
+  max: new CalendarDate(Number(route.query.year), 12, 31)
+}))
+
+const clearDates = () => {
+  const query = { ...route.query }
+  delete query.start_date
+  delete query.end_date
+
+  router.push({ query })
+}
+
 const columns: Array<TableColumn<ArchiveInterface>> = [
   {
     accessorKey: "tournament.name",
@@ -129,7 +182,7 @@ const columns: Array<TableColumn<ArchiveInterface>> = [
   { accessorKey: "tour" },
   { accessorKey: "level" },
   { accessorKey: "category" },
-  { id: "dates", header: "Dates" },
+  { id: "dates" },
   { id: "surface", accessorFn: row => (row.surfaces?.length ? row.surfaces.map(s => `${s.environment} ${s.surface}`) : []) },
   { id: "country", accessorFn: row => (row.venues ? useArrayUnique(row.venues.map(v => v.country.name)).value : []) }
 ]
@@ -171,7 +224,7 @@ const getUniqueLocations = (venues: Array<VenueInterface>) => {
       <u-page-body>
         <client-only>
           <u-table
-            :data="editions"
+            :data="filteredEditions"
             :columns
             sticky
             :loading="pending"
@@ -181,7 +234,8 @@ const getUniqueLocations = (venues: Array<VenueInterface>) => {
               getFacetedRowModel: getFacetedRowModel(),
               getFacetedUniqueValues: getFacetedUniqueValues()
             }"
-            :ui="{ tr: 'cursor-pointer', td: 'empty:p-0' }"
+            :column-filters-options="{ filterFromLeafRows: true }"
+            :ui="{ tr: 'data-[selectable=true]:cursor-pointer', td: 'empty:p-0' }"
           >
             <template #loading>
               <loading-icon />
@@ -191,6 +245,8 @@ const getUniqueLocations = (venues: Array<VenueInterface>) => {
               <empty
                 :icon="ICONS.calendarOff"
                 :title="`There were no tournaments played in ${route.query.year}`"
+                @refresh="refresh"
+                class="mx-2"
               />
             </template>
 
@@ -281,6 +337,49 @@ const getUniqueLocations = (venues: Array<VenueInterface>) => {
               />
             </template>
 
+            <template #dates-header>
+              <u-popover :ui="{ content: 'p-1' }">
+                <u-button
+                  color="neutral"
+                  variant="ghost"
+                  :icon="ICONS.calendar"
+                  :label="<string>route.query.start_date ? formatDate(route.query.start_date as string, route.query.end_date as string) : 'Dates'"
+                  :class="route.query.month ? '' : 'text-dimmed'"
+                />
+
+                <template #content>
+                  <u-calendar
+                    :model-value="selectedDate"
+                    @update:model-value="
+                      dates => {
+                        if (dates) {
+                          if (dates.start) {
+                            updateRouteQuery('start_date', dates.start.toString())
+                          }
+                          if (dates.end) {
+                            updateRouteQuery('end_date', dates.end.toString())
+                          }
+                        } else {
+                          updateRouteQuery('start_date', undefined)
+                          updateRouteQuery('end_date', undefined)
+                        }
+                      }
+                    "
+                    range
+                    :min-value="dateRange.min"
+                    :max-value="dateRange.max"
+                  />
+
+                  <u-button
+                    label="Clear"
+                    :icon="ui.icons.error"
+                    block
+                    @click="clearDates"
+                  />
+                </template>
+              </u-popover>
+            </template>
+
             <template #dates-cell="{ row }">
               <span v-if="row.original.start_date">{{ formatDate(row.original.start_date, row.original.end_date) }}</span>
             </template>
@@ -298,8 +397,9 @@ const getUniqueLocations = (venues: Array<VenueInterface>) => {
               <div
                 v-for="surface in cell.getValue<string[]>()"
                 :key="surface"
-                >{{ surface }}</div
               >
+                {{ surface }}
+              </div>
             </template>
 
             <template #country-header="{ column }">

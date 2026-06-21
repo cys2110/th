@@ -65,31 +65,27 @@ export default defineAppConfig({
       slots: { base: "justify-center" },
       defaultVariants: { variant: "subtle", size: "md" }
     },
-    // button: {
-    //   compoundVariants: [
-    //     {
-    //       loading: true,
-    //       leading: true,
-    //       class: { leadingIcon: "animate-none" }
-    //     }
-    //   ],
-    //   defaultVariants: { variant: "subtle", size: "xs" }
-    // },
-    // calendar: {
-    //   compoundVariants: [
-    //     {
-    //       color: "primary",
-    //       variant: "subtle",
-    //       class: {
-    //         cellTrigger: "hover:not-data-[selected]:bg-default"
-    //       }
-    //     }
-    //   ],
-    //   defaultVariants: {
-    //     size: "xs",
-    //     variant: "subtle"
-    //   }
-    // },
+    button: {
+      compoundVariants: [
+        {
+          loading: true,
+          leading: true,
+          class: { leadingIcon: "animate-none" }
+        }
+      ],
+      defaultVariants: { variant: "subtle", size: "xs" }
+    },
+    calendar: {
+      slots: { cellTrigger: "cursor-pointer" },
+      compoundVariants: [
+        {
+          color: "primary",
+          variant: "subtle",
+          class: { cellTrigger: "hover:not-data-[selected]:bg-default" }
+        }
+      ],
+      defaultVariants: { size: "xs", variant: "subtle" }
+    },
     // checkbox: { slots: { label: "cursor-pointer" } },
     // checkboxGroup: {
     //   slots: {
@@ -147,12 +143,12 @@ export default defineAppConfig({
     //     }
     //   }
     // },
-    // select: {
-    //   slots: {
-    //     content: "ring-primary cursor-pointer",
-    //     trailingIcon: "group-data-[state=open]:rotate-180 duration-250"
-    //   }
-    // },
+    select: {
+      slots: {
+        content: "ring-primary cursor-pointer min-w-fit",
+        trailingIcon: "group-data-[state=open]:rotate-180 duration-250"
+      }
+    },
     selectMenu: {
       slots: {
         content: "ring-primary cursor-pointer min-w-fit",
@@ -172,7 +168,7 @@ export default defineAppConfig({
       slots: {
         root: "scrollbar max-h-[70vh]",
         th: "text-center",
-        tbody: "[&>tr]:hover:bg-elevated/50",
+        tbody: "[&>tr]:data-[selectable=true]:hover:bg-elevated/50",
         td: "py-1 text-center"
       },
       defaultVariants: { loadingAnimation: "swing" }

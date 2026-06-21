@@ -84,7 +84,7 @@ def get_atp_stats():
 
         try:
             driver = create_driver()
-            driver.get(f"https://www.atptour.com{match}")
+            driver.get(match)
             time.sleep(10)
 
             WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME, 'RGMatchStats')))

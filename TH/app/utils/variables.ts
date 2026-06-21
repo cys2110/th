@@ -34,6 +34,8 @@ export const FLASK_ROUTE = "http://127.0.0.1:5001"
 
 export const LEVELS = ["Tour", "Challenger", "ITF"] as const
 
+export const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
+
 export const OPEN_ERA_YEARS = Array.from({ length: new Date().getFullYear() - 1968 + 1 }, (_, i) => 1968 + i)
 
 export const SURFACE_OPTIONS = [

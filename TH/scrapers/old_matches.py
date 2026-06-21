@@ -68,7 +68,7 @@ def scrape_old_atp_matches():
 
         try:
             driver = create_remote_chrome_driver()
-            driver.get(f"https://www.atptour.com{link}")
+            driver.get(link)
             time.sleep(10)
 
             WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME, 'atp_match-stats')))
