@@ -7,7 +7,7 @@ withDefaults(
     icon?: string
     loadingIcon?: string
   }>(),
-  { label: "Submit", icon: "line-md:uploading", loadingIcon: ICONS.uploading }
+  { label: "Save", icon: ICONS.save, loadingIcon: ICONS.uploading }
 )
 
 defineEmits<{

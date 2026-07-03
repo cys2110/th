@@ -4,7 +4,7 @@ export default defineNuxtRouteMiddleware(to => {
   const query = { ...to.query }
 
   if (!query.year) {
-    query.year = String(currentYear)
+    if (!query.year) query.year = String(currentYear)
 
     return navigateTo({
       ...to,

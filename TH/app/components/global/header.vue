@@ -49,7 +49,7 @@ const navLinks = computed<Array<NavigationMenuItem>>(() => [
 
 const showViewSwitcher = computed(() => {
   const currentRouteName = route.name
-  const viewSwitcherRoutes = ["tournaments", "tournament", "results", "players", "countries"]
+  const viewSwitcherRoutes = ["results-archive", "tournaments", "tournament", "results", "players", "countries"]
   return viewSwitcherRoutes.includes(currentRouteName)
 })
 

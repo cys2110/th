@@ -1,10 +1,8 @@
 <script setup lang="ts">
-import { formatDate, ICONS, kebabCase, MONTHS, OPEN_ERA_YEARS } from "#imports"
-import type { TableColumn, TableRow } from "@nuxt/ui"
-import { getFacetedRowModel, getFacetedUniqueValues } from "@tanstack/vue-table"
-import { CalendarDate, type DateValue, parseDate } from "@internationalized/date"
+import { formatDate, ICONS, LEVELS, TOUR_OPTIONS } from "#imports"
+import { CalendarDate, getLocalTimeZone, parseDate, today } from "@internationalized/date"
 
-definePageMeta({ middleware: ["year-query"] })
+definePageMeta({ middleware: ["results-archive"] })
 
 useHead({ title: "Results Archive" })
 
@@ -13,6 +11,7 @@ const router = useRouter()
 const supabase = useSupabaseClient()
 const { ui } = useAppConfig()
 
+const viewModeStore = useViewModeStore()
 const updateRouteQuery = useRouteQueryUpdater()
 
 const getSortDate = (item: ArchiveInterface) =>
@@ -32,7 +31,9 @@ const {
   async () => {
     const { data, error } = await supabase
       .from("editions")
-      .select("*, tournaments(id, name, tours), events(*, event_surface_mapping(surfaces(*)), event_venue_mapping(venues(*, countries(*))))")
+      .select(
+        "*, tournament:tournaments(id, name, tours), events(*, ...event_surface_mapping(surfaces(*)), ...event_venue_mapping(venues(*, country:countries(*))), ...event_supervisor_mapping(supervisors:people(*)))"
+      )
       .eq("year", Number(route.query.year))
 
     if (error || !data) {
@@ -40,167 +41,123 @@ const {
       return []
     }
 
-    return data
-      .map(item => {
-        const edition: Partial<ArchiveInterface> = {
-          id: item.id,
-          sponsor_name: item.sponsor_name,
-          year: item.year,
-          category: item.category,
-          start_date: item.start_date,
-          end_date: item.end_date,
-          tournament: item.tournaments
-        }
-
-        if (item.events.length === 1) {
-          edition.level = item.events[0]!.level
-          edition.tour = item.tours[0]
-          edition.category = item.events[0]!.category
-          edition.surfaces = item.events[0]!.event_surface_mapping.map(s => s.surfaces)
-          edition.venues = item.events[0]!.event_venue_mapping.map(v => ({
-            id: v.venues?.id,
-            name: v.venues?.name,
-            city: v.venues?.city,
-            country: v.venues?.countries
-          }))
-          edition.events = []
-        } else {
-          edition.events = item.events.map(subItem => {
-            const event: Partial<ArchiveInterface> = {
-              id: item.id,
-              year: item.year,
-              sponsor_name: subItem.sponsor_name,
-              tour: subItem.tour,
-              category: subItem.category,
-              start_date: subItem.start_date,
-              end_date: subItem.end_date
-            }
-
-            // If all item.events have the same level, then set level at edition otherwise set level at event
-            const levels = new Set(item.events.map(e => e.level))
-            if (levels.size === 1) {
-              edition.level = subItem.level
-            } else {
-              event.level = subItem.level
-            }
-
-            // If all item.events have the same surfaces, then set surfaces at edition otherwise set surfaces at event
-            const subItemSurfaces = subItem.event_surface_mapping.map(s => s.surfaces.id)
-            const allEventSurfaces = useArrayUnique(item.events.flatMap(e => e.event_surface_mapping.map(s => s.surfaces.id))).value
-            if (isEqual(subItemSurfaces, allEventSurfaces)) {
-              edition.surfaces = subItem.event_surface_mapping.map(s => s.surfaces)
-            } else {
-              event.surfaces = subItem.event_surface_mapping.map(s => s.surfaces)
-            }
-
-            // If all item.events have the same venues, then set venues at edition otherwise set venues at event
-            const subItemVenues = subItem.event_venue_mapping.map(v => v.venues?.id)
-            const allEventVenues = useArrayUnique(item.events.flatMap(e => e.event_venue_mapping.map(v => v.venues?.id))).value
-            if (isEqual(subItemVenues, allEventVenues)) {
-              edition.venues = subItem.event_venue_mapping.map(v => ({
-                id: v.venues?.id,
-                name: v.venues?.name,
-                city: v.venues?.city,
-                country: v.venues?.countries
-              }))
-            } else {
-              event.venues = subItem.event_venue_mapping.map(v => ({
-                id: v.venues?.id,
-                name: v.venues?.name,
-                city: v.venues?.city,
-                country: v.venues?.countries
-              }))
-            }
-
-            return event as ArchiveInterface
-          })
-        }
-
-        return edition as ArchiveInterface
-      })
-      .sort((a, b) => getSortDate(a).localeCompare(getSortDate(b)))
+    return (data as Array<ArchiveInterface>).sort((a, b) => getSortDate(a).localeCompare(getSortDate(b)))
   },
   { default: () => [], watch: [() => route.query.year] }
 )
 
-const filteredEditions = computed(() =>
-  editions.value.filter(e => {
-    let isStartMatch = true
-    let isEndMatch = true
+const selectedYear = computed(() => {
+  if (route.query.year) {
+    return new CalendarDate(Number(route.query.year), 1, 1)
+  }
+})
 
-    if (route.query.start_date) {
-      if (e.start_date) {
-        isStartMatch = route.query.start_date <= e.start_date
-      } else if (e.events?.length && e.events.some(event => event.start_date && route.query.start_date! <= event.start_date)) {
-        isStartMatch = true
-      } else {
-        isStartMatch = false
-      }
-    }
-
-    if (route.query.end_date) {
-      if (e.end_date) {
-        isEndMatch = route.query.end_date <= e.end_date
-      } else if (e.events?.length && e.events.some(event => event.end_date && route.query.start_date! <= event.end_date)) {
-        isEndMatch = true
-      } else {
-        isEndMatch = false
-      }
-    }
-
-    return isStartMatch && isEndMatch
-  })
-)
-
-const selectedDate = computed(() => ({
+const selectedDates = computed(() => ({
   start: route.query.start_date ? parseDate(route.query.start_date as string) : undefined,
   end: route.query.end_date ? parseDate(route.query.end_date as string) : undefined
 }))
 
-const dateRange = computed(() => ({
-  min: new CalendarDate(Number(route.query.year), 1, 1),
-  max: new CalendarDate(Number(route.query.year), 12, 31)
-}))
+const dateRange = computed(() => {
+  const allDates = editions.value.map(getEditionDateRange).filter(date => date !== undefined)
+
+  if (!allDates.length) return null
+
+  return {
+    min: allDates.reduce((min, dates) => (dates.start.compare(min) < 0 ? dates.start : min), allDates[0]!.start),
+    max: allDates.reduce((max, dates) => (dates.end.compare(max) > 0 ? dates.end : max), allDates[0]!.end)
+  }
+})
 
 const clearDates = () => {
   const query = { ...route.query }
+
   delete query.start_date
   delete query.end_date
 
-  router.push({ query })
+  router.replace({ query })
 }
 
-const columns: Array<TableColumn<ArchiveInterface>> = [
-  {
-    accessorKey: "tournament.name",
-    footer: ({ table }) => {
-      const rowCount = table.getFilteredRowModel().rows.length
+const getEditionDateRange = (edition: ArchiveInterface) => {
+  const startDates = (edition.start_date ? [edition.start_date] : edition.events.map(event => event.start_date)).filter((date): date is string =>
+    Boolean(date)
+  )
+  const endDates = (edition.end_date ? [edition.end_date] : edition.events.map(event => event.end_date)).filter((date): date is string =>
+    Boolean(date)
+  )
 
-      return `${rowCount.toLocaleString()} edition${rowCount === 1 ? "" : "s"}`
+  if (!startDates.length || !endDates.length) return
+
+  return {
+    start: parseDate(startDates.sort()[0]!),
+    end: parseDate(endDates.sort().at(-1)!)
+  }
+}
+
+const categories = computed(() =>
+  useArrayUnique(editions.value.flatMap(e => (e.category ? [e.category] : e.events.map(e => e.category).filter(Boolean)))).value.sort((a, b) =>
+    a.localeCompare(b)
+  )
+)
+
+const surfaces = computed(() =>
+  useArrayUnique(editions.value.flatMap(e => e.events.flatMap(event => event.surfaces.map(s => `${s.environment} ${s.surface}`)))).value.sort(
+    (a, b) => a.localeCompare(b)
+  )
+)
+
+const countries = computed(() =>
+  useArrayUnique(
+    editions.value.flatMap(e => e.events.flatMap(event => event.venues.map(v => v.country))),
+    (a, b) => a.id === b.id
+  ).value.sort((a, b) => a.name.localeCompare(b.name))
+)
+
+const clearSelection = (field: string) => {
+  updateRouteQuery(field, null)
+}
+
+const filteredEditions = computed(() =>
+  editions.value.filter(e => {
+    const isLevelMatch = !route.query.level || e.events.some(e => e.level === route.query.level)
+
+    const isTourMatch = !route.query.tour || e.tours.includes(route.query.tour as TourType) || e.events.some(e => e.tour === route.query.tour)
+
+    const isCategoryMatch = !route.query.category || e.category === route.query.category || e.events.some(e => e.category === route.query.category)
+
+    const isSurfaceMatch = !route.query.surface || e.events.some(e => e.surfaces.some(s => route.query.surface === `${s.environment} ${s.surface}`))
+
+    const isVenueMatch = !route.query.country || e.events.some(e => e.venues.some(v => v.country.id === route.query.country))
+
+    const startDate =
+      e.start_date ??
+      e.events
+        .map(event => event.start_date)
+        .filter((date): date is string => Boolean(date))
+        .sort()[0]
+    const endDate =
+      e.end_date ??
+      e.events
+        .map(event => event.end_date)
+        .filter((date): date is string => Boolean(date))
+        .sort()
+        .at(-1)
+    const filterStart = route.query.start_date as string | undefined
+    const filterEnd = route.query.end_date as string | undefined
+    let isDateMatch = !filterStart && !filterEnd
+
+    if (startDate && endDate) {
+      if (filterStart && filterEnd) {
+        isDateMatch = endDate >= filterStart && startDate <= filterEnd
+      } else if (filterStart) {
+        isDateMatch = endDate >= filterStart
+      } else if (filterEnd) {
+        isDateMatch = startDate <= filterEnd
+      }
     }
-  },
-  { accessorKey: "tour" },
-  { accessorKey: "level" },
-  { accessorKey: "category" },
-  { id: "dates" },
-  { id: "surface", accessorFn: row => (row.surfaces?.length ? row.surfaces.map(s => `${s.environment} ${s.surface}`) : []) },
-  { id: "country", accessorFn: row => (row.venues ? useArrayUnique(row.venues.map(v => v.country.name)).value : []) }
-]
 
-const handleSelectRow = (_e: Event, row: TableRow<ArchiveInterface>) => {
-  const { tournament, id, year } = row.original
-
-  router.push({ name: "edition", params: { id: tournament?.id || 0, name: kebabCase(tournament?.name), year, edition_id: id } })
-}
-
-const getUniqueLocations = (venues: Array<VenueInterface>) => {
-  const uniqueVenues = useArrayUnique(venues, (a, b) => a.city === b.city).value
-
-  return uniqueVenues.map(v => ({
-    city: v.city,
-    country: v.country
-  }))
-}
+    return isLevelMatch && isTourMatch && isCategoryMatch && isSurfaceMatch && isVenueMatch && isDateMatch
+  })
+)
 </script>
 
 <template>
@@ -211,222 +168,170 @@ const getUniqueLocations = (venues: Array<VenueInterface>) => {
         :ui="{ root: 'pb-4', description: 'flex justify-end gap-4' }"
       >
         <template #description>
-          <u-select-menu
-            :model-value="<string>route.query.year ? Number(route.query.year) : undefined"
-            @update:model-value="updateRouteQuery('year', $event)"
-            :icon="ICONS.calendar"
-            :items="OPEN_ERA_YEARS"
+          <u-popover :ui="{ content: 'p-1' }">
+            <u-button
+              color="neutral"
+              variant="outline"
+              size="sm"
+              :icon="ICONS.years"
+              :label="<string>route.query.year"
+              class="ring-primary font-normal"
+            />
+
+            <template #content>
+              <u-calendar
+                type="year"
+                :model-value="selectedYear"
+                @update:model-value="
+                  date => {
+                    if (date) {
+                      const stringDate = date.toString()
+                      const [year, month, day] = stringDate.split('-')
+
+                      updateRouteQuery('year', year)
+                    }
+                  }
+                "
+                :min-value="parseDate('1968-01-01')"
+                :max-value="today(getLocalTimeZone())"
+              />
+            </template>
+          </u-popover>
+
+          <u-popover :ui="{ content: 'p-1' }">
+            <u-button
+              color="neutral"
+              variant="outline"
+              size="sm"
+              :icon="ICONS.calendar"
+              :label="<string>route.query.start_date ? formatDate(route.query.start_date as string, route.query.end_date as string) : 'Dates'"
+              class="ring-primary font-normal"
+              :class="route.query.start_date || route.query.end_date ? '' : 'text-dimmed'"
+            />
+
+            <template #content>
+              <u-calendar
+                v-if="dateRange"
+                :model-value="selectedDates"
+                @update:model-value="
+                  dates => {
+                    if (dates) {
+                      router.replace({
+                        query: {
+                          ...route.query,
+                          start_date: dates.start?.toString(),
+                          end_date: dates.end?.toString()
+                        }
+                      })
+                    } else {
+                      clearDates()
+                    }
+                  }
+                "
+                range
+                :default-value="{ start: dateRange.min, end: dateRange.max }"
+                :min-value="dateRange.min"
+                :max-value="dateRange.max"
+              />
+
+              <u-button
+                label="Clear"
+                :icon="ui.icons.error"
+                block
+                @click="clearDates"
+              />
+            </template>
+          </u-popover>
+
+          <u-select
+            :model-value="<LevelType>route.query.level"
+            @update:model-value="updateRouteQuery('level', $event?.toString())"
             highlight
+            clear
+            :items="[...LEVELS]"
+            :icon="ICONS.level"
+            placeholder="Level"
+          >
+            <template #content-bottom>
+              <u-button
+                block
+                label="Clear"
+                :icon="ui.icons.error"
+                @click="clearSelection('level')"
+              />
+            </template>
+          </u-select>
+
+          <u-select
+            :model-value="<TourType>route.query.tour"
+            @update:model-value="updateRouteQuery('tour', $event?.toString())"
+            highlight
+            clear
+            :items="[...TOUR_OPTIONS]"
+            :icon="ICONS.tour"
+            placeholder="Tour"
+          >
+            <template #content-bottom>
+              <u-button
+                block
+                label="Clear"
+                :icon="ui.icons.error"
+                @click="clearSelection('tour')"
+              />
+            </template>
+          </u-select>
+
+          <u-select-menu
+            :model-value="<string>route.query.category"
+            @update:model-value="updateRouteQuery('category', $event?.toString())"
+            highlight
+            clear
+            :items="categories"
+            :icon="ICONS.category"
+            placeholder="Category"
           />
+
+          <u-select-menu
+            :model-value="<string>route.query.surface"
+            @update:model-value="updateRouteQuery('surface', $event?.toString())"
+            highlight
+            clear
+            :items="surfaces"
+            :icon="ICONS.court"
+            placeholder="Surface"
+          />
+
+          <u-select-menu
+            :model-value="<string>route.query.country"
+            @update:model-value="updateRouteQuery('country', $event?.toString())"
+            highlight
+            clear
+            :items="countries"
+            placeholder="Country"
+            value-key="id"
+            label-key="name"
+          >
+            <template #leading="{ modelValue }">
+              <u-icon :name="modelValue ? countries.find(c => c.id === modelValue)?.icon : ICONS.globe" />
+            </template>
+          </u-select-menu>
         </template>
       </u-page-header>
 
       <u-page-body>
-        <client-only>
-          <u-table
-            :data="filteredEditions"
-            :columns
-            sticky
-            :loading="pending"
-            @select="handleSelectRow"
-            :get-sub-rows="row => row.events"
-            :faceted-options="{
-              getFacetedRowModel: getFacetedRowModel(),
-              getFacetedUniqueValues: getFacetedUniqueValues()
-            }"
-            :column-filters-options="{ filterFromLeafRows: true }"
-            :ui="{ tr: 'data-[selectable=true]:cursor-pointer', td: 'empty:p-0' }"
-          >
-            <template #loading>
-              <loading-icon />
-            </template>
+        <archive-table
+          v-if="viewModeStore.isTableView"
+          :editions="filteredEditions"
+          :pending
+          @refresh="refresh"
+        />
 
-            <template #empty>
-              <empty
-                :icon="ICONS.calendarOff"
-                :title="`There were no tournaments played in ${route.query.year}`"
-                @refresh="refresh"
-                class="mx-2"
-              />
-            </template>
-
-            <template #tournament_name-header="{ column }">
-              <table-header
-                filter
-                sort
-                :column
-                label="Tournament"
-                :icon="ICONS.trophy"
-              />
-            </template>
-
-            <template #tournament_name-cell="{ row }">
-              <table-row-toggle
-                v-if="row.original.events?.length"
-                :row
-              >
-                <div class="text-left">
-                  <div v-if="row.original.tournament">
-                    <u-link
-                      :to="{ name: 'tournament', params: { id: row.original.tournament.id, name: kebabCase(row.original.tournament.name) } }"
-                      class="hover-link primary-link font-semibold"
-                    >
-                      {{ row.original.tournament.name }}
-                    </u-link>
-                  </div>
-                  <div v-if="row.original.sponsor_name">{{ row.original.sponsor_name }}</div>
-                </div>
-              </table-row-toggle>
-
-              <div
-                v-else
-                class="text-left ml-9"
-              >
-                <div v-if="row.original.tournament">
-                  <u-link
-                    :to="{ name: 'tournament', params: { id: row.original.tournament.id, name: kebabCase(row.original.tournament.name) } }"
-                    class="hover-link primary-link font-semibold"
-                  >
-                    {{ row.original.tournament.name }}
-                  </u-link>
-                </div>
-                <div v-if="row.original.sponsor_name">{{ row.original.sponsor_name }}</div>
-              </div>
-            </template>
-
-            <template #tour-header="{ column }">
-              <table-header
-                filter
-                :column
-                label="Tour"
-                :icon="ICONS.tour"
-              />
-            </template>
-
-            <template #tour-cell="{ row }">
-              <u-badge
-                v-if="row.original.tour"
-                :label="row.original.tour"
-                :color="row.original.tour"
-              />
-            </template>
-
-            <template #level-header="{ column }">
-              <table-header
-                filter
-                :column
-                label="Level"
-                :icon="ICONS.level"
-              />
-            </template>
-
-            <template #level-cell="{ row }">
-              <u-badge
-                v-if="row.original.level"
-                :label="row.original.level"
-                :color="row.original.level"
-              />
-            </template>
-
-            <template #category-header="{ column }">
-              <table-header
-                filter
-                :column
-                label="Category"
-                :icon="ICONS.category"
-              />
-            </template>
-
-            <template #dates-header>
-              <u-popover :ui="{ content: 'p-1' }">
-                <u-button
-                  color="neutral"
-                  variant="ghost"
-                  :icon="ICONS.calendar"
-                  :label="<string>route.query.start_date ? formatDate(route.query.start_date as string, route.query.end_date as string) : 'Dates'"
-                  :class="route.query.month ? '' : 'text-dimmed'"
-                />
-
-                <template #content>
-                  <u-calendar
-                    :model-value="selectedDate"
-                    @update:model-value="
-                      dates => {
-                        if (dates) {
-                          if (dates.start) {
-                            updateRouteQuery('start_date', dates.start.toString())
-                          }
-                          if (dates.end) {
-                            updateRouteQuery('end_date', dates.end.toString())
-                          }
-                        } else {
-                          updateRouteQuery('start_date', undefined)
-                          updateRouteQuery('end_date', undefined)
-                        }
-                      }
-                    "
-                    range
-                    :min-value="dateRange.min"
-                    :max-value="dateRange.max"
-                  />
-
-                  <u-button
-                    label="Clear"
-                    :icon="ui.icons.error"
-                    block
-                    @click="clearDates"
-                  />
-                </template>
-              </u-popover>
-            </template>
-
-            <template #dates-cell="{ row }">
-              <span v-if="row.original.start_date">{{ formatDate(row.original.start_date, row.original.end_date) }}</span>
-            </template>
-
-            <template #surface-header="{ column }">
-              <table-header
-                filter
-                :column
-                label="Surface"
-                :icon="ICONS.court"
-              />
-            </template>
-
-            <template #surface-cell="{ cell }">
-              <div
-                v-for="surface in cell.getValue<string[]>()"
-                :key="surface"
-              >
-                {{ surface }}
-              </div>
-            </template>
-
-            <template #country-header="{ column }">
-              <table-header
-                filter
-                :column
-                label="Location"
-                :icon="ICONS.venue"
-              />
-            </template>
-
-            <template #country-cell="{ row }">
-              <div
-                v-if="row.original.venues?.length"
-                v-for="location in getUniqueLocations(row.original.venues)"
-                :key="location.city"
-                class="flex justify-center items-center gap-2"
-              >
-                <span>{{ location.city }}</span>
-                <country-link
-                  :country="location.country"
-                  icon-only
-                />
-              </div>
-            </template>
-          </u-table>
-        </client-only>
+        <archive-grid
+          v-else
+          :editions="filteredEditions"
+          :pending
+          @refresh="refresh"
+        />
       </u-page-body>
     </u-page>
   </u-container>

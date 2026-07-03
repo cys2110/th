@@ -37,7 +37,9 @@ export const CATEGORIES = [
   "Grand Prix - Super Series",
   "ATP Challenger 90",
   "ATP Challenger 80",
-  "WTA 125K Series"
+  "WTA 125K Series",
+  "M25",
+  "W60"
 ] as const
 
 export const CONTINENTS = ["Africa", "Asia", "Europe", "North America", "Oceania", "South America"] as const

@@ -97,9 +97,15 @@ def get_atp_stats():
             layout = driver.find_element(By.CLASS_NAME, 'atp_layout-container').get_attribute('innerHTML')
             soup = BeautifulSoup(layout, 'html.parser')
 
+            link_parts = match.split('/')
+            slug = link_parts[-1]
+
+            match_no = int(slug[2:])
+
             match_info = {
                 'p1': {},
-                'p2': {}
+                'p2': {},
+                'match_no': match_no
             }
 
             # Get players
@@ -196,10 +202,12 @@ def get_atp_stats():
             matchesResponse = (
                 supabase
                 .table("matches")
-                .select("id, team_1_id, team_2_id, rounds!inner(event_id, round, draw)")
+                .select("id, team_1_id, team_2_id, winner_id, loser_id, rounds!inner(event_id, round, draw)")
                 .in_("team_1_id", match['p1']['entry_id'])
                 .in_("team_2_id", match['p2']['entry_id'])
                 .eq("rounds.event_id", event_id)
+                # .eq("match_type", "Singles")
+                # .eq("match_no", match['match_no'])
                 # .eq("rounds.draw", "Qualifying")
                 .single()
                 .execute()

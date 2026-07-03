@@ -522,7 +522,7 @@ export type Database = {
             columns: ["edition_id"]
             isOneToOne: false
             referencedRelation: "country_winners"
-            referencedColumns: ["id"]
+            referencedColumns: ["edition_id"]
           },
           {
             foreignKeyName: "events_edition_id_fkey"
@@ -536,7 +536,7 @@ export type Database = {
             columns: ["edition_id"]
             isOneToOne: false
             referencedRelation: "elimination_winners"
-            referencedColumns: ["id"]
+            referencedColumns: ["edition_id"]
           },
           {
             foreignKeyName: "events_edition_id_fkey"
@@ -1780,7 +1780,7 @@ export type Database = {
             columns: ["edition_id"]
             isOneToOne: false
             referencedRelation: "country_winners"
-            referencedColumns: ["id"]
+            referencedColumns: ["edition_id"]
           },
           {
             foreignKeyName: "events_edition_id_fkey"
@@ -1794,7 +1794,7 @@ export type Database = {
             columns: ["edition_id"]
             isOneToOne: false
             referencedRelation: "elimination_winners"
-            referencedColumns: ["id"]
+            referencedColumns: ["edition_id"]
           },
           {
             foreignKeyName: "events_edition_id_fkey"
@@ -1837,7 +1837,7 @@ export type Database = {
             columns: ["edition_id"]
             isOneToOne: false
             referencedRelation: "country_winners"
-            referencedColumns: ["id"]
+            referencedColumns: ["edition_id"]
           },
           {
             foreignKeyName: "events_edition_id_fkey"
@@ -1851,7 +1851,7 @@ export type Database = {
             columns: ["edition_id"]
             isOneToOne: false
             referencedRelation: "elimination_winners"
-            referencedColumns: ["id"]
+            referencedColumns: ["edition_id"]
           },
           {
             foreignKeyName: "events_edition_id_fkey"
@@ -1872,8 +1872,8 @@ export type Database = {
       country_winners: {
         Row: {
           country_id: string | null
+          edition_id: number | null
           end_date: string | null
-          id: number | null
           tournament_id: number | null
           year: number | null
         }
@@ -1903,8 +1903,8 @@ export type Database = {
       }
       elimination_winners: {
         Row: {
+          edition_id: number | null
           end_date: string | null
-          id: number | null
           match_type: Database["public"]["Enums"]["match_type_enum"] | null
           team: Json | null
           tour: Database["public"]["Enums"]["tour_enum"] | null
@@ -2048,14 +2048,14 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "match_scores_entry_id_fkey"
-            columns: ["t2_id"]
+            columns: ["t1_id"]
             isOneToOne: false
             referencedRelation: "entries"
             referencedColumns: ["id"]
           },
           {
             foreignKeyName: "match_scores_entry_id_fkey"
-            columns: ["t1_id"]
+            columns: ["t2_id"]
             isOneToOne: false
             referencedRelation: "entries"
             referencedColumns: ["id"]
@@ -2113,7 +2113,7 @@ export type Database = {
             columns: ["edition_id"]
             isOneToOne: false
             referencedRelation: "country_winners"
-            referencedColumns: ["id"]
+            referencedColumns: ["edition_id"]
           },
           {
             foreignKeyName: "events_edition_id_fkey"
@@ -2127,7 +2127,7 @@ export type Database = {
             columns: ["edition_id"]
             isOneToOne: false
             referencedRelation: "elimination_winners"
-            referencedColumns: ["id"]
+            referencedColumns: ["edition_id"]
           },
           {
             foreignKeyName: "events_edition_id_fkey"

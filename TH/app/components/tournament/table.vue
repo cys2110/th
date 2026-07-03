@@ -126,10 +126,7 @@ const handleSelectRow = (_e: Event, row: TableRow<TournamentInterface>) => {
     :loading="pending"
     @select="handleSelectRow"
     render-fallback-value="—"
-    :ui="{
-      root: '2xl:max-w-2/3 mx-auto',
-      tbody: '[&>tr]:cursor-pointer [&>tr]:even:bg-elevated/25'
-    }"
+    :ui="{ root: '2xl:max-w-2/3 mx-auto', tbody: '[&>tr]:cursor-pointer [&>tr]:even:bg-elevated/25' }"
   >
     <template #loading>
       <loading-icon />

@@ -184,13 +184,13 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
 
     const matchId = data[0].id
 
-    const setsToInsert = sets.filter(set => set.t1)
+    const setsToInsert = sets.filter(set => isDefined(set.t1))
 
     if (setsToInsert.length) {
       const { error: setsError } = await supabase.from("match_scores").insert(
         setsToInsert.flatMap(set => {
           const maxTb =
-            set.tb ?
+            isDefined(set.tb) ?
               (set.super_tb && set.tb > 8) || set.tb > 5 ? set.tb + 2
               : set.super_tb ? 10
               : 7

@@ -212,19 +212,6 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
           :class="tournamentStore.tours.length > 1 ? 'grid-cols-3' : 'grid-cols-2'"
         >
           <u-form-field
-            name="draw"
-            label="Draw"
-            required
-          >
-            <u-radio-group
-              v-model="state.draw"
-              :items="[...DRAW_TYPES]"
-              orientation="horizontal"
-              loop
-            />
-          </u-form-field>
-
-          <u-form-field
             v-if="tournamentStore.tours.length > 1"
             name="tour"
             label="Tour"
@@ -246,6 +233,19 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
             <u-radio-group
               v-model="state.match_type"
               :items="[...MATCH_TYPES]"
+              orientation="horizontal"
+              loop
+            />
+          </u-form-field>
+
+          <u-form-field
+            name="draw"
+            label="Draw"
+            required
+          >
+            <u-radio-group
+              v-model="state.draw"
+              :items="[...DRAW_TYPES]"
               orientation="horizontal"
               loop
             />

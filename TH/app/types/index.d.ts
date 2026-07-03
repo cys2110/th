@@ -52,15 +52,15 @@ declare global {
 
   interface PlayerInterface {
     id: string
-    first_name: string
-    last_name: string
+    first_name?: string
+    last_name?: string
     full_name: string
     country: CountryInterface
     tour: TourType
     dob: string | null
   }
 
-  type BasePlayerType = Pick<PlayerInterface, "id" | "full_name" | "country">
+  type BasePlayerType = Pick<PlayerInterface, "id" | "full_name" | "country" | "first_name" | "last_name">
 
   interface TournamentInterface {
     id: number
@@ -114,6 +114,7 @@ declare global {
     qs_link: string | null
     qd_draw: DrawsType | null
     qd_link: string | null
+    undefeated_bonus: number | null
     updated_at: string
   }
 
@@ -121,15 +122,36 @@ declare global {
     id: number
     sponsor_name: string | null
     year: number
-    level?: LevelType | null
-    tour?: TourType | null
+    tours: Array<TourType>
     category: CategoryType | null
     start_date: string | null
     end_date: string | null
-    tournament?: BaseTournamentType
-    surfaces?: Array<SurfaceInterface>
-    venues?: Array<VenueInterface>
-    events?: Array<ArchiveInterface>
+    tournament: BaseTournamentType
+    events: Array<EventInterface>
+  }
+
+  type EditionWinnerType = LaverCupWinnerInterface | CountryWinnerInterface | EliminationWinnerInterface
+
+  interface LaverCupWinnerInterface {
+    year: number
+    edition_id: number
+    end_date: string
+  }
+
+  interface CountryWinnerInterface {
+    year: number
+    edition_id: number
+    country: CountryInterface
+    end_date: string
+  }
+
+  interface EliminationWinnerInterface {
+    year: number
+    edition_id: number
+    end_date: string
+    tour: TourType
+    match_type: MatchEnumType
+    team: Array<Required<BasePlayerType>>
   }
 }
 

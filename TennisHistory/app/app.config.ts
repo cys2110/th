@@ -76,6 +76,7 @@ export default defineAppConfig({
       defaultVariants: { variant: "subtle", size: "xs" }
     },
     calendar: {
+      slots: { cellTrigger: "cursor-pointer" },
       compoundVariants: [
         {
           color: "primary",
