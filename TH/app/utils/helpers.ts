@@ -52,3 +52,10 @@ export const calculatePercentage = (value1: number, value2: number, decimalPlace
 
   return Number(percentage.toFixed(decimal))
 }
+
+// Generics
+export const isLaverWinner = (item: EditionWinnerType): item is LaverCupWinnerInterface => "team_name" in item
+
+export const isCountryWinner = (item: EditionWinnerType): item is CountryWinnerInterface => "country" in item
+
+export const isEliminationWinner = (item: EditionWinnerType): item is EliminationWinnerInterface => "tour" in item

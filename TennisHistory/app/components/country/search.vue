@@ -11,8 +11,6 @@ const {
   ui: { icons }
 } = useAppConfig()
 
-const supabase = useSupabaseClient()
-
 const { countries, pending, fetchCountries } = useCountryList()
 
 const selectedItems = ref<CountryWithIcon | null>()

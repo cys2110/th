@@ -20,7 +20,7 @@ const {
         .order("year", { ascending: true })
 
       if (error || !data) {
-        console.error("Error fetching Laver Cup winners")
+        console.error("Error fetching Laver Cup winners", error)
         return []
       }
 
@@ -42,7 +42,7 @@ const {
         .order("year", { ascending: true })
 
       if (error || !data) {
-        console.error("Error fetching country draw winners")
+        console.error("Error fetching country draw winners", error)
         return []
       }
 
@@ -53,10 +53,10 @@ const {
         .select("*")
         .eq("tournament_id", Number(route.params.id))
         .order("year", { ascending: true })
-        .order("id", { ascending: true })
+        .order("tournament_id", { ascending: true })
 
       if (error || !data) {
-        console.error("Error fetching tournament winners")
+        console.error("Error fetching tournament winners", error)
         return []
       }
 
@@ -68,5 +68,17 @@ const {
 </script>
 
 <template>
-  <div>{{ editions }}</div>
+  <tournament-winners-table
+    v-if="viewModeStore.isTableView"
+    :events="editions"
+    :pending
+    @refresh="refresh"
+  />
+
+  <tournament-winners-grid
+    v-else
+    :editions="editions"
+    :pending
+    @refresh="refresh"
+  />
 </template>

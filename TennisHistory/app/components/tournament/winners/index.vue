@@ -59,7 +59,7 @@ const {
         .select("*")
         .eq("tournament_id", Number(id))
         .order("year", { ascending: true })
-        .order("id", { ascending: true })
+        .order("tournament_id", { ascending: true })
 
       if (error || !data) {
         console.error("Error fetching tournament winners")

@@ -78,8 +78,6 @@ const formFields: Array<FormFieldInterface<Schema>> = [
   { label: "Abolished", key: "abolished", type: "calendar", description: "Year the tournament was abolished" },
   { label: "Website", key: "website", type: "textarea", class: "col-span-2" }
 ]
-
-const test = ref()
 </script>
 
 <template>

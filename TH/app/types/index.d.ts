@@ -136,6 +136,7 @@ declare global {
     year: number
     edition_id: number
     end_date: string
+    team_name: string | null
   }
 
   interface CountryWinnerInterface {
