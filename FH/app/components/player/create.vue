@@ -152,7 +152,7 @@ const formFields = computed<Array<FormFieldInterface<Schema>>>(
         label: "Preferred Foot",
         key: "preferred_foot",
         type: "radio",
-        items: Object.values(PREFERRED_FOOT_MAPPING).map(value => ({ label: value, value })),
+        items: Object.entries(PREFERRED_FOOT_MAPPING).map(([label, value]) => ({ label: value, value: label })),
         valueKey: "value"
       },
       { label: "Affiliation", key: "affiliation", type: "switch" },

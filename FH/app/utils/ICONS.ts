@@ -1,4 +1,6 @@
 export default {
+  calendar: "icon-park-twotone:calendar-dot",
+  football: "game-icons:soccer-ball",
   globe: "material-symbols-light:globe",
   player: "game-icons:soccer-kick",
   save: "icon-park-twotone:save-one",

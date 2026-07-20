@@ -34,12 +34,9 @@ const {
     <u-page>
       <u-page-header title="Competitions">
         <template #links>
-          <!-- <dev-only>
-            <lazy-federation-create
-              hydrate-on-idle
-              @refresh="refresh"
-            />
-          </dev-only> -->
+          <dev-only>
+            <lazy-competition-create hydrate-on-idle />
+          </dev-only>
         </template>
       </u-page-header>
 
@@ -51,6 +48,7 @@ const {
             :title="competition.name"
             :to="{ name: 'competition', params: { name: kebabCase(competition.name), id: competition.id } }"
             orientation="horizontal"
+            :ui="{ leading: 'space-x-2' }"
           >
             <nuxt-img
               v-if="competition.emblem_url"
@@ -60,20 +58,18 @@ const {
             />
 
             <template #leading>
-              <div class="space-x-2">
-                <u-badge :label="COMPETITION_CATEGORY_MAPPING[competition.category]" />
+              <u-badge :label="COMPETITION_CATEGORY_MAPPING[competition.category]" />
 
-                <u-badge
-                  :label="COMPETITION_TYPE_MAPPING[competition.type]"
-                  color="secondary"
-                />
+              <u-badge
+                :label="COMPETITION_TYPE_MAPPING[competition.type]"
+                color="secondary"
+              />
 
-                <u-badge
-                  v-if="competition.division_level"
-                  :label="competition.division_level"
-                  color="info"
-                />
-              </div>
+              <u-badge
+                v-if="competition.division_level"
+                :label="competition.division_level"
+                color="info"
+              />
             </template>
 
             <template #description>
@@ -88,6 +84,7 @@ const {
                     name: kebabCase(competition.national_association?.name || competition.confederation!.name)
                   }
                 }"
+                @click.stop
                 class="hover-link primary-link"
               >
                 {{ competition.national_association?.name || competition.confederation!.name }}

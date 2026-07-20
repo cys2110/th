@@ -18,9 +18,9 @@ JOIN football.people pe ON pe.id = p.person_id
 JOIN football.country c ON c.id = pe.nationality_country_id
 WHERE
     search_term IS NULL
-    OR pe.full_name ILIKE '%' || search_term || '%'
-    OR pe.full_name ILIKE search_term || '%'
-    OR p.aka ILIKE '%' || search_term || '%'
+    OR unaccent(pe.full_name) ILIKE '%' || search_term || '%'
+    OR unaccent(pe.full_name) ILIKE search_term || '%'
+    OR unaccent(p.aka) ILIKE '%' || search_term || '%'
 ORDER BY pe.last_name, pe.first_name, p.id
 LIMIT 40;
 END;

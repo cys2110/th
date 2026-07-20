@@ -25,6 +25,8 @@ export type Database = {
           id: string
           name: string
           national_association_id: string | null
+          promotion_id: string | null
+          relegation_id: string | null
           type: Database["football"]["Enums"]["competition_type"]
         }
         Insert: {
@@ -37,6 +39,8 @@ export type Database = {
           id?: string
           name: string
           national_association_id?: string | null
+          promotion_id?: string | null
+          relegation_id?: string | null
           type: Database["football"]["Enums"]["competition_type"]
         }
         Update: {
@@ -49,6 +53,8 @@ export type Database = {
           id?: string
           name?: string
           national_association_id?: string | null
+          promotion_id?: string | null
+          relegation_id?: string | null
           type?: Database["football"]["Enums"]["competition_type"]
         }
         Relationships: [
@@ -64,6 +70,20 @@ export type Database = {
             columns: ["national_association_id"]
             isOneToOne: false
             referencedRelation: "national_association"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "competition_promotion_id_fkey"
+            columns: ["promotion_id"]
+            isOneToOne: false
+            referencedRelation: "competition"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "competition_relegation_id_fkey"
+            columns: ["relegation_id"]
+            isOneToOne: false
+            referencedRelation: "competition"
             referencedColumns: ["id"]
           },
         ]
@@ -218,6 +238,7 @@ export type Database = {
           home_team_id: string
           id: string
           kickoff_time: string | null
+          match_no: number
           round_id: string | null
           season_id: string
           status: Database["football"]["Enums"]["match_status"]
@@ -235,6 +256,7 @@ export type Database = {
           home_team_id: string
           id?: string
           kickoff_time?: string | null
+          match_no?: number
           round_id?: string | null
           season_id: string
           status?: Database["football"]["Enums"]["match_status"]
@@ -252,6 +274,7 @@ export type Database = {
           home_team_id?: string
           id?: string
           kickoff_time?: string | null
+          match_no?: number
           round_id?: string | null
           season_id?: string
           status?: Database["football"]["Enums"]["match_status"]
@@ -663,6 +686,71 @@ export type Database = {
           },
         ]
       }
+      penalty_shootout_attempts: {
+        Row: {
+          attempt_number: number
+          goalkeeper_id: string | null
+          id: string
+          is_sudden_death: boolean
+          match_id: string
+          outcome: string
+          player_id: string | null
+          team_attempt_number: number
+          team_id: string
+        }
+        Insert: {
+          attempt_number: number
+          goalkeeper_id?: string | null
+          id?: string
+          is_sudden_death?: boolean
+          match_id: string
+          outcome: string
+          player_id?: string | null
+          team_attempt_number: number
+          team_id: string
+        }
+        Update: {
+          attempt_number?: number
+          goalkeeper_id?: string | null
+          id?: string
+          is_sudden_death?: boolean
+          match_id?: string
+          outcome?: string
+          player_id?: string | null
+          team_attempt_number?: number
+          team_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "penalty_shootout_attempts_goalkeeper_id_fkey"
+            columns: ["goalkeeper_id"]
+            isOneToOne: false
+            referencedRelation: "player"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "penalty_shootout_attempts_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "match"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "penalty_shootout_attempts_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "player"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "penalty_shootout_attempts_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "team"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       people: {
         Row: {
           birth_country_id: string | null
@@ -962,6 +1050,55 @@ export type Database = {
             columns: ["competition_id"]
             isOneToOne: false
             referencedRelation: "competition"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      season_awards: {
+        Row: {
+          award_type: string
+          id: string
+          is_shared: boolean
+          player_id: string | null
+          season_id: string
+          team_id: string | null
+        }
+        Insert: {
+          award_type: string
+          id?: string
+          is_shared?: boolean
+          player_id?: string | null
+          season_id: string
+          team_id?: string | null
+        }
+        Update: {
+          award_type?: string
+          id?: string
+          is_shared?: boolean
+          player_id?: string | null
+          season_id?: string
+          team_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "season_awards_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "player"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "season_awards_season_id_fkey"
+            columns: ["season_id"]
+            isOneToOne: false
+            referencedRelation: "season"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "season_awards_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "team"
             referencedColumns: ["id"]
           },
         ]
@@ -1319,6 +1456,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      search_people: {
+        Args: { search_term: string }
+        Returns: {
+          full_name: string
+          icon: string
+          id: string
+        }[]
+      }
       search_players: {
         Args: { search_term: string }
         Returns: {

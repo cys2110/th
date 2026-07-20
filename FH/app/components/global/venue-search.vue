@@ -19,10 +19,7 @@ const modelValue = defineModel<Venue>()
     class="w-full"
   >
     <template #leading="{ modelValue: selectedVenue }">
-      <u-icon
-        v-if="selectedVenue"
-        :name="selectedVenue.country.icon"
-      />
+      <u-icon :name="selectedVenue?.country.icon || 'material-symbols-light:stadium-outline-rounded'" />
     </template>
 
     <template #item-leading="{ item }">

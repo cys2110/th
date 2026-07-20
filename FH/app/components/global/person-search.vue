@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { ICONS } from "#imports"
+
 const { people, pending, fetchPeople, searchTerm } = usePersonSearch()
 
 type People = (typeof people.value)[number]
@@ -19,10 +21,7 @@ const modelValue = defineModel<People>()
     label-key="full_name"
   >
     <template #leading="{ modelValue: selectedPerson }">
-      <u-icon
-        v-if="selectedPerson?.country"
-        :name="selectedPerson.country.icon"
-      />
+      <u-icon :name="selectedPerson?.country?.icon || ICONS.football" />
     </template>
 
     <template #item-leading="{ item }">

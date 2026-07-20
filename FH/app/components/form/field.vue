@@ -108,10 +108,10 @@ const { ui } = useAppConfig()
       v-model="modelValue[field.key]"
     />
 
-    <!-- <form-dates-picker
+    <form-dates-picker
       v-else-if="field.type === 'dates'"
       v-model="modelValue[field.key]"
-    /> -->
+    />
 
     <u-listbox
       v-else-if="field.type === 'listbox'"
@@ -124,6 +124,21 @@ const { ui } = useAppConfig()
       v-else-if="field.type === 'calendar'"
       v-model="modelValue[field.key]"
       type="year"
+    />
+
+    <u-file-upload
+      v-else-if="field.type === 'image'"
+      v-model="modelValue[field.key]"
+      accept="image/*"
+      label="Drop your image here"
+    />
+
+    <u-input-time
+      v-else-if="field.type === 'time'"
+      v-model="modelValue[field.key]"
+      :hour-cycle="24"
+      icon="icon-park-twotone:time"
+      class="w-full"
     />
   </u-form-field>
 </template>

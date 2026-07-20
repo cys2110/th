@@ -7,17 +7,7 @@ export const usePersonSearch = () => {
   const searchTerm = ref()
 
   const personQuery = () => {
-    const query = supabase
-      .from("people")
-      .select("*, country:country!nationality_country_id(*)")
-      .limit(40)
-      .order("last_name", { ascending: true })
-      .order("first_name", { ascending: true })
-      .order("id", { ascending: true })
-
-    if (toValue(searchTerm)) {
-      query.or(`full_name.ilike.${toValue(searchTerm)}%,full_name.ilike.%${toValue(searchTerm)}%`)
-    }
+    const query = supabase.rpc("search_people", { search_term: toValue(searchTerm) || null })
 
     return query
   }
@@ -35,7 +25,7 @@ export const usePersonSearch = () => {
       const { data, error } = await personQuery()
 
       if (error || !data) {
-        console.error("Error fetching venues:", error)
+        console.error("Error fetching people:", error)
         return
       }
 

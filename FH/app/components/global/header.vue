@@ -10,20 +10,16 @@ const navLinks = computed<Array<NavigationMenuItem>>(() => [
     to: { name: "federations" }
   },
   {
-    label: "People",
-    active: route.path.startsWith("/players"),
-    defaultOpen: true,
-    children: [{ label: "Players", to: { name: "players" }, icon: ICONS.player }]
-  },
-  {
     label: "Competitions",
     active: route.path.startsWith("/competitions"),
     to: { name: "competitions" }
   },
   {
     label: "Teams",
-    active: route.path.startsWith("/teams"),
-    to: { name: "teams" }
+    active: route.path.startsWith("/teams") || route.path.startsWith("/players"),
+    to: { name: "teams" },
+    defaultOpen: true,
+    children: [{ label: "Players", to: { name: "players" }, icon: ICONS.player }]
   }
 ])
 </script>

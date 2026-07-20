@@ -67,7 +67,7 @@ const onSubmit = async () => {
     console.error("Error creating team:", error)
     set(errors, error)
   } else {
-    if (insertStandings.value && groupId.value) {
+    if (insertStandings.value) {
       const { error: standingsError } = await supabase.from("standing").insert(
         teams.value.map(team => ({
           season_id: props.seasonId,
@@ -82,12 +82,14 @@ const onSubmit = async () => {
         return
       }
 
-      const { error: groupError } = await supabase.from("group_team").insert(teams.value.map(team => ({ group_id: groupId.value!, team_id: team })))
+      if (groupId.value) {
+        const { error: groupError } = await supabase.from("group_team").insert(teams.value.map(team => ({ group_id: groupId.value!, team_id: team })))
 
-      if (groupError) {
-        console.error("Error creating group team:", groupError)
-        set(errors, groupError)
-        return
+        if (groupError) {
+          console.error("Error creating group team:", groupError)
+          set(errors, groupError)
+          return
+        }
       }
     }
 

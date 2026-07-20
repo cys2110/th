@@ -165,3 +165,11 @@ export const PLAYER_TEAM_RELATIONSHIP_TYPE_MAPPING: Record<PlayerTeamRelationshi
   loan: "Loan",
   reserve: "Reserve"
 }
+
+export const PENALTY_OUTCOME_MAPPING = {
+  scored: "Scored",
+  saved: "Saved",
+  missed: "Missed",
+  post: "Post",
+  crossbar: "Crossbar"
+}

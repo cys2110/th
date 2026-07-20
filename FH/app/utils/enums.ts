@@ -90,3 +90,13 @@ export const PositionGroupEnum = z.enum(
   ["goalkeeper", "defender", "midfielder", "forward"],
   `Position group must be one of ${["goalkeeper", "defender", "midfielder", "forward"].join(", ")}`
 )
+
+export const CompetitionTypeEnum = z.enum(
+  ["league", "cup", "playoff", "super_cup", "friendly", "tournament"],
+  `Competition type must be one of ${["league", "cup", "playoff", "super_cup", "friendly", "tournament"].join(", ")})`
+)
+
+export const CompetitionCategoryEnum = z.enum(
+  ["domestic", "continental", "international"],
+  `Competition category must be one of ${["domestic", "continental", "international"].join(", ")})`
+)

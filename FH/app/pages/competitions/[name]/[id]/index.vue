@@ -104,12 +104,12 @@ const handleSelectRow = (_e: Event, row: TableRow<CompetitionType["seasons"][num
               :label="competition.division_level"
             />
           </div>
-          <!-- <dev-only>
-            <lazy-federation-create
+          <dev-only>
+            <lazy-season-create
               hydrate-on-idle
               @refresh="refresh"
             />
-          </dev-only> -->
+          </dev-only>
         </template>
       </u-page-header>
 
@@ -127,7 +127,10 @@ const handleSelectRow = (_e: Event, row: TableRow<CompetitionType["seasons"][num
           </template>
 
           <template #empty>
-            <empty title="No seasons played" />
+            <empty
+              title="No seasons played"
+              class="mx-2"
+            />
           </template>
 
           <template #start_date-cell="{ row }">

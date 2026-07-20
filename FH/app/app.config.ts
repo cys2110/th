@@ -62,7 +62,7 @@ export default defineAppConfig({
           class: { leadingIcon: "animate-none" }
         }
       ],
-      defaultVariants: { variant: "subtle" }
+      defaultVariants: { variant: "subtle", size: "xs" }
     },
     calendar: {
       slots: { cellTrigger: "cursor-pointer" },
@@ -84,6 +84,22 @@ export default defineAppConfig({
       }
     },
     listbox: { slots: { content: "cursor-pointer" } },
+    progress: {
+      variants: {
+        orientation: {
+          horizontal: {
+            root: "flex-row items-center gap-5",
+            status: "max-w-fit text-default"
+          }
+        },
+        inverted: {
+          false: {
+            root: "flex-row-reverse"
+          }
+        }
+      },
+      defaultVariants: { animation: "swing" }
+    },
     radioGroup: {
       slots: {
         base: "cursor-pointer",

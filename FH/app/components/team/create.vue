@@ -4,29 +4,16 @@ import { set } from "@vueuse/core"
 import type { FormErrorEvent, FormSubmitEvent } from "@nuxt/ui"
 import { ACCEPTED_IMAGE_TYPES, MAX_FILE_SIZE } from "~/utils/variables"
 import { deburr } from "lodash"
+import { ICONS } from "#imports"
 
 const schema = object({
   name: string().min(1, "Name is required"),
-  country: object(
-    {
-      id: string(),
-      name: string(),
-      icon: string()
-    },
-    "Country is required"
-  ),
-  federation: object(
-    {
-      id: string(),
-      name: string(),
-      country: object({
-        id: string(),
-        name: string(),
-        icon: string()
-      })
-    },
-    "Federation is required"
-  ),
+  country: object({
+    id: string()
+  }).optional(),
+  federation: object({
+    id: string()
+  }),
   website: url().optional(),
   logo: z
     .instanceof(File, {
@@ -46,13 +33,7 @@ const schema = object({
   colours: array(string()).default([]),
   type: TeamTypeEnum,
   home_venue: object({
-    id: string(),
-    name: string(),
-    city: string(),
-    country: object({
-      id: string(),
-      name: string()
-    })
+    id: string()
   }).optional()
 })
 type Schema = z.infer<typeof schema>
@@ -88,56 +69,56 @@ const onError = (event: FormErrorEvent) => set(errors, JSON.stringify(event.erro
 const onSubmit = async (event: FormSubmitEvent<Schema>) => {
   set(isSaving, true)
 
-  const { country, logo, federation, home_venue, ...rest } = event.data
-  let logoUrl: string | undefined
+  try {
+    const { country, logo, federation, home_venue, ...rest } = event.data
+    let logoUrl: string | undefined
 
-  // Upload to storage if a logo is selected
-  if (logo) {
-    const { data, error } = await supabase.storage.from("football").upload(`teams/${deburr(rest.name)}`, logo, {
-      cacheControl: "3600",
-      upsert: true
+    // Upload to storage if a logo is selected
+    if (logo) {
+      const { data, error } = await supabase.storage.from("football").upload(`teams/${deburr(rest.name)}`, logo, {
+        cacheControl: "3600",
+        upsert: true
+      })
+
+      if (error) {
+        toast.add({
+          title: `Error uploading logo for ${event.data.name}`,
+          icon: ui.icons.error,
+          color: "error"
+        })
+        throw new Error(`Error uploading team logo for ${event.data.name}: ${error.message}`)
+      }
+
+      const { data: publicUrlData } = supabase.storage.from("football").getPublicUrl(data.path)
+      logoUrl = publicUrlData.publicUrl
+    }
+
+    const { error } = await supabase
+      .from("team")
+      .insert({ ...rest, country_id: country?.id, logo_url: logoUrl, home_venue_id: home_venue?.id, national_association_id: federation?.id })
+
+    toast.add({
+      title: error ? `Error creating ${event.data.name}` : `${event.data.name} successfully created!`,
+      icon: ui.icons[error ? "error" : "success"],
+      color: error ? "error" : "success"
     })
 
     if (error) {
-      toast.add({
-        title: `Error uploading logo for ${event.data.name}`,
-        icon: ui.icons.error,
-        color: "error"
-      })
-      console.error("Error uploading team logo:", error)
-      set(errors, error)
-      set(isSaving, false)
-      return
+      throw new Error(`Error creating team: ${error.message}`)
     }
-
-    const { data: publicUrlData } = supabase.storage.from("football").getPublicUrl(data.path)
-    logoUrl = publicUrlData.publicUrl
-  }
-
-  const { error } = await supabase
-    .from("team")
-    .insert({ ...rest, country_id: country.id, logo_url: logoUrl, home_venue_id: home_venue?.id, national_association_id: federation.id })
-
-  toast.add({
-    title: error ? `Error creating ${event.data.name}` : `${event.data.name} successfully created!`,
-    icon: ui.icons[error ? "error" : "success"],
-    color: error ? "error" : "success"
-  })
-
-  if (error) {
-    console.error("Error creating team:", error)
-    set(errors, error)
-  } else {
     handleReset()
     emits("refresh")
     set(isOpen, false)
+  } catch (error) {
+    console.error(error)
+    set(errors, error)
+  } finally {
+    set(isSaving, false)
   }
-
-  set(isSaving, false)
 }
 
 const formFields: Array<FormFieldInterface<Schema>> = [
-  { label: "Logo", key: "logo", type: "slot", class: "col-span-2" },
+  { label: "Logo", key: "logo", type: "image", class: "col-span-2" },
   { label: "Name", key: "name", type: "text", required: true, class: "col-span-2" },
   { label: "Short Name", key: "short_name", type: "text" },
   { label: "Abbreviation", key: "tla", type: "text" },
@@ -153,7 +134,7 @@ const formFields: Array<FormFieldInterface<Schema>> = [
   { label: "Founded", key: "founded", type: "text", subType: "number" },
   { label: "Nicknames", key: "nicknames", type: "tags", class: "col-span-2" },
   { label: "Colours", key: "colours", type: "tags", class: "col-span-2" },
-  { label: "Country", key: "country", type: "slot", required: true },
+  { label: "Country", key: "country", type: "slot" },
   { label: "National Association", key: "federation", type: "slot", required: true },
   { label: "Home Venue", key: "home_venue", type: "slot", class: "col-span-2" },
   { label: "Website", key: "website", type: "textarea", class: "col-span-2" }
@@ -190,13 +171,6 @@ const formFields: Array<FormFieldInterface<Schema>> = [
             v-model="state"
             :field
           >
-            <u-file-upload
-              v-if="field.key === 'logo'"
-              v-model="state.logo"
-              accept="image/*"
-              label="Drop your image here"
-            />
-
             <u-input-menu
               v-if="field.key === 'federation'"
               v-model="<any>state.federation"
@@ -209,14 +183,11 @@ const formFields: Array<FormFieldInterface<Schema>> = [
               label-key="name"
             >
               <template #leading="{ modelValue }">
-                <u-icon
-                  v-if="modelValue"
-                  :name="modelValue.country.icon"
-                />
+                <u-icon :name="modelValue?.country?.icon || ICONS.globe" />
               </template>
 
               <template #item-leading="{ item }">
-                <u-icon :name="item.country.icon" />
+                <u-icon :name="item.country?.icon" />
               </template>
             </u-input-menu>
 

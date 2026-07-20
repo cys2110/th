@@ -27,7 +27,7 @@ const fixturesQuery = () =>
     )
     .eq("season.competition_id", route.params.id)
     .eq("season.name", seasonName.value)
-    .order("kickoff_time", { ascending: true })
+    .order("match_no", { ascending: true })
 
 type FixtureType = QueryData<ReturnType<typeof fixturesQuery>>[number]
 

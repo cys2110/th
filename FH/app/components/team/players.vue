@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { DevOnly, LazyTeamPlayerAdd } from "#components"
+import { formatDate } from "#imports"
 import type { TableColumn } from "@nuxt/ui"
 import { type QueryData } from "@supabase/supabase-js"
 
@@ -69,14 +70,14 @@ const columns: Array<TableColumn<PlayerType>> = [
       />
     </template>
 
-    <!-- <template #tenure-cell="{ row }">
+    <template #tenure-cell="{ row }">
       <div
         v-for="tenure in row.original.tenure"
         :key="tenure.id"
       >
-        <span>{{ tenure.title }}</span>
-        <span v-if="tenure.start_date"> - {{ formatDate(tenure.start_date, tenure.end_date) }}</span>
+        <!-- <span>{{ tenure.title }}</span> -->
+        <span v-if="tenure.start_date">{{ formatDate(tenure.start_date, tenure.end_date) }}</span>
       </div>
-    </template> -->
+    </template>
   </u-table>
 </template>

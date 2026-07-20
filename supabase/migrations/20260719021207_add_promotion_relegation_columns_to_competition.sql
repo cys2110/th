@@ -1,0 +1,3 @@
+ALTER TABLE football.competition
+ADD COLUMN IF NOT EXISTS promotion_id UUID REFERENCES football.competition(id) ON UPDATE CASCADE ON DELETE SET NULL,
+ADD COLUMN IF NOT EXISTS relegation_id UUID REFERENCES football.competition(id) ON UPDATE CASCADE ON DELETE SET NULL;

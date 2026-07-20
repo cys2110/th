@@ -33,7 +33,7 @@ const {
 type Team = QueryData<ReturnType<typeof teamsQuery>>[number]
 
 const columns: Array<TableColumn<Team>> = [
-  { accessorKey: "name", header: "Name" },
+  { id: "name", accessorFn: row => row.short_name || row.name, header: "Name" },
   { accessorKey: "country.name", header: "Country" },
   { accessorKey: "national_association.name", header: "Federation" },
   { id: "type", accessorFn: row => TEAM_TYPE_MAPPING[row.type], header: "Team Type" }
