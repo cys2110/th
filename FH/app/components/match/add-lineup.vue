@@ -48,7 +48,11 @@ const { data: positions, pending: positionsPending } = await useAsyncData(
   { default: () => [] }
 )
 
-const { data: players, pending } = await useAsyncData(
+const {
+  data: players,
+  pending,
+  refresh
+} = await useAsyncData(
   () => `${route.params.match_id}-add-lineup-${props.teamId}`,
   async () => {
     const { data, error } = await supabase
@@ -178,7 +182,15 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
 
                 <template #item-label="{ item }">{{ item.full_name }}</template>
 
-                <template #item-description="{ item }">{{ item.aka }}</template>
+                <template #content-bottom>
+                  <u-button
+                    :icon="ui.icons.reload"
+                    block
+                    @click="refresh()"
+                  >
+                    Refresh
+                  </u-button>
+                </template>
               </u-input-menu>
             </u-form-field>
 

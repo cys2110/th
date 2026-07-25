@@ -31,8 +31,30 @@ const toast = useToast()
 const supabase = useSupabaseClient()
 const { ui } = useAppConfig()
 
-const teamSearch = useTeamSearch()
-const playerSearch = usePlayerSearch()
+const {
+  data: players,
+  pending,
+  refresh
+} = await useAsyncData(
+  () => `team-players-${JSON.stringify(route.params)}`,
+  async () => {
+    const { data, error } = await supabase
+      .from("player_team_tenure")
+      .select("...player(id, aka, ...people(full_name, ...country!nationality_country_id(icon)))")
+      .eq("team_id", route.params.team_id)
+
+    if (error) {
+      console.error("Error fetching team players:", error)
+      return []
+    }
+
+    return useArrayUnique(
+      data.map(player => ({ ...player, name: player.aka || player.full_name })),
+      (a, b) => a.id === b.id
+    ).value
+  },
+  { default: () => [] }
+)
 
 const isOpen = ref(false)
 const isSaving = ref(false)
@@ -132,26 +154,29 @@ const formFields = computed<Array<FormFieldInterface<Schema>>>(
             <u-input-menu
               v-if="field.key === 'player'"
               v-model="<any>state.player"
-              v-model:search-term="playerSearch.searchTerm.value"
-              :loading="playerSearch.pending.value"
+              :loading="pending"
               clear
               placeholder="Player"
-              :items="<any>playerSearch.players.value"
+              :items="players"
               class="w-full"
-              ignore-filter
-              label-key="full_name"
+              label-key="name"
+              description-key="aka"
+              :filter-fields="['aka', 'full_name']"
             >
               <template #leading="{ modelValue }">
                 <u-icon :name="modelValue?.icon || ICONS.globe" />
               </template>
 
-              <template #item-leading="{ item }">
-                <u-icon :name="item.icon" />
-              </template>
-
               <template #item-label="{ item }">{{ item.full_name }}</template>
 
-              <template #item-description="{ item }">{{ item.aka }}</template>
+              <template #content-bottom>
+                <u-button
+                  block
+                  label="Refresh"
+                  :icon="ui.icons.reload"
+                  @click="() => refresh()"
+                />
+              </template>
             </u-input-menu>
           </form-field>
         </div>

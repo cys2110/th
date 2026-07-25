@@ -13,6 +13,7 @@ declare global {
     multiple?: boolean
     loading?: boolean
     rotateIcon?: boolean
+    decimal?: boolean
 
     max?: number
 

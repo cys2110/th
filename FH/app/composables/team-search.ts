@@ -1,8 +1,9 @@
 import { type QueryData } from "@supabase/supabase-js"
 import { set } from "@vueuse/core"
 
-export const useTeamSearch = () => {
+export const useTeamSearch = (teamIds?: Ref<string[]>) => {
   const supabase = useSupabaseClient()
+  const route = useRoute()
 
   const searchTerm = ref()
 
@@ -11,6 +12,8 @@ export const useTeamSearch = () => {
 
     if (toValue(searchTerm)) {
       query.ilike("name", `%${toValue(searchTerm)}%`)
+    } else if (route.query.team && Array.isArray(route.query.team)) {
+      query.in("id", route.query.team as string[])
     }
 
     return query
@@ -33,7 +36,10 @@ export const useTeamSearch = () => {
         return
       }
 
-      set(teams, data)
+      set(
+        teams,
+        data.map(team => ({ ...team, aka: team.short_name || team.name }))
+      )
     } finally {
       set(pending, false)
     }

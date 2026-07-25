@@ -142,7 +142,14 @@ const getPlayerIcon = (role: string) => {
           :class="item.team_id === homeTeam.id ? 'ring-primary' : 'ring-secondary'"
         >
           <div class="text-dimmed text-xs/5">
-            {{ item.minute === 46 && item.type === "substitution" ? "HT" : `${item.minute}'` }}
+            {{
+              item.type === "substitution" ?
+                item.minute === 46 ? "HT"
+                : item.minute === 91 ? "PET"
+                : item.minute === 106 ? "ET - HT"
+                : `${item.minute}'`
+              : `${item.minute}'`
+            }}
             <span v-if="item.stoppage_minute"> + {{ item.stoppage_minute }}'</span>
           </div>
 

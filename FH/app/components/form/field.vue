@@ -42,6 +42,7 @@ const { ui } = useAppConfig()
       :placeholder="field.placeholder ?? field.label"
       :disabled="field.disabled"
       :currency="field.currency"
+      :decimal="field.decimal"
     />
 
     <u-switch

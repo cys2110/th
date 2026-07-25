@@ -5,10 +5,12 @@ withDefaults(
   defineProps<{
     placeholder: string
     currency?: string
+    decimal?: boolean
     disabled?: boolean
   }>(),
   {
-    disabled: false
+    disabled: false,
+    decimal: false
   }
 )
 
@@ -21,7 +23,7 @@ const { ui } = useAppConfig()
   <u-input-number
     v-model="modelValue"
     :placeholder
-    :step="currency ? 0.01 : undefined"
+    :step="currency || decimal ? 0.01 : undefined"
     :disabled
     :decrement="false"
     :format-options="

@@ -10,9 +10,9 @@ RETURN QUERY
 SELECT
     p.id,
     p.full_name,
-    c.icon
+    CASE WHEN c IS NULL THEN 'flag:xx-4x3' ELSE c.icon END AS icon
 FROM football.people p
-JOIN football.country c ON c.id = p.nationality_country_id
+LEFT JOIN football.country c ON c.id = p.nationality_country_id
 WHERE
     search_term IS NULL
     OR unaccent(p.full_name) ILIKE '%' || search_term || '%'

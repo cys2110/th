@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { DevOnly, LazyMatchCreate } from "#components"
+import { ICONS } from "#imports"
 import type { TableColumn, TableRow } from "@nuxt/ui"
 import { type QueryData } from "@supabase/supabase-js"
 import { kebabCase } from "lodash"
@@ -53,18 +54,23 @@ const {
 const columns: Array<TableColumn<FixtureType>> = [
   {
     accessorKey: "round.name",
+    header: "Round",
     footer: () => h(DevOnly, {}, () => h(LazyMatchCreate, { hydrateOnIdle: true, onRefresh: refresh, seasonId: props.seasonId }))
   },
   {
-    accessorKey: "group.name"
-  },
-  {
-    accessorKey: "home_team.name",
+    id: "status",
+    accessorFn: row => {
+      if (row.status === "full_time") {
+        return row.decision
+      } else {
+        return row.status
+      }
+    },
     header: ""
   },
+  { accessorKey: "home_team", header: "" },
   { id: "score", header: "Score" },
-  { accessorKey: "away_team.name", header: "" }
-  // { accessorKey: "tenure", header: "Tenure" }
+  { accessorKey: "away_team", header: "" }
 ]
 
 const handleSelectRow = (_e: Event, row: TableRow<FixtureType>) => {
@@ -94,6 +100,47 @@ const handleSelectRow = (_e: Event, row: TableRow<FixtureType>) => {
         title="No fixtures played"
         class="mx-2"
       />
+    </template>
+
+    <template #round_name-cell="{ row }">
+      <div>
+        <div>{{ row.original.round?.name }}</div>
+        <div v-if="row.original.group">{{ row.original.group?.name }}</div>
+      </div>
+    </template>
+
+    <template #home_team-cell="{ row }">
+      <div class="flex justify-center">
+        <u-user
+          :name="row.original.home_team.name"
+          :avatar="{
+            src: row.original.home_team.logo_url || '',
+            loading: 'lazy',
+            icon: ICONS.team
+          }"
+          :to="{
+            name: 'team',
+            params: { id: row.original.home_team_id, name: kebabCase(row.original.home_team.name) }
+          }"
+        />
+      </div>
+    </template>
+
+    <template #away_team-cell="{ row }">
+      <div class="flex justify-center">
+        <u-user
+          :name="row.original.away_team.name"
+          :avatar="{
+            src: row.original.away_team.logo_url || '',
+            loading: 'lazy',
+            icon: ICONS.team
+          }"
+          :to="{
+            name: 'team',
+            params: { id: row.original.home_team_id, name: kebabCase(row.original.away_team.name) }
+          }"
+        />
+      </div>
     </template>
 
     <template #score-cell="{ row }">

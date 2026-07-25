@@ -22,7 +22,7 @@ const teamSchema = object({
 type TeamSchema = z.infer<typeof teamSchema>
 
 const schema = object({
-  round_id: string(),
+  round_id: string().optional(),
   group_id: string().optional(),
   home_team: teamSchema,
   away_team: teamSchema,
@@ -250,7 +250,6 @@ const formFields = computed<Array<FormFieldInterface<Schema>>>(
         loading: roundsPending.value,
         valueKey: "id",
         labelKey: "name",
-        required: true,
         class: groups.value.length ? "col-span-1" : "col-span-2"
       },
       ...(groups.value.length ?
@@ -283,7 +282,7 @@ const teamFields = computed<Array<FormFieldInterface<TeamSchema>>>(() => [
   { label: "Team", key: "team", type: "slot", required: true, class: "col-span-5" },
   { label: "Score", key: "score", type: "number" },
   { label: "Penalties", key: "penalties", type: "number" },
-  { label: "Possession (%)", key: "possession", type: "number" },
+  { label: "Possession (%)", key: "possession", type: "number", decimal: true },
   { label: "Shots", key: "shots", type: "number" },
   { label: "Shots on Target", key: "shots_on_target", type: "number" },
   { label: "Yellow Cards", key: "yellow_cards", type: "number" },
@@ -344,6 +343,7 @@ const teamFields = computed<Array<FormFieldInterface<TeamSchema>>>(() => [
               v-if="field.type === 'number'"
               v-model="<any>state.home_team![field.key as keyof TeamSchema]"
               :placeholder="field.label"
+              :decimal="field.decimal"
             />
 
             <u-input-menu
@@ -393,6 +393,7 @@ const teamFields = computed<Array<FormFieldInterface<TeamSchema>>>(() => [
               v-if="field.type === 'number'"
               v-model="<any>state.away_team![field.key as keyof TeamSchema]"
               :placeholder="field.label"
+              :decimal="field.decimal"
             />
 
             <u-input-menu

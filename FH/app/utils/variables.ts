@@ -27,6 +27,7 @@ export const POSITION_GROUP_MAPPING: Record<PositionGroup, string> = {
   midfielder: "Midfielder",
   forward: "Forward"
 }
+export const POSITION_GROUPS = Object.entries(POSITION_GROUP_MAPPING).map(([key, value]) => ({ label: value, value: key }))
 
 export const STAGE_TYPE_MAPPING: Record<StageType, string> = {
   group: "Group",

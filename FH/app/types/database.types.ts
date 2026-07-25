@@ -374,6 +374,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "match_award_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "player_details"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "match_award_team_id_fkey"
             columns: ["team_id"]
             isOneToOne: false
@@ -475,6 +482,13 @@ export type Database = {
             referencedRelation: "player"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "match_event_player_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "player_details"
+            referencedColumns: ["id"]
+          },
         ]
       }
       match_lineup: {
@@ -521,6 +535,13 @@ export type Database = {
             columns: ["player_id"]
             isOneToOne: false
             referencedRelation: "player"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "match_lineup_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "player_details"
             referencedColumns: ["id"]
           },
           {
@@ -729,6 +750,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "penalty_shootout_attempts_goalkeeper_id_fkey"
+            columns: ["goalkeeper_id"]
+            isOneToOne: false
+            referencedRelation: "player_details"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "penalty_shootout_attempts_match_id_fkey"
             columns: ["match_id"]
             isOneToOne: false
@@ -740,6 +768,13 @@ export type Database = {
             columns: ["player_id"]
             isOneToOne: false
             referencedRelation: "player"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "penalty_shootout_attempts_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "player_details"
             referencedColumns: ["id"]
           },
           {
@@ -952,6 +987,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "player_team_tenure_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "player_details"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "player_team_tenure_team_id_fkey"
             columns: ["team_id"]
             isOneToOne: false
@@ -1056,6 +1098,7 @@ export type Database = {
       }
       season_awards: {
         Row: {
+          award_level: number | null
           award_type: string
           id: string
           is_shared: boolean
@@ -1064,6 +1107,7 @@ export type Database = {
           team_id: string | null
         }
         Insert: {
+          award_level?: number | null
           award_type: string
           id?: string
           is_shared?: boolean
@@ -1072,6 +1116,7 @@ export type Database = {
           team_id?: string | null
         }
         Update: {
+          award_level?: number | null
           award_type?: string
           id?: string
           is_shared?: boolean
@@ -1085,6 +1130,13 @@ export type Database = {
             columns: ["player_id"]
             isOneToOne: false
             referencedRelation: "player"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "season_awards_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "player_details"
             referencedColumns: ["id"]
           },
           {
@@ -1134,6 +1186,13 @@ export type Database = {
             columns: ["player_id"]
             isOneToOne: false
             referencedRelation: "player"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "squad_player_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "player_details"
             referencedColumns: ["id"]
           },
           {
@@ -1453,7 +1512,56 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      player_details: {
+        Row: {
+          aka: string | null
+          birth_country: string | null
+          birth_country_icon: string | null
+          birth_country_id: string | null
+          birth_place: string | null
+          current_position:
+            | Database["football"]["Enums"]["position_group"]
+            | null
+          dob: string | null
+          dod: string | null
+          first_name: string | null
+          full_name: string | null
+          height_cm: number | null
+          icon: string | null
+          id: string | null
+          label: string | null
+          last_name: string | null
+          nationality_country_id: string | null
+          preferred_foot: Database["football"]["Enums"]["preferred_foot"] | null
+          search_text: string | null
+          team_id: string | null
+          team_logo: string | null
+          team_name: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "people_birth_country_id_fkey"
+            columns: ["birth_country_id"]
+            isOneToOne: false
+            referencedRelation: "country"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "people_nationality_country_id_fkey"
+            columns: ["nationality_country_id"]
+            isOneToOne: false
+            referencedRelation: "country"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "player_current_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "team"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       search_people: {

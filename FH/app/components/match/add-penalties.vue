@@ -230,12 +230,16 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
             </u-form-field>
 
             <u-form-field
-              name="goalkeeper_id"
+              name="goalkeeper"
               label="Goalkeeper"
             >
               <u-input-menu
-                v-model="<any>state[index]!.player"
-                :items="state[index]!.team.id === homeTeam.id ? players.away.filter(player => player.position === 'goalkeeper') : players.away"
+                v-model="<any>state[index]!.goalkeeper"
+                :items="
+                  state[index]!.team.id === homeTeam.id ?
+                    players.away.filter(player => player.position === 'Goalkeeper')
+                  : players.home.filter(player => player.position === 'Goalkeeper')
+                "
                 placeholder="Goalkeeper"
                 class="w-full"
                 label-key="name"

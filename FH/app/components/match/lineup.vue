@@ -36,8 +36,18 @@ const {
     }
 
     return {
-      home: data.filter(item => item.team_id === props.homeTeam.id),
-      away: data.filter(item => item.team_id === props.awayTeam.id)
+      home: data
+        .filter(item => item.team_id === props.homeTeam.id)
+        .map(item => ({
+          ...item,
+          name: item.aka || item.full_name
+        })),
+      away: data
+        .filter(item => item.team_id === props.awayTeam.id)
+        .map(item => ({
+          ...item,
+          name: item.aka || item.full_name
+        }))
     }
   },
   { default: () => ({ home: [], away: [] }) }

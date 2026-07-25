@@ -71,13 +71,6 @@ const tabItems = [
           <u-breadcrumb :items="breadcrumbs" />
         </template>
 
-        <!-- <template
-          #description
-          v-if="season"
-        >
-          {{ formatDate(season.start_date, season.end_date) }}
-        </template> -->
-
         <template #links>
           <u-badge
             v-if="team"

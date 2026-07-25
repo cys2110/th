@@ -17,11 +17,7 @@ const schema = object({
   start_date: any().optional(),
   end_date: any().optional(),
   parent_team: object({
-    id: string(),
-    short_name: string(),
-    name: string(),
-    logo_url: string().optional(),
-    nicknames: array(string()).default([])
+    id: string()
   }).optional()
 }).superRefine((data, ctx) => {
   if (data.relationship_type === "loan" && !data.parent_team) {
@@ -186,6 +182,7 @@ const formFields = computed<Array<FormFieldInterface<Schema>>>(
               :items="<any>teamSearch.teams.value"
               class="w-full"
               ignore-filter
+              label-key="aka"
             >
               <template #leading="{ modelValue }">
                 <u-avatar
