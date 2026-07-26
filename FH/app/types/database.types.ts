@@ -367,6 +367,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "match_award_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "player_match_stats"
+            referencedColumns: ["match_id"]
+          },
+          {
             foreignKeyName: "match_award_player_id_fkey"
             columns: ["player_id"]
             isOneToOne: false
@@ -377,7 +384,28 @@ export type Database = {
             foreignKeyName: "match_award_player_id_fkey"
             columns: ["player_id"]
             isOneToOne: false
+            referencedRelation: "player_career_stats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "match_award_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
             referencedRelation: "player_details"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "match_award_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "player_match_stats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "match_award_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "player_season_stats"
             referencedColumns: ["id"]
           },
           {
@@ -440,6 +468,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "match_event_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "player_match_stats"
+            referencedColumns: ["match_id"]
+          },
+          {
             foreignKeyName: "match_event_team_id_fkey"
             columns: ["team_id"]
             isOneToOne: false
@@ -486,7 +521,28 @@ export type Database = {
             foreignKeyName: "match_event_player_player_id_fkey"
             columns: ["player_id"]
             isOneToOne: false
+            referencedRelation: "player_career_stats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "match_event_player_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
             referencedRelation: "player_details"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "match_event_player_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "player_match_stats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "match_event_player_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "player_season_stats"
             referencedColumns: ["id"]
           },
         ]
@@ -531,6 +587,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "match_lineup_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "player_match_stats"
+            referencedColumns: ["match_id"]
+          },
+          {
             foreignKeyName: "match_lineup_player_id_fkey"
             columns: ["player_id"]
             isOneToOne: false
@@ -541,7 +604,28 @@ export type Database = {
             foreignKeyName: "match_lineup_player_id_fkey"
             columns: ["player_id"]
             isOneToOne: false
+            referencedRelation: "player_career_stats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "match_lineup_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
             referencedRelation: "player_details"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "match_lineup_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "player_match_stats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "match_lineup_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "player_season_stats"
             referencedColumns: ["id"]
           },
           {
@@ -588,11 +672,25 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "match_referee_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "player_match_stats"
+            referencedColumns: ["match_id"]
+          },
+          {
             foreignKeyName: "match_referee_person_id_fkey"
             columns: ["person_id"]
             isOneToOne: false
             referencedRelation: "people"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "match_referee_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "player_details"
+            referencedColumns: ["person_id"]
           },
         ]
       }
@@ -643,6 +741,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "match"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "match_stats_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "player_match_stats"
+            referencedColumns: ["match_id"]
           },
           {
             foreignKeyName: "match_stats_team_id_fkey"
@@ -753,7 +858,28 @@ export type Database = {
             foreignKeyName: "penalty_shootout_attempts_goalkeeper_id_fkey"
             columns: ["goalkeeper_id"]
             isOneToOne: false
+            referencedRelation: "player_career_stats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "penalty_shootout_attempts_goalkeeper_id_fkey"
+            columns: ["goalkeeper_id"]
+            isOneToOne: false
             referencedRelation: "player_details"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "penalty_shootout_attempts_goalkeeper_id_fkey"
+            columns: ["goalkeeper_id"]
+            isOneToOne: false
+            referencedRelation: "player_match_stats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "penalty_shootout_attempts_goalkeeper_id_fkey"
+            columns: ["goalkeeper_id"]
+            isOneToOne: false
+            referencedRelation: "player_season_stats"
             referencedColumns: ["id"]
           },
           {
@@ -762,6 +888,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "match"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "penalty_shootout_attempts_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "player_match_stats"
+            referencedColumns: ["match_id"]
           },
           {
             foreignKeyName: "penalty_shootout_attempts_player_id_fkey"
@@ -774,7 +907,28 @@ export type Database = {
             foreignKeyName: "penalty_shootout_attempts_player_id_fkey"
             columns: ["player_id"]
             isOneToOne: false
+            referencedRelation: "player_career_stats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "penalty_shootout_attempts_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
             referencedRelation: "player_details"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "penalty_shootout_attempts_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "player_match_stats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "penalty_shootout_attempts_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "player_season_stats"
             referencedColumns: ["id"]
           },
           {
@@ -880,6 +1034,13 @@ export type Database = {
             referencedRelation: "people"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "person_na_affiliation_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "player_details"
+            referencedColumns: ["person_id"]
+          },
         ]
       }
       player: {
@@ -934,6 +1095,13 @@ export type Database = {
             isOneToOne: true
             referencedRelation: "people"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "player_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: true
+            referencedRelation: "player_details"
+            referencedColumns: ["person_id"]
           },
         ]
       }
@@ -990,7 +1158,28 @@ export type Database = {
             foreignKeyName: "player_team_tenure_player_id_fkey"
             columns: ["player_id"]
             isOneToOne: false
+            referencedRelation: "player_career_stats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "player_team_tenure_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
             referencedRelation: "player_details"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "player_team_tenure_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "player_match_stats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "player_team_tenure_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "player_season_stats"
             referencedColumns: ["id"]
           },
           {
@@ -1136,7 +1325,28 @@ export type Database = {
             foreignKeyName: "season_awards_player_id_fkey"
             columns: ["player_id"]
             isOneToOne: false
+            referencedRelation: "player_career_stats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "season_awards_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
             referencedRelation: "player_details"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "season_awards_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "player_match_stats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "season_awards_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "player_season_stats"
             referencedColumns: ["id"]
           },
           {
@@ -1192,7 +1402,28 @@ export type Database = {
             foreignKeyName: "squad_player_player_id_fkey"
             columns: ["player_id"]
             isOneToOne: false
+            referencedRelation: "player_career_stats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "squad_player_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
             referencedRelation: "player_details"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "squad_player_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "player_match_stats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "squad_player_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "player_season_stats"
             referencedColumns: ["id"]
           },
           {
@@ -1382,6 +1613,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "team_coach_tenure_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "player_details"
+            referencedColumns: ["person_id"]
+          },
+          {
             foreignKeyName: "team_coach_tenure_team_id_fkey"
             columns: ["team_id"]
             isOneToOne: false
@@ -1512,6 +1750,55 @@ export type Database = {
       }
     }
     Views: {
+      player_career_stats: {
+        Row: {
+          aka: string | null
+          appearances: number | null
+          assists: number | null
+          clean_sheets: number | null
+          competition: string | null
+          competition_category:
+            | Database["football"]["Enums"]["competition_category"]
+            | null
+          competition_id: string | null
+          competition_type:
+            | Database["football"]["Enums"]["competition_type"]
+            | null
+          full_name: string | null
+          goalkeeper: boolean | null
+          goals: number | null
+          id: string | null
+          minutes_played: number | null
+          own_goals: number | null
+          penalties: number | null
+          penalties_missed: number | null
+          penalties_taken: number | null
+          penalty_saves: number | null
+          red_cards: number | null
+          saves: number | null
+          second_yellows: number | null
+          starter: number | null
+          team_id: string | null
+          team_type: Database["football"]["Enums"]["team_type"] | null
+          yellow_cards: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "match_lineup_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "team"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "season_competition_id_fkey"
+            columns: ["competition_id"]
+            isOneToOne: false
+            referencedRelation: "competition"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       player_details: {
         Row: {
           aka: string | null
@@ -1532,6 +1819,7 @@ export type Database = {
           label: string | null
           last_name: string | null
           nationality_country_id: string | null
+          person_id: string | null
           preferred_foot: Database["football"]["Enums"]["preferred_foot"] | null
           search_text: string | null
           team_id: string | null
@@ -1558,6 +1846,120 @@ export type Database = {
             columns: ["team_id"]
             isOneToOne: false
             referencedRelation: "team"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      player_match_stats: {
+        Row: {
+          aka: string | null
+          appearance: boolean | null
+          assists: number | null
+          away_score: number | null
+          away_team_id: string | null
+          clean_sheet: boolean | null
+          full_name: string | null
+          goals: number | null
+          home_score: number | null
+          home_team_id: string | null
+          id: string | null
+          kickoff_time: string | null
+          match_id: string | null
+          minutes_played: number | null
+          own_goals: number | null
+          penalties: number | null
+          penalties_missed: number | null
+          penalties_taken: number | null
+          penalty_saves: number | null
+          position_id: string | null
+          red_cards: number | null
+          result: string | null
+          saves: number | null
+          season_id: string | null
+          second_yellows: number | null
+          starter: boolean | null
+          team_id: string | null
+          yellow_cards: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "match_away_team_id_fkey"
+            columns: ["away_team_id"]
+            isOneToOne: false
+            referencedRelation: "team"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "match_home_team_id_fkey"
+            columns: ["home_team_id"]
+            isOneToOne: false
+            referencedRelation: "team"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "match_lineup_position_id_fkey"
+            columns: ["position_id"]
+            isOneToOne: false
+            referencedRelation: "position"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "match_lineup_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "team"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "match_season_id_fkey"
+            columns: ["season_id"]
+            isOneToOne: false
+            referencedRelation: "season"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      player_season_stats: {
+        Row: {
+          aka: string | null
+          appearances: number | null
+          assists: number | null
+          clean_sheets: number | null
+          end_date: string | null
+          full_name: string | null
+          goalkeeper: boolean | null
+          goals: number | null
+          id: string | null
+          minutes_played: number | null
+          own_goals: number | null
+          penalties: number | null
+          penalties_missed: number | null
+          penalties_taken: number | null
+          penalty_saves: number | null
+          red_cards: number | null
+          saves: number | null
+          season: string | null
+          season_id: string | null
+          second_yellows: number | null
+          start_date: string | null
+          starter: number | null
+          team_id: string | null
+          team_type: Database["football"]["Enums"]["team_type"] | null
+          yellow_cards: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "match_lineup_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "team"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "match_season_id_fkey"
+            columns: ["season_id"]
+            isOneToOne: false
+            referencedRelation: "season"
             referencedColumns: ["id"]
           },
         ]
@@ -1642,6 +2044,7 @@ export type Database = {
         | "injured_player"
       match_event_type:
         | "goal"
+        | "save"
         | "red_card"
         | "yellow_card"
         | "second_yellow_card"
@@ -1866,6 +2269,7 @@ export const Constants = {
       ],
       match_event_type: [
         "goal",
+        "save",
         "red_card",
         "yellow_card",
         "second_yellow_card",

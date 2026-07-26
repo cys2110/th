@@ -42,20 +42,25 @@ const getIcon = (type: string) => {
     case "goal":
       return ICONS.football
     case "injury":
-      return "icon-park-twotone:red-cross"
+      return ICONS.injury
     case "substitution":
-      return "line-md:arrows-horizontal"
-    case "penalty_missed":
+      return ICONS.substitution
+    case "save":
     case "penalty_saved":
-      return "tabler:ball-football-off"
+      return ICONS.keeper
+    case "penalty_missed":
+      return ICONS.football_off
+    case "second_yellow_card":
+      return ICONS.second_card
     default:
-      return "icon-park-twotone:rectangle"
+      return ICONS.card
   }
 }
 
 const getTextColour = (type: string) => {
   switch (type) {
     case "goal":
+    case "save":
       return "text-success"
     case "injury":
     case "red_card":
@@ -93,17 +98,18 @@ const sortPlayers = (a: any, b: any) => {
 const getPlayerIcon = (role: string) => {
   switch (role) {
     case "keeper":
-      return "game-icons:goal-keeper"
+      return ICONS.keeper
     case "scorer":
       return ICONS.football
     case "sub_on":
-      return "line-md:arrow-right"
+      return ICONS.sub_on
     case "sub_off":
-      return "line-md:arrow-left"
+      return ICONS.sub_off
     case "assist":
+      return ICONS.assist
     case "penalty_taker":
     case "own_goal_scorer":
-      return "game-icons:soccer-kick"
+      return ICONS.player
     default:
       return undefined
   }

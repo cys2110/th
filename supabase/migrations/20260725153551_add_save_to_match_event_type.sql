@@ -1,0 +1,1 @@
+ALTER TYPE football.match_event_type ADD VALUE 'save' AFTER 'goal';

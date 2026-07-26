@@ -1,10 +1,22 @@
 export default {
+  assist: "material-symbols-light:shoe-cleats-outline",
+  bench: "fluent:bench-20-regular",
   calendar: "icon-park-twotone:calendar-dot",
+  card: "icon-park-twotone:rectangle",
   football: "game-icons:soccer-ball",
+  football_off: "tabler:ball-football-off",
   globe: "material-symbols-light:globe",
+  injury: "icon-park-twotone:red-cross",
+  keeper: "game-icons:goal-keeper",
+  pitch: "game-icons:soccer-field",
   player: "game-icons:soccer-kick",
   save: "icon-park-twotone:save-one",
+  second_card: "streamline:cards-remix",
+  sub_on: "line-md:arrow-right",
+  sub_off: "line-md:arrow-left",
+  substitution: "line-md:arrows-horizontal",
   team: "fluent:people-team-20-regular",
   uploading: "line-md:uploading-loop",
+  whistle: "game-icons:whistle",
   world: "icon-park-twotone:globe"
 }

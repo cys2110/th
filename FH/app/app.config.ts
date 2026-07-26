@@ -7,7 +7,9 @@ export default defineAppConfig({
       info: "indigo",
       error: "red",
       success: "emerald",
-      neutral: "slate"
+      neutral: "slate",
+      yellow: "yellow",
+      orange: "orange"
     },
     icons: {
       arrowLeft: "line-md:arrow-left-circle-twotone",

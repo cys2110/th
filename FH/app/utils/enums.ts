@@ -35,8 +35,8 @@ export const MatchDecisionEnum = z.enum(
 )
 
 export const MatchEventType = z.enum(
-  ["goal", "red_card", "yellow_card", "second_yellow_card", "penalty_missed", "penalty_saved", "own_goal", "substitution", "injury"],
-  `Match event type must be one of ${["goal", "red_card", "yellow_card", "second_yellow_card", "penalty_missed", "penalty_saved", "own_goal", "substitution", "injury"].join(", ")}`
+  ["goal", "red_card", "yellow_card", "second_yellow_card", "penalty_missed", "penalty_saved", "own_goal", "substitution", "injury", "save"],
+  `Match event type must be one of ${["goal", "red_card", "yellow_card", "second_yellow_card", "penalty_missed", "penalty_saved", "own_goal", "substitution", "injury", "save"].join(", ")}`
 )
 
 export const MatchEventRole = z.enum(

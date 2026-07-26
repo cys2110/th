@@ -24,7 +24,8 @@ SELECT
     p.current_team_id AS team_id,
     CASE WHEN t.short_name IS NULL THEN t.name ELSE t.short_name END AS team_name,
     t.logo_url AS team_logo,
-    p.current_position
+    p.current_position,
+    pe.id AS person_id
 FROM football.player p
 JOIN football.people pe ON pe.id = p.person_id
 JOIN football.country c ON c.id = pe.nationality_country_id

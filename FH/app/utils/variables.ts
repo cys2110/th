@@ -60,7 +60,8 @@ export const MATCH_EVENT_TYPE_MAPPING: Record<MatchEventType, string> = {
   penalty_saved: "Penalty Saved",
   own_goal: "Own Goal",
   substitution: "Substitution",
-  injury: "Injury"
+  injury: "Injury",
+  save: "Save"
 }
 
 export const MATCH_EVENT_ROLE_MAPPING: Record<MatchEventRole, string> = {
@@ -125,6 +126,7 @@ export const TEAM_TYPE_MAPPING: Record<TeamType, string> = {
   national_team: "National",
   representative_team: "Representative"
 }
+export const TEAM_TYPES = Object.entries(TEAM_TYPE_MAPPING).map(([key, value]) => ({ label: value, value: key }))
 
 export const COMPETITION_TYPE_MAPPING: Record<CompetitionType, string> = {
   league: "League",
@@ -134,12 +136,14 @@ export const COMPETITION_TYPE_MAPPING: Record<CompetitionType, string> = {
   super_cup: "Super Cup",
   tournament: "Tournament"
 }
+export const COMPETITION_TYPES = Object.entries(COMPETITION_TYPE_MAPPING).map(([key, value]) => ({ label: value, value: key }))
 
 export const COMPETITION_CATEGORY_MAPPING: Record<CompetitionCategory, string> = {
   domestic: "Domestic",
   continental: "Continental",
   international: "International"
 }
+export const COMPETITION_CATEGORIES = Object.entries(COMPETITION_CATEGORY_MAPPING).map(([key, value]) => ({ label: value, value: key }))
 
 export const AFFILIATION_TYPE_MAPPING: Record<AffiliationType, string> = {
   birth: "Birth",

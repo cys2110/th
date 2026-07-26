@@ -190,6 +190,7 @@ onMounted(() => {
             value-key="value"
             multiple
             @update:model-value="updateRouteQuery('position', $event as string[])"
+            :icon="ICONS.pitch"
             class="w-full"
           />
         </u-page-aside>
@@ -212,6 +213,7 @@ onMounted(() => {
             <empty
               title="No players found"
               icon="fluent:people-team-delete-20-regular"
+              @refresh="refresh"
             />
           </template>
 
