@@ -1,23 +1,20 @@
 <script setup lang="ts">
+import { ICONS } from "#imports"
 import type { NavigationMenuItem } from "@nuxt/ui"
 
 const route = useRoute()
 const router = useRouter()
-
-const {
-  ui: { icons }
-} = useAppConfig()
-
+const { ui } = useAppConfig()
 const supabase = useSupabaseClient()
 
-const viewModeStore = useViewModeStore()
+// const viewModeStore = useViewModeStore()
 const { isLoggedIn } = useAuthState()
 
 // Navigation menu items
 const navLinks = computed<Array<NavigationMenuItem>>(() => [
   {
     label: "Results",
-    icon: ICONS.years,
+    icon: ICONS.calendar,
     active: route.name === "results-archive",
     to: { name: "results-archive" }
   },
@@ -40,27 +37,27 @@ const navLinks = computed<Array<NavigationMenuItem>>(() => [
   },
   {
     label: "More",
-    icon: icons.ellipsis,
+    icon: ui.icons.ellipsis,
     defaultOpen: true,
     children: [
-      { label: "Countries", icon: ICONS.globe, to: { name: "countries" } },
+      { label: "Countries", icon: ICONS.world, to: { name: "countries" } },
       { label: "Years", icon: ICONS.years, to: { name: "years" } },
-      { label: "About", icon: icons.info, to: { name: "about" } }
+      { label: "About", icon: ui.icons.info, to: { name: "about" } }
     ]
   }
 ])
 
-const showViewSwitcher = computed(() => {
-  const currentRouteName = route.name
-  const viewSwitcherRoutes = ["tournaments", "tournament", "results", "players", "countries"]
-  return viewSwitcherRoutes.includes(currentRouteName)
-})
+// const showViewSwitcher = computed(() => {
+//   const currentRouteName = route.name
+//   const viewSwitcherRoutes = ["results-archive", "tournaments", "tournament", "results", "players", "countries"]
+//   return viewSwitcherRoutes.includes(currentRouteName)
+// })
 
 const handleAuthState = async () => {
   if (isLoggedIn.value) {
     await supabase.auth.signOut()
   } else {
-    router.push({ name: "signin" })
+    router.push({ name: "login" })
   }
 }
 </script>
@@ -71,18 +68,18 @@ const handleAuthState = async () => {
     mode="drawer"
   >
     <template #right>
-      <search />
+      <!-- <search /> -->
 
-      <u-button
+      <!-- <u-button
         v-if="showViewSwitcher"
         variant="ghost"
         :icon="viewModeStore.isTableView ? ICONS.table : ICONS.cards"
         @click="viewModeStore.toggleViewMode"
         color="neutral"
-      />
+      /> -->
 
       <u-button
-        :icon="isLoggedIn ? 'solar:logout-2-line-duotone' : 'solar:login-2-line-duotone'"
+        :icon="isLoggedIn ? 'solar:logout-line-duotone' : ICONS.logIn"
         @click="handleAuthState"
         color="neutral"
         variant="ghost"

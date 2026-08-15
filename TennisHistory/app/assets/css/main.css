@@ -18,19 +18,6 @@ input::-webkit-inner-spin-button {
   --font-sans: "Jost", sans-serif;
   --font-cursive: "Homemade Apple", cursive;
   --container-8xl: 120rem;
-  /* --draw-width: "max-content";
-  --draw-heigth: 100%;
-  --main-vertical-padding: 20px;
-  --round-titles-vertical-padding: 8px;
-  --nav-button-padding: 4px;
-  --nav-buttons-top-distance: 50%;
-  --connection-lines-width: 2px;
-  --match-max-width: 1000px;
-  --match-min-vertical-gap: 25px;
-  --match-hor-margin: 20px;
-  --match-axis-margin: 4px;
-  --one-side-players-gap: 2px;
-  --distance-between-score-pairs: 14px; */
 }
 
 @layer base {

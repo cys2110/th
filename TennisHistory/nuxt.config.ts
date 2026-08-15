@@ -44,33 +44,33 @@ export default defineNuxtConfig({
   // Imports not required
   imports: {
     presets: [
-      {
-        from: "@vueuse/core",
-        imports: [
-          "breakpointsTailwind",
-          "useBreakpoints",
-          "provideSSRWidth",
-          "useSSRWidth",
-          "createReusableTemplate",
-          "useInfiniteScroll",
-          "useDateFormat",
-          "isDefined",
-          "get",
-          "set",
-          "useSorted",
-          "useArrayUnique",
-          "useArrayFilter",
-          "useArrayMap",
-          "useArrayJoin",
-          "useArrayFindLast",
-          "useArraySome",
-          "useArrayEvery",
-          "useLocalStorage",
-          "watchDeep",
-          "watchImmediate",
-          "watchOnce"
-        ]
-      },
+      // {
+      //   from: "@vueuse/core",
+      //   imports: [
+      //     "breakpointsTailwind",
+      //     "useBreakpoints",
+      //     "provideSSRWidth",
+      //     "useSSRWidth",
+      //     "createReusableTemplate",
+      //     "useInfiniteScroll",
+      //     "useDateFormat",
+      //     "isDefined",
+      //     "get",
+      //     "set",
+      //     "useSorted",
+      //     "useArrayUnique",
+      //     "useArrayFilter",
+      //     "useArrayMap",
+      //     "useArrayJoin",
+      //     "useArrayFindLast",
+      //     "useArraySome",
+      //     "useArrayEvery",
+      //     "useLocalStorage",
+      //     "watchDeep",
+      //     "watchImmediate",
+      //     "watchOnce"
+      //   ]
+      // },
       {
         from: "@vueuse/router",
         imports: ["useRouteQuery"]

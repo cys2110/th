@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { provideSSRWidth } from "@vueuse/core"
+
 useHead({
   titleTemplate: "%s %separator %category %separator %siteName",
   templateParams: {
@@ -17,9 +19,9 @@ provide(
   THEME_KEY,
   computed(() => (colorMode.value === "dark" ? "dark" : "light"))
 )
-provide(LOADING_OPTIONS_KEY, {
-  maskColor: computed(() => (colorMode.value === "dark" ? COLOURS.light.slate : COLOURS.dark.slate)).value
-})
+// provide(LOADING_OPTIONS_KEY, {
+//   maskColor: computed(() => (colorMode.value === "dark" ? COLOURS.light.slate : COLOURS.dark.slate)).value
+// })
 </script>
 
 <template>

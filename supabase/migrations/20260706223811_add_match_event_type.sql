@@ -1,1 +1,0 @@
-ALTER TYPE football.match_event_type ADD VALUE 'second_yellow_card' AFTER 'yellow_card';

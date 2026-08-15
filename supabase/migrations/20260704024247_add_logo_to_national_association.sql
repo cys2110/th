@@ -1,1 +1,0 @@
-ALTER TABLE football.national_association ADD COLUMN logo_url TEXT;
