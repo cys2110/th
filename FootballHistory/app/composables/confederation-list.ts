@@ -13,7 +13,7 @@ export const useConfederationList = () => {
     set(pending, true)
 
     try {
-      const { data, error } = await supabase.from("confederation").select("id, name").order("id", { ascending: true })
+      const { data, error } = await supabase.schema("football").from("confederation").select("id, name").order("id", { ascending: true })
 
       if (error || !data) {
         console.error("Error fetching confederations:", error)

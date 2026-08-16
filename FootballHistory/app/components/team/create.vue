@@ -4,7 +4,6 @@ import { set } from "@vueuse/core"
 import type { FormErrorEvent, FormSubmitEvent } from "@nuxt/ui"
 import { ACCEPTED_IMAGE_TYPES, MAX_FILE_SIZE } from "~/utils/variables"
 import { deburr, snakeCase } from "lodash"
-import { ICONS } from "#imports"
 
 const schema = object({
   name: string().min(1, "Name is required"),
@@ -79,7 +78,10 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
       logoUrl = publicUrlData.publicUrl
     }
 
-    const { error } = await supabase.from("team").insert({ ...rest, country_id: country?.id, logo_url: logoUrl, home_venue_id: home_venue?.id })
+    const { error } = await supabase
+      .schema("football")
+      .from("team")
+      .insert({ ...rest, country_id: country?.id, logo_url: logoUrl, home_venue_id: home_venue?.id })
 
     if (error) {
       throw new Error(`Error creating team: ${error.message}`)

@@ -22,6 +22,7 @@ const {
   () => `match-penalties-${route.params.match_id}`,
   async () => {
     const { data, error } = await supabase
+      .schema("football")
       .from("penalty_shootout_attempt")
       .select(
         `

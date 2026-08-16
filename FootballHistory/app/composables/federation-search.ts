@@ -7,7 +7,7 @@ export const useFederationSearch = () => {
   const searchTerm = ref()
 
   const federationQuery = () => {
-    const query = supabase.from("federation").select("*, ...country(icon)").limit(40).order("name", { ascending: true })
+    const query = supabase.schema("football").from("federation").select("*, ...country(icon)").limit(40).order("name", { ascending: true })
 
     if (toValue(searchTerm)) {
       query.ilike("name", `%${toValue(searchTerm)}%`)

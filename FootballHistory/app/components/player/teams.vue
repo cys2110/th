@@ -11,6 +11,7 @@ const toast = useToast()
 
 const teamsQuery = () =>
   supabase
+    .schema("football")
     .from("player_team_tenure")
     .select("*, team!team_id(name, short_name, logo_url), parent_team:team!parent_team_id(name, short_name, logo_url)")
     .eq("player_id", route.params.id)

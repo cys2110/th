@@ -21,6 +21,7 @@ const {
   () => `match-lineups-${route.params.match_id}`,
   async () => {
     const { data, error } = await supabase
+      .schema("football")
       .from("match_lineup")
       .select("team_id, shirt_number, starter, captain, position, ...player(id, aka, ...people(full_name, ...country!nationality_country_id(icon)))")
       .eq("match_id", route.params.match_id)

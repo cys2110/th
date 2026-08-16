@@ -8,7 +8,7 @@ export const useTeamSearch = (teamIds?: Ref<string[]>) => {
   const searchTerm = ref()
 
   const teamQuery = () => {
-    const query = supabase.from("team").select("*").limit(40).order("name", { ascending: true })
+    const query = supabase.schema("football").from("team").select("*").limit(40).order("name", { ascending: true })
 
     if (toValue(searchTerm)) {
       query.ilike("name", `%${toValue(searchTerm)}%`)

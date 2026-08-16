@@ -39,7 +39,7 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
   set(isSaving, true)
 
   try {
-    const { error } = await supabase.from("team_coach_tenure").insert({
+    const { error } = await supabase.schema("football").from("team_coach_tenure").insert({
       team_id: route.params.id,
       person_id: event.data.person.id,
       title: event.data.title,

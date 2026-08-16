@@ -16,7 +16,7 @@ const supabase = useSupabaseClient()
 const { data: statsArray, refresh } = await useAsyncData(
   () => `match-stats-${route.params.match_id}`,
   async () => {
-    const { data, error } = await supabase.from("match_stats").select("*").eq("match_id", route.params.match_id)
+    const { data, error } = await supabase.schema("football").from("match_stats").select("*").eq("match_id", route.params.match_id)
 
     if (error || !data) {
       console.error("Error fetching match stats:", error)

@@ -118,11 +118,14 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
       emblemUrl = publicUrlData.publicUrl
     }
 
-    const { error } = await supabase.from("competition").insert({
-      ...rest,
-      federation_id: federation?.id,
-      emblem_url: emblemUrl
-    })
+    const { error } = await supabase
+      .schema("football")
+      .from("competition")
+      .insert({
+        ...rest,
+        federation_id: federation?.id,
+        emblem_url: emblemUrl
+      })
 
     if (error) {
       throw new Error(`Error creating competition: ${error.message}`)

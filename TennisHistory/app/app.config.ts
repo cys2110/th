@@ -60,8 +60,78 @@ export default defineAppConfig({
       upload: "line-md:uploading",
       warning: "line-md:alert-twotone-loop"
     },
+    badge: {
+      slots: { base: "justify-center" },
+      defaultVariants: { variant: "subtle", size: "md" }
+    },
+    button: {
+      compoundVariants: [
+        {
+          loading: true,
+          leading: true,
+          class: { leadingIcon: "animate-none" }
+        }
+      ],
+      defaultVariants: { variant: "subtle", size: "xs" }
+    },
+    calendar: {
+      slots: { cellTrigger: "cursor-pointer" },
+      compoundVariants: [
+        {
+          color: "primary",
+          variant: "subtle",
+          class: {
+            cellTrigger: "hover:not-data-[selected]:bg-default"
+          }
+        }
+      ],
+      defaultVariants: {
+        size: "xs",
+        variant: "subtle"
+      }
+    },
+    checkbox: { slots: { label: "cursor-pointer" } },
+    contextMenu: { defaultVariants: { size: "md" } },
+    fileUpload: { slots: { root: "cursor-pointer" } },
     footerColumns: { slots: { center: "xl:col-span-3" } },
     header: { slots: { title: "font-cursive" } },
-    main: { base: "min-h-0 h-[calc(100vh-var(--ui-header-height))] overflow-y-auto" }
+    inputMenu: {
+      slots: {
+        content: "ring-primary cursor-pointer",
+        trailingIcon: "group-data-[state=open]:rotate-180 duration-250 cursor-pointer"
+      }
+    },
+    main: { base: "min-h-0 h-[calc(100vh-var(--ui-header-height))] overflow-y-auto" },
+    navigationMenu: { defaultVariants: { variant: "link" } },
+    select: {
+      slots: {
+        content: "ring-primary cursor-pointer",
+        trailingIcon: "group-data-[state=open]:rotate-180 duration-250"
+      }
+    },
+    selectMenu: {
+      slots: {
+        content: "ring-primary cursor-pointer min-w-fit",
+        trailingIcon: "group-data-[state=open]:rotate-180 duration-250"
+      }
+    },
+    table: {
+      slots: {
+        root: "scrollbar max-h-[calc(100vh-18rem)]",
+        th: "text-center",
+        tbody: "[&>tr]:data-[selectable=true]:cursor-pointer",
+        td: "py-1 text-center"
+      },
+      defaultVariants: { loadingAnimation: "swing" }
+    },
+    user: {
+      variants: {
+        size: {
+          "3xl": {
+            name: "text-3xl font-semibold"
+          }
+        }
+      }
+    }
   }
 })

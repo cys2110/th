@@ -48,7 +48,10 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
   try {
     const { country, ...rest } = event.data
 
-    const { error } = await supabase.from("venue").insert({ ...rest, country_id: country.id })
+    const { error } = await supabase
+      .schema("football")
+      .from("venue")
+      .insert({ ...rest, country_id: country.id })
 
     toast.add({
       title: error ? `Error creating ${venueName.value}` : `${venueName.value} successfully created!`,

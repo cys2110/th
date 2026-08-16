@@ -26,7 +26,7 @@ const { ui } = useAppConfig()
 const { data: competitions, pending } = await useAsyncData(
   "competitions",
   async () => {
-    const { data, error } = await supabase.from("competition").select("*").order("name", { ascending: true })
+    const { data, error } = await supabase.schema("football").from("competition").select("*").order("name", { ascending: true })
 
     if (error || !data) {
       console.error("Error fetching competitions:", error)
@@ -58,6 +58,7 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
     const { dates, ...rest } = event.data
 
     const { data, error } = await supabase
+      .schema("football")
       .from("season")
       .insert({
         ...rest,

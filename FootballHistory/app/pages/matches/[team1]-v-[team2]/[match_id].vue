@@ -16,6 +16,7 @@ const {
   () => `match-${route.params.match_id}`,
   async () => {
     const { data, error } = await supabase
+      .schema("football")
       .from("match")
       .select(
         `

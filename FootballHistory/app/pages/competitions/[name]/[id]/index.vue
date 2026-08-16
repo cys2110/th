@@ -11,7 +11,7 @@ const router = useRouter()
 const supabase = useSupabaseClient()
 
 const competitionQuery = () =>
-  supabase.from("competition").select("*, federation(*), confederation(*), seasons:season(*)").eq("code", route.params.id).single()
+  supabase.schema("football").from("competition").select("*, federation(*), confederation(*), seasons:season(*)").eq("code", route.params.id).single()
 
 type CompetitionType = QueryData<ReturnType<typeof competitionQuery>>
 

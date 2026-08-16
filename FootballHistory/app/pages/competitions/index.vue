@@ -13,7 +13,11 @@ const {
 } = await useAsyncData(
   "competitions",
   async () => {
-    const { data, error } = await supabase.from("competition").select("*, federation(*), confederation(*)").order("name", { ascending: true })
+    const { data, error } = await supabase
+      .schema("football")
+      .from("competition")
+      .select("*, federation(*), confederation(*)")
+      .order("name", { ascending: true })
 
     if (error || !data) {
       console.error("Error fetching competitions:", error)

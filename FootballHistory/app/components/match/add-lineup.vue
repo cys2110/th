@@ -43,6 +43,7 @@ const {
   () => `${route.params.match_id}-add-lineup-${props.teamId}`,
   async () => {
     const { data, error } = await supabase
+      .schema("football")
       .from("player")
       .select("id, aka, ...people(full_name, country:country!nationality_country_id(*)), squad_player!inner(id)")
       .eq("squad_player.season_id", props.seasonId)
@@ -74,18 +75,21 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
   set(isSaving, true)
 
   try {
-    const { error } = await supabase.from("match_lineup").insert(
-      event.data.map(lineup => {
-        const { player, ...rest } = lineup
+    const { error } = await supabase
+      .schema("football")
+      .from("match_lineup")
+      .insert(
+        event.data.map(lineup => {
+          const { player, ...rest } = lineup
 
-        return {
-          ...rest,
-          match_id: route.params.match_id,
-          team_id: props.teamId,
-          player_id: player.id
-        }
-      })
-    )
+          return {
+            ...rest,
+            match_id: route.params.match_id,
+            team_id: props.teamId,
+            player_id: player.id
+          }
+        })
+      )
 
     if (error) {
       console.error("Error creating match lineups:", error)

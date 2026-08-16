@@ -20,6 +20,7 @@ const {
   () => `season-${route.params.id}-${route.params.season}`,
   async () => {
     const { data, error } = await supabase
+      .schema("football")
       .from("season")
       .select("*, competition!inner(name, code, type)")
       .eq("competition.code", route.params.id)

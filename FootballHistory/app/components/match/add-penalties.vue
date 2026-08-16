@@ -41,6 +41,7 @@ const {
   () => `match-lineups-${route.params.match_id}`,
   async () => {
     const { data, error } = await supabase
+      .schema("football")
       .from("match_lineup")
       .select("team_id, shirt_number, starter, captain, position, ...player(id, aka, ...people(full_name, ...country!nationality_country_id(icon)))")
       .eq("match_id", route.params.match_id)
@@ -91,19 +92,22 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
   set(isSaving, true)
 
   try {
-    const { error } = await supabase.from("penalty_shootout_attempt").insert(
-      event.data.map(penalty => {
-        const { player, goalkeeper, team, ...rest } = penalty
+    const { error } = await supabase
+      .schema("football")
+      .from("penalty_shootout_attempt")
+      .insert(
+        event.data.map(penalty => {
+          const { player, goalkeeper, team, ...rest } = penalty
 
-        return {
-          ...rest,
-          team_id: team.id,
-          goalkeeper_id: goalkeeper.id,
-          player_id: penalty.player.id,
-          match_id: route.params.match_id
-        }
-      })
-    )
+          return {
+            ...rest,
+            team_id: team.id,
+            goalkeeper_id: goalkeeper.id,
+            player_id: penalty.player.id,
+            match_id: route.params.match_id
+          }
+        })
+      )
 
     if (error) {
       console.error("Error creating penalties:", error)

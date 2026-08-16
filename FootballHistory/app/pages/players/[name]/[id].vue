@@ -11,7 +11,8 @@ const supabase = useSupabaseClient()
 const toast = useToast()
 const { ui } = useAppConfig()
 
-const playerQuery = () => supabase.from("player_details").select("*, country!nationality_country_id(name)").eq("id", route.params.id).single()
+const playerQuery = () =>
+  supabase.schema("football").from("player_details").select("*, country!nationality_country_id(name)").eq("id", route.params.id).single()
 
 type PlayerType = QueryData<ReturnType<typeof playerQuery>>
 
@@ -131,7 +132,7 @@ const handleSave = async () => {
   let updateError = []
 
   if (Object.keys(playerEditedFields).length) {
-    const { error } = await supabase.from("player").update(playerEditedFields).eq("id", route.params.id)
+    const { error } = await supabase.schema("football").from("player").update(playerEditedFields).eq("id", route.params.id)
 
     if (error) updateError.push(error)
   }

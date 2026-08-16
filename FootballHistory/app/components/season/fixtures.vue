@@ -15,6 +15,7 @@ const seasonName = computed(() => decodeURIComponent(route.params.season as stri
 
 const fixturesQuery = (competitionId: string) =>
   supabase
+    .schema("football")
     .from("match")
     .select(
       `
@@ -39,7 +40,12 @@ const {
 } = await useAsyncData(
   () => `${route.params.id}-${route.params.season}-fixtures`,
   async () => {
-    const { data: competitionData, error: competitionError } = await supabase.from("competition").select("id").eq("code", route.params.id).single()
+    const { data: competitionData, error: competitionError } = await supabase
+      .schema("football")
+      .from("competition")
+      .select("id")
+      .eq("code", route.params.id)
+      .single()
 
     if (competitionError || !competitionData) {
       console.error("Error fetching competition:", competitionError)

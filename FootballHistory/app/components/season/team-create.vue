@@ -41,7 +41,7 @@ const handleReset = () => {
 const fetchGroups = async () => {
   set(groupLoading, true)
 
-  const { data, error } = await supabase.from("group").select("*").eq("season_id", props.seasonId)
+  const { data, error } = await supabase.schema("football").from("group").select("*").eq("season_id", props.seasonId)
 
   if (error) {
     console.error("Error fetching groups:", error)
@@ -55,7 +55,10 @@ const fetchGroups = async () => {
 const onSubmit = async () => {
   set(isSaving, true)
 
-  const { error } = await supabase.from("team_season").insert(teams.value.map(team => ({ team_id: team, season_id: props.seasonId })))
+  const { error } = await supabase
+    .schema("football")
+    .from("team_season")
+    .insert(teams.value.map(team => ({ team_id: team, season_id: props.seasonId })))
 
   toast.add({
     title: error ? `Error adding teams` : `Teams successfully added!`,
@@ -68,13 +71,16 @@ const onSubmit = async () => {
     set(errors, error)
   } else {
     if (insertStandings.value) {
-      const { error: standingsError } = await supabase.from("standing").insert(
-        teams.value.map(team => ({
-          season_id: props.seasonId,
-          team_id: team,
-          group_id: groupId.value
-        }))
-      )
+      const { error: standingsError } = await supabase
+        .schema("football")
+        .from("standing")
+        .insert(
+          teams.value.map(team => ({
+            season_id: props.seasonId,
+            team_id: team,
+            group_id: groupId.value
+          }))
+        )
 
       if (standingsError) {
         console.error("Error creating standings:", standingsError)
@@ -83,7 +89,10 @@ const onSubmit = async () => {
       }
 
       if (groupId.value) {
-        const { error: groupError } = await supabase.from("group_team").insert(teams.value.map(team => ({ group_id: groupId.value!, team_id: team })))
+        const { error: groupError } = await supabase
+          .schema("football")
+          .from("group_team")
+          .insert(teams.value.map(team => ({ group_id: groupId.value!, team_id: team })))
 
         if (groupError) {
           console.error("Error creating group team:", groupError)

@@ -6,6 +6,7 @@ const { data, pending, refresh } = await useAsyncData(
   () => `season-stats-${route.params.id}`,
   async () => {
     const { data, error } = await supabase
+      .schema("football")
       .from("player_season_stats")
       .select("*, season_table:season(competition(name)), team(name, short_name, logo_url)")
       .eq("id", route.params.id)

@@ -52,6 +52,7 @@ const {
   () => `match-players-${route.params.match_id}`,
   async () => {
     const { data, error } = await supabase
+      .schema("football")
       .from("match_lineup")
       .select("position, ...player(id, aka, ...people(full_name, ...country!nationality_country_id(icon)))")
       .eq("match_id", route.params.match_id)
@@ -89,6 +90,7 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
       const { players, team, ...rest } = matchEvent
 
       const { data, error } = await supabase
+        .schema("football")
         .from("match_event")
         .insert({
           ...rest,
@@ -102,13 +104,16 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
         throw new Error(`Error creating match event: ${error.message}`)
       }
 
-      const { error: eventPlayerError } = await supabase.from("match_event_player").insert(
-        players.map(player => ({
-          match_event_id: data[0]!.id,
-          player_id: player!.player!.id,
-          role: player!.role
-        }))
-      )
+      const { error: eventPlayerError } = await supabase
+        .schema("football")
+        .from("match_event_player")
+        .insert(
+          players.map(player => ({
+            match_event_id: data[0]!.id,
+            player_id: player!.player!.id,
+            role: player!.role
+          }))
+        )
 
       if (eventPlayerError) {
         console.error("Error creating match event player:", eventPlayerError)

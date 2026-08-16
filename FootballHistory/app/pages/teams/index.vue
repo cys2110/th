@@ -9,7 +9,8 @@ useHead({ title: "Teams" })
 const supabase = useSupabaseClient()
 const router = useRouter()
 
-const teamsQuery = () => supabase.from("team").select("*, country(*)").order("short_name", { ascending: true }).order("name", { ascending: true })
+const teamsQuery = () =>
+  supabase.schema("football").from("team").select("*, country(*)").order("short_name", { ascending: true }).order("name", { ascending: true })
 
 const {
   data: teams,

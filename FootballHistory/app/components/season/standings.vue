@@ -14,6 +14,7 @@ const supabase = useSupabaseClient()
 
 const standingQuery = () =>
   supabase
+    .schema("football")
     .from("standing")
     .select("*, team(name, short_name, logo_url)")
     .eq("season_id", props.seasonId)

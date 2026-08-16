@@ -1,11 +1,23 @@
 export default {
   calendar: "solar:calendar-line-duotone",
+  calendarOff: "material-symbols-light:event-busy-outline-rounded",
+  filter: "line-md:filter-twotone",
+  globe: "material-symbols-light:globe",
   h2h: "pepicons-pencil:swords-circle",
   logIn: "solar:login-line-duotone",
   logout: "solar:logout-line-duotone",
   player: "map:tennis",
   racquet: "material-symbols-light:sports-tennis-outline-rounded",
+  save: "icon-park-twotone:save-one",
+  sort: "material-symbols-light:arrows-up-down-circle-outline-rounded",
+  sortAsc: "material-symbols-light:arrow-cool-down-rounded",
+  sortDesc: "material-symbols-light:arrow-warm-up-rounded",
+  stats: "icon-park-twotone:market-analysis",
+  tour: "icon-park-twotone:public-toilet",
   trophy: "icon-park-twotone:trophy",
+  trophyOff: "pepicons-pencil:trophy-circle-off",
+  uploading: "line-md:uploading-loop",
+  venue: "material-symbols-light:stadium-outline-rounded",
   world: "icon-park-twotone:globe",
   years: "solar:calendar-minimalistic-bold-duotone"
 }

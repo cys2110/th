@@ -51,13 +51,16 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
   try {
     const { nationality, birth_country, dob, dod, ...rest } = event.data
 
-    const { error } = await supabase.from("people").insert({
-      ...rest,
-      nationality_country_id: nationality?.id,
-      birth_country_id: birth_country?.id,
-      dob: dob?.toString(),
-      dod: dod?.toString()
-    })
+    const { error } = await supabase
+      .schema("football")
+      .from("people")
+      .insert({
+        ...rest,
+        nationality_country_id: nationality?.id,
+        birth_country_id: birth_country?.id,
+        dob: dob?.toString(),
+        dod: dod?.toString()
+      })
 
     toast.add({
       title:

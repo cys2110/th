@@ -13,7 +13,7 @@ export const useTeamList = () => {
     set(pending, true)
 
     try {
-      const { data, error } = await supabase.from("team").select("*").order("name", { ascending: true })
+      const { data, error } = await supabase.schema("football").from("team").select("*").order("name", { ascending: true })
 
       if (error || !data) {
         console.error("Error fetching teams:", error)

@@ -9,6 +9,7 @@ const supabase = useSupabaseClient()
 
 const captainQuery = () =>
   supabase
+    .schema("football")
     .from("team_captain")
     .select(
       `

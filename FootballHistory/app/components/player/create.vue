@@ -43,10 +43,13 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
   try {
     const { player, ...rest } = event.data
 
-    const { error } = await supabase.from("player").insert({
-      ...rest,
-      person_id: player.id
-    })
+    const { error } = await supabase
+      .schema("football")
+      .from("player")
+      .insert({
+        ...rest,
+        person_id: player.id
+      })
 
     if (error) {
       console.error("Error creating player:", error)

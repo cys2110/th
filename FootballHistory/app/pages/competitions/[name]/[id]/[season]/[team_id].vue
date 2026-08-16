@@ -17,7 +17,12 @@ const {
 } = await useAsyncData(
   () => `team-season-${route.params.id}-${route.params.season}-${route.params.team_id}`,
   async () => {
-    const { data: competitionData, error: competitionError } = await supabase.from("competition").select("id").eq("code", route.params.id).single()
+    const { data: competitionData, error: competitionError } = await supabase
+      .schema("football")
+      .from("competition")
+      .select("id")
+      .eq("code", route.params.id)
+      .single()
 
     if (competitionError || !competitionData) {
       console.error("Error fetching competition:", competitionError)
@@ -25,6 +30,7 @@ const {
     }
 
     const { data, error } = await supabase
+      .schema("football")
       .from("team_season")
       .select(
         `

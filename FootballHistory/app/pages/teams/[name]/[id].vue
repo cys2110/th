@@ -18,7 +18,7 @@ const {
 } = await useAsyncData(
   () => `team-${route.params.id}`,
   async () => {
-    const { data, error } = await supabase.from("team").select("*, country(*), venue(*)").eq("id", route.params.id).single()
+    const { data, error } = await supabase.schema("football").from("team").select("*, country(*), venue(*)").eq("id", route.params.id).single()
 
     if (error || !data) {
       console.error("Error fetching team:", error)

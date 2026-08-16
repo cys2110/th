@@ -15,6 +15,7 @@ const {
   () => `match-stats-${route.params.id}`,
   async () => {
     const { data, error } = await supabase
+      .schema("football")
       .from("player_match_stats")
       .select(
         "*, season(name, competition(id, name)), home_team:team!home_team_id(name, short_name, logo_url), away_team:team!away_team_id(name, short_name, logo_url)"

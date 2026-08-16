@@ -21,6 +21,7 @@ const {
   () => `match-events-${route.params.match_id}`,
   async () => {
     const { data, error } = await supabase
+      .schema("football")
       .from("match_event")
       .select("*, players:match_event_player(role, ...player(id, aka, ...people(full_name, country!nationality_country_id(*))))")
       .eq("match_id", route.params.match_id)

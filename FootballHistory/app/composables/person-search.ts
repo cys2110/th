@@ -7,7 +7,7 @@ export const usePersonSearch = () => {
   const searchTerm = ref()
 
   const personQuery = () => {
-    const query = supabase.rpc("search_people", { search_term: toValue(searchTerm) || null })
+    const query = supabase.schema("football").rpc("search_people", { search_term: toValue(searchTerm) || null })
 
     return query
   }

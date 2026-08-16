@@ -41,13 +41,16 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
   set(isSaving, true)
 
   try {
-    const { error } = await supabase.from("match_referee").insert(
-      event.data.map(referee => ({
-        match_id: route.params.match_id,
-        person_id: referee.person.id,
-        type: referee.referee_type
-      }))
-    )
+    const { error } = await supabase
+      .schema("football")
+      .from("match_referee")
+      .insert(
+        event.data.map(referee => ({
+          match_id: route.params.match_id,
+          person_id: referee.person.id,
+          type: referee.referee_type
+        }))
+      )
 
     if (error) {
       console.error("Error creating referees:", error)

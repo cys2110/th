@@ -7,7 +7,6 @@ const router = useRouter()
 const { ui } = useAppConfig()
 const supabase = useSupabaseClient()
 
-// const viewModeStore = useViewModeStore()
 const { isLoggedIn } = useAuthState()
 
 // Navigation menu items
@@ -47,12 +46,6 @@ const navLinks = computed<Array<NavigationMenuItem>>(() => [
   }
 ])
 
-// const showViewSwitcher = computed(() => {
-//   const currentRouteName = route.name
-//   const viewSwitcherRoutes = ["results-archive", "tournaments", "tournament", "results", "players", "countries"]
-//   return viewSwitcherRoutes.includes(currentRouteName)
-// })
-
 const handleAuthState = async () => {
   if (isLoggedIn.value) {
     await supabase.auth.signOut()
@@ -69,14 +62,6 @@ const handleAuthState = async () => {
   >
     <template #right>
       <!-- <search /> -->
-
-      <!-- <u-button
-        v-if="showViewSwitcher"
-        variant="ghost"
-        :icon="viewModeStore.isTableView ? ICONS.table : ICONS.cards"
-        @click="viewModeStore.toggleViewMode"
-        color="neutral"
-      /> -->
 
       <u-button
         :icon="isLoggedIn ? 'solar:logout-line-duotone' : ICONS.logIn"

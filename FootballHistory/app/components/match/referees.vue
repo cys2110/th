@@ -12,6 +12,7 @@ const {
   () => `match-referees-${route.params.match_id}`,
   async () => {
     const { data, error } = await supabase
+      .schema("football")
       .from("match_referee")
       .select("id, type, ...people(full_name, country!nationality_country_id(*))")
       .eq("match_id", route.params.match_id)

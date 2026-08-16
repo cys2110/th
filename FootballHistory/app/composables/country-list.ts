@@ -13,7 +13,7 @@ export const useCountryList = () => {
     set(pending, true)
 
     try {
-      const { data, error } = await supabase.from("country").select("*").order("name", { ascending: true })
+      const { data, error } = await supabase.schema("football").from("country").select("*").order("name", { ascending: true })
 
       if (error || !data) {
         console.error("Error fetching countries:", error)

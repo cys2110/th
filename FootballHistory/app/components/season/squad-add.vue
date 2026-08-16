@@ -34,6 +34,7 @@ const {
   () => `team-players-${JSON.stringify(route.params)}`,
   async () => {
     const { data, error } = await supabase
+      .schema("football")
       .from("player_team_tenure")
       .select("...player(id, aka, ...people(full_name, ...country!nationality_country_id(icon)))")
       .eq("team_id", route.params.team_id)

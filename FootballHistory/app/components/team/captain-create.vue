@@ -35,6 +35,7 @@ const {
   () => `team-players-${route.params.id}`,
   async () => {
     const { data, error } = await supabase
+      .schema("football")
       .from("player_team_tenure")
       .select("...player(id, aka, ...people(full_name, ...country!nationality_country_id(icon))), team_id")
       .eq("team_id", route.params.id)
@@ -65,7 +66,7 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
   set(isSaving, true)
 
   try {
-    const { error } = await supabase.from("team_captain").insert({
+    const { error } = await supabase.schema("football").from("team_captain").insert({
       team_id: route.params.id,
       player_id: event.data.player.id,
       captain_type: event.data.captain_type,

@@ -28,6 +28,7 @@ const {
   () => `match-award-players-${route.params.match_id}`,
   async () => {
     const { data, error } = await supabase
+      .schema("football")
       .from("match_lineup")
       .select("team_id, ...player(id, aka, ...people(full_name, ...country!nationality_country_id(icon)))")
       .eq("match_id", route.params.match_id)
@@ -67,12 +68,15 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
   try {
     const { player, ...rest } = event.data
 
-    const { error } = await supabase.from("match_award").insert({
-      ...rest,
-      match_id: route.params.match_id,
-      team_id: player.team_id,
-      player_id: player.id
-    })
+    const { error } = await supabase
+      .schema("football")
+      .from("match_award")
+      .insert({
+        ...rest,
+        match_id: route.params.match_id,
+        team_id: player.team_id,
+        player_id: player.id
+      })
 
     if (error) {
       console.error("Error creating award:", error)

@@ -12,6 +12,7 @@ const seasonName = computed(() => decodeURIComponent(route.params.season as stri
 
 const squadQuery = (competitionId: string) =>
   supabase
+    .schema("football")
     .from("squad_player")
     .select(
       `

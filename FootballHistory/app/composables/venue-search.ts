@@ -7,11 +7,7 @@ export const useVenueSearch = () => {
   const searchTerm = ref()
 
   const venueQuery = () => {
-    const query = supabase.from("venue").select("*, country(*)").limit(40).order("city", { ascending: true }).order("name", { ascending: true })
-
-    if (toValue(searchTerm)) {
-      query.or(`slug.ilike.${toValue(searchTerm)}%,slug.ilike.%${toValue(searchTerm)}%`)
-    }
+    const query = supabase.rpc("search_venues", { search_text: toValue(searchTerm) || null, schema_name: "football" })
 
     return query
   }

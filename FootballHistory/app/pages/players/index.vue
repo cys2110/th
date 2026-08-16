@@ -40,6 +40,7 @@ const searchTerm = ref()
 
 const playersQuery = () => {
   const query = supabase
+    .schema("football")
     .from("player_details")
     .select("*, country!nationality_country_id(name)", { count: "exact" })
     .order("last_name", { ascending: true })

@@ -62,6 +62,7 @@ const { data: rounds, pending: roundsPending } = await useAsyncData(
   () => `${props.seasonId}-add-match-rounds`,
   async () => {
     const { data: rounds, error: roundsError } = await supabase
+      .schema("football")
       .from("round")
       .select("id, name")
       .eq("season_id", props.seasonId)
@@ -83,7 +84,11 @@ const {
 } = await useAsyncData(
   () => `${props.seasonId}-add-match-groups-${state.value.round_id}`,
   async () => {
-    const { data: groupsData, error: groupsError } = await supabase.from("group").select("id, name").eq("round_id", state.value.round_id!)
+    const { data: groupsData, error: groupsError } = await supabase
+      .schema("football")
+      .from("group")
+      .select("id, name")
+      .eq("round_id", state.value.round_id!)
 
     if (groupsError) {
       console.error("Error fetching groups:", groupsError)
@@ -108,6 +113,7 @@ const { data: teams, pending: teamsPending } = await useAsyncData(
   async () => {
     if (state.value.group_id) {
       const { data: teamsData, error: teamsError } = await supabase
+        .schema("football")
         .from("team")
         .select("id, short_name, name, logo_url, nicknames, group_team!inner(group_id)")
         .eq("group_team.group_id", state.value.group_id)
@@ -118,6 +124,7 @@ const { data: teams, pending: teamsPending } = await useAsyncData(
       return (teamsData || [])?.map(team => ({ ...team, aka: team.short_name || team.name }))
     } else {
       const { data: teamsData, error: teamsError } = await supabase
+        .schema("football")
         .from("team")
         .select("id, short_name, name, logo_url, nicknames, team_season!inner(season_id)")
         .eq("team_season.season_id", props.seasonId)
@@ -161,6 +168,7 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
       : null
     // Insert match
     const { data, error } = await supabase
+      .schema("football")
       .from("match")
       .insert({
         ...rest,
@@ -189,10 +197,9 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
     if (home_team.possession) {
       const { team: homeTeam, score: homeScore, penalties: homePenalties, ...homeTeamRest } = home_team
       const { team: awayTeam, score: awayScore, penalties: awayPenalties, ...awayTeamRest } = away_team
-      console.log(homeTeam, homeTeamRest)
-      console.log(awayTeam, awayTeamRest)
 
       const { data: stats, error: statsError } = await supabase
+        .schema("football")
         .from("match_stats")
         .insert([
           {

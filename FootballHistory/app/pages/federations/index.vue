@@ -13,6 +13,7 @@ const {
   "confederations",
   async () => {
     const { data, error } = await supabase
+      .schema("football")
       .from("confederation")
       .select("*, federations:federation(*)")
       .order("id", { ascending: true })

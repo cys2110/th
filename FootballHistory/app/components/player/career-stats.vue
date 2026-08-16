@@ -7,7 +7,11 @@ const supabase = useSupabaseClient()
 const { data, pending, refresh } = await useAsyncData(
   () => `career-stats-${route.params.id}`,
   async () => {
-    const { data, error } = await supabase.from("player_career_stats").select("*, team(name, short_name, logo_url)").eq("id", route.params.id)
+    const { data, error } = await supabase
+      .schema("football")
+      .from("player_career_stats")
+      .select("*, team(name, short_name, logo_url)")
+      .eq("id", route.params.id)
 
     if (error || !data) {
       console.error("Error fetching player career stats:", error)

@@ -17,6 +17,7 @@ const {
   () => `${route.params.id}-${route.params.season}-teams`,
   async () => {
     const { data, error } = await supabase
+      .schema("football")
       .from("team")
       .select("*, team_season!inner(season_id)")
       .eq("team_season.season_id", props.seasonId)
