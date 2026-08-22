@@ -134,5 +134,11 @@ const modelValue = defineModel<any>()
       v-else-if="field.type === 'venue'"
       v-model="modelValue[field.key]"
     />
+
+    <person-search
+      v-else-if="field.type === 'person'"
+      v-model="modelValue[field.key]"
+      :multiple="field.multiple || false"
+    />
   </u-form-field>
 </template>

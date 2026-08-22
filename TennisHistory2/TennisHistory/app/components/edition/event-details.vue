@@ -197,35 +197,8 @@ const handleSubmit = async () => {
 <template>
   <div class="w-full xl:min-w-1/2 px-5">
     <dashboard-subpanel>
-      <template #title>
-        <div class="flex items-center gap-2">
-          <u-badge
-            v-if="event.tour"
-            :label="event.tour"
-            :color="event.tour"
-          />
-          <u-badge
-            v-if="event.level"
-            :label="event.level"
-            :color="event.level"
-          />
-        </div>
-      </template>
       <template #right>
         <u-field-group>
-          <u-button
-            v-if="event?.site_link"
-            :href="event.site_link"
-            :icon="icons.external"
-            target="_blank"
-          />
-          <u-button
-            v-if="event?.wiki_link"
-            :href="event.wiki_link"
-            :icon="ICONS.wikipedia"
-            target="_blank"
-          />
-
           <template v-if="isAdmin">
             <lazy-scrape-atp-draw
               v-if="event.tour === 'ATP'"
@@ -507,56 +480,6 @@ const handleSubmit = async () => {
 
         <template v-if="isAdmin">
           <div>
-            <div>Site Link</div>
-            <div class="detail">
-              <form-textarea
-                v-if="'site_link' in updatedEvent"
-                v-model="updatedEvent.site_link"
-                placeholder="Site link"
-              />
-
-              <div
-                v-else
-                class="truncate text-ellipsis"
-              >
-                {{ event.site_link || "—" }}
-              </div>
-
-              <u-checkbox
-                highlight
-                :icon="ICONS.racquet"
-                :model-value="'site_link' in updatedEvent"
-                @update:model-value="() => handleCheckboxCheck(['site_link'])"
-              />
-            </div>
-          </div>
-
-          <div>
-            <div>Wikipedia Link</div>
-            <div class="detail">
-              <form-textarea
-                v-if="'wiki_link' in updatedEvent"
-                v-model="updatedEvent.wiki_link"
-                placeholder="Wikipedia link"
-              />
-
-              <div
-                v-else
-                class="truncate text-ellipsis"
-              >
-                {{ event.wiki_link || "—" }}
-              </div>
-
-              <u-checkbox
-                highlight
-                :icon="ICONS.racquet"
-                :model-value="'wiki_link' in updatedEvent"
-                @update:model-value="() => handleCheckboxCheck(['wiki_link'])"
-              />
-            </div>
-          </div>
-
-          <div>
             <div>Singles Draw</div>
             <div class="detail">
               <u-input-menu
@@ -743,16 +666,6 @@ const handleSubmit = async () => {
                 :icon="ICONS.racquet"
                 :model-value="'qd_link' in updatedEvent"
                 @update:model-value="() => handleCheckboxCheck(['qd_link'])"
-              />
-            </div>
-          </div>
-
-          <div>
-            <div>Updated at</div>
-            <div>
-              <u-badge
-                :label="formatDateTime(event.updated_at)"
-                color="success"
               />
             </div>
           </div>

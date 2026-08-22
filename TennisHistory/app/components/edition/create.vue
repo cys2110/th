@@ -104,7 +104,7 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
       name: "edition",
       params: {
         ...route.params,
-        year: event.data.year,
+        year: event.data.year.year,
         edition_no: event.data.edition_no
       }
     })
@@ -122,13 +122,15 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
 const formFields = computed<Array<FormFieldInterface<Schema>>>(
   () =>
     [
-      { label: "Tours", key: "tours", type: "checkbox", items: tournamentStore.tours, required: true, icon: ICONS.tour, class: "col-span-2" },
+      ...(tournamentStore.tours.length > 1 ?
+        [{ label: "Tours", key: "tours", type: "checkbox", items: tournamentStore.tours, required: true, icon: ICONS.tour, class: "col-span-2" }]
+      : []),
       { label: "Year", key: "year", type: "calendar", required: true },
       { label: "Dates", key: "dates", type: "dates" },
       { label: "Sponsor Name", key: "sponsor_name", type: "text", class: "col-span-2" },
       { label: "Edition Number", key: "edition_no", type: "number" },
       { label: "Category", key: "category", type: "inputMenu", items: CATEGORIES },
-      { label: "Currency", key: "currency", type: "inputMenu", items: CURRENCIES },
+      { label: "Currency", key: "currency", type: "inputMenu", items: CURRENCIES, valueKey: "value" },
       { label: "Total Financial Commitment", key: "tfc", type: "number", disabled: !state.value.currency, currency: state.value.currency || "USD" },
       { label: "Draw Type", key: "draw_type", type: "inputMenu", items: DRAW_TYPES },
       { label: "Draw Size", key: "draw_size", type: "number" },

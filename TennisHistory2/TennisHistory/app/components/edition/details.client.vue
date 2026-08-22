@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { parseDate } from "@internationalized/date"
-
 const {
   params: { id, year, edId }
 } = useRoute("edition")
@@ -230,10 +228,6 @@ const handleSubmit = async () => {
       class="flex justify-end"
     >
       <u-field-group class="w-fit">
-        <lazy-edition-event-create
-          hydrate-on-idle
-          @refresh="refresh"
-        />
         <lazy-edition-country-rounds-create
           v-if="COUNTRY_DRAWS.includes(id)"
           hydrate-on-idle
@@ -247,11 +241,6 @@ const handleSubmit = async () => {
           hydrate-on-idle
           :start-date="edition.start_date"
         />
-        <u-button
-          :icon="icons.reload"
-          @click="refresh()"
-        />
-
         <u-button
           :icon="ICONS.save"
           :loading="isSaving"
@@ -439,36 +428,6 @@ const handleSubmit = async () => {
 
         <template v-if="isAdmin">
           <div>
-            <div>Wikipedia Link</div>
-            <div v-if="pending">
-              <u-skeleton class="w-full h-4" />
-            </div>
-            <div
-              v-else
-              class="detail"
-            >
-              <form-textarea
-                v-if="'wiki_link' in updatedEdition"
-                v-model="updatedEdition.wiki_link"
-                placeholder="Wikipedia link"
-              />
-
-              <div
-                v-else
-                class="truncate text-ellipsis"
-                >{{ edition?.wiki_link || "—" }}</div
-              >
-
-              <u-checkbox
-                highlight
-                :icon="ICONS.racquet"
-                :model-value="'wiki_link' in updatedEdition"
-                @update:model-value="() => handleCheckboxCheck(['wiki_link'])"
-              />
-            </div>
-          </div>
-
-          <div>
             <div>Draw Type</div>
             <div v-if="pending">
               <u-skeleton class="w-full h-4" />
@@ -519,20 +478,6 @@ const handleSubmit = async () => {
                 :icon="ICONS.racquet"
                 :model-value="'draw_link' in updatedEdition"
                 @update:model-value="() => handleCheckboxCheck(['draw_link'])"
-              />
-            </div>
-          </div>
-
-          <div>
-            <div>Updated at</div>
-            <div v-if="pending">
-              <u-skeleton class="w-full h-4" />
-            </div>
-            <div v-else>
-              <u-badge
-                v-if="edition?.updated_at"
-                :label="formatDateTime(edition.updated_at)"
-                color="success"
               />
             </div>
           </div>

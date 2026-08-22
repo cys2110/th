@@ -151,30 +151,6 @@ const handleSubmit = async () => {
     }"
     :ui="{ root: 'xl:max-w-3/4 2xl:max-w-2/3 mx-auto max-h-[calc(100vh-25rem)]' }"
   >
-    <template #loading>
-      <u-icon
-        :name="icons.loading"
-        class="size-8"
-      />
-    </template>
-
-    <template #empty>
-      <u-empty
-        :icon="ICONS.moneyOff"
-        :title="`No rounds available for ${tournamentStore.name} ${year}`"
-        description="If you think this is an error, refresh the page. Otherwise, please be patient as we continue to add more data."
-        class="mx-2"
-      >
-        <template #actions>
-          <u-button
-            label="Refresh"
-            :icon="icons.reload"
-            @click="refresh()"
-          />
-        </template>
-      </u-empty>
-    </template>
-
     <template #checkbox-header="{ table }">
       <div class="mx-auto w-fit">
         <u-checkbox

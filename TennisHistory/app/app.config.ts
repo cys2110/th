@@ -97,12 +97,13 @@ export default defineAppConfig({
     header: { slots: { title: "font-cursive" } },
     inputMenu: {
       slots: {
-        content: "ring-primary cursor-pointer",
+        content: "ring-primary cursor-pointer w-fit",
         trailingIcon: "group-data-[state=open]:rotate-180 duration-250 cursor-pointer"
       }
     },
     main: { base: "min-h-0 h-[calc(100vh-var(--ui-header-height))] overflow-y-auto" },
     navigationMenu: { defaultVariants: { variant: "link" } },
+    radioGroup: { slots: { label: "cursor-pointer" } },
     select: {
       slots: {
         content: "ring-primary cursor-pointer",

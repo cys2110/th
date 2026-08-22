@@ -111,7 +111,7 @@ const tournamentYears = computed(() => {
               day="numeric"
               hour="2-digit"
               minute="2-digit"
-              time-zone="UTC"
+              time-zone="America/New_York"
             />
           </u-badge>
         </template>

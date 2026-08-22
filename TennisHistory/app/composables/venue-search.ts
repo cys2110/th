@@ -1,5 +1,6 @@
 import type { QueryData } from "@supabase/supabase-js"
 import { set } from "@vueuse/core"
+import { deburr } from "lodash"
 
 export const useVenueSearch = () => {
   const supabase = useSupabaseClient()
@@ -7,7 +8,7 @@ export const useVenueSearch = () => {
   const searchTerm = ref()
 
   const venueQuery = () => {
-    const query = supabase.rpc("search_venues", { search_text: toValue(searchTerm) || null, schema_name: "tennis" })
+    const query = supabase.rpc("search_venues", { search_text: deburr(toValue(searchTerm)) || null, schema_name: "tennis" })
 
     return query
   }

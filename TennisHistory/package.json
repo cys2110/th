@@ -12,7 +12,7 @@
   "dependencies": {
     "@nuxt/eslint": "^1.17.0",
     "@nuxt/image": "^2.1.0",
-    "@nuxt/ui": "^4.10.0",
+    "@nuxt/ui": "^4.11.0",
     "@nuxtjs/supabase": "^2.0.10",
     "@pinia/nuxt": "^1.0.2",
     "@tiptap/core": "^3.30.1",
@@ -42,6 +42,7 @@
     "nuxt": "^4.5.2",
     "nuxt-echarts": "^1.0.1",
     "pinia": "^4.0.3",
+    "playwright": "^1.62.1",
     "tailwind-scrollbar": "^4.0.2",
     "tailwindcss": "^4.3.3",
     "typescript": "^6.0.3",

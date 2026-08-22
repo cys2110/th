@@ -1,13 +1,12 @@
 <script setup lang="ts">
-import { type Database, type Tables } from "~/types/database.types"
+import { type Tables } from "~/types/database.types"
 import { set, useInfiniteScroll, watchDeep } from "@vueuse/core"
 import type { ContextMenuItem, TableColumn, TableRow } from "@nuxt/ui"
-import { ICONS, TOUR_OPTIONS } from "#imports"
+import { ICONS, TOUR_OPTIONS, TourEnum } from "#imports"
 import { LazyTournamentCreate, UButton, UFieldGroup } from "#components"
 import { CalendarDate, type DateValue } from "@internationalized/date"
 
 type TournamentType = Tables<{ schema: "tennis" }, "tournament">
-type TourEnum = Database["tennis"]["Enums"]["tour_enum"]
 
 useHead({ title: "Tournaments" })
 
@@ -20,15 +19,15 @@ const { isAdmin } = useAuthState()
 const updateRouteQuery = useRouteQueryUpdater()
 
 const selectedEstablishedDate = computed(() => {
-  if (route.query.year) {
-    return new CalendarDate(Number(route.query.year), 1, 1)
+  if (route.query.established) {
+    return new CalendarDate(Number(route.query.established), 1, 1)
   }
   return undefined
 })
 
 const selectedAbolishedDate = computed(() => {
-  if (route.query.year) {
-    return new CalendarDate(Number(route.query.year), 1, 1)
+  if (route.query.abolished) {
+    return new CalendarDate(Number(route.query.abolished), 1, 1)
   }
   return undefined
 })

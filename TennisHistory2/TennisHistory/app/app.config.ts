@@ -28,8 +28,7 @@ export default defineAppConfig({
     progress: { slots: { status: "!w-full" } },
     radioGroup: {
       slots: {
-        base: "cursor-pointer",
-        label: "cursor-pointer"
+        base: "cursor-pointer"
       },
       variants: {
         orientation: {
