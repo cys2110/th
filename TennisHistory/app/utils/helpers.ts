@@ -14,3 +14,10 @@ export const getTournamentType = (tournamentName: string) => {
 
   return "elimination"
 }
+
+export const percentage = (value: number, total: number, decimals = 0) =>
+  total === 0 ? 0 : Number(((value / total) * 100).toFixed(Math.max(0, decimals)))
+
+export const convertKmhToMph = (kmh: number) => {
+  return Math.round(kmh * 0.621371)
+}

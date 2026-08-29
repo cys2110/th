@@ -97,12 +97,13 @@ export default defineAppConfig({
     header: { slots: { title: "font-cursive" } },
     inputMenu: {
       slots: {
-        content: "ring-primary cursor-pointer w-fit",
+        content: "ring-primary cursor-pointer min-w-fit",
         trailingIcon: "group-data-[state=open]:rotate-180 duration-250 cursor-pointer"
       }
     },
     main: { base: "min-h-0 h-[calc(100vh-var(--ui-header-height))] overflow-y-auto" },
     navigationMenu: { defaultVariants: { variant: "link" } },
+    progress: { slots: { status: "!w-full text-default" } },
     radioGroup: { slots: { label: "cursor-pointer" } },
     select: {
       slots: {
@@ -125,6 +126,7 @@ export default defineAppConfig({
       },
       defaultVariants: { loadingAnimation: "swing" }
     },
+    tabs: { defaultVariants: { size: "md" } },
     user: {
       variants: {
         size: {

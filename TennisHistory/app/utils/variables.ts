@@ -53,6 +53,13 @@ export const CURRENCY_MAPPING = {
 }
 export const CURRENCIES = Object.entries(CURRENCY_MAPPING).map(([key, value]) => ({ label: value, value: key }))
 
+export const INCOMPLETE_MAPPING: Record<IncompleteEnum, string> = {
+  B: "Bye",
+  D: "Defaulted",
+  R: "Retired",
+  WO: "Walkover"
+}
+
 export const ROUNDS = [
   "Win",
   "Final",

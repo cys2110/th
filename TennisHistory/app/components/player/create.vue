@@ -111,6 +111,23 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
   set(isUploading, true)
 
   try {
+    // Check that player isn't already in the database
+    const { data: player, error: playerError } = await supabase.schema("tennis").from("player").select("id").eq("id", event.data.id).maybeSingle()
+
+    if (playerError) {
+      console.error("Error fetching player:", playerError)
+      throw Error
+    }
+
+    if (player?.id) {
+      toast.add({
+        title: "Player already exists",
+        icon: ui.icons.error,
+        color: "error"
+      })
+      return
+    }
+
     let image_url: string | undefined
     // Upload to storage if a logo is selected
     if (event.data.image) {

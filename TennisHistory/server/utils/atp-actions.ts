@@ -1,4 +1,4 @@
-import { Page } from "playwright"
+import type { Page } from "playwright"
 
 export async function acceptCookies(page: Page) {
   const cookieButton = page.getByRole("button", { name: "Essential Cookies Only" })
@@ -13,4 +13,10 @@ export async function acceptCookies(page: Page) {
   } catch {
     console.log("Cookie banner did not appear")
   }
+}
+
+export const parsePlayerLink = (link: string) => {
+  const match = link.match(/\/en\/players\/[^/"']+\/([a-z0-9]{4})\/overview/i)
+
+  return match?.[1] ?? null
 }

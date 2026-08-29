@@ -2,6 +2,7 @@ import { z } from "zod"
 import { type Database, type Tables } from "~/types/database.types"
 
 export type TourEnum = Database["tennis"]["Enums"]["tour_enum"]
+export type IncompleteEnum = Database["tennis"]["Enums"]["incomplete_enum"]
 
 export const DRAW_TYPES = ["Elimination", "Round robin", "Country draw", "Laver Cup", "Davis Cup"] as const
 export const DrawTypeEnum = z.enum(DRAW_TYPES, `Draw must be one of ${DRAW_TYPES.join(", ")}`)

@@ -13,14 +13,14 @@ const { isAdmin } = useAuthState()
 const tournamentStore = useTournamentStore()
 
 const { data: createOptions } = await useAsyncData(
-  () => `rounds-currency-${tournamentStore.editionId}`,
+  () => `rounds-currency-${tournamentStore.ids.id || ""}`,
   async () => {
-    if (tournamentStore.editionId) {
+    if (tournamentStore.ids.id) {
       const { data, error } = await supabase
         .schema("tennis")
         .from("events")
         .select("id, tour, currency, edition:editions(currency)")
-        .eq("edition_id", tournamentStore.editionId)
+        .eq("edition_id", tournamentStore.ids.id as string)
 
       if (error || !data) {
         console.error("Error fetching options", error)
@@ -42,10 +42,10 @@ const {
   pending,
   refresh
 } = useAsyncData(
-  () => `rounds-${tournamentStore.editionId}`,
+  () => `rounds-${tournamentStore.ids.id || ""}`,
   async () => {
-    if (tournamentStore.editionId) {
-      const { data, error } = await fetchRounds(supabase, tournamentStore.editionId)
+    if (tournamentStore.ids.id) {
+      const { data, error } = await fetchRounds(supabase, tournamentStore.ids.id as string)
 
       if (error || !data) {
         console.error("Error fetching rounds", error)

@@ -1816,14 +1816,14 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "match_scores_entry_id_fkey"
-            columns: ["t2_id"]
+            columns: ["t1_id"]
             isOneToOne: false
             referencedRelation: "entries"
             referencedColumns: ["id"]
           },
           {
             foreignKeyName: "match_scores_entry_id_fkey"
-            columns: ["t1_id"]
+            columns: ["t2_id"]
             isOneToOne: false
             referencedRelation: "entries"
             referencedColumns: ["id"]
@@ -2208,6 +2208,13 @@ export type Database = {
             foreignKeyName: "editions_tournament_id_fkey"
             columns: ["tournament_id"]
             isOneToOne: false
+            referencedRelation: "match_details"
+            referencedColumns: ["tournament_id"]
+          },
+          {
+            foreignKeyName: "editions_tournament_id_fkey"
+            columns: ["tournament_id"]
+            isOneToOne: false
             referencedRelation: "tournament"
             referencedColumns: ["id"]
           },
@@ -2224,6 +2231,7 @@ export type Database = {
         Row: {
           captain: string | null
           country_id: string | null
+          entry_key: string | null
           event_id: string
           id: string
           match_type: Database["tennis"]["Enums"]["match_type_enum"] | null
@@ -2235,6 +2243,7 @@ export type Database = {
         Insert: {
           captain?: string | null
           country_id?: string | null
+          entry_key?: string | null
           event_id: string
           id?: string
           match_type?: Database["tennis"]["Enums"]["match_type_enum"] | null
@@ -2246,6 +2255,7 @@ export type Database = {
         Update: {
           captain?: string | null
           country_id?: string | null
+          entry_key?: string | null
           event_id?: string
           id?: string
           match_type?: Database["tennis"]["Enums"]["match_type_enum"] | null
@@ -2576,7 +2586,21 @@ export type Database = {
             foreignKeyName: "match_scores_match_id_fkey"
             columns: ["match_id"]
             isOneToOne: false
+            referencedRelation: "match_details"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "match_scores_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
             referencedRelation: "matches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "match_scores_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "result_matches"
             referencedColumns: ["id"]
           },
         ]
@@ -2678,7 +2702,21 @@ export type Database = {
             foreignKeyName: "match_stats_match_id_fkey"
             columns: ["match_id"]
             isOneToOne: false
+            referencedRelation: "match_details"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "match_stats_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
             referencedRelation: "matches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "match_stats_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "result_matches"
             referencedColumns: ["id"]
           },
         ]
@@ -2694,6 +2732,7 @@ export type Database = {
           id: string
           incomplete: Database["tennis"]["Enums"]["incomplete_enum"] | null
           loser_id: string | null
+          match_link: string | null
           match_no: number
           match_type: Database["tennis"]["Enums"]["match_type_enum"]
           round_id: string
@@ -2714,6 +2753,7 @@ export type Database = {
           id?: string
           incomplete?: Database["tennis"]["Enums"]["incomplete_enum"] | null
           loser_id?: string | null
+          match_link?: string | null
           match_no: number
           match_type: Database["tennis"]["Enums"]["match_type_enum"]
           round_id: string
@@ -2734,6 +2774,7 @@ export type Database = {
           id?: string
           incomplete?: Database["tennis"]["Enums"]["incomplete_enum"] | null
           loser_id?: string | null
+          match_link?: string | null
           match_no?: number
           match_type?: Database["tennis"]["Enums"]["match_type_enum"]
           round_id?: string
@@ -3558,6 +3599,13 @@ export type Database = {
             foreignKeyName: "editions_tournament_id_fkey"
             columns: ["tournament_id"]
             isOneToOne: false
+            referencedRelation: "match_details"
+            referencedColumns: ["tournament_id"]
+          },
+          {
+            foreignKeyName: "editions_tournament_id_fkey"
+            columns: ["tournament_id"]
+            isOneToOne: false
             referencedRelation: "tournament"
             referencedColumns: ["id"]
           },
@@ -3585,6 +3633,13 @@ export type Database = {
             foreignKeyName: "editions_tournament_id_fkey"
             columns: ["tournament_id"]
             isOneToOne: false
+            referencedRelation: "match_details"
+            referencedColumns: ["tournament_id"]
+          },
+          {
+            foreignKeyName: "editions_tournament_id_fkey"
+            columns: ["tournament_id"]
+            isOneToOne: false
             referencedRelation: "tournament"
             referencedColumns: ["id"]
           },
@@ -3605,6 +3660,97 @@ export type Database = {
           year: number | null
         }
         Relationships: []
+      }
+      match_details: {
+        Row: {
+          category: string | null
+          court: string | null
+          date: string | null
+          draw: Database["tennis"]["Enums"]["draw_enum"] | null
+          duration: string | null
+          edition_no: number | null
+          format: number | null
+          group_name: string | null
+          id: string | null
+          incomplete: Database["tennis"]["Enums"]["incomplete_enum"] | null
+          level: Database["tennis"]["Enums"]["level_enum"] | null
+          loser_id: string | null
+          match_link: string | null
+          match_no: number | null
+          match_type: Database["tennis"]["Enums"]["match_type_enum"] | null
+          round: string | null
+          round_id: string | null
+          sponsor_name: string | null
+          surface: string | null
+          team_1_id: string | null
+          team_1_scores: Json | null
+          team_1_seed: number | null
+          team_1_stats: Json | null
+          team_1_status: Database["tennis"]["Enums"]["status_enum"] | null
+          team_2_id: string | null
+          team_2_scores: Json | null
+          team_2_seed: number | null
+          team_2_stats: Json | null
+          team_2_status: Database["tennis"]["Enums"]["status_enum"] | null
+          tie_id: string | null
+          tour: Database["tennis"]["Enums"]["tour_enum"] | null
+          tournament_id: string | null
+          tournament_name: string | null
+          umpire_id: string | null
+          winner_id: string | null
+          year: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "matches_loser_id_fkey"
+            columns: ["loser_id"]
+            isOneToOne: false
+            referencedRelation: "entries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matches_round_id_fkey"
+            columns: ["round_id"]
+            isOneToOne: false
+            referencedRelation: "rounds"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matches_team_1_id_fkey"
+            columns: ["team_1_id"]
+            isOneToOne: false
+            referencedRelation: "entries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matches_team_2_id_fkey"
+            columns: ["team_2_id"]
+            isOneToOne: false
+            referencedRelation: "entries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matches_tie_id_fkey"
+            columns: ["tie_id"]
+            isOneToOne: false
+            referencedRelation: "ties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matches_umpire_id_fkey"
+            columns: ["umpire_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matches_winner_id_fkey"
+            columns: ["winner_id"]
+            isOneToOne: false
+            referencedRelation: "entries"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       player_details: {
         Row: {
@@ -3643,6 +3789,106 @@ export type Database = {
             columns: ["person_id"]
             isOneToOne: false
             referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      result_matches: {
+        Row: {
+          court: string | null
+          date: string | null
+          draw: Database["tennis"]["Enums"]["draw_enum"] | null
+          duration: string | null
+          edition_no: number | null
+          format: number | null
+          group_name: string | null
+          id: string | null
+          incomplete: Database["tennis"]["Enums"]["incomplete_enum"] | null
+          loser_id: string | null
+          loser_rank: number | null
+          loser_scores: Json | null
+          loser_seed: number | null
+          loser_status: Database["tennis"]["Enums"]["status_enum"] | null
+          match_link: string | null
+          match_no: number | null
+          match_type: Database["tennis"]["Enums"]["match_type_enum"] | null
+          round: string | null
+          round_id: string | null
+          team_1_id: string | null
+          team_2_id: string | null
+          tie_id: string | null
+          tour: Database["tennis"]["Enums"]["tour_enum"] | null
+          tournament_id: string | null
+          umpire_id: string | null
+          winner_id: string | null
+          winner_rank: number | null
+          winner_scores: Json | null
+          winner_seed: number | null
+          winner_status: Database["tennis"]["Enums"]["status_enum"] | null
+          year: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "editions_tournament_id_fkey"
+            columns: ["tournament_id"]
+            isOneToOne: false
+            referencedRelation: "match_details"
+            referencedColumns: ["tournament_id"]
+          },
+          {
+            foreignKeyName: "editions_tournament_id_fkey"
+            columns: ["tournament_id"]
+            isOneToOne: false
+            referencedRelation: "tournament"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matches_loser_id_fkey"
+            columns: ["loser_id"]
+            isOneToOne: false
+            referencedRelation: "entries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matches_round_id_fkey"
+            columns: ["round_id"]
+            isOneToOne: false
+            referencedRelation: "rounds"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matches_team_1_id_fkey"
+            columns: ["team_1_id"]
+            isOneToOne: false
+            referencedRelation: "entries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matches_team_2_id_fkey"
+            columns: ["team_2_id"]
+            isOneToOne: false
+            referencedRelation: "entries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matches_tie_id_fkey"
+            columns: ["tie_id"]
+            isOneToOne: false
+            referencedRelation: "ties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matches_umpire_id_fkey"
+            columns: ["umpire_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matches_winner_id_fkey"
+            columns: ["winner_id"]
+            isOneToOne: false
+            referencedRelation: "entries"
             referencedColumns: ["id"]
           },
         ]

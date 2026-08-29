@@ -39,7 +39,7 @@ const { data: edition } = await useAsyncData(
     const { data, error } = await supabase
       .schema("tennis")
       .from("editions")
-      .select("id, tours, tournament(id, name, logo_url)")
+      .select("id, tours, tournament(id, name, logo_url, mens_id, womens_id)")
       .eq("tournament_id", route.params.id)
       .eq("year", Number(route.params.year))
       .eq("edition_no", Number(route.params.edition_no))
@@ -61,7 +61,7 @@ watch(
       const { tournament, tours, id } = edition.value
       tournamentStore.tournamentName = tournament?.name || ""
       tournamentStore.tours = tours || []
-      tournamentStore.editionId = id
+      tournamentStore.ids = { mens: tournament?.mens_id, womens: tournament?.womens_id, id }
     }
   },
   { immediate: true }

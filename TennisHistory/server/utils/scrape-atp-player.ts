@@ -11,7 +11,6 @@ export async function scrapeAtpPlayer(id: string) {
     await acceptCookies(page)
 
     const image = await page.locator(".player_shot").getByRole("img").getAttribute("src")
-    console.log(image)
 
     const personalDetailsFields = ["Age", "DOB", "Height", "Turned pro", "Country", "Birthplace", "Plays", "Coach"] as const
 
@@ -25,7 +24,7 @@ export async function scrapeAtpPlayer(id: string) {
       )
     ) as Record<(typeof personalDetailsFields)[number], string | null>
 
-    await page.getByRole("link", { name: "Singles" }).click()
+    await page.locator(".atp_player-profile-header-wrapper").getByRole("link", { name: "Singles" }).click()
 
     const singlesStatsDetails = await page.locator(".player-stats-details").all()
 
@@ -60,7 +59,7 @@ export async function scrapeAtpPlayer(id: string) {
       pm = (await prizeMoney.count()) > 0 ? await getParentText(prizeMoney) : null
     }
 
-    await page.getByRole("link", { name: "Doubles" }).click()
+    await page.locator(".atp_player-profile-header-wrapper").getByRole("link", { name: "Doubles" }).click()
 
     const doublesStatsDetails = await page.locator(".player-stats-details").all()
 
