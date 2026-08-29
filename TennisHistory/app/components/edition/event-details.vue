@@ -39,7 +39,12 @@ const tournamentStore = useTournamentStore()
         #right
         v-if="isAdmin"
       >
-        <u-field-group></u-field-group>
+        <u-field-group>
+          <lazy-scrape-atp-draw
+            v-if="event.tour === 'ATP'"
+            hydrate-on-idle
+          />
+        </u-field-group>
       </template>
 
       <div class="flex gap-6 my-6 w-fit mx-auto">

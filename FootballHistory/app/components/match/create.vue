@@ -215,8 +215,6 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
         ])
         .select("*")
 
-      console.log(stats)
-
       if (statsError) {
         console.error("Error creating match stats:", statsError)
         set(errors, statsError)

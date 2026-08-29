@@ -55,3 +55,12 @@ export function parseRank(value: string | null) {
 
   return Number.isNaN(rank) ? null : rank
 }
+
+export const parsePercentageStat = (value: string) => {
+  const match = value.match(/(\d+)\s*\/\s*(\d+)/)
+
+  const numerator = match ? Number(match[1]) : null
+  const denominator = match ? Number(match[2]) : null
+
+  return { numerator, denominator }
+}

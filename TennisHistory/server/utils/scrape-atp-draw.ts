@@ -100,7 +100,36 @@ const parseMatchLink = (link: string) => {
   return Number(matchId?.replace(/[^0-9]/g, ""))
 }
 
-const getDrawMatches = async (page: Page, drawType: string) => {
+type DrawScore = {
+  set_no: number
+  set: number
+  tb?: number
+}
+
+const fillMissingTiebreakScores = (team1Scores: Array<DrawScore>, team2Scores: Array<DrawScore>, superTiebreak: boolean) => {
+  const fillTeamTiebreaks = (scores: Array<DrawScore>, opposingScores: Array<DrawScore>) => {
+    for (const score of scores) {
+      if (score.tb === undefined) continue
+
+      const opposingScore = opposingScores.find(item => item.set_no === score.set_no)
+
+      if (!opposingScore || opposingScore.tb !== undefined) continue
+
+      opposingScore.tb =
+        superTiebreak ?
+          score.tb < 8 ?
+            10
+          : score.tb + 2
+        : score.tb < 5 ? 7
+        : score.tb + 2
+    }
+  }
+
+  fillTeamTiebreaks(team1Scores, team2Scores)
+  fillTeamTiebreaks(team2Scores, team1Scores)
+}
+
+const getDrawMatches = async (page: Page, drawType: string, superTiebreak = false) => {
   const matches = []
   const entries: Record<string, any> = {}
   let matchNo = 0
@@ -179,13 +208,18 @@ const getDrawMatches = async (page: Page, drawType: string) => {
           const entryInfoContainer = playerContainer.locator("span")
 
           if ((await entryInfoContainer.count()) > 0) {
-            // Get entry info text and strip out parentheses
-            const entryInfoString = await entryInfoContainer.innerText().then(text => text.replace("(", "").replace(")", ""))
+            const entryInfoParts = await entryInfoContainer
+              .innerText()
+              .then(text => text.replace(/[()]/g, "").trim().split(/\s+/).filter(Boolean))
+            const seedPart = entryInfoParts.find(part => /^\d+$/.test(part))
+            const statusParts = entryInfoParts.filter(part => part !== seedPart)
 
-            if (isNaN(Number(entryInfoString))) {
-              entryInfo = entryInfoString
-            } else {
-              seed = Number(entryInfoString)
+            if (seedPart) seed = Number(seedPart)
+
+            if (statusParts.length > 0) {
+              const status = statusParts.join(" ")
+
+              entryInfo = status.toLowerCase() === "alt" ? "AL" : status
             }
           }
         }
@@ -238,6 +272,7 @@ const getDrawMatches = async (page: Page, drawType: string) => {
         }
       }
 
+      fillMissingTiebreakScores(matchDetails.t1.scores, matchDetails.t2.scores, superTiebreak)
       matches.push(matchDetails)
     }
   }
@@ -419,7 +454,7 @@ export async function scrapeAtpDraw(
             }
           }
 
-          const draw = await getDrawMatches(newPage, drawType)
+          const draw = await getDrawMatches(newPage, drawType, superTiebreak)
 
           allMatches.push(...draw.matches)
           Object.assign(entries, draw.entries)
@@ -477,6 +512,7 @@ export async function scrapeAtpDraw(
       .from("events")
       .select("id")
       .eq("edition_id", editionData.id)
+      .eq("tour", "ATP")
       .single()
 
     if (eventError || !eventData) {

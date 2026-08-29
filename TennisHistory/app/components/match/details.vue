@@ -17,8 +17,6 @@ const scoreGridStyle = computed(() => ({
   gridTemplateColumns: `minmax(0, 1fr) repeat(${setNumbers.value.length}, 1.25rem)`
 }))
 
-console.log(scoreGridStyle.value)
-
 const getSetScore = (scores: unknown, setNumber: number) =>
   Array.isArray(scores) ? (scores as Array<MatchScore>).find(score => score.set_no === setNumber) : undefined
 

@@ -1,9 +1,12 @@
 <script setup lang="ts">
+import { ICONS } from "#imports"
+
 definePageMeta({ name: "match" })
 
 const route = useRoute("match")
 const { ui } = useAppConfig()
 const supabase = useSupabaseClient()
+const toast = useToast()
 
 const { isAdmin } = useAuthState()
 
@@ -35,6 +38,33 @@ useHead({
       match.value ? `${match.value.tournament_name} ${match.value.year}${match.value.edition_no ? `[${match.value.edition_no}]` : ""}` : undefined
   }
 })
+
+const handleScrapeMatch = async () => {
+  if (!match.value?.match_link) return
+
+  const result = await $fetch("/api/scrape-match", {
+    query: {
+      href: match.value.match_link,
+      tour: match.value.tour
+    }
+  })
+
+  if (result.success) {
+    toast.add({
+      title: "Match scraped",
+      icon: ui.icons.success,
+      color: "success"
+    })
+    refresh()
+  } else {
+    console.error("Error scraping match:", result)
+    toast.add({
+      title: "Error scraping match",
+      icon: ui.icons.error,
+      color: "error"
+    })
+  }
+}
 </script>
 
 <template>
@@ -50,9 +80,8 @@ useHead({
         <template #links>
           <u-button
             v-if="isAdmin && match.match_link"
-            :to="match.match_link"
-            :icon="ui.icons.external"
-            target="_blank"
+            :icon="ICONS.download"
+            @click="handleScrapeMatch"
           />
         </template>
       </u-page-header>

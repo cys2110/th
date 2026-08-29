@@ -70,7 +70,7 @@ const handleSelectRow = (_e: Event, row: TableRow<ResultMatchQuery>) => {
           ({{ row.original.winner_seed }}{{ row.original.winner_seed && row.original.winner_status ? " " : "" }}{{ row.original.winner_status }})
         </small>
 
-        <small>[{{ row.original.winner_rank }}]</small>
+        <small>[{{ row.original.winner.team.reduce((total, player) => total + (player.rank || 0), 0) }}]</small>
       </div>
     </template>
 
@@ -85,7 +85,7 @@ const handleSelectRow = (_e: Event, row: TableRow<ResultMatchQuery>) => {
           ({{ row.original.loser_seed }}{{ row.original.loser_seed && row.original.loser_status ? " " : "" }}{{ row.original.loser_status }})
         </small>
 
-        <small>[{{ row.original.loser_rank }}]</small>
+        <small>[{{ row.original.loser.team.reduce((total, player) => total + (player.rank || 0), 0) }}]</small>
       </div>
     </template>
 

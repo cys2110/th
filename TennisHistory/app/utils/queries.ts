@@ -66,10 +66,6 @@ export const fetchResultMatches = (supabase: SupabaseClient<Database>, tournamen
     .eq("tournament_id", tournamentId)
     .eq("year", Number(year))
     .eq("edition_no", Number(editionNo))
-    .order("tour", { ascending: true })
-    .order("match_type", { ascending: true })
-    .order("match_type", { ascending: true })
-    .order("match_no", { ascending: true })
 export type ResultMatchQuery = QueryData<ReturnType<typeof fetchResultMatches>>[number]
 
 export const fetchMatchDetails = (supabase: SupabaseClient<Database>, matchId: string) =>

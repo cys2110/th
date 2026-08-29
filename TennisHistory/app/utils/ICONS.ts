@@ -2,6 +2,7 @@ export default {
   calendar: "solar:calendar-line-duotone",
   calendarOff: "material-symbols-light:event-busy-outline-rounded",
   download: "line-md:downloading",
+  downloading: "line-md:downloading-loop",
   draw: "game-icons:family-tree",
   filter: "line-md:filter-twotone",
   globe: "material-symbols-light:globe",

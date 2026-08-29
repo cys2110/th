@@ -9,6 +9,7 @@ from
   (
     select
       r.round,
+      r.number as round_number,
       ed.tournament_id,
       ed.year,
       ed.edition_no,
@@ -78,6 +79,10 @@ from
       and li.draw = m.draw
   ) q
 order by
+  tour,
+  match_type,
+  draw,
+  round_number,
   least(winner_rank, loser_rank);
 
 GRANT SELECT ON TABLE tennis.result_matches TO anon, authenticated;
