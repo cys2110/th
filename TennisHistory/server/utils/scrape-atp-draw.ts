@@ -208,9 +208,7 @@ const getDrawMatches = async (page: Page, drawType: string, superTiebreak = fals
           const entryInfoContainer = playerContainer.locator("span")
 
           if ((await entryInfoContainer.count()) > 0) {
-            const entryInfoParts = await entryInfoContainer
-              .innerText()
-              .then(text => text.replace(/[()]/g, "").trim().split(/\s+/).filter(Boolean))
+            const entryInfoParts = await entryInfoContainer.innerText().then(text => text.replace(/[()]/g, "").trim().split(/\s+/).filter(Boolean))
             const seedPart = entryInfoParts.find(part => /^\d+$/.test(part))
             const statusParts = entryInfoParts.filter(part => part !== seedPart)
 
@@ -224,18 +222,26 @@ const getDrawMatches = async (page: Page, drawType: string, superTiebreak = fals
           }
         }
 
-        matchDetails.t1.entryKey = matchDetails.t1.players.map((p: any) => p.id).join("-")
-        matchDetails.t2.entryKey = matchDetails.t2.players.map((p: any) => p.id).join("-")
+        const entryKey = matchDetails[`t${i + 1}`].players.map((p: any) => p.id).join("-")
 
-        entries[matchDetails[`t${i + 1}`].players.map((p: any) => p.id).join("-")] = {
-          seed,
-          entryInfo,
+        entries[entryKey] ??= {
           players: matchDetails[`t${i + 1}`].players,
-          match_type: matchDetails[`t${i + 1}`].players.length > 1 ? "Doubles" : "Singles",
-          draw: drawType.includes("Qual") ? "Qualifying" : "Main"
+          match_type: matchDetails[`t${i + 1}`].players.length > 1 ? "Doubles" : "Singles"
         }
 
-        matchDetails[`t${i + 1}`].entryKey = matchDetails[`t${i + 1}`].players.map((p: any) => p.id).join("-")
+        if (drawType.includes("Qual")) {
+          entries[entryKey].qualifying = {
+            seed,
+            entryInfo
+          }
+        } else {
+          entries[entryKey].main = {
+            seed,
+            entryInfo
+          }
+        }
+
+        matchDetails[`t${i + 1}`].entryKey = entryKey
 
         // If team container has an icon-checkmark span, then this is the winning team
         const iconCheckmark = teamContainer.locator(".icon-checkmark")
@@ -271,6 +277,9 @@ const getDrawMatches = async (page: Page, drawType: string, superTiebreak = fals
           }
         }
       }
+
+      matchDetails.t1.entryKey = matchDetails.t1.players.map((p: any) => p.id).join("-")
+      matchDetails.t2.entryKey = matchDetails.t2.players.map((p: any) => p.id).join("-")
 
       fillMissingTiebreakScores(matchDetails.t1.scores, matchDetails.t2.scores, superTiebreak)
       matches.push(matchDetails)
@@ -457,7 +466,13 @@ export async function scrapeAtpDraw(
           const draw = await getDrawMatches(newPage, drawType, superTiebreak)
 
           allMatches.push(...draw.matches)
-          Object.assign(entries, draw.entries)
+
+          for (const [entryKey, entry] of Object.entries(draw.entries)) {
+            entries[entryKey] = {
+              ...entries[entryKey],
+              ...entry
+            }
+          }
         } finally {
           await context.close()
         }
@@ -613,15 +628,30 @@ export async function scrapeAtpDraw(
       .schema("tennis")
       .from("seeds")
       .insert(
-        Object.values(entries)
-          .filter(entry => entry.seed)
-          .map(entry => ({
-            event_id: eventId,
-            entry_id: entry.entry_id,
-            seed: entry.seed,
-            match_type: entry.match_type,
-            draw: entry.draw
-          }))
+        Object.values(entries).flatMap(entry => [
+          ...(entry.qualifying?.seed ?
+            [
+              {
+                event_id: eventId,
+                entry_id: entry.entry_id,
+                seed: entry.qualifying.seed,
+                match_type: entry.match_type,
+                draw: "Qualifying" as const
+              }
+            ]
+          : []),
+          ...(entry.main?.seed ?
+            [
+              {
+                event_id: eventId,
+                entry_id: entry.entry_id,
+                seed: entry.main.seed,
+                match_type: entry.match_type,
+                draw: "Main" as const
+              }
+            ]
+          : [])
+        ])
       )
 
     if (seedsError) {
@@ -638,14 +668,28 @@ export async function scrapeAtpDraw(
       .schema("tennis")
       .from("entry_status")
       .insert(
-        Object.values(entries)
-          .filter(entry => entry.entryInfo)
-          .map(entry => ({
-            event_id: eventId,
-            entry_id: entry.entry_id,
-            status: entry.entryInfo,
-            draw: entry.draw
-          }))
+        Object.values(entries).flatMap(entry => [
+          ...(entry.qualifying?.entryInfo ?
+            [
+              {
+                event_id: eventId,
+                entry_id: entry.entry_id,
+                status: entry.qualifying.entryInfo,
+                draw: "Qualifying" as const
+              }
+            ]
+          : []),
+          ...(entry.main?.entryInfo ?
+            [
+              {
+                event_id: eventId,
+                entry_id: entry.entry_id,
+                status: entry.main.entryInfo,
+                draw: "Main" as const
+              }
+            ]
+          : [])
+        ])
       )
 
     if (entryInfoError) {

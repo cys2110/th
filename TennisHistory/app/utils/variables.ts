@@ -142,3 +142,15 @@ export const SURFACES = [
   "Indoor Carpet",
   "Outdoor Carpet"
 ]
+
+export const STATUS_MAPPING: Record<StatusEnum, string> = {
+  AL: "Alternate",
+  CO: "Collegian",
+  JR: "Junior Reserved",
+  LL: "Lucky Loser",
+  NG: "Next Gen",
+  Q: "Qualifier",
+  PR: "Protected Ranking",
+  SE: "Special Exempt",
+  WC: "Wild Card"
+}

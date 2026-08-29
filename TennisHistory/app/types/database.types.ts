@@ -3619,6 +3619,20 @@ export type Database = {
           },
         ]
       }
+      entry_info: {
+        Row: {
+          draw: Database["tennis"]["Enums"]["draw_enum"] | null
+          edition_no: number | null
+          entry_id: string | null
+          player_id: string | null
+          rank: number | null
+          reason: string | null
+          tournament_id: string | null
+          type: string | null
+          year: number | null
+        }
+        Relationships: []
+      }
       laver_cup_winners: {
         Row: {
           end_date: string | null

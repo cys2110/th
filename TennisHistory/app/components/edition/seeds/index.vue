@@ -31,6 +31,7 @@ const {
       *,
       ...entries(
         team:player_entry_mapping(
+          player_order,
           country(*),
           ...player(id, image_url, ...people(full_name))
         )
@@ -46,7 +47,10 @@ const {
       return []
     }
 
-    return data
+    return data.map(seed => ({
+      ...seed,
+      team: seed.team?.sort((a, b) => a.player_order - b.player_order)
+    }))
   },
   { default: () => [] }
 )
