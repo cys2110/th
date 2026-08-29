@@ -8,7 +8,7 @@ export const usePersonSearch = () => {
   const searchTerm = ref()
 
   const personQuery = () => {
-    const query = supabase.schema("tennis").rpc("search_people", { search_term: deburr(toValue(searchTerm)) || null })
+    const query = supabase.schema("tennis").rpc("search_people", { search_term: deburr(toValue(searchTerm)) })
 
     return query
   }

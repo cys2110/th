@@ -57,6 +57,12 @@ const handleScrapeMatch = async () => {
     })
     refresh()
   } else {
+    if ("href" in result && result.href) {
+      await navigateTo(result.href, {
+        open: { target: "_blank" }
+      })
+    }
+
     console.error("Error scraping match:", result)
     toast.add({
       title: "Error scraping match",

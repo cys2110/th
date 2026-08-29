@@ -97,3 +97,21 @@ export const fetchMatchDetails = (supabase: SupabaseClient<Database>, matchId: s
     .eq("id", matchId)
     .single()
 export type MatchDetailsQuery = QueryData<ReturnType<typeof fetchMatchDetails>>
+
+export const fetchEntriesQuery = (supabase: SupabaseClient<Database>, editionId: string) =>
+  supabase
+    .schema("tennis")
+    .from("entries")
+    .select(
+      `
+      *,
+      events!inner(edition_id),
+      team:player_entry_mapping(
+        country(*),
+        ...player(id, image_url, ...people(full_name))
+      )
+    `
+    )
+    .eq("events.edition_id", editionId)
+
+export type EntriesQuery = QueryData<ReturnType<typeof fetchEntriesQuery>>[number]

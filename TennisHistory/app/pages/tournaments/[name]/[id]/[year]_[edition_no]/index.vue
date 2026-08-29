@@ -37,17 +37,16 @@ const tabItems = computed<Array<TabsItem>>(() => [
           </template>
 
           <template #seeds>
-            <!-- <edition-seeds-country v-if="COUNTRY_DRAWS.includes(id)" />
-
-            <edition-seeds v-else /> -->
+            <edition-seeds />
+            <!-- <edition-seeds-country v-if="COUNTRY_DRAWS.includes(id)" />-->
           </template>
 
           <template #entry-info>
-            <!-- <edition-entry-info /> -->
+            <edition-entry-info />
           </template>
 
           <template #entries>
-            <!-- <edition-entries /> -->
+            <edition-entries />
           </template>
         </u-tabs>
       </u-page-body>

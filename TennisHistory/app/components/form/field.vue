@@ -140,5 +140,11 @@ const modelValue = defineModel<any>()
       v-model="modelValue[field.key]"
       :multiple="field.multiple || false"
     />
+
+    <player-search
+      v-else-if="field.type === 'player'"
+      v-model="modelValue[field.key]"
+      :multiple="field.multiple || false"
+    />
   </u-form-field>
 </template>

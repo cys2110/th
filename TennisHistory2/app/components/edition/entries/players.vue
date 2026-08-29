@@ -360,60 +360,11 @@ const handleSave = async () => {
       th: 'py-1.5'
     }"
   >
-    <template #loading>
-      <u-icon
-        :name="icons.loading"
-        class="size-8"
-      />
-    </template>
-
-    <template #empty>
-      <u-empty
-        :icon="ICONS.peopleOff"
-        :title="`No players played in ${tournamentStore.name} ${year}`"
-        description="If you think this is an error, refresh the page. Otherwise, please be patient as we continue to add more data."
-        class="mx-2"
-      >
-        <template #actions>
-          <u-button
-            label="Refresh"
-            :icon="icons.reload"
-            @click="refresh()"
-          />
-        </template>
-      </u-empty>
-    </template>
-
-    <template #tour-header="{ column }">
-      <table-filter-header
-        :column
-        label="Tour"
-        :icon="ICONS.tour"
-      />
-    </template>
-
     <template #tour-cell="{ row }">
       <u-badge
         :label="row.original.tour"
         :color="row.original.tour"
       />
-    </template>
-
-    <template #player-header="{ column }">
-      <div class="flex justify-center items-center gap-0.5">
-        <table-filter-header
-          :column
-          label="Player"
-          type="name"
-          multiple
-          :icon="ICONS.player"
-        />
-        <table-sort-header :column />
-      </div>
-    </template>
-
-    <template #player-cell="{ row }">
-      <player-link :players="[row.original]" />
     </template>
 
     <template #singles_checkbox-cell="{ row }">
@@ -450,15 +401,6 @@ const handleSave = async () => {
       />
     </template>
 
-    <template #singles_draws-header="{ column }">
-      <table-filter-header
-        :column
-        label="Draws"
-        :icon="ICONS.level"
-        query="singles_draw"
-      />
-    </template>
-
     <template #singles_draws-cell="{ row }">
       <div class="space-x-1">
         <template
@@ -472,13 +414,6 @@ const handleSave = async () => {
           />
         </template>
       </div>
-    </template>
-
-    <template #singles_seed-header="{ column }">
-      <table-sort-header
-        :column
-        label="Seed"
-      />
     </template>
 
     <template #singles_statuses-header="{ column }">

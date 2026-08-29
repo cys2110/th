@@ -32,12 +32,19 @@ const columns = computed<Array<TableColumn<ResultMatchQuery>>>(() => [
   { id: "actions" }
 ])
 
-const handleSelectRow = (_e: Event, row: TableRow<ResultMatchQuery>) => {
+const handleSelectRow = async (_e: Event, row: TableRow<ResultMatchQuery>) => {
   if (row.original.match_stats[0]?.count || isAdmin.value) {
-    router.push({
-      name: "match",
-      params: { id: row.original.id || "" }
-    })
+    await navigateTo(
+      {
+        name: "match",
+        params: { id: row.original.id || "" }
+      },
+      {
+        open: {
+          target: "_blank"
+        }
+      }
+    )
   }
 }
 </script>

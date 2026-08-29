@@ -1,5 +1,20 @@
 import type { Page } from "playwright"
 
+export const verifyHuman = async (page: Page) => {
+  const checkbox = page.locator('input[type="checkbox"]')
+
+  try {
+    await checkbox.waitFor({
+      state: "visible",
+      timeout: 3000
+    })
+
+    await checkbox.click()
+  } catch {
+    console.log("Human verification did not appear")
+  }
+}
+
 export async function acceptCookies(page: Page) {
   const cookieButton = page.getByRole("button", { name: "Essential Cookies Only" })
 

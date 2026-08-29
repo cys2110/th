@@ -68,6 +68,10 @@ const schema = object({
 type SchemaInput = z.input<typeof schema>
 type Schema = z.infer<typeof schema>
 
+const props = defineProps<{ forward: false }>()
+
+const emits = defineEmits<{ refresh: [] }>()
+
 defineShortcuts({
   ctrl_a: () => set(isOpen, !isOpen.value)
 })
@@ -301,6 +305,11 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
 
     handleReset()
     set(isOpen, false)
+
+    if (props.forward) {
+    } else {
+      emits("refresh")
+    }
     // router.push({
     //   name: "player",
     //   params: { id: event.data.id, name: kebabCase(`${event.data.first_name} ${event.data.last_name}`) }
@@ -425,7 +434,11 @@ const handleScrape = async () => {
     :title="`Create ${state.first_name ? `${state.first_name}${state.last_name ? ` ${state.last_name}` : ''}` : 'Player'}`"
     v-model:open="isOpen"
   >
-    <u-button :icon="ui.icons.plus" />
+    <u-button
+      :icon="ui.icons.plus"
+      :label="forward ? undefined : 'Create Player'"
+      :block="forward ? false : true"
+    />
 
     <template #body>
       <u-user

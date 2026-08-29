@@ -3568,6 +3568,57 @@ export type Database = {
           },
         ]
       }
+      entries_by_player: {
+        Row: {
+          country_id: string | null
+          currency: string | null
+          doubles_entry: Json | null
+          edition_no: number | null
+          full_name: string | null
+          player_id: string | null
+          singles_entry: Json | null
+          tour: Database["tennis"]["Enums"]["tour_enum"] | null
+          tournament_id: string | null
+          year: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "editions_tournament_id_fkey"
+            columns: ["tournament_id"]
+            isOneToOne: false
+            referencedRelation: "match_details"
+            referencedColumns: ["tournament_id"]
+          },
+          {
+            foreignKeyName: "editions_tournament_id_fkey"
+            columns: ["tournament_id"]
+            isOneToOne: false
+            referencedRelation: "tournament"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "player_entry_mapping_country_id_fkey"
+            columns: ["country_id"]
+            isOneToOne: false
+            referencedRelation: "country"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "player_entry_mapping_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "player"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "player_entry_mapping_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "player_details"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       laver_cup_winners: {
         Row: {
           end_date: string | null
@@ -3810,9 +3861,55 @@ export type Database = {
           },
         ]
       }
+      seed_details: {
+        Row: {
+          draw: Database["tennis"]["Enums"]["draw_enum"] | null
+          edition_no: number | null
+          entry_id: string | null
+          id: string | null
+          match_type: Database["tennis"]["Enums"]["match_type_enum"] | null
+          rank: number | null
+          seed: number | null
+          tour: Database["tennis"]["Enums"]["tour_enum"] | null
+          tournament_id: string | null
+          withdrawn: boolean | null
+          year: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "editions_tournament_id_fkey"
+            columns: ["tournament_id"]
+            isOneToOne: false
+            referencedRelation: "match_details"
+            referencedColumns: ["tournament_id"]
+          },
+          {
+            foreignKeyName: "editions_tournament_id_fkey"
+            columns: ["tournament_id"]
+            isOneToOne: false
+            referencedRelation: "tournament"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "seeds_entry_id_fkey"
+            columns: ["entry_id"]
+            isOneToOne: false
+            referencedRelation: "entries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       search_people: {
+        Args: { search_term: string }
+        Returns: {
+          full_name: string
+          icon: string
+          id: string
+        }[]
+      }
+      search_players: {
         Args: { search_term: string }
         Returns: {
           full_name: string
