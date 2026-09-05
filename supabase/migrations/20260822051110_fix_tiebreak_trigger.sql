@@ -9,7 +9,7 @@ DECLARE
 BEGIN
     SELECT ms."set", ms.tb, ms.id
     INTO other_row
-    FROM match_scores ms
+    FROM tennis.match_scores ms
     WHERE ms.match_id::uuid = NEW.match_id::uuid
       AND ms.set_no   = NEW.set_no
       AND ms.entry_id::uuid <> NEW.entry_id::uuid
@@ -28,7 +28,7 @@ BEGIN
     IF NEW.tb IS NOT NULL AND other_row.tb IS NULL THEN
         derived_other_tb := CASE WHEN NEW.tb <= 5 THEN 7 ELSE NEW.tb + 2 END;
 
-        UPDATE match_scores ms
+        UPDATE tennis.match_scores ms
         SET tb = derived_other_tb
         WHERE ms.id = other_row.id;
     END IF;

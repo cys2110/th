@@ -68,7 +68,7 @@ const schema = object({
 type SchemaInput = z.input<typeof schema>
 type Schema = z.infer<typeof schema>
 
-const props = defineProps<{ forward: false }>()
+const props = defineProps<{ forward: boolean }>()
 
 const emits = defineEmits<{ refresh: [] }>()
 
@@ -244,11 +244,11 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
 
     const rankingsData: Array<RankingInsert> = []
 
-    if (event.data.current_singles || event.data.current_doubles) {
-      const now = today("America/New_York")
-      const start = startOfWeek(now, "en-US", "mon")
-      const end = endOfWeek(now, "en-US", "mon")
+    const now = today("America/New_York")
+    const start = startOfWeek(now, "en-US", "mon")
+    const end = endOfWeek(now, "en-US", "mon")
 
+    if (event.data.current_singles || event.data.current_doubles) {
       if (event.data.current_singles) {
         rankingsData.push({
           player_id: event.data.id,
@@ -270,7 +270,11 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
       }
     }
 
-    if (event.data.ch_singles && event.data.ch_singles_date) {
+    if (
+      event.data.ch_singles &&
+      event.data.ch_singles_date &&
+      (event.data.ch_singles !== event.data.current_singles || event.data.ch_singles_date !== start.toString())
+    ) {
       rankingsData.push({
         player_id: event.data.id,
         rank: event.data.ch_singles,
@@ -280,7 +284,11 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
       })
     }
 
-    if (event.data.ch_doubles && event.data.ch_doubles_date) {
+    if (
+      event.data.ch_doubles &&
+      event.data.ch_doubles_date &&
+      (event.data.ch_doubles !== event.data.current_doubles || event.data.ch_doubles_date !== start.toString())
+    ) {
       rankingsData.push({
         player_id: event.data.id,
         rank: event.data.ch_doubles,

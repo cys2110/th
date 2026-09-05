@@ -33,7 +33,7 @@ const columns = computed<Array<TableColumn<ResultMatchQuery>>>(() => [
 ])
 
 const handleSelectRow = async (_e: Event, row: TableRow<ResultMatchQuery>) => {
-  if (row.original.match_stats[0]?.count || isAdmin.value) {
+  if (row.original.match_stats?.[0]?.count || isAdmin.value) {
     await navigateTo(
       {
         name: "match",
@@ -98,11 +98,13 @@ const handleSelectRow = async (_e: Event, row: TableRow<ResultMatchQuery>) => {
 
     <template #score-cell="{ row }">
       <div class="flex items-center gap-1">
+        <!-- <span>{{ row.original.winner_scores ? row.original.winner_scores.length : "" }}</span> -->
+        <!-- {{ row.original.loser_scores ? row.original.loser_scores.length : "" }} -->
         <div
           v-for="(set, index) in row.original.winner_scores"
           :key="index"
         >
-          <span>{{ (set as any).set }}{{ (row.original.loser_scores as any)[index].set }}</span>
+          <span>{{ (set as any).set }}{{ (row.original.loser_scores as any)[index]?.set }}</span>
           <sup v-if="isDefined((set as any).tb) || isDefined((row.original.loser_scores as any)[index].tb)">
             {{ Math.min((set as any).tb || 9999, (row.original.loser_scores as any)[index].tb || 9999) }}
           </sup>

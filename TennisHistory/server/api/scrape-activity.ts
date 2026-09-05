@@ -7,8 +7,6 @@ export default defineEventHandler(async event => {
   const tournamentId = String(query.tournament_id ?? "")
   const year = String(query.year ?? "")
   const tour = String(query.tour ?? "")
-  const superTiebreak = Boolean(query.super_tiebreak)
-  const format = String(query.format ?? "")
   const editionNo = String(query.edition_no ?? "")
 
   if (!tournamentId || !year || !tour) {
@@ -18,5 +16,5 @@ export default defineEventHandler(async event => {
     })
   }
 
-  return await scrapeAtpDraw(supabase, tournamentId, year, editionNo, format, superTiebreak)
+  return await scrapeAtpActivity(supabase, tournamentId, year, editionNo)
 })

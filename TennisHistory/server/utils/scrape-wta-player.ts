@@ -6,6 +6,8 @@ const evaluateScript = (script: string | null) => {
 
     const { givenName, familyName, nationality, birthDate, birthPlace, image, additionalProperty } = json
 
+    const playingHand = additionalProperty.find((p: any) => p.name === "Plays")?.value.replace("-Handed", "")
+
     return {
       first_name: givenName,
       last_name: familyName,
@@ -13,7 +15,7 @@ const evaluateScript = (script: string | null) => {
       dob: birthDate,
       birth_place: birthPlace.address.addressLocality !== "N/A" ? birthPlace.address.addressLocality : null,
       birthCountry: birthPlace.address.addressCountry || null,
-      rh: additionalProperty.find((p: any) => p.name === "Plays")?.value.replace("-Handed", ""),
+      rh: playingHand !== "N/A" ? playingHand : null,
       image
     }
   }

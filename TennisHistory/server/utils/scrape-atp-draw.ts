@@ -224,20 +224,23 @@ const getDrawMatches = async (page: Page, drawType: string, superTiebreak = fals
 
         const entryKey = matchDetails[`t${i + 1}`].players.map((p: any) => p.id).join("-")
 
-        entries[entryKey] ??= {
-          players: matchDetails[`t${i + 1}`].players,
-          match_type: matchDetails[`t${i + 1}`].players.length > 1 ? "Doubles" : "Singles"
-        }
-
-        if (drawType.includes("Qual")) {
-          entries[entryKey].qualifying = {
-            seed,
-            entryInfo
+        // A bye has no players and must not create an empty tournament entry.
+        if (matchDetails[`t${i + 1}`].players.length > 0) {
+          entries[entryKey] ??= {
+            players: matchDetails[`t${i + 1}`].players,
+            match_type: matchDetails[`t${i + 1}`].players.length > 1 ? "Doubles" : "Singles"
           }
-        } else {
-          entries[entryKey].main = {
-            seed,
-            entryInfo
+
+          if (drawType.includes("Qual")) {
+            entries[entryKey].qualifying = {
+              seed,
+              entryInfo
+            }
+          } else {
+            entries[entryKey].main = {
+              seed,
+              entryInfo
+            }
           }
         }
 
@@ -426,6 +429,7 @@ export async function scrapeAtpDraw(
   supabase: SupabaseClient<Database>,
   tournamentId: string,
   year: string,
+  editionNo: string,
   format: string = "3",
   superTiebreak?: boolean
 ) {
@@ -511,6 +515,7 @@ export async function scrapeAtpDraw(
       .select("id, tournament!inner(id)")
       .eq("tournament.mens_id", Number(tournamentId))
       .eq("year", Number(year))
+      .eq("edition_no", Number(editionNo))
       .single()
 
     if (editionError || !editionData) {

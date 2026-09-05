@@ -5,17 +5,6 @@ import type { SupabaseClient } from "@supabase/supabase-js"
 export async function scrapeAtpMatch(supabase: SupabaseClient<Database>, href: string) {
   const browser = await chromium.launch({ headless: false })
 
-  const context = await browser.newContext({
-    // Real users don't have consistent viewports — this helps avoid fingerprint mismatches
-    viewport: {
-      width: 1280 + Math.floor(Math.random() * 100), // Randomize a bit
-      height: 720 + Math.floor(Math.random() * 100)
-    },
-    // userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36", // Use a real user-agent, ideally from your proxy location
-    locale: "en-US", // Match browser locale to IP region
-    timezoneId: "America/New_York" // Timezone mismatches are a red flag in Cloudflare fingerprinting
-  })
-
   const stats_dictionary = {
     Aces: "aces",
     "Double Faults": "dfs",

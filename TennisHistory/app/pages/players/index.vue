@@ -182,7 +182,7 @@ const columns: Array<TableColumn<PlayerType>> = [
       if (isAdmin.value) {
         return h(UFieldGroup, {}, () => [
           h(UButton, { icon: ui.icons.reload, onClick: () => refresh() }),
-          h(LazyPlayerCreate, { hydrateOnIdle: true })
+          h(LazyPlayerCreate, { hydrateOnIdle: true, forward: true })
         ])
       }
     }

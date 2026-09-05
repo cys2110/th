@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ICONS, MatchTypeEnum, TourEnum } from "#imports"
+import { ICONS, TourEnum, type DrawEnum } from "#imports"
 import type { TableColumn } from "@nuxt/ui"
 import { createColumnHelper, type ColumnFiltersState } from "@tanstack/vue-table"
 import { UBadge } from "#components"
@@ -15,8 +15,6 @@ const tournamentStore = useTournamentStore()
 
 const columnFilters = ref<ColumnFiltersState>([])
 const isSaving = ref(false)
-const updatedMappings = ref<{ [key: string]: number | null }>({})
-const updatedEntries = ref<{ [key: string]: { pm: number | null; points: number | null } }>({})
 
 const {
   data: entries,
@@ -79,6 +77,62 @@ const getColumnFilter = (id: string) => columnFilters.value.find(filter => filte
 const setColumnFilter = (id: string, value: unknown) => {
   columnFilters.value = [...columnFilters.value.filter(filter => filter.id !== id), ...(isDefined(value) && value !== "" ? [{ id, value }] : [])]
 }
+
+const scrapeAtpActivity = async () => {
+  const tournamentId = tournamentStore.ids.mens
+
+  if (!tournamentId) {
+    toast.add({
+      title: "ATP tournament ID is missing",
+      icon: ui.icons.error,
+      color: "error"
+    })
+    return
+  }
+
+  isSaving.value = true
+
+  try {
+    const result = await $fetch("/api/scrape-activity", {
+      query: {
+        tournament_id: tournamentId,
+        year: route.params.year,
+        edition_no: route.params.edition_no,
+        tour: "ATP"
+      }
+    })
+
+    if (!result.success) {
+      console.error("Error scraping ATP activity:", result)
+      toast.add({
+        title: "Error scraping ATP activity",
+        description:
+          "errors" in result ? `${result.errors.length} player entries could not be updated`
+          : "error" in result ? result.error
+          : undefined,
+        icon: ui.icons.error,
+        color: "error"
+      })
+      return
+    }
+
+    toast.add({
+      title: "ATP activity scraped",
+      icon: ui.icons.success,
+      color: "success"
+    })
+  } catch (error) {
+    console.error("Error scraping ATP activity:", error)
+    toast.add({
+      title: "Error scraping ATP activity",
+      icon: ui.icons.error,
+      color: "error"
+    })
+  } finally {
+    refresh()
+    isSaving.value = false
+  }
+}
 </script>
 
 <template>
@@ -107,6 +161,15 @@ const setColumnFilter = (id: string, value: unknown) => {
         <lazy-edition-entries-create
           hydrate-on-idle
           @refresh="refresh"
+        />
+
+        <u-button
+          v-if="entries.length"
+          label="ATP"
+          :icon="ICONS.download"
+          :loading="isSaving"
+          :loading-icon="ICONS.downloading"
+          @click="scrapeAtpActivity"
         />
 
         <u-button

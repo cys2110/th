@@ -19,7 +19,8 @@ const handleScrape = async (close: () => void) => {
       year: route.params.year,
       tour: "ATP",
       super_tiebreak: superTiebreak.value,
-      format: format.value
+      format: format.value,
+      edition_no: route.params.edition_no
     }
   })
 
