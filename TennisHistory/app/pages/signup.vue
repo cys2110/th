@@ -1,16 +1,16 @@
 <script setup lang="ts">
 import type { AuthFormField, FormSubmitEvent } from "@nuxt/ui"
-import { coerce, email, object, string, z } from "zod"
+import { coerce, email, object, z } from "zod"
 import { ICONS } from "#imports"
 import { set } from "@vueuse/core"
 
 useHead({ title: "Sign Up" })
 
 const baseSchema = object({
-  username: string("Username is required").min(4, "Username must be at least 4 characters"),
+  username: coerce.string("Username is required").min(4, "Username must be at least 4 characters"),
   email: email("Email is required"),
-  first_name: string("First name is required").min(1, "First name is required"),
-  last_name: string("Last name is required").min(1, "Last name is required"),
+  first_name: coerce.string("First name is required").min(1, "First name is required"),
+  last_name: coerce.string("Last name is required").min(1, "Last name is required"),
   password: coerce.string("Password is required").min(8, "Password must be at least 8 characters"),
   confirmPassword: coerce.string("Confirm password is required")
 })
@@ -25,7 +25,6 @@ const schema = baseSchema.refine(data => data.password === data.confirmPassword,
   }
 })
 
-type InputSchema = z.input<typeof schema>
 type Schema = z.infer<typeof schema>
 
 const {
@@ -49,7 +48,7 @@ const fields: Array<AuthFormField> = [
   { name: "confirmPassword", type: "password", label: "Confirm Password", placeholder: "Confirm password", required: true }
 ]
 
-const onSubmit = async (event: FormSubmitEvent<InputSchema>) => {
+const onSubmit = async (event: FormSubmitEvent<Schema>) => {
   const { data, error } = await supabase.from("users").select("id").eq("username", event.data.username).maybeSingle()
 
   if (error) {
@@ -117,14 +116,23 @@ const handleOtpSubmit = async () => {
     <u-card class="max-w-md w-full">
       <div
         v-if="showOtp"
-        class="w-fit mx-auto"
+        class="w-fit mx-auto flex flex-col gap-6"
       >
+        <div class="font-semibold text-center">Enter your authentication code</div>
+
+        <u-input
+          v-model="emailAddress"
+          type="email"
+          placeholder="Email Address"
+        />
+
         <u-pin-input
           otp
           :length="8"
           v-model="otp"
           type="number"
           @complete="handleOtpSubmit"
+          :disabled="!emailAddress"
         />
       </div>
 
@@ -140,9 +148,19 @@ const handleOtpSubmit = async () => {
       <template #footer>
         <u-button
           block
-          color="success"
+          color="neutral"
           label="Already have an account? Sign In!"
           :to="{ name: 'login' }"
+          variant="link"
+        />
+
+        <u-button
+          v-if="!showOtp"
+          block
+          color="neutral"
+          label="I already have an authentication code"
+          @click="() => (showOtp = true)"
+          variant="link"
         />
       </template>
     </u-card>
