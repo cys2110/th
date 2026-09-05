@@ -11,11 +11,24 @@ export function parseDate(value: string) {
     return `${year}-${month}-${day}`
   }
 
+  const months = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"]
+  const monthFirstDate = value.match(/\b([A-Za-z]{3})\s+(\d{1,2}),\s+(\d{4})\b/)
+
+  if (monthFirstDate) {
+    const [, monthName, day, year] = monthFirstDate
+    const monthIndex = months.indexOf(monthName!.toLowerCase())
+
+    if (monthIndex >= 0) {
+      const month = String(monthIndex + 1).padStart(2, "0")
+
+      return `${year}-${month}-${day!.padStart(2, "0")}`
+    }
+  }
+
   const abbreviatedDate = value.match(/\b(\d{1,2})\s+([A-Za-z]{3})\s+(\d{2})\b/)
 
   if (abbreviatedDate) {
     const [, day, monthName, shortYear] = abbreviatedDate
-    const months = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"]
     const monthIndex = months.indexOf(monthName!.toLowerCase())
 
     if (monthIndex >= 0) {

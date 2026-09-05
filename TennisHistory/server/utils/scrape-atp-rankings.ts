@@ -8,7 +8,7 @@ export async function scrapeAtpRankings(id: string) {
 
     await page.goto(`https://www.atptour.com/en/players/x/${id}/rankings-history?year=all`, { waitUntil: "domcontentloaded" })
 
-    await acceptCookies(page)
+    await acceptAtpCookies(page)
 
     const rankings: Array<{ start_date: string; rank: number; match_type: "Singles" | "Doubles" }> = []
 

@@ -22,7 +22,7 @@ const checkForMissingPlayers = async (supabase: SupabaseClient<Database>, page: 
   try {
     const drawPlayers: Array<{ id: string; name: string }> = []
 
-    await acceptCookies(page)
+    await acceptAtpCookies(page)
 
     const players = await page.locator(".name").all()
 

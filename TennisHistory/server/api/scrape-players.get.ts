@@ -10,10 +10,5 @@ export default defineEventHandler(async event => {
     })
   }
 
-  // If ID is a number, it's a player ID
-  if (isNaN(Number(id))) {
-    return await scrapeAtpPlayer(id)
-  }
-
-  return scrapeWtaPlayer(id)
+  return await (isNaN(Number(id)) ? scrapeAtpPlayer : scrapeWtaPlayer)(id)
 })

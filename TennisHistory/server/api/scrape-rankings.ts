@@ -21,7 +21,7 @@ export default defineEventHandler(async event => {
     return []
   }
 
-  const rankings = await scrapeAtpRankings(id)
+  const rankings = await (isNaN(Number(id)) ? scrapeAtpRankings : scrapeWtaRankings)(id)
 
   const rankingsToInsert = rankings
     .filter(r => !existingRankings.find(er => er.start_date === r.start_date && er.match_type === r.match_type))

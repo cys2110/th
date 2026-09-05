@@ -38,7 +38,7 @@ const scrapeActivity = async (browser: Browser, playerId: string, matchType: "Si
       waitUntil: "domcontentloaded"
     })
 
-    await acceptCookies(page)
+    await acceptAtpCookies(page)
 
     const tournamentContainers = await page.locator(".tournament").all()
 

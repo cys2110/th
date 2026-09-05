@@ -15,7 +15,7 @@ export const verifyHuman = async (page: Page) => {
   }
 }
 
-export async function acceptCookies(page: Page) {
+export async function acceptAtpCookies(page: Page) {
   const cookieButton = page.getByRole("button", { name: "Essential Cookies Only" })
 
   try {
