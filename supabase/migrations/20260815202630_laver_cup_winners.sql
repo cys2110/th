@@ -13,3 +13,5 @@ JOIN tennis.events e ON ed.id = e.edition_id
 LEFT JOIN tennis.entries en ON e.id = en.event_id
 WHERE ed.draw_type = 'Laver Cup'::tennis.draw_type_enum
 AND en.points > 12;
+
+GRANT SELECT ON TABLE tennis.laver_cup_winners TO anon, authenticated;

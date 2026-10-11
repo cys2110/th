@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import { ICONS } from "#imports"
 
+const props = defineProps<{
+  tour: TourEnum
+}>()
+
 const route = useRoute("edition")
 const { ui } = useAppConfig()
 const toast = useToast()
@@ -11,16 +15,18 @@ const isScraping = ref(false)
 
 const format = ref(3)
 const superTiebreak = ref(false)
+const tournamentId = ref()
 
 const handleScrape = async (close: () => void) => {
   const result = await $fetch("/api/scrape-draw", {
     query: {
-      tournament_id: tournamentStore.ids.mens,
+      db_id: tournamentStore.ids[props.tour === "ATP" ? "mens" : "womens"],
       year: route.params.year,
-      tour: "ATP",
+      tour: props.tour,
       super_tiebreak: superTiebreak.value,
       format: format.value,
-      edition_no: route.params.edition_no
+      edition_no: route.params.edition_no,
+      tournament_id: tournamentId.value
     }
   })
 
@@ -39,20 +45,27 @@ const handleScrape = async (close: () => void) => {
 </script>
 
 <template>
-  <u-modal title="Scrape ATP Draw">
+  <u-modal :title="`Scrape ${tour} Draw`">
     <u-button
       :icon="ICONS.draw"
       :ui="{ leadingIcon: 'rotate-270' }"
     />
 
     <template #body>
-      <div class="grid grid-cols-2 items-center">
+      <div class="grid grid-cols-3 gap-3 items-center">
         <u-radio-group
           orientation="horizontal"
           :items="[3, 5]"
           v-model="format"
           legend="Format"
         />
+
+        <u-form-field label="Tournament ID">
+          <form-input
+            v-model="tournamentId"
+            placeholder="Tournament ID"
+          />
+        </u-form-field>
 
         <u-checkbox
           v-model="superTiebreak"

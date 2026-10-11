@@ -73,7 +73,8 @@ const props = defineProps<{ forward: boolean }>()
 const emits = defineEmits<{ refresh: [] }>()
 
 defineShortcuts({
-  ctrl_a: () => set(isOpen, !isOpen.value)
+  ctrl_a: () => set(isOpen, !isOpen.value),
+  ctrl_s: () => handleScrape()
 })
 
 const router = useRouter()
@@ -401,7 +402,7 @@ const handleScrape = async () => {
     const response = await fetch(`/api/scrape-players?id=${state.value.id}`)
     const data = await response.json()
 
-    console.log(data)
+    console.info("player:", data)
 
     const { birthCountry, country, coaches: coachesData, ch_singles_date, ch_doubles_date, dob, turned_pro, image, ...rest } = data
 
@@ -482,12 +483,6 @@ const handleScrape = async () => {
             v-model="state"
           />
         </div>
-
-        <div
-          v-if="coaches.length"
-          class="text-sm"
-          >Coaches: {{ coaches }}</div
-        >
 
         <u-form
           v-for="(_, index) in state.coaches"

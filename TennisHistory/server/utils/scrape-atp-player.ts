@@ -8,6 +8,8 @@ export async function scrapeAtpPlayer(id: string) {
 
     await page.goto(`https://www.atptour.com/en/players/x/${id}/overview`, { waitUntil: "domcontentloaded" })
 
+    await page.pause()
+
     await acceptAtpCookies(page)
 
     const image = await page.locator(".player_shot").getByRole("img").getAttribute("src")

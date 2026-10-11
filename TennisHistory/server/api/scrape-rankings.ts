@@ -36,7 +36,10 @@ export default defineEventHandler(async event => {
       }
     })
 
-  const { error: insertError } = await supabase.schema("tennis").from("rankings").insert(rankingsToInsert)
+  const { error: insertError } = await supabase
+    .schema("tennis")
+    .from("rankings")
+    .upsert(rankingsToInsert, { onConflict: "player_id,start_date,match_type" })
 
   if (insertError) {
     console.error("Error inserting rankings:", insertError)

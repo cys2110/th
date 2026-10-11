@@ -2003,7 +2003,7 @@ export type Database = {
           draw: Database["tennis"]["Enums"]["draw_enum"]
           entry_id: string
           event_id: string
-          id: string
+          id: number
           player_id: string | null
           reason: string | null
         }
@@ -2011,7 +2011,7 @@ export type Database = {
           draw: Database["tennis"]["Enums"]["draw_enum"]
           entry_id: string
           event_id: string
-          id?: string
+          id?: number
           player_id?: string | null
           reason?: string | null
         }
@@ -2019,7 +2019,7 @@ export type Database = {
           draw?: Database["tennis"]["Enums"]["draw_enum"]
           entry_id?: string
           event_id?: string
-          id?: string
+          id?: number
           player_id?: string | null
           reason?: string | null
         }
@@ -2230,21 +2230,21 @@ export type Database = {
           draw: Database["tennis"]["Enums"]["draw_enum"]
           entry_id: string
           event_id: string
-          id: string
+          id: number
           status: Database["tennis"]["Enums"]["status_enum"]
         }
         Insert: {
           draw: Database["tennis"]["Enums"]["draw_enum"]
           entry_id: string
           event_id: string
-          id?: string
+          id?: number
           status: Database["tennis"]["Enums"]["status_enum"]
         }
         Update: {
           draw?: Database["tennis"]["Enums"]["draw_enum"]
           entry_id?: string
           event_id?: string
-          id?: string
+          id?: number
           status?: Database["tennis"]["Enums"]["status_enum"]
         }
         Relationships: [
@@ -2267,17 +2267,17 @@ export type Database = {
       event_supervisor_mapping: {
         Row: {
           event_id: string
-          id: string
+          id: number
           supervisor_id: string
         }
         Insert: {
           event_id: string
-          id?: string
+          id?: number
           supervisor_id: string
         }
         Update: {
           event_id?: string
-          id?: string
+          id?: number
           supervisor_id?: string
         }
         Relationships: [
@@ -2431,21 +2431,21 @@ export type Database = {
           draw: Database["tennis"]["Enums"]["draw_enum"]
           entry_id: string
           event_id: string
-          id: string
+          id: number
           rank: number | null
         }
         Insert: {
           draw: Database["tennis"]["Enums"]["draw_enum"]
           entry_id: string
           event_id: string
-          id?: string
+          id?: number
           rank?: number | null
         }
         Update: {
           draw?: Database["tennis"]["Enums"]["draw_enum"]
           entry_id?: string
           event_id?: string
-          id?: string
+          id?: number
           rank?: number | null
         }
         Relationships: [
@@ -2468,7 +2468,7 @@ export type Database = {
       match_scores: {
         Row: {
           entry_id: string
-          id: string
+          id: number
           match_id: string
           set: number | null
           set_no: number | null
@@ -2476,7 +2476,7 @@ export type Database = {
         }
         Insert: {
           entry_id: string
-          id?: string
+          id?: number
           match_id: string
           set?: number | null
           set_no?: number | null
@@ -2484,7 +2484,7 @@ export type Database = {
         }
         Update: {
           entry_id?: string
-          id?: string
+          id?: number
           match_id?: string
           set?: number | null
           set_no?: number | null
@@ -2532,7 +2532,7 @@ export type Database = {
           bps_saved: number | null
           dfs: number | null
           entry_id: string
-          id: string
+          id: number
           match_id: string
           max_speed: number | null
           net: number | null
@@ -2560,7 +2560,7 @@ export type Database = {
           bps_saved?: number | null
           dfs?: number | null
           entry_id: string
-          id?: string
+          id?: number
           match_id: string
           max_speed?: number | null
           net?: number | null
@@ -2588,7 +2588,7 @@ export type Database = {
           bps_saved?: number | null
           dfs?: number | null
           entry_id?: string
-          id?: string
+          id?: number
           match_id?: string
           max_speed?: number | null
           net?: number | null
@@ -2866,21 +2866,21 @@ export type Database = {
       player_coach_mapping: {
         Row: {
           coach_id: string
-          id: string
+          id: number
           player_id: string
           status: string
           years: string | null
         }
         Insert: {
           coach_id: string
-          id?: string
+          id?: number
           player_id: string
           status?: string
           years?: string | null
         }
         Update: {
           coach_id?: string
-          id?: string
+          id?: number
           player_id?: string
           status?: string
           years?: string | null
@@ -2968,25 +2968,76 @@ export type Database = {
           },
         ]
       }
+      player_stats: {
+        Row: {
+          id: number
+          level: Database["public"]["Enums"]["level_enum"]
+          loss: number
+          match_type: Database["tennis"]["Enums"]["match_type_enum"]
+          player_id: string
+          pm: number
+          titles: number
+          win: number
+          year: number
+        }
+        Insert: {
+          id?: number
+          level?: Database["public"]["Enums"]["level_enum"]
+          loss?: number
+          match_type: Database["tennis"]["Enums"]["match_type_enum"]
+          player_id: string
+          pm?: number
+          titles?: number
+          win?: number
+          year: number
+        }
+        Update: {
+          id?: number
+          level?: Database["public"]["Enums"]["level_enum"]
+          loss?: number
+          match_type?: Database["tennis"]["Enums"]["match_type_enum"]
+          player_id?: string
+          pm?: number
+          titles?: number
+          win?: number
+          year?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "player_stats_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "player"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "player_stats_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "player_details"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       prev_nationality_mapping: {
         Row: {
           country_id: string
           end_date: string
-          id: string
+          id: number
           player_id: string
           start_date: string
         }
         Insert: {
           country_id: string
           end_date: string
-          id?: string
+          id?: number
           player_id: string
           start_date: string
         }
         Update: {
           country_id?: string
           end_date?: string
-          id?: string
+          id?: number
           player_id?: string
           start_date?: string
         }
@@ -3017,7 +3068,7 @@ export type Database = {
       rankings: {
         Row: {
           end_date: string
-          id: string
+          id: number
           match_type: Database["tennis"]["Enums"]["match_type_enum"]
           player_id: string
           rank: number
@@ -3025,7 +3076,7 @@ export type Database = {
         }
         Insert: {
           end_date: string
-          id?: string
+          id?: number
           match_type: Database["tennis"]["Enums"]["match_type_enum"]
           player_id: string
           rank: number
@@ -3033,7 +3084,7 @@ export type Database = {
         }
         Update: {
           end_date?: string
-          id?: string
+          id?: number
           match_type?: Database["tennis"]["Enums"]["match_type_enum"]
           player_id?: string
           rank?: number
@@ -3061,7 +3112,7 @@ export type Database = {
           draw: Database["tennis"]["Enums"]["draw_enum"]
           entry_id: string
           event_id: string
-          id: string
+          id: number
           player_id: string | null
           reason: string | null
         }
@@ -3069,7 +3120,7 @@ export type Database = {
           draw: Database["tennis"]["Enums"]["draw_enum"]
           entry_id: string
           event_id: string
-          id?: string
+          id?: number
           player_id?: string | null
           reason?: string | null
         }
@@ -3077,7 +3128,7 @@ export type Database = {
           draw?: Database["tennis"]["Enums"]["draw_enum"]
           entry_id?: string
           event_id?: string
-          id?: string
+          id?: number
           player_id?: string | null
           reason?: string | null
         }
@@ -3164,7 +3215,7 @@ export type Database = {
           draw: Database["tennis"]["Enums"]["draw_enum"]
           entry_id: string
           event_id: string
-          id: string
+          id: number
           match_type: Database["tennis"]["Enums"]["match_type_enum"] | null
           rank: number | null
           seed: number
@@ -3173,7 +3224,7 @@ export type Database = {
           draw: Database["tennis"]["Enums"]["draw_enum"]
           entry_id: string
           event_id: string
-          id?: string
+          id?: number
           match_type?: Database["tennis"]["Enums"]["match_type_enum"] | null
           rank?: number | null
           seed: number
@@ -3182,7 +3233,7 @@ export type Database = {
           draw?: Database["tennis"]["Enums"]["draw_enum"]
           entry_id?: string
           event_id?: string
-          id?: string
+          id?: number
           match_type?: Database["tennis"]["Enums"]["match_type_enum"] | null
           rank?: number | null
           seed?: number
@@ -3393,7 +3444,7 @@ export type Database = {
           draw: Database["tennis"]["Enums"]["draw_enum"]
           entry_id: string
           event_id: string
-          id: string
+          id: number
           player_id: string | null
           reason: string | null
         }
@@ -3401,7 +3452,7 @@ export type Database = {
           draw: Database["tennis"]["Enums"]["draw_enum"]
           entry_id: string
           event_id: string
-          id?: string
+          id?: number
           player_id?: string | null
           reason?: string | null
         }
@@ -3409,7 +3460,7 @@ export type Database = {
           draw?: Database["tennis"]["Enums"]["draw_enum"]
           entry_id?: string
           event_id?: string
-          id?: string
+          id?: number
           player_id?: string | null
           reason?: string | null
         }
@@ -3449,7 +3500,7 @@ export type Database = {
           draw: Database["tennis"]["Enums"]["draw_enum"]
           entry_id: string
           event_id: string
-          id: string
+          id: number
           player_id: string | null
           reason: string | null
         }
@@ -3457,7 +3508,7 @@ export type Database = {
           draw: Database["tennis"]["Enums"]["draw_enum"]
           entry_id: string
           event_id: string
-          id?: string
+          id?: number
           player_id?: string | null
           reason?: string | null
         }
@@ -3465,7 +3516,7 @@ export type Database = {
           draw?: Database["tennis"]["Enums"]["draw_enum"]
           entry_id?: string
           event_id?: string
-          id?: string
+          id?: number
           player_id?: string | null
           reason?: string | null
         }
@@ -3880,7 +3931,7 @@ export type Database = {
           draw: Database["tennis"]["Enums"]["draw_enum"] | null
           edition_no: number | null
           entry_id: string | null
-          id: string | null
+          id: number | null
           match_type: Database["tennis"]["Enums"]["match_type_enum"] | null
           rank: number | null
           seed: number | null
@@ -3962,12 +4013,12 @@ export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
         DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -3991,11 +4042,11 @@ export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -4016,11 +4067,11 @@ export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -4041,11 +4092,11 @@ export type Enums<
   DefaultSchemaEnumNameOrOptions extends
     | keyof DefaultSchema["Enums"]
     | { schema: keyof DatabaseWithoutInternals },
-  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+  EnumName extends (DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaEnumNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -4058,11 +4109,11 @@ export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof DefaultSchema["CompositeTypes"]
     | { schema: keyof DatabaseWithoutInternals },
-  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+  CompositeTypeName extends (PublicCompositeTypeNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never = never,
+    : never) = never,
 > = PublicCompositeTypeNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }

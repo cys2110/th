@@ -47,7 +47,7 @@ const isUploading = ref(false)
 
 // Get events
 const { data: events, pending: eventsPending } = await useAsyncData(
-  () => `create-seed-${JSON.stringify(route.params)}`,
+  () => `entry-info-events-${JSON.stringify(route.params)}`,
   async () => {
     const { data, error } = await supabase
       .schema("tennis")

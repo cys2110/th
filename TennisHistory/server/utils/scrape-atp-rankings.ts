@@ -8,9 +8,11 @@ export async function scrapeAtpRankings(id: string) {
 
     await page.goto(`https://www.atptour.com/en/players/x/${id}/rankings-history?year=all`, { waitUntil: "domcontentloaded" })
 
+    await page.pause()
+
     await acceptAtpCookies(page)
 
-    const rankings: Array<{ start_date: string; rank: number; match_type: "Singles" | "Doubles" }> = []
+    const rankings: Array<RankingResult> = []
 
     const matchTypeContainers = await page.locator(".rankings-list").all()
 
@@ -21,10 +23,11 @@ export async function scrapeAtpRankings(id: string) {
 
       if (rankingItems) {
         for (const item of rankingItems) {
-          const date = await item.locator(".name").innerText()
-          const rank = await item.locator(".set-points").innerText()
+          const [date, rank] = await Promise.all([item.locator(".name").innerText(), item.locator(".set-points").innerText()])
 
-          rankings.push({ start_date: date.replaceAll("/", "-"), rank: Number(rank), match_type: matchType })
+          const startDate = parseDate(date.trim())
+
+          rankings.push({ start_date: startDate, rank: Number(rank), match_type: matchType })
         }
       }
     }

@@ -1,23 +1,23 @@
-import { chromium, Locator, Page } from "playwright"
-
-interface Ranking {
-  start_date: string
-  rank: number
-  match_type: "Singles" | "Doubles"
-}
+import { chromium, Locator } from "playwright"
 
 const getWeekRankings = async (container: Locator, matchType: "Singles" | "Doubles") => {
-  const rankings: Array<Ranking> = []
+  const rankings: Array<RankingResult> = []
 
   const rankingRows = await container.locator(".player-ranking-history__table-inner").locator(".player-ranking-history__table-row").all()
 
   if (rankingRows.length) {
     for (const row of rankingRows) {
-      const date = (await row.locator(".player-ranking-history__table-value--left").innerText()).trim()
-      const rank = (await row.locator(".player-ranking-history__table-value--right").innerText()).trim()
+      const [date, rank] = (
+        await Promise.all([
+          row.locator(".player-ranking-history__table-value--left").innerText(),
+          row.locator(".player-ranking-history__table-value--right").innerText()
+        ])
+      ).map(v => v.trim())
+
+      const startDate = parseDate(date!)
 
       rankings.push({
-        start_date: parseDate(date),
+        start_date: startDate,
         rank: Number(rank),
         match_type: matchType
       })
@@ -42,7 +42,12 @@ export async function scrapeWtaRankings(id: string) {
     const singlesContainer = weeklyTabContainer.locator('[data-ui-tab-week="Singles"]')
     const doublesContainer = weeklyTabContainer.locator('[data-ui-tab-week="Doubles"]')
 
-    return [...(await getWeekRankings(singlesContainer, "Singles")), ...(await getWeekRankings(doublesContainer, "Doubles"))]
+    const rankings = await Promise.all([
+      getWeekRankings(singlesContainer, "Singles"),
+      getWeekRankings(doublesContainer, "Doubles")
+    ])
+
+    return rankings.flat()
   } finally {
     await browser.close()
   }

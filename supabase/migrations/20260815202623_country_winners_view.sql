@@ -15,3 +15,5 @@ LEFT JOIN tennis.rounds r ON e.id = r.event_id AND r.round = 'Final'
 LEFT JOIN tennis.ties t ON r.id = t.round_id
 LEFT JOIN tennis.entries te ON te.id = t.winner_id
 WHERE ed.draw_type = 'Country draw'::tennis.draw_type_enum;
+
+GRANT SELECT ON TABLE tennis.country_winners TO anon, authenticated;

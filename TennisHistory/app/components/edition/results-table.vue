@@ -98,15 +98,15 @@ const handleSelectRow = async (_e: Event, row: TableRow<ResultMatchQuery>) => {
 
     <template #score-cell="{ row }">
       <div class="flex items-center gap-1">
-        <!-- <span>{{ row.original.winner_scores ? row.original.winner_scores.length : "" }}</span> -->
-        <!-- {{ row.original.loser_scores ? row.original.loser_scores.length : "" }} -->
+        <!-- <span>{{ row.original.winner_scores ? row.original.winner_scores.length : "" }}</span>
+        <div>{{ row.original.loser_scores ? row.original.loser_scores.length : "" }}</div> -->
         <div
           v-for="(set, index) in row.original.winner_scores"
           :key="index"
         >
           <span>{{ (set as any).set }}{{ (row.original.loser_scores as any)[index]?.set }}</span>
-          <sup v-if="isDefined((set as any).tb) || isDefined((row.original.loser_scores as any)[index].tb)">
-            {{ Math.min((set as any).tb || 9999, (row.original.loser_scores as any)[index].tb || 9999) }}
+          <sup v-if="isDefined((set as any)?.tb) || isDefined((row.original.loser_scores as any)[index]?.tb)">
+            {{ Math.min((set as any)?.tb || 9999, (row.original.loser_scores as any)[index]?.tb || 9999) }}
           </sup>
         </div>
 

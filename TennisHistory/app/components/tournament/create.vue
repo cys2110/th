@@ -24,7 +24,7 @@ const schema = object({
     })
     .optional()
 }).superRefine((data, ctx) => {
-  if (!data.mens_id && (data.tours.includes("ATP") || data.tours.includes("ITF-M"))) {
+  if (!data.mens_id && data.tours.includes("ATP")) {
     ctx.addIssue({
       code: "custom",
       path: ["mens_id"],
@@ -32,7 +32,7 @@ const schema = object({
     })
   }
 
-  if (!data.womens_id && (data.tours.includes("WTA") || data.tours.includes("ITF-W"))) {
+  if (!data.womens_id && data.tours.includes("WTA")) {
     ctx.addIssue({
       code: "custom",
       path: ["womens_id"],

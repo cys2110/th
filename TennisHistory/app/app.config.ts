@@ -91,7 +91,7 @@ export default defineAppConfig({
       }
     },
     checkbox: { slots: { label: "cursor-pointer" } },
-    contextMenu: { defaultVariants: { size: "md" } },
+    contextMenu: { slots: { item: "data-[slot=item]:cursor-pointer" } },
     fileUpload: { slots: { root: "cursor-pointer" } },
     footerColumns: { slots: { center: "xl:col-span-3" } },
     header: { slots: { title: "font-cursive" } },

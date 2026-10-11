@@ -87,7 +87,7 @@ const { pending, execute, refresh } = await useAsyncData(
 
     set(canLoadMore, data.length + players.value.length < (countData || 0))
     set(count, countData || 0)
-    set(players, players.value.concat(data as Array<PlayerType>))
+    players.value = players.value.concat(data as Array<PlayerType>)
 
     return data
   },
@@ -209,7 +209,103 @@ const getContextItems = (row: TableRow<PlayerType>): Array<ContextMenuItem> =>
       type: "link",
       to: { name: "player", params: { id: row.original.id, name: kebabCase(row.original.full_name!) } },
       target: "_blank"
-    }
+    },
+    { type: "separator" },
+    { label: "Filter by", type: "label" },
+    {
+      label: row.original.tour,
+      description: "Tour",
+      type: "checkbox",
+      checked: route.query.tour === row.original.tour,
+      onUpdateChecked: () => {
+        if (route.query.tour === row.original.tour) {
+          updateRouteQuery("tour", null)
+        } else {
+          updateRouteQuery("tour", row.original.tour)
+        }
+      }
+    },
+    {
+      label: (row.original.country as any).name,
+      description: "Country",
+      type: "checkbox",
+      checked: route.query.country === (row.original.country as any).id,
+      onUpdateChecked: () => {
+        if (route.query.country === (row.original.country as any).id) {
+          updateRouteQuery("country", null)
+        } else {
+          updateRouteQuery("country", (row.original.country as any).id)
+        }
+      }
+    },
+    ...(row.original.turned_pro ?
+      [
+        {
+          label: row.original.turned_pro,
+          description: "Turned Pro",
+          type: "checkbox",
+          checked: route.query.turned_pro === String(row.original.turned_pro),
+          onUpdateChecked: () => {
+            if (route.query.turned_pro === String(row.original.turned_pro)) {
+              updateRouteQuery("turned_pro", null)
+            } else {
+              updateRouteQuery("turned_pro", row.original.turned_pro)
+            }
+          }
+        }
+      ]
+    : []),
+    ...(row.original.retired ?
+      [
+        {
+          label: row.original.retired,
+          description: "Retired",
+          type: "checkbox",
+          checked: route.query.retired === String(row.original.retired),
+          onUpdateChecked: () => {
+            if (route.query.retired === String(row.original.retired)) {
+              updateRouteQuery("retired", null)
+            } else {
+              updateRouteQuery("retired", row.original.retired)
+            }
+          }
+        }
+      ]
+    : []),
+    ...((row.original.tournament_years as any).first ?
+      [
+        {
+          label: (row.original.tournament_years as any).first,
+          description: "First Tournament Year",
+          type: "checkbox",
+          checked: route.query.first_year === String((row.original.tournament_years as any).first),
+          onUpdateChecked: () => {
+            if (route.query.first_year === String((row.original.tournament_years as any).first)) {
+              updateRouteQuery("first_year", null)
+            } else {
+              updateRouteQuery("first_year", (row.original.tournament_years as any).first)
+            }
+          }
+        }
+      ]
+    : []),
+    ...((row.original.tournament_years as any).last ?
+      [
+        {
+          label: (row.original.tournament_years as any).last,
+          description: "Last Tournament Year",
+          type: "checkbox",
+          checked: route.query.last_year === String((row.original.tournament_years as any).last),
+          onUpdateChecked: () => {
+            if (route.query.last_year === String((row.original.tournament_years as any).last)) {
+              updateRouteQuery("last_year", null)
+            } else {
+              updateRouteQuery("last_year", (row.original.tournament_years as any).last)
+            }
+          }
+        }
+      ]
+    : [])
   ] as Array<ContextMenuItem>
 
 const onContextmenu = (e: Event, row: TableRow<PlayerType>) => {
@@ -228,7 +324,7 @@ const onContextmenu = (e: Event, row: TableRow<PlayerType>) => {
           <u-select
             :model-value="<TourEnum>route.query.tour"
             @update:model-value="updateRouteQuery('tour', $event)"
-            :items="[...TOUR_OPTIONS]"
+            :items="['ATP', 'WTA']"
             placeholder="Tour"
             :icon="ICONS.tour"
           >
@@ -296,6 +392,42 @@ const onContextmenu = (e: Event, row: TableRow<PlayerType>) => {
               <u-calendar
                 :model-value="selectedRetiredDate"
                 @update:model-value="updateRouteQuery('retired', $event ? ($event as DateValue).year : undefined)"
+                type="year"
+              />
+            </template>
+          </u-popover>
+
+          <u-popover>
+            <u-button
+              variant="outline"
+              color="neutral"
+              :icon="ICONS.calendar"
+              :label="<string>route.query.first_year || 'First Tournament'"
+              :class="route.query.first_year ? '' : 'text-dimmed font-normal'"
+            />
+
+            <template #content>
+              <u-calendar
+                :model-value="selectedFirstYearDate"
+                @update:model-value="updateRouteQuery('first_year', $event ? ($event as DateValue).year : undefined)"
+                type="year"
+              />
+            </template>
+          </u-popover>
+
+          <u-popover>
+            <u-button
+              variant="outline"
+              color="neutral"
+              :icon="ICONS.calendar"
+              :label="<string>route.query.last_year || 'Last Tournament'"
+              :class="route.query.last_year ? '' : 'text-dimmed font-normal'"
+            />
+
+            <template #content>
+              <u-calendar
+                :model-value="selectedLastYearDate"
+                @update:model-value="updateRouteQuery('last_year', $event ? ($event as DateValue).year : undefined)"
                 type="year"
               />
             </template>

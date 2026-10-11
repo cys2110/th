@@ -4,9 +4,9 @@ import { any, array, coerce, object, string, url, z } from "zod"
 import { set } from "@vueuse/core"
 
 const schema = object({
-  tour: TourEnum,
-  category: string(),
-  currency: string(),
+  tour: TourEnum.optional(),
+  category: string().optional(),
+  currency: string().optional(),
   dates: any().optional(),
   level: LevelEnum,
   sponsor_name: string().optional(),

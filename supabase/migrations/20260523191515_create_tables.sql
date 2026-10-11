@@ -3,7 +3,8 @@ CREATE TABLE countries (
     id TEXT PRIMARY KEY NOT NULL,
     name TEXT NOT NULL,
     continent continent_enum NOT NULL,
-    alpha_2 TEXT
+    alpha_2 TEXT,
+    icon TEXT NOT NULL
 );
 
 -- Venues table
@@ -12,9 +13,14 @@ CREATE TABLE venues (
     name TEXT,
     city TEXT NOT NULL,
     country_id TEXT NOT NULL REFERENCES countries (id) ON UPDATE CASCADE ON DELETE CASCADE,
+    slug TEXT GENERATED ALWAYS AS (lower(name || ' ' || city)) STORED,
 
     CONSTRAINT venues_unique UNIQUE (name, city)
 );
+
+CREATE INDEX venues_slug_trgm_idx
+ON venues
+USING GIN (slug extensions.gin_trgm_ops);
 
 -- Surfaces table
 CREATE TABLE surfaces (
@@ -60,8 +66,13 @@ CREATE TABLE players (
     tour tour_enum NOT NULL,
     turned_pro INTEGER,
     wiki_link TEXT,
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    full_name TEXT GENERATED ALWAYS AS (first_name || ' ' || last_name) STORED
 );
+
+CREATE INDEX players_full_name_trgm_idx
+ON players
+USING GIN (full_name extensions.gin_trgm_ops);
 
 -- People table
 CREATE TABLE people (
@@ -69,9 +80,14 @@ CREATE TABLE people (
     first_name TEXT NOT NULL,
     last_name TEXT NOT NULL,
     player_id TEXT REFERENCES players (id) ON UPDATE CASCADE ON DELETE SET NULL,
+    full_name TEXT GENERATED ALWAYS AS (first_name || ' ' || last_name) STORED,
 
     CONSTRAINT people_slug_unique UNIQUE (first_name, last_name)
 );
+
+CREATE INDEX people_full_name_trgm_idx
+ON people
+USING GIN (full_name extensions.gin_trgm_ops);
 
 -- Player country mapping
 CREATE TABLE player_country_mapping (
@@ -298,8 +314,8 @@ CREATE TABLE ties (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     tie_number INTEGER NOT NULL,
     round_id UUID NOT NULL REFERENCES rounds (id) ON UPDATE CASCADE ON DELETE CASCADE,
-    country_1_id TEXT NOT NULL REFERENCES countries (id) ON UPDATE CASCADE ON DELETE CASCADE,
-    country_2_id TEXT NOT NULL REFERENCES countries (id) ON UPDATE CASCADE ON DELETE CASCADE,
+    country_1_id TEXT NOT NULL REFERENCES entries (id) ON UPDATE CASCADE ON DELETE CASCADE,
+    country_2_id TEXT NOT NULL REFERENCES entries (id) ON UPDATE CASCADE ON DELETE CASCADE,
     winner_id TEXT NOT NULL REFERENCES entries (id) ON UPDATE CASCADE ON DELETE CASCADE,
     loser_id TEXT NOT NULL REFERENCES entries (id) ON UPDATE CASCADE ON DELETE CASCADE,
     date DATE,

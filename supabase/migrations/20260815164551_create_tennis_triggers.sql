@@ -65,19 +65,19 @@ EXECUTE FUNCTION public.handle_updated_at();
 
 -- Trigger function to create rounds for Laver Cup events (can automatically create rounds since they will be the same for each event)
 CREATE OR REPLACE FUNCTION tennis.create_laver_cup_rounds()
-RETURNS TRIGGER
+RETURNS trigger
 LANGUAGE plpgsql
+SET search_path = ''
 AS $$
 DECLARE
-    edition_draw_type draws_enum;
+  edition_draw_type tennis.draw_type_enum;
 BEGIN
-    -- Get draw type of event's edition
-    SELECT ed.draw_type
-    INTO edition_draw_type
-    FROM editions ed
-    WHERE ed.id = NEW.edition_id;
+  SELECT ed.draw_type
+  INTO edition_draw_type
+  FROM tennis.editions AS ed
+  WHERE ed.id = NEW.edition_id;
 
-    -- Create rounds for Laver Cup events
+  -- Create rounds for Laver Cup events
     IF edition_draw_type = 'Laver Cup' THEN
         INSERT INTO rounds (number, round, points, tour, draw, event_id)
         VALUES
@@ -86,7 +86,7 @@ BEGIN
         (3, 'Day 1', 1, 'ATP', 'Main', NEW.id);
     END IF;
 
-    RETURN NEW;
+  RETURN NEW;
 END;
 $$;
 
@@ -245,10 +245,10 @@ DECLARE
 BEGIN
     SELECT ms."set", ms.tb, ms.id
     INTO other_row
-    FROM match_scores ms
-    WHERE ms.match_id = NEW.match_id
+    FROM tennis.match_scores ms
+    WHERE ms.match_id::uuid = NEW.match_id::uuid
       AND ms.set_no   = NEW.set_no
-      AND ms.entry_id <> NEW.entry_id
+      AND ms.entry_id::uuid <> NEW.entry_id::uuid
     LIMIT 1;
 
     IF NEW."set" = 7 AND NEW.tb IS NULL THEN
@@ -264,7 +264,7 @@ BEGIN
     IF NEW.tb IS NOT NULL AND other_row.tb IS NULL THEN
         derived_other_tb := CASE WHEN NEW.tb <= 5 THEN 7 ELSE NEW.tb + 2 END;
 
-        UPDATE match_scores ms
+        UPDATE tennis.match_scores ms
         SET tb = derived_other_tb
         WHERE ms.id = other_row.id;
     END IF;
@@ -286,7 +286,7 @@ AS $$
 DECLARE
     match_points numeric;
     match_pm numeric;
-    match_event_id text;
+    match_event_id uuid;
 
     win_round_id uuid;
     win_points numeric;

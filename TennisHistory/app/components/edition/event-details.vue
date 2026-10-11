@@ -40,8 +40,9 @@ const tournamentStore = useTournamentStore()
         v-if="isAdmin"
       >
         <u-field-group>
-          <lazy-scrape-atp-draw
-            v-if="event.tour === 'ATP'"
+          <lazy-scrape-draw
+            v-if="event.tour === 'ATP' || event.tour === 'WTA'"
+            :tour="event.tour"
             hydrate-on-idle
           />
         </u-field-group>

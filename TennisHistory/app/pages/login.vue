@@ -3,7 +3,7 @@ import { ICONS } from "#imports"
 import type { AuthFormField, FormSubmitEvent } from "@nuxt/ui"
 import { object, string, z } from "zod"
 
-useHead({ title: "Sign In" })
+useHead({ title: "Log In" })
 
 const schema = object({
   username: string().min(1, "Username is required"),
@@ -73,7 +73,8 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
       <template #footer>
         <u-button
           block
-          color="success"
+          color="neutral"
+          variant="link"
           label="Sign up"
           :to="{ name: 'signup' }"
         />

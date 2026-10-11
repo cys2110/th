@@ -1,5 +1,3 @@
-DROP VIEW IF EXISTS tennis.player_details;
-
 CREATE OR REPLACE VIEW tennis.player_details
 WITH (security_invoker = true)
 AS

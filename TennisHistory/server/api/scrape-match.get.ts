@@ -14,5 +14,9 @@ export default defineEventHandler(async event => {
     })
   }
 
+  if (tour === "WTA") {
+    return await scrapeWtaMatch(supabase, href)
+  }
+
   return await scrapeAtpMatch(supabase, href)
 })

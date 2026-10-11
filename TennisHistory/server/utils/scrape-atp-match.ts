@@ -26,6 +26,8 @@ export async function scrapeAtpMatch(supabase: SupabaseClient<Database>, href: s
 
     await page.goto(href, { waitUntil: "domcontentloaded" })
 
+    await page.pause()
+
     await acceptAtpCookies(page)
 
     const stats: { t1: { [key: string]: number }; t2: { [key: string]: number } } = {

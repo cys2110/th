@@ -1,2 +1,0 @@
-ALTER TABLE countries
-ADD COLUMN icon TEXT;

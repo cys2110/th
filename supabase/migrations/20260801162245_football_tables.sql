@@ -31,7 +31,7 @@ CREATE TABLE football.confederation (
 CREATE TABLE football.federation (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name TEXT NOT NULL,
-    short_name TEXT,
+    short_name TEXT NOT NULL,
     founded INTEGER,
     headquarters TEXT NOT NULL,
     country_id TEXT NOT NULL REFERENCES football.country (id) ON UPDATE CASCADE ON DELETE CASCADE,
@@ -81,7 +81,7 @@ CREATE TABLE football.team (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name TEXT NOT NULL,
     short_name TEXT,
-    code TEXT UNIQUE NOT NULL,
+    code TEXT NOT NULL,
     nicknames TEXT[] NOT NULL DEFAULT ARRAY[]::TEXT[],
     colours TEXT[] NOT NULL DEFAULT ARRAY[]::TEXT[],
     country_id TEXT REFERENCES football.country (id) ON UPDATE CASCADE ON DELETE SET NULL,
@@ -390,7 +390,7 @@ CREATE TABLE football.match_award (
     award_level INTEGER,
 
     constraint match_award_has_recipient check (
-        num_nonnulls(player_id, team_id) = 1
+        num_nonnulls(player_id, team_id) >= 1
     )
 );
 

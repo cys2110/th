@@ -1,26 +1,10 @@
-import { readFile, writeFile } from "node:fs/promises"
-import { resolve } from "node:path"
 import type { SupabaseClient } from "@supabase/supabase-js"
 import { chromium, Page } from "playwright"
 import type { Database } from "~/types/database.types"
 
-type DrawPlayer = {
-  id: string
-  name: string
-}
-
-async function writeMissingPlayers(players: Array<DrawPlayer>) {
-  const filePath = resolve(process.cwd(), "public/missing-players.json")
-  const contents = await readFile(filePath, "utf8")
-  const existingPlayers: Array<DrawPlayer> = contents.trim() ? JSON.parse(contents) : []
-  const missingPlayers = Array.from(new Map([...existingPlayers, ...players].map(player => [player.id, player])).values())
-
-  await writeFile(filePath, `${JSON.stringify(missingPlayers, null, 2)}\n`)
-}
-
 const checkForMissingPlayers = async (supabase: SupabaseClient<Database>, page: Page) => {
   try {
-    const drawPlayers: Array<{ id: string; name: string }> = []
+    const drawPlayers: Record<string, string> = {}
 
     await acceptAtpCookies(page)
 
@@ -36,11 +20,7 @@ const checkForMissingPlayers = async (supabase: SupabaseClient<Database>, page: 
         if (id) {
           const result = parsePlayerLink(id)
 
-          if (result && !drawPlayers.find(p => p.id === result))
-            drawPlayers.push({
-              id: result,
-              name
-            })
+          if (result && !(result in drawPlayers)) drawPlayers[result] = name
         } else {
           return {
             success: false,
@@ -52,32 +32,18 @@ const checkForMissingPlayers = async (supabase: SupabaseClient<Database>, page: 
     }
 
     // Check that all players are in supabase already
-    const { data, error } = await supabase
-      .schema("tennis")
-      .from("player")
-      .select("id")
-      .in(
-        "id",
-        drawPlayers.map(player => player.id)
-      )
+    const verifyPlayersResult = await verifyExistingPlayers(supabase, drawPlayers)
 
-    if (error || !data) {
-      console.error("Error fetching players:", error)
+    if (!verifyPlayersResult.success) {
       return {
         success: false,
-        error: "Error fetching players"
+        error: "Error checking existing players"
       }
-    }
-
-    const playersNotInSupabase = drawPlayers.filter(p => !data.find(player => player.id === p.id))
-
-    if (playersNotInSupabase.length > 0) {
-      await writeMissingPlayers(playersNotInSupabase)
-
+    } else if (verifyPlayersResult.count) {
       return {
         success: false,
         error: "Missing players",
-        missingPlayers: playersNotInSupabase
+        missingPlayers: verifyPlayersResult.playersNotInSupabase
       }
     }
 
@@ -410,6 +376,8 @@ const mergeResultMatches = (drawMatches: Array<Record<string, any>>, resultMatch
   for (const resultMatch of resultMatches) {
     const resultTeams = [normalizeTeamKey(resultMatch.t1 || ""), normalizeTeamKey(resultMatch.t2 || "")].sort()
     const candidates = drawMatches.filter(match => {
+      if (match.incomplete === "B") return false
+
       const drawTeams = [normalizeTeamKey(match.t1.entryKey), normalizeTeamKey(match.t2.entryKey)].sort()
 
       return !matchedDraws.has(match) && drawTeams[0] === resultTeams[0] && drawTeams[1] === resultTeams[1]
@@ -428,12 +396,14 @@ const mergeResultMatches = (drawMatches: Array<Record<string, any>>, resultMatch
 export async function scrapeAtpDraw(
   supabase: SupabaseClient<Database>,
   tournamentId: string,
+  dbId: string,
   year: string,
   editionNo: string,
   format: string = "3",
   superTiebreak?: boolean
 ) {
   const browser = await chromium.launch({ headless: false })
+  let missingPlayers: Record<string, string> = {}
 
   try {
     const allMatches: Array<Record<string, any>> = []
@@ -442,6 +412,8 @@ export async function scrapeAtpDraw(
     const page = await browser.newPage()
 
     await page.goto(`https://www.atptour.com/en/scores/archive/x/${tournamentId}/${year}/draws`)
+
+    await page.pause()
 
     const matchTypeButtons = await page.locator(".atp_draw").locator(".tab-switcher-link").all()
 
@@ -457,13 +429,14 @@ export async function scrapeAtpDraw(
         try {
           await newPage.goto(new URL(href, page.url()).href)
 
+          await newPage.pause()
+
           const missingPlayersCheck = await checkForMissingPlayers(supabase, newPage)
 
           if (!missingPlayersCheck.success) {
-            return {
-              success: false,
-              error: missingPlayersCheck.error,
-              missingPlayers: missingPlayersCheck.missingPlayers
+            missingPlayers = {
+              ...missingPlayers,
+              ...missingPlayersCheck.missingPlayers
             }
           }
 
@@ -483,12 +456,22 @@ export async function scrapeAtpDraw(
       }
     }
 
+    if (Object.keys(missingPlayers).length) {
+      return {
+        success: false,
+        error: "Missing players",
+        missingPlayers: missingPlayers
+      }
+    }
+
     const singlesResultsContext = await browser.newContext()
     const singlesNewPage = await singlesResultsContext.newPage()
 
     try {
       // Go to results page
       await singlesNewPage.goto(`https://www.atptour.com/en/scores/archive/x/${tournamentId}/${year}/results`)
+
+      await singlesNewPage.pause()
 
       const singlesMatches = await getResultMatches(singlesNewPage)
       mergeResultMatches(allMatches, singlesMatches)
@@ -503,6 +486,8 @@ export async function scrapeAtpDraw(
       // Go to results page
       await doublesNewPage.goto(`https://www.atptour.com/en/scores/archive/x/${tournamentId}/${year}/results?matchType=doubles`)
 
+      await doublesNewPage.pause()
+
       const doublesMatches = await getResultMatches(doublesNewPage)
       mergeResultMatches(allMatches, doublesMatches)
     } finally {
@@ -513,7 +498,7 @@ export async function scrapeAtpDraw(
       .schema("tennis")
       .from("editions")
       .select("id, tournament!inner(id)")
-      .eq("tournament.mens_id", Number(tournamentId))
+      .eq("tournament.mens_id", Number(dbId))
       .eq("year", Number(year))
       .eq("edition_no", Number(editionNo))
       .single()
@@ -727,7 +712,9 @@ export async function scrapeAtpDraw(
           round_id:
             roundData.find(
               round =>
-                (match.round === "1st Round Qualifying" ? round.round === "Qualifying round 1" : round.round === match.round) &&
+                (match.round === "1st Round Qualifying" ? round.round === "Qualifying round 1"
+                : match.round === "2nd Round Qualifying" ? round.round === "Qualifying round 2"
+                : round.round === match.round) &&
                 round.draw === match.draw_type &&
                 round.match_type === match.match_type
             )?.id || "",
@@ -741,11 +728,12 @@ export async function scrapeAtpDraw(
         .select("id")
 
       if (matchError || !matchData?.length) {
-        console.error("Error inserting match:", matchError)
+        console.error("Error inserting match:", match, matchError)
 
         return {
           success: false,
-          error: "Error inserting match"
+          error: "Error inserting match",
+          matches: allMatches
         }
       }
 
@@ -760,24 +748,32 @@ export async function scrapeAtpDraw(
       .schema("tennis")
       .from("match_scores")
       .insert(
-        allMatches.flatMap(match => {
-          const t1Scores = match.t1.scores.map((score: any) => ({
-            match_id: match.match_id,
-            entry_id: match.t1.entry_id,
-            set_no: score.set_no,
-            set: score.set,
-            tb: score.tb
-          }))
-          const t2Scores = match.t2.scores.map((score: any) => ({
-            match_id: match.match_id,
-            entry_id: match.t2.entry_id,
-            set_no: score.set_no,
-            set: score.set,
-            tb: score.tb
-          }))
+        allMatches
+          .filter(match => !match.bye)
+          .flatMap(match => {
+            const t1Scores =
+              match.t1.players.length ?
+                match.t1.scores.map((score: any) => ({
+                  match_id: match.match_id,
+                  entry_id: match.t1.entry_id,
+                  set_no: score.set_no,
+                  set: score.set,
+                  tb: score.tb
+                }))
+              : []
+            const t2Scores =
+              match.t2.players.length ?
+                match.t2.scores.map((score: any) => ({
+                  match_id: match.match_id,
+                  entry_id: match.t2.entry_id,
+                  set_no: score.set_no,
+                  set: score.set,
+                  tb: score.tb
+                }))
+              : []
 
-          return [...t1Scores, ...t2Scores]
-        })
+            return [...t1Scores, ...t2Scores]
+          })
       )
 
     if (matchScoresError) {

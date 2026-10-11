@@ -16,3 +16,5 @@ FROM tennis.editions ed
 LEFT JOIN tennis.events e ON ed.id = e.edition_id
 LEFT JOIN tennis.rounds r ON e.id = r.event_id AND r.round = 'Final'
 LEFT JOIN tennis.matches m ON r.id = m.round_id;
+
+GRANT SELECT ON TABLE tennis.elimination_winners TO anon, authenticated;

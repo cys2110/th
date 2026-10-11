@@ -1,5 +1,3 @@
-DROP VIEW IF EXISTS tennis.seed_details;
-
 CREATE OR REPLACE VIEW tennis.seed_details
 WITH (security_invoker = true)
 AS
