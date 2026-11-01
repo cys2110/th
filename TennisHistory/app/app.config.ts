@@ -101,6 +101,7 @@ export default defineAppConfig({
         trailingIcon: "group-data-[state=open]:rotate-180 duration-250 cursor-pointer"
       }
     },
+    listbox: { slots: { content: "cursor-pointer" } },
     main: { base: "min-h-0 h-[calc(100vh-var(--ui-header-height))] overflow-y-auto" },
     navigationMenu: { defaultVariants: { variant: "link" } },
     progress: { slots: { status: "!w-full text-default" } },
@@ -126,7 +127,17 @@ export default defineAppConfig({
       },
       defaultVariants: { loadingAnimation: "swing" }
     },
-    tabs: { defaultVariants: { size: "md" } },
+    tabs: {
+      variants: {
+        orientation: {
+          vertical: {
+            root: "items-start",
+            list: "sticky top-16"
+          }
+        }
+      },
+      defaultVariants: { size: "md" }
+    },
     user: {
       variants: {
         size: {

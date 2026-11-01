@@ -15,25 +15,24 @@ const schema = object({
 type SchemaInput = z.input<typeof schema>
 type Schema = z.infer<typeof schema>
 
-const props = defineProps<{ options: Array<{ event_id: string; tour: TourType; currency: string }> }>()
+const props = defineProps<{ options: Array<{ event_id: string; tour: TourEnum; currency: string | null }> }>()
 
 const emits = defineEmits<{ refresh: [] }>()
 
 defineShortcuts({
-  ctrl_a: () => set(isOpen, !isOpen.value)
+  ctrl_e: () => set(isOpen, !isOpen.value)
 })
 
-const route = useRoute("edition")
 const toast = useToast()
 const supabase = useSupabaseClient()
 const { ui } = useAppConfig()
 
-const tournamentStore = useTournamentStore()
-
 const isOpen = ref(false)
 const isUploading = ref(false)
 
-const state = ref<Partial<SchemaInput>>({})
+const state = ref<Partial<SchemaInput>>({
+  tour: props.options.length === 1 ? props.options[0]?.tour : undefined
+})
 
 const formatTieredPm = (pm: string) => {
   const numberPm = Number(pm)
@@ -111,9 +110,11 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
 }
 
 const formFields = computed<Array<FormFieldInterface<Schema>>>(() => [
-  { label: "tour", key: "tour", type: "radio", items: props.options.map(o => o.tour) },
+  ...(props.options.length > 1 ?
+    ([{ label: "tour", key: "tour", type: "radio", items: props.options.map(o => o.tour) }] as Array<FormFieldInterface<Schema>>)
+  : []),
   { label: "Match Type", key: "match_type", type: "radio", items: MATCH_TYPES },
-  { label: "Round", key: "round", type: "inputMenu", items: ROUNDS, required: true, class: "col-span-2" },
+  { label: "Round", key: "round", type: "inputMenu", items: ROUNDS, required: true, class: props.options.length > 1 ? "col-span-2" : "col-span-1" },
   { label: "Points", key: "points", type: "number" },
   {
     label: "Prize Money",

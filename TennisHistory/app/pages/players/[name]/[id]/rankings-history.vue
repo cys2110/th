@@ -1,9 +1,7 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+definePageMeta({ name: "rankings" })
+</script>
 
 <template>
-  <div>
-    Page: players/[name]/[id]/rankings-history
-  </div>
+  <div>rankings</div>
 </template>
-
-<style scoped></style>

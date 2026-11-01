@@ -4,7 +4,7 @@ create or replace view tennis.entry_info
 with (security_invoker = true)
 as
 select
-  'default' as info_type,
+  'defaults' as info_type,
   ed.tournament_id,
   ed.year,
   ed.edition_no,
@@ -36,15 +36,22 @@ select
   d.draw,
   d.reason,
   d.player_id,
+  (
+    select
+      pe.full_name
+    from tennis.player p
+    join tennis.people pe on pe.id = p.person_id
+    where p.id = d.player_id
+  ) as teammate,
   null::int as rank,
-  null::tennis.status_enum
+  null::tennis.status_enum as status
 from
   tennis.defaults d
   join tennis.events ev on ev.id = d.event_id
   join tennis.editions ed on ed.id = ev.edition_id
 union all
 select
-  'retirement' as info_type,
+  'retirements' as info_type,
   ed.tournament_id,
   ed.year,
   ed.edition_no,
@@ -76,15 +83,22 @@ select
   r.draw,
   r.reason,
   r.player_id,
+  (
+    select
+      pe.full_name
+    from tennis.player p
+    join tennis.people pe on pe.id = p.person_id
+    where p.id = r.player_id
+  ) as teammate,
   null::int as rank,
-  null::tennis.status_enum
+  null::tennis.status_enum as status
 from
   tennis.retirements r
   join tennis.events ev on ev.id = r.event_id
   join tennis.editions ed on ed.id = ev.edition_id
 union all
 select
-  'walkover' as info_type,
+  'walkovers' as info_type,
   ed.tournament_id,
   ed.year,
   ed.edition_no,
@@ -116,15 +130,22 @@ select
   wo.draw,
   wo.reason,
   wo.player_id,
+  (
+    select
+      pe.full_name
+    from tennis.player p
+    join tennis.people pe on pe.id = p.person_id
+    where p.id = wo.player_id
+  ) as teammate,
   null::int as rank,
-  null::tennis.status_enum
+  null::tennis.status_enum as status
 from
   tennis.walkovers wo
   join tennis.events ev on ev.id = wo.event_id
   join tennis.editions ed on ed.id = ev.edition_id
 union all
 select
-  'withdrawal' as info_type,
+  'withdrawals' as info_type,
   ed.tournament_id,
   ed.year,
   ed.edition_no,
@@ -156,15 +177,22 @@ select
   wd.draw,
   wd.reason,
   wd.player_id,
+  (
+    select
+      pe.full_name
+    from tennis.player p
+    join tennis.people pe on pe.id = p.person_id
+    where p.id = wd.player_id
+  ) as teammate,
   null::int as rank,
-  null::tennis.status_enum
+  null::tennis.status_enum as status
 from
   tennis.withdrawals wd
   join tennis.events ev on ev.id = wd.event_id
   join tennis.editions ed on ed.id = ev.edition_id
 union all
 select
-  'lda' as info_type,
+  'ldas' as info_type,
   ed.tournament_id,
   ed.year,
   ed.edition_no,
@@ -196,15 +224,16 @@ select
   lda.draw,
   null::text as reason,
   null::text as player_id,
+  null::text as teammate,
   lda.rank,
-  null::tennis.status_enum
+  null::tennis.status_enum as status
 from
   tennis.ldas lda
   join tennis.events ev on ev.id = lda.event_id
   join tennis.editions ed on ed.id = ev.edition_id
 union all
 select
-  'status' as info_type,
+  'entry_status' as info_type,
   ed.tournament_id,
   ed.year,
   ed.edition_no,
@@ -236,6 +265,7 @@ select
   es.draw,
   null::text as reason,
   null::text as player_id,
+  null::text as teammate,
   null::int as rank,
   es.status
 from

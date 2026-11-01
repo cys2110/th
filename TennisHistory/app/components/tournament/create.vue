@@ -129,8 +129,8 @@ const formFields = computed<Array<FormFieldInterface<Schema>>>(
       { label: "Logo", key: "logo", type: "image", class: "col-span-4" },
       { label: "Name", key: "name", type: "text", required: true, class: "col-span-4" },
       { label: "Tours", key: "tours", type: "checkbox", items: TOUR_OPTIONS, required: true, icon: ICONS.tour, class: "col-span-2" },
-      { label: "Men's ID", key: "mens_id", type: "text", disabled: state.value.tours?.includes("ATP") && state.value.tours?.includes("ITF-M") },
-      { label: "Women's ID", key: "womens_id", type: "text", disabled: state.value.tours?.includes("WTA") && state.value.tours?.includes("ITF-W") },
+      { label: "Men's ID", key: "mens_id", type: "text", disabled: !state.value.tours?.includes("ATP") },
+      { label: "Women's ID", key: "womens_id", type: "text", disabled: !state.value.tours?.includes("WTA") },
       { label: "Established", key: "established", type: "calendar", description: "Year the tournament was established", class: "col-span-2" },
       { label: "Abolished", key: "abolished", type: "calendar", description: "Year the tournament was abolished", class: "col-span-2" },
       { label: "Website", key: "website", type: "textarea", class: "col-span-4" }

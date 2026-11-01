@@ -1,7 +1,11 @@
 import { type Database } from "~/types/database.types"
 import { useChangeCase } from "@vueuse/integrations/useChangeCase"
 
-type TourEnum = Database["tennis"]["Enums"]["tour_enum"]
+interface IDs {
+  mens: number | null
+  womens: number | null
+  edition: string | null
+}
 
 export const useTournamentStore = defineStore("tournament", () => {
   const paramName = ref("")
@@ -9,7 +13,11 @@ export const useTournamentStore = defineStore("tournament", () => {
 
   const tours = ref<Array<TourEnum>>([])
 
-  const ids = ref<Record<string, number | string | null>>({})
+  const ids = ref<IDs>({
+    mens: null,
+    womens: null,
+    edition: null
+  })
 
   const name = computed(() => {
     if (tournamentName.value) return tournamentName.value

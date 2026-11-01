@@ -16,14 +16,14 @@ const tournamentStore = useTournamentStore()
 
 const isScraping = ref(false)
 
-const tournamentId = ref()
+const tournamentId = ref(tournamentStore.ids[props.tour === "ATP" ? "mens" : "womens"])
 
 const handleScrape = async (close: () => void) => {
   isScraping.value = true
 
   await $fetch("/api/scrape-activity", {
     query: {
-      db_id: tournamentStore.ids[props.tour === "ATP" ? "mens" : "womens"],
+      db_id: route.params.id,
       year: route.params.year,
       tour: props.tour,
       edition_no: route.params.edition_no,

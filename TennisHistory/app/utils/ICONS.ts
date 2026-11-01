@@ -1,4 +1,5 @@
 export default {
+  barChart: "solar:chart-2-bold-duotone",
   calendar: "solar:calendar-line-duotone",
   calendarOff: "material-symbols-light:event-busy-outline-rounded",
   download: "line-md:downloading",
@@ -14,6 +15,7 @@ export default {
   overview: "icon-park-twotone:view-grid-list",
   peopleOff: "solar:user-minus-rounded-line-duotone",
   player: "map:tennis",
+  profile: "solar:user-id-bold-duotone",
   racquet: "material-symbols-light:sports-tennis-outline-rounded",
   ranking: "solar:ranking-line-duotone",
   save: "icon-park-twotone:save-one",

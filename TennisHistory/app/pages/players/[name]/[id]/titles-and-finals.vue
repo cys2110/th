@@ -1,9 +1,7 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+definePageMeta({ name: "titles-and-finals" })
+</script>
 
 <template>
-  <div>
-    Page: players/[name]/[id]/titles-and-finals
-  </div>
+  <div>titles and finals</div>
 </template>
-
-<style scoped></style>

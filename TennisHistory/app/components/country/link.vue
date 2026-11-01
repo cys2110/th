@@ -1,15 +1,13 @@
 <script setup lang="ts">
 import { kebabCase } from "#imports"
-import { type Tables } from "~/types/database.types"
-
-type CountryType = Tables<{ schema: "tennis" }, "country">
 
 withDefaults(
   defineProps<{
     country: CountryType
+    size?: number
     iconOnly?: boolean
   }>(),
-  { iconOnly: false }
+  { iconOnly: false, size: 5 }
 )
 </script>
 
@@ -20,7 +18,8 @@ withDefaults(
   >
     <u-icon
       :name="country.icon"
-      class="rounded-md size-5"
+      class="rounded-md"
+      :class="`size-${size}`"
     />
 
     <span

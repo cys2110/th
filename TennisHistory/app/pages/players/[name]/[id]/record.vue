@@ -1,9 +1,7 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+definePageMeta({ name: "record" })
+</script>
 
 <template>
-  <div>
-    Page: players/[name]/[id]/record
-  </div>
+  <div>record</div>
 </template>
-
-<style scoped></style>

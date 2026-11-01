@@ -1,23 +1,33 @@
-import type { Database } from "~/types/database.types"
+import type { Enums, Tables, TablesInsert, TablesUpdate } from "~/types/database.types"
 
 declare global {
-  type TourEnum = Database["tennis"]["Enums"]["tour_enum"]
-  type DrawEnum = Database["tennis"]["Enums"]["draw_enum"]
-  type MatchTypeEnum = Database["tennis"]["Enums"]["match_type_enum"]
-  type LevelEnum = Database["tennis"]["Enums"]["level_enum"]
-  type IncompleteEnum = Database["tennis"]["Enums"]["incomplete_enum"]
-  type StatusEnum = Database["tennis"]["Enums"]["status_enum"]
+  type TourEnum = Enums<{ schema: "tennis" }, "tour_enum">
+  type DrawEnum = Enums<{ schema: "tennis" }, "draw_enum">
+  type MatchTypeEnum = Enums<{ schema: "tennis" }, "match_type_enum">
+  type LevelEnum = Enums<{ schema: "tennis" }, "level_enum">
+  type IncompleteEnum = Enums<{ schema: "tennis" }, "incomplete_enum">
+  type StatusEnum = Enums<{ schema: "tennis" }, "status_enum">
+  type SurfaceEnum = Enums<{ schema: "tennis" }, "surface_enum">
+  type EnvironmentEnum = Enums<{ schema: "tennis" }, "environment_enum">
+  type DrawTypeEnum = Enums<{ schema: "tennis" }, "draw_type_enum">
 
-  type PlayerStatsInsert = Database["tennis"]["Tables"]["player_stats"]["Insert"]
+  type CountryType = Tables<{ schema: "tennis" }, "country">
+  type CountryUpdate = TablesUpdate<{ schema: "tennis" }, "country">
 
-  type EntryInsert = Database["tennis"]["Tables"]["entries"]["Insert"]
-  type PemInsert = Database["tennis"]["Tables"]["player_entry_mapping"]["Insert"]
-  type SeedInsert = Database["tennis"]["Tables"]["seeds"]["Insert"]
-  type EntryStatusInsert = Database["tennis"]["Tables"]["entry_status"]["Insert"]
+  type RoundType = Tables<{ schema: "tennis" }, "rounds">
 
-  type MatchInsert = Database["tennis"]["Tables"]["matches"]["Insert"]
-  type ScoreInsert = Database["tennis"]["Tables"]["match_scores"]["Insert"]
-  type StatsInsert = Database["tennis"]["Tables"]["match_stats"]["Insert"]
+  type TeamEntry = Tables<{ schema: "tennis" }, "entries_by_team">
+
+  type EntryInfo = Tables<{ schema: "tennis" }, "entry_info">
+
+  type EntryInsert = TablesInsert<{ schema: "tennis" }, "entries">
+  type PemInsert = TablesInsert<{ schema: "tennis" }, "player_entry_mapping">
+  type SeedInsert = TablesInsert<{ schema: "tennis" }, "seeds">
+  type EntryStatusInsert = TablesInsert<{ schema: "tennis" }, "entry_status">
+
+  type MatchInsert = TablesInsert<{ schema: "tennis" }, "matches">
+  type ScoreInsert = TablesInsert<{ schema: "tennis" }, "match_scores">
+  type StatsInsert = TablesInsert<{ schema: "tennis" }, "match_stats">
 }
 
 export {}

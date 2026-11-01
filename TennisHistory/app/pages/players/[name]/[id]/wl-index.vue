@@ -1,9 +1,7 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+definePageMeta({ name: "wl-index" })
+</script>
 
 <template>
-  <div>
-    Page: players/[name]/[id]/wl-index
-  </div>
+  <div>wl-index</div>
 </template>
-
-<style scoped></style>

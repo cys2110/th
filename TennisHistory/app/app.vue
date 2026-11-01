@@ -34,7 +34,9 @@ provide(
     <Header />
 
     <u-main>
-      <nuxt-page />
+      <nuxt-layout>
+        <nuxt-page />
+      </nuxt-layout>
     </u-main>
 
     <Footer />

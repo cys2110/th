@@ -1,11 +1,7 @@
 import { z } from "zod"
-import { type Database, type Tables } from "~/types/database.types"
 
-export type TourEnum = Database["tennis"]["Enums"]["tour_enum"]
-export type MatchTypeEnum = Database["tennis"]["Enums"]["match_type_enum"]
-export type DrawEnum = Database["tennis"]["Enums"]["draw_enum"]
-export type IncompleteEnum = Database["tennis"]["Enums"]["incomplete_enum"]
-export type StatusEnum = Database["tennis"]["Enums"]["status_enum"]
+export const CONTINENTS = ["Africa", "Asia", "Europe", "North America", "Oceania", "South America"] as const
+export const ContinentEnum = z.enum(CONTINENTS, `Continent must be one of ${CONTINENTS.join(", ")}`)
 
 export const DrawEnumType = z.enum(["Main", "Qualifying"], `Draw must be one of ${["Main", "Qualifying"].join(", ")}`)
 

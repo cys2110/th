@@ -25,17 +25,6 @@ export const fetchEdition = (supabase: SupabaseClient<Database>, tournamentId: s
     .single()
 export type EditionQuery = QueryData<ReturnType<typeof fetchEdition>>
 
-export const fetchRounds = (supabase: SupabaseClient<Database>, editionId: string) =>
-  supabase
-    .schema("tennis")
-    .from("rounds")
-    .select("*, ...events!inner(currency, edition:editions(currency))")
-    .eq("events.edition_id", editionId)
-    .order("tour", { ascending: true })
-    .order("match_type", { ascending: true })
-    .order("number", { ascending: true })
-export type RoundsQuery = QueryData<ReturnType<typeof fetchRounds>>[number]
-
 export const fetchResultMatches = (supabase: SupabaseClient<Database>, tournamentId: string, year: string, editionNo: string) =>
   supabase
     .schema("tennis")
@@ -113,5 +102,6 @@ export const fetchEntriesQuery = (supabase: SupabaseClient<Database>, editionId:
     `
     )
     .eq("events.edition_id", editionId)
+    .order("player_order", { referencedTable: "player_entry_mapping", ascending: true })
 
 export type EntriesQuery = QueryData<ReturnType<typeof fetchEntriesQuery>>[number]

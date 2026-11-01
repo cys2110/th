@@ -104,7 +104,15 @@ const getDrawMatches = async (page: Page, drawType: string, superTiebreak = fals
 
   // Start with last draw container since this is the final
   for (let i = drawContainers.length - 1; i >= 0; i--) {
-    const round = await drawContainers[i]?.locator(".draw-header").innerText()
+    const roundText = (await drawContainers[i]?.locator(".draw-header").innerText()) || ""
+    const roundMapping: Record<typeof roundText, string> = {
+      Finals: "Final",
+      "Semi-Finals": "Semifinals",
+      "Quarter-Finals": "Quarterfinals",
+      "2nd Round Qualifying": "Qualifying round 2",
+      "1st Round Qualifying": "Qualifying round 1"
+    }
+
     const drawMatches = await drawContainers[i]?.locator(".draw-stats").all()
 
     if (!drawMatches) continue
@@ -113,7 +121,7 @@ const getDrawMatches = async (page: Page, drawType: string, superTiebreak = fals
       const matchDetails: Record<string, any> = {
         draw_type: drawType.includes("Qual") ? "Qualifying" : "Main",
         match_type: drawType.includes("Singles") ? "Singles" : "Doubles",
-        round,
+        round: roundText in roundMapping ? roundMapping[roundText] : roundText,
         t1: {
           players: [],
           scores: []
@@ -259,7 +267,7 @@ const getDrawMatches = async (page: Page, drawType: string, superTiebreak = fals
 }
 
 const getResultMatches = async (page: Page) => {
-  const matches: Array<Record<string, string>> = []
+  const matches: Array<Record<string, string | null>> = []
   const months: Record<string, string> = {
     January: "01",
     February: "02",
@@ -279,7 +287,7 @@ const getResultMatches = async (page: Page) => {
     const month = dateParts?.[2] ? months[dateParts[2]] : undefined
 
     if (!dateParts?.[1] || !month || !dateParts[3]) {
-      throw new Error(`Unable to parse result date: ${value}`)
+      return undefined
     }
 
     return `${dateParts[3]}-${month}-${dateParts[1].padStart(2, "0")}`
@@ -289,32 +297,44 @@ const getResultMatches = async (page: Page) => {
 
   for (const accordionItem of accordionItems) {
     const header = await getParentText(accordionItem.locator("h4"))
+    const date = formatDate(header)
 
     const resultMatches = await accordionItem.locator(".match").all()
 
     for (const resultMatch of resultMatches) {
-      const match: Record<string, string> = {
-        date: formatDate(header)
+      const match: Record<string, string | null> = {
+        date: date || null
       }
 
       const matchHeader = await resultMatch.locator(".match-header").locator("span").all()
 
-      const matchInfo = matchHeader[0]
+      if (date) {
+        const matchInfo = matchHeader[0]
 
-      if (matchInfo && (await matchInfo.count()) > 0) {
-        const info = await matchInfo.innerText()
+        if (matchInfo && (await matchInfo.count()) > 0) {
+          const info = await matchInfo.innerText()
 
-        if (info) {
-          const infoParts = info.split(/\s+-\s+/, 2)
+          if (info) {
+            const infoParts = info.split(/\s+-\s+/, 2)
 
-          if (infoParts[0]) {
-            match.round = infoParts[0].trim()
-          }
+            if (infoParts[0]) {
+              match.round = infoParts[0].trim()
+            }
 
-          if (infoParts[1]) {
-            match.court = infoParts[1].trim()
+            if (infoParts[1]) {
+              match.court = infoParts[1].trim()
+            }
           }
         }
+      } else {
+        const roundMapping: Record<typeof header, string> = {
+          Semifinal: "Semifinals",
+          Quarterfinal: "Quarterfinals",
+          "2nd Round Qualifying": "Qualifying round 2",
+          "1st Round Qualifying": "Qualifying round 1"
+        }
+
+        match.round = (header in roundMapping ? roundMapping[header] : header) as string
       }
 
       const matchDuration = matchHeader[1]
@@ -369,7 +389,7 @@ const getResultMatches = async (page: Page) => {
   return matches
 }
 
-const mergeResultMatches = (drawMatches: Array<Record<string, any>>, resultMatches: Array<Record<string, string>>) => {
+const mergeResultMatches = (drawMatches: Array<Record<string, any>>, resultMatches: Array<Record<string, string | null>>) => {
   const normalizeTeamKey = (key: string) => key.split("-").sort().join("-")
   const matchedDraws = new Set<Record<string, any>>()
 
@@ -497,8 +517,8 @@ export async function scrapeAtpDraw(
     const { data: editionData, error: editionError } = await supabase
       .schema("tennis")
       .from("editions")
-      .select("id, tournament!inner(id)")
-      .eq("tournament.mens_id", Number(dbId))
+      .select("id")
+      .eq("tournament_id", dbId)
       .eq("year", Number(year))
       .eq("edition_no", Number(editionNo))
       .single()
@@ -571,11 +591,14 @@ export async function scrapeAtpDraw(
       const { data: entryData, error: entryError } = await supabase
         .schema("tennis")
         .from("entries")
-        .insert({
-          match_type: entryValue.match_type,
-          event_id: eventId,
-          entry_key: entryKey
-        })
+        .upsert(
+          {
+            match_type: entryValue.match_type,
+            event_id: eventId,
+            entry_key: entryKey
+          },
+          { onConflict: "event_id,entry_key" }
+        )
         .select("id, entry_key")
 
       if (entryError || !entryData?.length) {
@@ -594,14 +617,15 @@ export async function scrapeAtpDraw(
     const { error: playerEntryMappingError } = await supabase
       .schema("tennis")
       .from("player_entry_mapping")
-      .insert(
+      .upsert(
         Object.values(entries).flatMap(entry =>
           entry.players.map((player: any, index: number) => ({
             player_id: player.id,
             entry_id: entry.entry_id,
             player_order: index + 1
           }))
-        )
+        ),
+        { onConflict: "player_id,entry_id" }
       )
 
     if (playerEntryMappingError) {
@@ -646,11 +670,6 @@ export async function scrapeAtpDraw(
 
     if (seedsError) {
       console.error("Error inserting seeds:", seedsError)
-
-      return {
-        success: false,
-        error: "Error inserting seeds"
-      }
     }
 
     // Insert entry_info
@@ -684,11 +703,6 @@ export async function scrapeAtpDraw(
 
     if (entryInfoError) {
       console.error("Error inserting entry info:", entryInfoError)
-
-      return {
-        success: false,
-        error: "Error inserting entry info"
-      }
     }
 
     // Insert matches

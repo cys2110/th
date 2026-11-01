@@ -23,6 +23,21 @@ declare global {
     valueKey?: string
     labelKey?: string
   }
+
+  interface DrawOption {
+    label: string
+    draw_type: DrawTypeEnum
+    link: string | null
+    tour: TourEnum
+    match_type: MatchTypeEnum
+    draw: DrawEnum
+  }
+
+  type ChartCategory = {
+    label: string
+    key: string
+    color: string
+  }
 }
 
 export {}

@@ -20,15 +20,13 @@ type Schema = z.infer<typeof schema>
 const emits = defineEmits<{ refresh: [] }>()
 
 defineShortcuts({
-  ctrl_a: () => set(isOpen, !isOpen.value)
+  ctrl_e: () => set(isOpen, !isOpen.value)
 })
 
 const route = useRoute("edition")
 const { ui } = useAppConfig()
 const toast = useToast()
 const supabase = useSupabaseClient()
-
-const tournamentStore = useTournamentStore()
 
 const isOpen = ref(false)
 const isUploading = ref(false)
@@ -63,8 +61,18 @@ const {
 
 const state = ref<Partial<Schema>>({})
 
+watch(
+  events,
+  () => {
+    if (events.value.length === 1) {
+      state.value.tour = events.value[0]
+    }
+  },
+  { immediate: true }
+)
+
 const handleReset = () => {
-  state.value = {}
+  state.value = { tour: events.value.length === 1 ? events.value[0] : undefined }
 }
 
 const onError = (event: FormErrorEvent) => {
@@ -147,8 +155,17 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
 }
 
 const formFields = computed<FormFieldInterface<Schema>[]>(() => [
-  { label: "S/D", key: "match_type", type: "radio", items: MATCH_TYPES, required: true },
-  { label: "Tour", key: "tour", type: "inputMenu", items: events.value, labelKey: "tour", required: true },
+  {
+    label: "S/D",
+    key: "match_type",
+    type: "radio",
+    items: MATCH_TYPES,
+    required: true,
+    class: events.value.length > 1 ? "col-span-1" : "col-span-2"
+  },
+  ...(events.value.length > 1 ?
+    ([{ label: "Tour", key: "tour", type: "inputMenu", items: events.value, labelKey: "tour", required: true }] as Array<FormFieldInterface<Schema>>)
+  : []),
   { label: state.value.match_type === "Singles" ? "Player" : "Player 1", key: "player", type: "player", required: true },
   { label: "Rank", key: "rank", type: "number" },
   ...(state.value.match_type === "Doubles" ?

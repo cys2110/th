@@ -1,6 +1,5 @@
 export default {
   areaChart: "icon-park-twotone:area-map",
-  barChart: "solar:chart-2-bold-duotone",
   cards: "icon-park-twotone:view-grid-card",
   category: "material-symbols-light:category-search-outline-rounded",
   chartOff: "material-symbols-light:bar-chart-off-rounded",
@@ -27,7 +26,6 @@ export default {
   person: "solar:user-rounded-bold-duotone",
   people: "icon-park-twotone:peoples-two",
   polarChart: "solar:round-graph-line-duotone",
-  profile: "solar:user-id-bold-duotone",
   scatterChart: "material-symbols-light:scatter-plot-outline",
   stackedBarChart: "material-symbols-light:stacked-bar-chart-rounded",
   supervisor: "solar:clipboard-bold-duotone",

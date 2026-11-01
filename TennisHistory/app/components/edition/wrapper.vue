@@ -1,31 +1,21 @@
 <script setup lang="ts">
-import type { BreadcrumbItem, TabsItem } from "@nuxt/ui"
+import type { BreadcrumbItem } from "@nuxt/ui"
 
 const route = useRoute("edition")
-const router = useRouter()
 const supabase = useSupabaseClient()
 
 const tournamentStore = useTournamentStore()
 tournamentStore.paramName = route.params.name
 
-const editionPages: Array<TabsItem> = [
-  { label: "Overview", value: "edition", icon: ICONS.overview },
-  { label: "Results", value: "results", icon: ICONS.scores },
-  { label: "Draws", value: "draws", icon: ICONS.draw, ui: { leadingIcon: "rotate-270" } }
-]
+const editionPages = [
+  { label: "Overview", icon: ICONS.overview, to: "edition" },
+  { label: "Results", icon: ICONS.scores, to: "results" },
+  { label: "Draws", icon: ICONS.draw, to: "draws", iconClass: "rotate-270" }
+] as const
 
-const currentPage = computed(() => editionPages.find(page => page.value === route.params.name))
+const currentPage = computed(() => editionPages.find(page => page.to === route.params.name))
 
-const activeRoute = computed({
-  get() {
-    return route.params.name
-  },
-  set(tab) {
-    router.push({ name: tab as "edition" | "draws" | "results", params: route.params })
-  }
-})
-
-// Set browser tab name here to set for all player sub-pages
+// Set browser tab name here to set for all edition sub-pages
 useHead({
   title: () => currentPage.value?.label,
   templateParams: {
@@ -61,7 +51,7 @@ watch(
       const { tournament, tours, id } = edition.value
       tournamentStore.tournamentName = tournament?.name || ""
       tournamentStore.tours = tours || []
-      tournamentStore.ids = { mens: tournament?.mens_id, womens: tournament?.womens_id, id }
+      tournamentStore.ids = { mens: tournament.mens_id || null, womens: tournament.womens_id, edition: id }
     }
   },
   { immediate: true }
@@ -78,7 +68,7 @@ const breadcrumbs = computed<Array<BreadcrumbItem>>(() => [
 </script>
 
 <template>
-  <u-page-header :ui="{ root: 'border-none mb-0 pb-0' }">
+  <u-page-header :ui="{ root: 'pb-1', wrapper: 'py-8' }">
     <template #headline>
       <u-breadcrumb :items="breadcrumbs" />
     </template>
@@ -86,22 +76,20 @@ const breadcrumbs = computed<Array<BreadcrumbItem>>(() => [
     <template #title> {{ route.params.year }}{{ Number(route.params.edition_no) ? ` [${route.params.edition_no}]` : "" }} </template>
 
     <template #default>
-      <u-tabs
-        :items="editionPages"
-        variant="link"
-        :content="false"
-        v-model="activeRoute"
-        :ui="{ list: 'justify-end' }"
-      >
-        <template #default="{ item }">
-          <u-link
-            :to="{ name: item.value as any, params: route.params }"
-            class="text-inherit hover:text-inherit"
-          >
-            {{ item.label }}
-          </u-link>
-        </template>
-      </u-tabs>
+      <div class="flex justify-end gap-3">
+        <u-button
+          v-for="page in editionPages"
+          :key="page.label"
+          :label="page.label"
+          :to="{ name: page.to, params: route.params }"
+          :icon="page.icon"
+          :ui="{ leadingIcon: 'iconClass' in page ? page.iconClass : '' }"
+          active-class="text-primary!"
+          variant="link"
+          color="neutral"
+          size="lg"
+        />
+      </div>
     </template>
   </u-page-header>
 </template>

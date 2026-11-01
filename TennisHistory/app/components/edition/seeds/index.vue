@@ -1,10 +1,23 @@
 <script setup lang="ts">
-import { ICONS, MatchTypeEnum, TourEnum } from "#imports"
+import { getColumnFilter, ICONS, setColumnFilter } from "#imports"
 import type { TableColumn } from "@nuxt/ui"
-import type { ColumnFiltersState } from "@tanstack/vue-table"
-import { isDefined, set } from "@vueuse/core"
+import type { ColumnFiltersState, Row } from "@tanstack/vue-table"
+import { isDefined, set, useArrayUnique } from "@vueuse/core"
+
+interface UpdatedSeeds {
+  [key: string]: number | null
+}
+
+interface BaseChartData {
+  seed: number
+}
+
+type ChartData = BaseChartData & {
+  [key: string]: number | null
+}
 
 const route = useRoute("edition")
+const router = useRouter()
 const supabase = useSupabaseClient()
 const toast = useToast()
 const { ui } = useAppConfig()
@@ -12,9 +25,8 @@ const { ui } = useAppConfig()
 const { isAdmin } = useAuthState()
 const tournamentStore = useTournamentStore()
 
-const updatedSeeds = ref<{ [key: string]: number | null }>({})
+const updatedSeeds = ref<UpdatedSeeds>({})
 const isSaving = ref(false)
-const columnFilters = ref<ColumnFiltersState>([])
 
 const {
   data: seeds,
@@ -56,67 +68,109 @@ const {
 )
 type SeedType = (typeof seeds.value)[number]
 
+const multipleTours = computed(() => new Set(seeds.value.map(s => s.tour)).size > 1)
+
 const columns: Array<TableColumn<SeedType>> = [
   { id: "checkbox" },
-  { accessorKey: "tour", header: "Tour", filterFn: "equals" },
-  { accessorKey: "match_type", header: "S/D", filterFn: "equals" },
-  { accessorKey: "draw", header: "Draw", filterFn: "equals" },
+  { accessorKey: "tour", header: "Tour" },
+  { accessorKey: "match_type", header: "S/D" },
+  { accessorKey: "draw", header: "Draw" },
   { accessorKey: "seed", header: "Seed" },
   { id: "team", header: "Team" },
   { accessorKey: "rank", header: "Rank" }
 ]
+
+const columnFilters = ref<ColumnFiltersState>([])
 
 const columnVisibility = computed(() => ({
   checkbox: isAdmin.value,
   tour: tournamentStore.tours.length > 1
 }))
 
-const getColumnFilter = (id: string) => columnFilters.value.find(filter => filter.id === id)?.value
-
-const setColumnFilter = (id: string, value: unknown) => {
-  columnFilters.value = [...columnFilters.value.filter(filter => filter.id !== id), ...(isDefined(value) && value !== "" ? [{ id, value }] : [])]
-}
-
 const handleSave = async () => {
   set(isSaving, true)
 
-  try {
-    const errors: Record<string, number | null> = {}
+  const errors: UpdatedSeeds = {}
 
-    for (const [seedId, rank] of Object.entries(updatedSeeds.value)) {
-      const { error } = await supabase.schema("tennis").from("seeds").update({ rank }).eq("id", seedId)
+  for (const [seedId, rank] of Object.entries(updatedSeeds.value)) {
+    const { error } = await supabase.schema("tennis").from("seeds").update({ rank }).eq("id", Number(seedId))
 
-      if (error) {
-        console.error("Error updating seed:", error)
-        errors[seedId] = rank
-      }
+    if (error) {
+      console.error("Error updating seed:", error)
+      errors[seedId] = rank
     }
-
-    if (Object.keys(errors).length) {
-      toast.add({
-        title: "Error updating seeds",
-        icon: ui.icons.error,
-        color: "error"
-      })
-      set(updatedSeeds, errors)
-    } else {
-      toast.add({
-        title: "Seeds successfully updated",
-        icon: ui.icons.success,
-        color: "success"
-      })
-
-      set(updatedSeeds, {})
-    }
-  } finally {
-    refresh()
-    set(isSaving, false)
   }
+
+  const hasErrors = Object.keys(errors).length > 0
+
+  toast.add({
+    title: hasErrors ? "Error updating seeds" : "Seeds successfully updated",
+    icon: ui.icons[hasErrors ? "error" : "success"],
+    color: hasErrors ? "error" : "success"
+  })
+
+  set(updatedSeeds, hasErrors ? errors : {})
+  set(isSaving, false)
+  refresh()
 }
+
+const chartData = computed<ChartData[]>(() => {
+  const allSeeds = seeds.value as SeedType[]
+  const uniqueSeeds = useArrayUnique(allSeeds.map(s => s.seed)).value.sort((a, b) => (a || 9999) - (b || 9999))
+
+  return uniqueSeeds.map(s => {
+    const matchingSeeds = allSeeds.filter(seed => (seed.seed || 9999) === s)
+
+    const seed: ChartData = {
+      seed: s!
+    }
+
+    matchingSeeds.forEach(se => {
+      if (se.seed && isDefined(se.rank)) {
+        seed[`${se.tour} - ${se.match_type} - ${se.draw}`] = se.rank
+      }
+    })
+
+    return seed
+  })
+})
+
+const chartCategories = computed(() => {
+  const categories: ChartCategory[] = []
+
+  const firstItem = chartData.value[0]
+
+  if (firstItem) {
+    const itemCategories = Object.keys(firstItem).filter(k => k !== "seed")
+
+    itemCategories.forEach(c => {
+      const [tour, match_type, draw] = c.split(" - ")
+
+      categories.push({
+        label: multipleTours.value ? c : `${match_type} - ${draw}`,
+        key: c,
+        color: CHART_COLOURS[c as keyof typeof CHART_COLOURS]
+      })
+    })
+  }
+
+  return categories
+})
 </script>
 
 <template>
   <u-container class="max-w-6xl my-6 space-y-6">
+    <u-chart
+      v-if="seeds.length"
+      type="bar"
+      :data="chartData"
+      index="seed"
+      :categories="chartCategories"
+      x-label="Seed"
+      y-label="Rank"
+      :height="400"
+    />
+
     <div class="flex justify-end gap-3">
       <!--Tour filter-->
       <u-select-menu
@@ -124,8 +178,8 @@ const handleSave = async () => {
         :items="tournamentStore.tours"
         placeholder="Tour"
         clear
-        :model-value="<TourEnum>getColumnFilter('tour')"
-        @update:model-value="setColumnFilter('tour', $event)"
+        :model-value="<TourEnum>getColumnFilter('tour', columnFilters)"
+        @update:model-value="columnFilters = setColumnFilter('tour', $event, columnFilters)"
       />
 
       <!--Match type filter-->
@@ -133,8 +187,8 @@ const handleSave = async () => {
         :items="['Singles', 'Doubles']"
         placeholder="S/D"
         clear
-        :model-value="<MatchTypeEnum>getColumnFilter('match_type')"
-        @update:model-value="setColumnFilter('match_type', $event)"
+        :model-value="<MatchTypeEnum>getColumnFilter('match_type', columnFilters)"
+        @update:model-value="columnFilters = setColumnFilter('match_type', $event, columnFilters)"
       />
 
       <!--Draw filter-->
@@ -142,8 +196,8 @@ const handleSave = async () => {
         :items="['Main', 'Qualifying']"
         placeholder="Draw"
         clear
-        :model-value="<DrawEnum>getColumnFilter('draw')"
-        @update:model-value="setColumnFilter('draw', $event)"
+        :model-value="<DrawEnum>getColumnFilter('draw', columnFilters)"
+        @update:model-value="columnFilters = setColumnFilter('draw', $event, columnFilters)"
       />
 
       <u-field-group v-if="isAdmin">
@@ -151,10 +205,12 @@ const handleSave = async () => {
           hydrate-on-idle
           @refresh="refresh"
         />
+
         <u-button
           :icon="ui.icons.reload"
           @click="refresh()"
         />
+
         <u-button
           :icon="ICONS.save"
           :loading="isSaving"
@@ -165,26 +221,29 @@ const handleSave = async () => {
     </div>
 
     <u-table
-      v-model:column-visibility="columnVisibility"
-      v-model:column-filters="columnFilters"
       :data="seeds"
       :columns
       :loading="pending"
+      v-model:column-visibility="columnVisibility"
+      v-model:column-filters="columnFilters"
       sticky
       render-fallback-value="—"
       :meta="{
         class: {
-          tr: row => (row.original.draw === 'Qualifying' ? 'bg-elevated' : '')
+          tr: row => (row.original.draw === 'Qualifying' ? 'bg-elevated/50' : '')
         }
       }"
-      class="max-h-[58vh]"
     >
       <template #loading>
         <loading-icon />
       </template>
 
       <template #empty>
-        <empty :title="`${tournamentStore.name} ${route.params.year} had no seeds`" />
+        <empty
+          :title="`${tournamentStore.name} ${route.params.year} had no seeds`"
+          @refresh="refresh"
+          class="mx-2"
+        />
       </template>
 
       <template #checkbox-header="{ table }">
@@ -227,6 +286,7 @@ const handleSave = async () => {
         <player-link
           v-if="row.original.team"
           :team="row.original.team"
+          :class="{ 'line-through': row.original.withdrawn }"
         />
       </template>
 

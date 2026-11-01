@@ -15,12 +15,12 @@ const isScraping = ref(false)
 
 const format = ref(3)
 const superTiebreak = ref(false)
-const tournamentId = ref()
+const tournamentId = ref(tournamentStore.ids[props.tour === "ATP" ? "mens" : "womens"])
 
 const handleScrape = async (close: () => void) => {
   const result = await $fetch("/api/scrape-draw", {
     query: {
-      db_id: tournamentStore.ids[props.tour === "ATP" ? "mens" : "womens"],
+      db_id: route.params.id,
       year: route.params.year,
       tour: props.tour,
       super_tiebreak: superTiebreak.value,

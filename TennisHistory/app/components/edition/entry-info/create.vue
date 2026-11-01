@@ -7,9 +7,9 @@ import { STATUS_MAPPING } from "#imports"
 const schema = object({
   relationship: string(),
   entry: object({
-    id: string(),
+    entry_id: string(),
     event_id: string(),
-    label: string(),
+    players: string(),
     team: array(
       object({
         id: string(),
@@ -33,7 +33,7 @@ type Schema = z.infer<typeof schema>
 const emits = defineEmits<{ refresh: [] }>()
 
 defineShortcuts({
-  ctrl_a: () => set(isOpen, !isOpen.value)
+  ctrl_e: () => set(isOpen, !isOpen.value)
 })
 
 const { ui } = useAppConfig()
@@ -71,6 +71,16 @@ const { entries, pending, fetchEntries } = useEntryList(route.params.id, route.p
 
 const state = ref<Partial<Schema>>({})
 
+watch(
+  events,
+  () => {
+    if (events.value.length === 1) {
+      state.value.tour === events.value[0]?.id
+    }
+  },
+  { immediate: true }
+)
+
 const handleReset = () => {
   const { tour, draw, match_type } = state.value
   set(state, { tour, draw, match_type })
@@ -93,7 +103,7 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
       case "Last Direct Acceptance":
         const { error: ldaError } = await supabase.schema("tennis").from("ldas").insert({
           event_id: event.data.entry.event_id,
-          entry_id: event.data.entry.id,
+          entry_id: event.data.entry.entry_id,
           draw: event.data.draw,
           rank: event.data.rank
         })
@@ -106,7 +116,7 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
       case "Status":
         const { error: statusError } = await supabase.schema("tennis").from("entry_status").insert({
           event_id: event.data.entry.event_id,
-          entry_id: event.data.entry.id,
+          entry_id: event.data.entry.entry_id,
           status: event.data.status!,
           draw: event.data.draw
         })
@@ -132,7 +142,7 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
           .from(mapping[event.data.relationship as keyof typeof mapping])
           .insert({
             event_id: event.data.entry.event_id,
-            entry_id: event.data.entry.id,
+            entry_id: event.data.entry.entry_id,
             draw: event.data.draw,
             reason: event.data.reason,
             player_id: event.data.player_id
@@ -152,7 +162,7 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
                   : event.data.relationship === "Retirement" ? "R"
                   : "D"
               })
-              .eq("loser_id", event.data.entry.id)
+              .eq("loser_id", event.data.entry.entry_id)
               .eq("draw", event.data.draw)
 
             if (updateMatchError) {
@@ -207,8 +217,12 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
         @submit="onSubmit"
         @error="onError"
       >
-        <div class="grid grid-cols-4 items-center gap-3">
+        <div
+          class="grid items-center gap-3"
+          :class="events.length > 1 ? 'grid-cols-4' : 'grid-cols-2'"
+        >
           <form-field
+            v-if="events.length > 1"
             v-model="state"
             :field="{
               label: 'Tour',
@@ -254,7 +268,7 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
               type: 'inputMenu',
               items: ['Status', 'Default', 'Last Direct Acceptance', 'Retirement', 'Walkover', 'Withdrawal'],
               required: true,
-              class: 'col-span-4'
+              class: events.length > 1 ? 'col-span-4' : 'col-span-2'
             }"
           />
 
@@ -262,7 +276,7 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
             name="entry"
             :label="state.match_type === 'Doubles' ? 'Team' : 'Player'"
             required
-            class="col-span-4"
+            :class="events.length > 1 ? 'col-span-4' : 'col-span-2'"
           >
             <u-input-menu
               v-model="<any>state.entry"
@@ -275,7 +289,7 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
               "
               :placeholder="`Select ${state.match_type === 'Doubles' ? 'Team' : 'Player'}`"
               :loading="pending"
-              label-key="label"
+              label-key="players"
               clear
               class="w-full"
             >
@@ -293,14 +307,14 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
           <form-field
             v-if="state.relationship === 'Last Direct Acceptance'"
             v-model="state"
-            :field="{ label: 'Rank', key: 'rank', type: 'number', class: 'col-span-4' }"
+            :field="{ label: 'Rank', key: 'rank', type: 'number', class: events.length > 1 ? 'col-span-4' : 'col-span-2' }"
           />
 
           <u-form-field
             v-else-if="state.relationship === 'Status'"
             name="status"
             label="Status"
-            class="col-span-4"
+            :class="events.length > 1 ? 'col-span-4' : 'col-span-2'"
           >
             <u-input-menu
               v-model="state.status"
@@ -315,13 +329,25 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
           <template v-else>
             <form-field
               v-model="state"
-              :field="{ label: 'Reason', key: 'reason', type: 'text', class: 'col-span-2' }"
+              :field="{
+                label: 'Reason',
+                key: 'reason',
+                type: 'text',
+                class:
+                  events.length > 1 ?
+                    state.match_type === 'Doubles' ?
+                      'col-span-2'
+                    : 'col-span-4'
+                  : state.match_type === 'Doubles' ? 'col-span-1'
+                  : 'col-span-2'
+              }"
             />
 
             <u-form-field
+              v-if="state.match_type === 'Doubles'"
               name="player_id"
               label="Player"
-              class="col-span-2"
+              :class="events.length > 1 ? 'col-span-2' : 'col-span-1'"
             >
               <u-input-menu
                 v-model="state.player_id"

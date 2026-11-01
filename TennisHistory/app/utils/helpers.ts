@@ -1,3 +1,6 @@
+import type { ColumnFiltersState } from "@tanstack/vue-table"
+import { isDefined } from "@vueuse/core"
+
 export const formatBytes = (bytes: number, decimals = 2) => {
   if (bytes === 0) return "0 Bytes"
   const k = 1024
@@ -6,6 +9,9 @@ export const formatBytes = (bytes: number, decimals = 2) => {
   const i = Math.floor(Math.log(bytes) / Math.log(k))
   return Number.parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i]
 }
+
+export const formatCurrency = (value: number, currency?: string | null) =>
+  value.toLocaleString("en-GB", { style: "currency", currency: currency || "USD" })
 
 export const getTournamentType = (tournamentName: string) => {
   if (tournamentName === "laver-cup") return "laver"
@@ -21,3 +27,16 @@ export const percentage = (value: number, total: number, decimals = 0) =>
 export const convertKmhToMph = (kmh: number) => {
   return Math.round(kmh * 0.621371)
 }
+
+export const getColumnFilter = (id: string, columnFilters: ColumnFiltersState) => columnFilters.find(filter => filter.id === id)?.value
+
+export const setColumnFilter = (id: string, value: unknown, columnFilters: ColumnFiltersState) => [
+  ...columnFilters.filter(filter => filter.id !== id),
+  ...(isDefined(value) && value !== "" ? [{ id, value }] : [])
+]
+
+export const prettifyJson = (data: Record<any, any> | Array<Record<any, any>>) =>
+  JSON.stringify(data, (_, value) => (value === undefined ? "__UNDEFINED__" : value), 2).replace(
+    /"__UNDEFINED__"/g,
+    "<em class='text-ATP'>undefined</em>"
+  )

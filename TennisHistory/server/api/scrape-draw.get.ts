@@ -4,7 +4,7 @@ export default defineEventHandler(async event => {
   const query = getQuery(event)
   const supabase = await serverSupabaseClient(event)
 
-  const tournamentId = String(query.tournament_id ?? query.db_id ?? "")
+  const tournamentId = String(query.tournament_id ?? "")
   const dbId = String(query.db_id ?? "")
   const year = String(query.year ?? "")
   const tour = String(query.tour ?? "")
@@ -12,7 +12,7 @@ export default defineEventHandler(async event => {
   const format = String(query.format ?? "")
   const editionNo = String(query.edition_no ?? "0")
 
-  if (!dbId || !year) {
+  if (!dbId || !year || !tournamentId) {
     throw createError({
       statusCode: 400,
       statusMessage: "tournament_id and year are required"

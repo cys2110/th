@@ -3,5 +3,5 @@ definePageMeta({ name: "player" })
 </script>
 
 <template>
-  <div> Page: players/[name]/[id]/index </div>
+  <div>player</div>
 </template>

@@ -5,7 +5,7 @@ export default defineEventHandler(async event => {
   const query = getQuery(event)
   const supabase = await serverSupabaseClient(event)
 
-  const tournamentId = String(query.tournament_id ?? query.db_id ?? "")
+  const tournamentId = String(query.tournament_id ?? "")
   const dbId = String(query.db_id ?? "")
   const year = String(query.year ?? "")
   const tour = String(query.tour ?? "") as TourEnum
@@ -13,7 +13,7 @@ export default defineEventHandler(async event => {
 
   const errors: Array<{ player_id: string; error: string }> = []
 
-  if (!dbId || !year || !tour) {
+  if (!dbId || !year || !tour || !tournamentId) {
     throw createError({
       statusCode: 400,
       statusMessage: "tournament_id, year and tour are required"
@@ -23,8 +23,8 @@ export default defineEventHandler(async event => {
   const { data: eventsData, error: eventsError } = await supabase
     .schema("tennis")
     .from("editions")
-    .select("id, tournament!inner(id), events!inner(id)")
-    .eq(`tournament.${tour === "WTA" ? "womens_id" : "mens_id"}`, Number(dbId))
+    .select("id, events!inner(id)")
+    .eq("tournament_id", dbId)
     .eq("year", Number(year))
     .eq("edition_no", Number(editionNo))
     .eq("events.tour", tour)

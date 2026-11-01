@@ -67,11 +67,10 @@ export async function scrapeWtaDraw(supabase: SupabaseClient<Database>, tourname
       .select(
         `
         id,
-        tournament!inner(womens_id),
         events(id, tour, rounds(*))
         `
       )
-      .eq("tournament.womens_id", Number(dbId))
+      .eq("tournament_id", dbId)
       .eq("edition_no", Number(editionNo))
       .eq("year", Number(year))
       .single()

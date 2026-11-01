@@ -3,38 +3,26 @@ import { set } from "@vueuse/core"
 export const useEntryList = (tournamentId: string, year: string, editionNo: string) => {
   const supabase = useSupabaseClient()
 
-  const entries = ref<Array<EntriesQuery & { label: string }>>([])
+  const entries = ref<Array<TeamEntry>>([])
   const pending = ref(false)
 
   const fetchEntries = async () => {
     set(pending, true)
 
     try {
-      const { data: editionData, error: editionError } = await supabase
+      const { data, error } = await supabase
         .schema("tennis")
-        .from("editions")
-        .select("id")
+        .from("entries_by_team")
+        .select("*")
         .eq("tournament_id", tournamentId)
         .eq("year", Number(year))
         .eq("edition_no", Number(editionNo))
-        .single()
-
-      if (editionError || !editionData) {
-        console.error("Error fetching edition:", editionError)
-        return
-      }
-
-      const { data, error } = await fetchEntriesQuery(supabase, editionData.id)
 
       if (error || !data) {
-        console.error("Error fetching entries:", error)
-        return
+        console.error("Error fetching entries", error)
       }
 
-      entries.value = data.map(entry => ({
-        ...entry,
-        label: entry.team.map(team => team.full_name).join(" / ")
-      }))
+      entries.value = data!
     } finally {
       set(pending, false)
     }

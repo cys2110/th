@@ -51,6 +51,7 @@ export const CURRENCY_MAPPING = {
   GBP: "£",
   USD: "$"
 }
+
 export const CURRENCIES = Object.entries(CURRENCY_MAPPING).map(([key, value]) => ({ label: value, value: key }))
 
 export const INCOMPLETE_MAPPING: Record<IncompleteEnum, string> = {
@@ -154,3 +155,47 @@ export const STATUS_MAPPING: Record<StatusEnum, string> = {
   SE: "Special Exempt",
   WC: "Wild Card"
 }
+
+export const ENTRY_INFO_CATEGORIES = [
+  { key: "entry_status", status: "AL", label: "Alternates" },
+  { key: "entry_status", status: "CO", label: "Collegians" },
+  { key: "defaults", label: "Defaults" },
+  { key: "entry_status", status: "JR", label: "Junior Reserved" },
+  { key: "ldas", label: "Last Direct Acceptances" },
+  { key: "entry_status", status: "LL", label: "Lucky Losers" },
+  { key: "entry_status", status: "NG", label: "Next Gen" },
+  { key: "entry_status", status: "PR", label: "Protected Ranking" },
+  { key: "entry_status", status: "Q", label: "Qualifier" },
+  { key: "retirements", label: "Retirements" },
+  { key: "entry_status", status: "SE", label: "Special Exempt" },
+  { key: "walkovers", label: "Walkovers" },
+  { key: "entry_status", status: "WC", label: "Wild Cards" },
+  { key: "withdrawals", label: "Withdrawals" }
+] as const
+
+export const CHART_COLOURS = {
+  "ATP - Singles": "ATP",
+  "ATP - Doubles": "Doubles",
+  "WTA - Singles": "WTA",
+  "WTA - Doubles": "Singles",
+  "ITF-M - Singles": "ITF-M",
+  "ITF-M - Doubles": "ITF",
+  "ITF-W - Singles": "ITF-W",
+  "ITF-W - Doubles": "Active",
+  "ATP - Singles - Main": "ATP",
+  "ATP - Doubles - Main": "Doubles",
+  "WTA - Singles - Main": "WTA",
+  "WTA - Doubles - Main": "Singles",
+  "ITF-M - Singles - Main": "ITF-M",
+  "ITF-M - Doubles - Main": "ITF",
+  "ITF-W - Singles - Main": "ITF-W",
+  "ITF-W - Doubles - Main": "Active",
+  "ATP - Singles - Qualifying": "Qualifying",
+  "ATP - Doubles - Qualifying": "primary",
+  "WTA - Singles - Qualifying": "Main",
+  "WTA - Doubles - Qualifying": "success",
+  "ITF-M - Singles - Qualifying": "Tour",
+  "ITF-M - Doubles - Qualifying": "Challenger",
+  "ITF-W - Singles - Qualifying": "success",
+  "ITF-W - Doubles - Qualifying": "warning"
+} as const

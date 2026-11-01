@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { ICONS } from "#imports"
 
-const props = defineProps<{ multiple: boolean }>()
+const props = withDefaults(defineProps<{ multiple?: boolean; placeholder?: string }>(), {
+  placeholder: "Person"
+})
 
 const { people, pending, fetchPeople, searchTerm } = usePersonSearch()
 
@@ -18,7 +20,7 @@ const modelValue = defineModel<People>()
     clear
     ignore-filter
     :multiple
-    placeholder="Person"
+    :placeholder
     :items="people"
     class="w-full"
     label-key="full_name"

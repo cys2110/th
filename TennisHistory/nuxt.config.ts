@@ -13,6 +13,10 @@ export default defineNuxtConfig({
     }
   },
 
+  routeRules: {
+    "/players/:name/:id/**": { appLayout: "player" }
+  },
+
   // Set scroll behaviour
   router: { options: { scrollBehaviorType: "smooth" } },
 
@@ -44,33 +48,33 @@ export default defineNuxtConfig({
   // Imports not required
   imports: {
     presets: [
-      // {
-      //   from: "@vueuse/core",
-      //   imports: [
-      //     "breakpointsTailwind",
-      //     "useBreakpoints",
-      //     "provideSSRWidth",
-      //     "useSSRWidth",
-      //     "createReusableTemplate",
-      //     "useInfiniteScroll",
-      //     "useDateFormat",
-      //     "isDefined",
-      //     "get",
-      //     "set",
-      //     "useSorted",
-      //     "useArrayUnique",
-      //     "useArrayFilter",
-      //     "useArrayMap",
-      //     "useArrayJoin",
-      //     "useArrayFindLast",
-      //     "useArraySome",
-      //     "useArrayEvery",
-      //     "useLocalStorage",
-      //     "watchDeep",
-      //     "watchImmediate",
-      //     "watchOnce"
-      //   ]
-      // },
+      {
+        from: "@vueuse/core",
+        imports: [
+          "breakpointsTailwind",
+          "useBreakpoints",
+          "provideSSRWidth",
+          "useSSRWidth",
+          "createReusableTemplate",
+          "useInfiniteScroll",
+          "useDateFormat",
+          "isDefined",
+          "get",
+          "set",
+          "useSorted",
+          "useArrayUnique",
+          "useArrayFilter",
+          "useArrayMap",
+          "useArrayJoin",
+          "useArrayFindLast",
+          "useArraySome",
+          "useArrayEvery",
+          "useLocalStorage",
+          "watchDeep",
+          "watchImmediate",
+          "watchOnce"
+        ]
+      },
       {
         from: "@vueuse/router",
         imports: ["useRouteQuery"]
@@ -129,6 +133,7 @@ export default defineNuxtConfig({
       defaultVariants: {
         size: "sm"
       }
-    }
+    },
+    prose: true
   }
 })

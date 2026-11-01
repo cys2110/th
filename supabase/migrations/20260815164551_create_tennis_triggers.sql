@@ -79,7 +79,7 @@ BEGIN
 
   -- Create rounds for Laver Cup events
     IF edition_draw_type = 'Laver Cup' THEN
-        INSERT INTO rounds (number, round, points, tour, draw, event_id)
+        INSERT INTO tennis.rounds (number, round, points, tour, draw, event_id)
         VALUES
         (1, 'Day 3', 3, 'ATP', 'Main', NEW.id),
         (2, 'Day 2', 2, 'ATP', 'Main', NEW.id),

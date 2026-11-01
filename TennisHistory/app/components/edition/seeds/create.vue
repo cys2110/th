@@ -2,13 +2,12 @@
 import type { FormErrorEvent, FormSubmitEvent } from "@nuxt/ui"
 import { number, object, string, z } from "zod"
 import { set } from "@vueuse/core"
-import { ICONS } from "#imports"
 
 const schema = object({
   entry: object({
-    id: string(),
+    entry_id: string(),
     event_id: string(),
-    label: string()
+    players: string()
   }),
   seed: number(),
   draw: DrawEnumType,
@@ -21,36 +20,36 @@ type Schema = z.infer<typeof schema>
 const emits = defineEmits<{ refresh: [] }>()
 
 defineShortcuts({
-  ctrl_a: () => set(isOpen, !isOpen.value)
+  ctrl_e: () => set(isOpen, !isOpen.value)
 })
 
 const { ui } = useAppConfig()
 const route = useRoute("edition")
-
 const toast = useToast()
 const supabase = useSupabaseClient()
+
+const tournamentStore = useTournamentStore()
+const editionId = computed(() => tournamentStore.ids.edition)
 
 const isOpen = ref(false)
 const isUploading = ref(false)
 
 // Get events
 const { data: events, pending: eventsPending } = await useAsyncData(
-  () => `create-seed-${JSON.stringify(route.params)}`,
+  () => `create-seed-${editionId.value}`,
   async () => {
-    const { data, error } = await supabase
-      .schema("tennis")
-      .from("events")
-      .select("id, tour, editions!inner(id)")
-      .eq("editions.tournament_id", route.params.id)
-      .eq("editions.year", Number(route.params.year))
-      .eq("editions.edition_no", Number(route.params.edition_no))
+    if (editionId.value) {
+      const { data, error } = await supabase.schema("tennis").from("events").select("id, tour").eq("edition_id", editionId.value)
 
-    if (error) {
-      console.error("Error fetching events:", error)
-      return []
+      if (error) {
+        console.error("Error fetching events:", error)
+        return []
+      }
+
+      return data
     }
 
-    return data
+    return []
   },
   { default: () => [] }
 )
@@ -58,6 +57,16 @@ const { data: events, pending: eventsPending } = await useAsyncData(
 const { entries, pending, fetchEntries } = useEntryList(route.params.id, route.params.year, route.params.edition_no)
 
 const state = ref<Partial<Schema>>({})
+
+watch(
+  events,
+  () => {
+    if (events.value.length === 1) {
+      state.value.tour = events.value[0]?.id
+    }
+  },
+  { immediate: true }
+)
 
 const handleReset = () => {
   const { tour, draw, match_type } = state.value
@@ -85,7 +94,7 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
       .insert({
         ...rest,
         event_id: entry.event_id,
-        entry_id: entry.id
+        entry_id: entry.entry_id
       })
 
     if (error) {
@@ -131,6 +140,7 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
       >
         <div class="grid grid-cols-4 gap-3">
           <form-field
+            v-if="events.length > 1"
             v-model="state"
             :field="{
               label: 'Tour',
@@ -148,6 +158,7 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
             name="match_type"
             label="S/D"
             required
+            :class="events.length > 1 ? 'col-span-1' : 'col-span-2'"
           >
             <u-radio-group
               :items="['Singles', 'Doubles']"
@@ -160,6 +171,7 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
             name="draw"
             label="Draw"
             required
+            :class="events.length > 1 ? 'col-span-1' : 'col-span-2'"
           >
             <u-radio-group
               :items="['Main', 'Qualifying']"
@@ -185,7 +197,7 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
               "
               :placeholder="`Select ${state.match_type === 'Doubles' ? 'Team' : 'Player'}`"
               :loading="pending"
-              label-key="label"
+              label-key="players"
               clear
               class="w-full"
             >
