@@ -6,6 +6,7 @@ RETURNS TABLE (
     id UUID,
     name TEXT,
     city TEXT,
+    country_id TEXT,
     icon TEXT
 )
 LANGUAGE plpgsql
@@ -21,6 +22,7 @@ BEGIN
             v.id,
             v.name,
             v.city,
+            v.country_id,
             c.icon
         FROM %I.venue v
         JOIN %I.country c ON c.id = v.country_id

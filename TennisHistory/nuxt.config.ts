@@ -85,7 +85,7 @@ export default defineNuxtConfig({
       },
       {
         from: "lodash",
-        imports: ["kebabCase", "startCase", "groupBy", "isEqual", "cloneDeep", "toArray"]
+        imports: ["kebabCase", "startCase", "groupBy", "isEqual", "cloneDeep", "toArray", "deburr", "differenceWith", "fromPairs", "toPairs"]
       }
     ]
   },

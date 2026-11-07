@@ -18,7 +18,7 @@ export default defineEventHandler(async event => {
 
   if (existingRankingsError) {
     console.error("Error fetching existing rankings:", existingRankingsError)
-    return []
+    return { success: false as const, error: existingRankingsError }
   }
 
   const rankings = await (isNaN(Number(id)) ? scrapeAtpRankings : scrapeWtaRankings)(id)
@@ -43,7 +43,12 @@ export default defineEventHandler(async event => {
 
   if (insertError) {
     console.error("Error inserting rankings:", insertError)
+
+    return {
+      success: false as const,
+      error: insertError
+    }
   }
 
-  return rankingsToInsert
+  return { success: true as const }
 })

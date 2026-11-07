@@ -21,7 +21,8 @@ export async function scrapeAtpActivity(browser: Browser, playerId: string, matc
       waitUntil: "domcontentloaded"
     })
 
-    await page.pause()
+    // await page.pause()
+    await page.waitForTimeout(7)
 
     await acceptAtpCookies(page)
 

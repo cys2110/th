@@ -105,3 +105,11 @@ export const fetchEntriesQuery = (supabase: SupabaseClient<Database>, editionId:
     .order("player_order", { referencedTable: "player_entry_mapping", ascending: true })
 
 export type EntriesQuery = QueryData<ReturnType<typeof fetchEntriesQuery>>[number]
+
+export const fetchVenuesQuery = (supabase: SupabaseClient<Database>, searchTerm: string | Ref<string>) =>
+  supabase.rpc("search_venues", { search_text: deburr(toValue(searchTerm)) || "", schema_name: "tennis" })
+export type VenueType = QueryData<ReturnType<typeof fetchVenuesQuery>>[number]
+
+export const fetchPlayersQuery = (supabase: SupabaseClient<Database>, searchTerm: string | Ref<string>) =>
+  supabase.schema("tennis").rpc("search_players", { search_term: deburr(toValue(searchTerm)) })
+export type PlayerType = QueryData<ReturnType<typeof fetchPlayersQuery>>[number]

@@ -8,13 +8,11 @@ export async function scrapeAtpPlayer(id: string) {
 
     await page.goto(`https://www.atptour.com/en/players/x/${id}/overview`, { waitUntil: "domcontentloaded" })
 
-    await page.pause()
-
     await acceptAtpCookies(page)
 
     const image = await page.locator(".player_shot").getByRole("img").getAttribute("src")
 
-    const personalDetailsFields = ["Age", "DOB", "Height", "Turned pro", "Country", "Birthplace", "Plays", "Coach"] as const
+    const personalDetailsFields = ["Age", "DOB", "Height", "Turned pro", "Country", "Birthplace", "Plays"] as const
 
     const personalDetails = Object.fromEntries(
       await Promise.all(
@@ -107,7 +105,6 @@ export async function scrapeAtpPlayer(id: string) {
       rh: plays && plays !== "Unknown" ? plays.replace("-Handed", "") : null,
       bh: bh && bh !== "Unknown Backhand" ? bh.replace("-Handed Backhand", "") : null,
       turned_pro: personalDetails["Turned pro"],
-      coaches: personalDetails["Coach"] ? parseCoaches(personalDetails["Coach"]) : null,
       current_singles: currentSinglesRank,
       ch_singles: chSinglesRank,
       ch_singles_date: chSinglesDate ? parseDate(chSinglesDate) : null,

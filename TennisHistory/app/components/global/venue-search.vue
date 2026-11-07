@@ -1,9 +1,7 @@
 <script setup lang="ts">
-const { venues, pending, fetchVenues, searchTerm } = useVenueSearch()
+const { venues, pending, searchTerm } = useVenueSearch()
 
-type Venue = (typeof venues.value)[number]
-
-const modelValue = defineModel<Venue>()
+const modelValue = defineModel<VenueType>()
 </script>
 
 <template>
@@ -32,10 +30,6 @@ const modelValue = defineModel<Venue>()
 
     <template #item-description="{ item }">
       <span v-if="item.name">{{ item.city }}</span>
-    </template>
-
-    <template #content-bottom>
-      <venue-create @refresh="fetchVenues" />
     </template>
   </u-input-menu>
 </template>

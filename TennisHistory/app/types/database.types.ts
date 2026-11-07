@@ -1910,6 +1910,7 @@ export type Database = {
         Args: { schema_name: string; search_text: string }
         Returns: {
           city: string
+          country_id: string
           icon: string
           id: string
           name: string
@@ -2160,6 +2161,7 @@ export type Database = {
       entries: {
         Row: {
           captain: string | null
+          captain_id: string | null
           country_id: string | null
           entry_key: string | null
           event_id: string
@@ -2172,6 +2174,7 @@ export type Database = {
         }
         Insert: {
           captain?: string | null
+          captain_id?: string | null
           country_id?: string | null
           entry_key?: string | null
           event_id: string
@@ -2184,6 +2187,7 @@ export type Database = {
         }
         Update: {
           captain?: string | null
+          captain_id?: string | null
           country_id?: string | null
           entry_key?: string | null
           event_id?: string
@@ -2207,6 +2211,13 @@ export type Database = {
             columns: ["captain"]
             isOneToOne: false
             referencedRelation: "player_details"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "entries_captain_id_fkey"
+            columns: ["captain_id"]
+            isOneToOne: false
+            referencedRelation: "people"
             referencedColumns: ["id"]
           },
           {
@@ -2468,6 +2479,49 @@ export type Database = {
           },
         ]
       }
+      itf_groups: {
+        Row: {
+          edition_id: string
+          group_name: string
+          id: number
+          level: number
+        }
+        Insert: {
+          edition_id: string
+          group_name: string
+          id?: number
+          level: number
+        }
+        Update: {
+          edition_id?: string
+          group_name?: string
+          id?: number
+          level?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dc_group_edition_id_fkey"
+            columns: ["edition_id"]
+            isOneToOne: false
+            referencedRelation: "country_winners"
+            referencedColumns: ["edition_id"]
+          },
+          {
+            foreignKeyName: "dc_group_edition_id_fkey"
+            columns: ["edition_id"]
+            isOneToOne: false
+            referencedRelation: "editions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "dc_group_edition_id_fkey"
+            columns: ["edition_id"]
+            isOneToOne: false
+            referencedRelation: "laver_cup_winners"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ldas: {
         Row: {
           draw: Database["tennis"]["Enums"]["draw_enum"]
@@ -2517,6 +2571,72 @@ export type Database = {
             columns: ["event_id"]
             isOneToOne: false
             referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lineups: {
+        Row: {
+          doubles_rank: number | null
+          entry_id: string
+          id: number
+          lineup_order: number
+          player_id: string
+          rank: number | null
+          round_id: string
+        }
+        Insert: {
+          doubles_rank?: number | null
+          entry_id: string
+          id?: number
+          lineup_order: number
+          player_id: string
+          rank?: number | null
+          round_id: string
+        }
+        Update: {
+          doubles_rank?: number | null
+          entry_id?: string
+          id?: number
+          lineup_order?: number
+          player_id?: string
+          rank?: number | null
+          round_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lineups_entry_id_fkey"
+            columns: ["entry_id"]
+            isOneToOne: false
+            referencedRelation: "entries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lineups_entry_id_fkey"
+            columns: ["entry_id"]
+            isOneToOne: false
+            referencedRelation: "entries_by_team"
+            referencedColumns: ["entry_id"]
+          },
+          {
+            foreignKeyName: "lineups_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "player"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lineups_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "player_details"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lineups_round_id_fkey"
+            columns: ["round_id"]
+            isOneToOne: false
+            referencedRelation: "rounds"
             referencedColumns: ["id"]
           },
         ]
@@ -3236,6 +3356,7 @@ export type Database = {
           draw: Database["tennis"]["Enums"]["draw_enum"]
           event_id: string
           id: string
+          itf_group: number | null
           match_type: Database["tennis"]["Enums"]["match_type_enum"] | null
           number: number
           pm: number | null
@@ -3248,6 +3369,7 @@ export type Database = {
           draw: Database["tennis"]["Enums"]["draw_enum"]
           event_id: string
           id?: string
+          itf_group?: number | null
           match_type?: Database["tennis"]["Enums"]["match_type_enum"] | null
           number: number
           pm?: number | null
@@ -3260,6 +3382,7 @@ export type Database = {
           draw?: Database["tennis"]["Enums"]["draw_enum"]
           event_id?: string
           id?: string
+          itf_group?: number | null
           match_type?: Database["tennis"]["Enums"]["match_type_enum"] | null
           number?: number
           pm?: number | null
@@ -3281,6 +3404,13 @@ export type Database = {
             columns: ["event_id"]
             isOneToOne: false
             referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rounds_itf_group_fkey"
+            columns: ["itf_group"]
+            isOneToOne: false
+            referencedRelation: "itf_groups"
             referencedColumns: ["id"]
           },
         ]
@@ -3340,6 +3470,93 @@ export type Database = {
             columns: ["event_id"]
             isOneToOne: false
             referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      standings: {
+        Row: {
+          entry_id: string
+          event_id: string
+          games_lost: number
+          games_won: number
+          group_name: string
+          id: number
+          matches_lost: number
+          matches_won: number
+          position: number
+          round_id: string | null
+          sets_lost: number
+          sets_won: number
+          ties_lost: number | null
+          ties_won: number | null
+        }
+        Insert: {
+          entry_id: string
+          event_id: string
+          games_lost: number
+          games_won: number
+          group_name: string
+          id?: number
+          matches_lost: number
+          matches_won: number
+          position: number
+          round_id?: string | null
+          sets_lost: number
+          sets_won: number
+          ties_lost?: number | null
+          ties_won?: number | null
+        }
+        Update: {
+          entry_id?: string
+          event_id?: string
+          games_lost?: number
+          games_won?: number
+          group_name?: string
+          id?: number
+          matches_lost?: number
+          matches_won?: number
+          position?: number
+          round_id?: string | null
+          sets_lost?: number
+          sets_won?: number
+          ties_lost?: number | null
+          ties_won?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "standings_entry_id_fkey"
+            columns: ["entry_id"]
+            isOneToOne: false
+            referencedRelation: "entries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "standings_entry_id_fkey"
+            columns: ["entry_id"]
+            isOneToOne: false
+            referencedRelation: "entries_by_team"
+            referencedColumns: ["entry_id"]
+          },
+          {
+            foreignKeyName: "standings_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "entries_by_team"
+            referencedColumns: ["event_id"]
+          },
+          {
+            foreignKeyName: "standings_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "standings_round_id_fkey"
+            columns: ["round_id"]
+            isOneToOne: false
+            referencedRelation: "rounds"
             referencedColumns: ["id"]
           },
         ]
@@ -4237,6 +4454,21 @@ export type Database = {
           id: string
         }[]
       }
+      search_tournament: {
+        Args: { search_term: string }
+        Returns: {
+          abolished: number
+          established: number
+          id: string
+          logo_url: string
+          mens_id: number
+          name: string
+          tours: Database["tennis"]["Enums"]["tour_enum"][]
+          updated_at: string
+          website: string
+          womens_id: number
+        }[]
+      }
     }
     Enums: {
       draw_enum: "Main" | "Qualifying"
@@ -4246,8 +4478,9 @@ export type Database = {
         | "Country draw"
         | "Laver Cup"
         | "Davis Cup"
+        | "ITF country"
       environment_enum: "Indoor" | "Outdoor"
-      incomplete_enum: "B" | "WO" | "D" | "R"
+      incomplete_enum: "B" | "WO" | "D" | "R" | "NP"
       level_enum: "Tour" | "Challenger" | "ITF"
       match_type_enum: "Singles" | "Doubles"
       status_enum: "AL" | "CO" | "JR" | "LL" | "NG" | "Q" | "PR" | "SE" | "WC"
@@ -4447,9 +4680,10 @@ export const Constants = {
         "Country draw",
         "Laver Cup",
         "Davis Cup",
+        "ITF country",
       ],
       environment_enum: ["Indoor", "Outdoor"],
-      incomplete_enum: ["B", "WO", "D", "R"],
+      incomplete_enum: ["B", "WO", "D", "R", "NP"],
       level_enum: ["Tour", "Challenger", "ITF"],
       match_type_enum: ["Singles", "Doubles"],
       status_enum: ["AL", "CO", "JR", "LL", "NG", "Q", "PR", "SE", "WC"],

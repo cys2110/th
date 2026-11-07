@@ -14,6 +14,14 @@ declare global {
   type CountryType = Tables<{ schema: "tennis" }, "country">
   type CountryUpdate = TablesUpdate<{ schema: "tennis" }, "country">
 
+  type VenueUpdate = Tables<{ schema: "tennis" }, "venue">
+
+  type Player = Tables<{ schema: "tennis" }, "player">
+
+  type RankingsInsert = TablesInsert<{ schema: "tennis" }, "rankings">
+
+  type TournamentType = Tables<{ schema: "tennis" }, "tournament">
+
   type RoundType = Tables<{ schema: "tennis" }, "rounds">
 
   type TeamEntry = Tables<{ schema: "tennis" }, "entries_by_team">

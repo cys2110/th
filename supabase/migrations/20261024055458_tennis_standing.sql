@@ -11,7 +11,8 @@ create table tennis.standings (
     sets_won int not null,
     sets_lost int not null,
     games_won int not null,
-    games_lost int not null
+    games_lost int not null,
+    round_id uuid not null references tennis.rounds(id) on update cascade on delete cascade
 );
 
 grant select on table tennis.standings to anon;

@@ -7,15 +7,7 @@ export const useVenueSearch = () => {
 
   const searchTerm = ref()
 
-  const venueQuery = () => {
-    const query = supabase.rpc("search_venues", { search_text: deburr(toValue(searchTerm)) || null, schema_name: "tennis" })
-
-    return query
-  }
-
-  type Venue = QueryData<ReturnType<typeof venueQuery>>[number]
-
-  const venues = ref<Array<Venue>>([])
+  const venues = ref<Array<VenueType>>([])
   const pending = ref(false)
 
   const fetchVenues = async () => {
@@ -23,7 +15,7 @@ export const useVenueSearch = () => {
     set(venues, [])
 
     try {
-      const { data, error } = await venueQuery()
+      const { data, error } = await fetchVenuesQuery(supabase, searchTerm)
 
       if (error || !data) {
         console.error("Error fetching venues:", error)

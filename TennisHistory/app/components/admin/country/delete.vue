@@ -138,20 +138,9 @@ const onDelete = async () => {
         v-if="error"
         color="error"
         variant="subtle"
-        :title="error.type"
-      >
-        <template #description>
-          <div v-if="Array.isArray(error.details)">
-            <div
-              v-for="e in error.details"
-              :key="e.id"
-            >
-              {{ e.name }}: {{ e.message }}
-            </div>
-          </div>
-          <div v-else>{{ error.details }}</div>
-        </template>
-      </u-alert>
+        title="Error deleting countries"
+        :description="error"
+      />
 
       <u-page-card
         v-if="response"

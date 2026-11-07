@@ -1,21 +1,14 @@
 <script setup lang="ts">
 import { CONTINENTS, countrySchema, ICONS, prettifyJson } from "#imports"
 import type { FormErrorEvent, FormSubmitEvent } from "@nuxt/ui"
-import { differenceWith, fromPairs, toPairs } from "lodash"
+import { countryInitialState } from "../utils"
 
 const { ui } = useAppConfig()
 const supabase = useSupabaseClient()
 
 const { countries, fetchCountries } = useCountryList()
 
-const initialState = {
-  id: undefined,
-  name: undefined,
-  continent: undefined,
-  icon: undefined
-}
-
-const state = ref<Partial<CountrySchema>>({ ...initialState })
+const state = ref<Partial<CountrySchema>>({ ...countryInitialState })
 const isUpdating = ref(false)
 const response = ref<CountryType | null>()
 const error = ref<{ type: string; details: any } | null>()
@@ -29,7 +22,7 @@ const handleCountrySelection = (country: CountryType) => {
 const handleReset = () => {
   set(error, null)
   set(selectedCountry, null)
-  set(state, { ...initialState })
+  set(state, { ...countryInitialState })
 }
 
 const onError = (event: FormErrorEvent) => {

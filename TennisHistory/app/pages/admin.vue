@@ -22,7 +22,7 @@ const items: Array<TabsItem> = [
           :items
           variant="link"
           orientation="vertical"
-          default-value="country"
+          default-value="tournament"
         >
           <template #player>
             <admin-player />

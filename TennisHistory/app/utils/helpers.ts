@@ -36,7 +36,16 @@ export const setColumnFilter = (id: string, value: unknown, columnFilters: Colum
 ]
 
 export const prettifyJson = (data: Record<any, any> | Array<Record<any, any>>) =>
-  JSON.stringify(data, (_, value) => (value === undefined ? "__UNDEFINED__" : value), 2).replace(
-    /"__UNDEFINED__"/g,
-    "<em class='text-ATP'>undefined</em>"
-  )
+  JSON.stringify(data, (_, value) => {
+    const string = value
+
+    if (string === undefined) {
+      return "<em class='text-ATP'>undefined</em>"
+    }
+
+    if (string === null) {
+      return "<em class='text-info'>null</em>"
+    }
+
+    return string
+  }, 2).replace(/"(<em class='text-(?:ATP|info)'>(?:undefined|null)<\/em>)"/g, "$1")

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { FormErrorEvent, FormSubmitEvent, ListboxItem } from "@nuxt/ui"
 import { countrySchema, ICONS, isDefined, prettifyJson } from "#imports"
+import { countryInitialState } from "../utils"
 
 const { ui } = useAppConfig()
 const supabase = useSupabaseClient()
@@ -16,22 +17,15 @@ const continents: Array<ListboxItem> = [
   { value: "South America" }
 ]
 
-const initialState = {
-  id: undefined,
-  name: undefined,
-  continent: undefined,
-  icon: undefined
-}
-
-const state = ref<Partial<CountrySchema>>(initialState)
+const state = ref<Partial<CountrySchema>>({ ...countryInitialState })
 const isUploading = ref(false)
-const response = ref<CountryType | null>()
+const response = ref()
 const error = ref<{ type: string; details: any } | null>()
 
 const existingCountry = computed(() => countries.value.find(c => c.id === state.value.id || c.name === state.value.name))
 
 const handleReset = () => {
-  set(state, initialState)
+  set(state, { ...countryInitialState })
   set(response, null)
   set(error, null)
 }

@@ -2,8 +2,8 @@
 import { type Tables } from "~/types/database.types"
 import { set, useInfiniteScroll, watchDeep } from "@vueuse/core"
 import type { ContextMenuItem, TableColumn, TableRow } from "@nuxt/ui"
-import { ICONS, TOUR_OPTIONS, TourEnum } from "#imports"
-import { LazyPlayerCreate, UButton, UFieldGroup } from "#components"
+import { ICONS } from "#imports"
+import { UButton } from "#components"
 import { CalendarDate, type DateValue } from "@internationalized/date"
 
 type PlayerType = Tables<{ schema: "tennis" }, "player_details">
@@ -180,10 +180,7 @@ const columns: Array<TableColumn<PlayerType>> = [
     },
     footer: () => {
       if (isAdmin.value) {
-        return h(UFieldGroup, {}, () => [
-          h(UButton, { icon: ui.icons.reload, onClick: () => refresh() }),
-          h(LazyPlayerCreate, { hydrateOnIdle: true, forward: true })
-        ])
+        return h(UButton, { icon: ui.icons.reload, onClick: () => refresh() })
       }
     }
   }

@@ -1,19 +1,7 @@
-import type { QueryData } from "@supabase/supabase-js"
-import { set } from "@vueuse/core"
-import { deburr } from "lodash"
-
 export const usePlayerSearch = () => {
   const supabase = useSupabaseClient()
 
   const searchTerm = ref()
-
-  const playerQuery = () => {
-    const query = supabase.schema("tennis").rpc("search_players", { search_term: deburr(toValue(searchTerm)) })
-
-    return query
-  }
-
-  type PlayerType = QueryData<ReturnType<typeof playerQuery>>[number]
 
   const players = ref<Array<PlayerType>>([])
   const pending = ref(false)
@@ -23,7 +11,7 @@ export const usePlayerSearch = () => {
     set(players, [])
 
     try {
-      const { data, error } = await playerQuery()
+      const { data, error } = await fetchPlayersQuery(supabase, searchTerm)
 
       if (error || !data) {
         console.error("Error fetching players:", error)
