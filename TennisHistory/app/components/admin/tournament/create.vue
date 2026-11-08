@@ -1,13 +1,11 @@
 <script setup lang="ts">
 import type { FormErrorEvent, FormSubmitEvent } from "@nuxt/ui"
 import { ICONS, prettifyJson, TOUR_OPTIONS, tournamentSchema } from "#imports"
-import { endOfWeek, parseDate, startOfWeek, today } from "@internationalized/date"
 import { tournamentInitialState } from "../utils"
 import { snakeCase } from "change-case"
 
 const { ui } = useAppConfig()
 const supabase = useSupabaseClient()
-const toast = useToast()
 
 const state = ref<Partial<TournamentInputSchema>>({ ...tournamentInitialState })
 const isUploading = ref(false)
@@ -82,7 +80,7 @@ const onSubmit = async (event: FormSubmitEvent<TournamentSchema>) => {
 
 <template>
   <div class="flex gap-6 items-start">
-    <u-card class="basis-2/3">
+    <u-card class="w-2/3">
       <template #header>
         <div class="font-semibold">Create Tournament</div>
       </template>
@@ -202,7 +200,7 @@ const onSubmit = async (event: FormSubmitEvent<TournamentSchema>) => {
       </template>
     </u-card>
 
-    <div class="min-w-0 basis-1/3 space-y-6">
+    <div class="w-1/3 space-y-6">
       <u-alert
         v-if="errors.length"
         v-for="(error, index) in errors"

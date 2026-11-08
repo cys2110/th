@@ -5,7 +5,7 @@ export const ContinentEnum = z.enum(CONTINENTS, `Continent must be one of ${CONT
 
 export const DrawEnumType = z.enum(["Main", "Qualifying"], `Draw must be one of ${["Main", "Qualifying"].join(", ")}`)
 
-export const DRAW_TYPES = ["Elimination", "Round robin", "Country draw", "Laver Cup", "Davis Cup"] as const
+export const DRAW_TYPES = ["Elimination", "Round robin", "Country draw", "Laver Cup", "ITF country", "Davis Cup"] as const
 export const DrawTypeEnum = z.enum(DRAW_TYPES, `Draw must be one of ${DRAW_TYPES.join(", ")}`)
 
 export const LEVELS = ["Tour", "Challenger", "ITF"] as const

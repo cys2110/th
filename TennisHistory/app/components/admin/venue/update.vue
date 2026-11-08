@@ -156,7 +156,7 @@ const onSubmit = async (event: FormSubmitEvent<VenueUpdateSchema>) => {
       </template>
     </u-card>
 
-    <div class="space-y-6 basis-1/3">
+    <div class="space-y-6 w-1/3">
       <u-alert
         v-if="error"
         color="error"
@@ -177,8 +177,11 @@ const onSubmit = async (event: FormSubmitEvent<VenueUpdateSchema>) => {
       </u-alert>
 
       <u-page-card title="Request Body">
-        <prose-code class="w-full">
-          <pre v-html="prettifyJson(state)" />
+        <prose-code class="min-w-0 w-full overflow-x-auto">
+          <pre
+            v-html="prettifyJson(state)"
+            class="overflow-x-auto"
+          />
         </prose-code>
       </u-page-card>
 
@@ -186,8 +189,11 @@ const onSubmit = async (event: FormSubmitEvent<VenueUpdateSchema>) => {
         v-if="response"
         title="Response"
       >
-        <prose-code class="w-full">
-          <pre v-html="prettifyJson(response)" />
+        <prose-code class="min-w-0 w-full overflow-x-auto">
+          <pre
+            v-html="prettifyJson(response)"
+            class="overflow-x-auto"
+          />
         </prose-code>
       </u-page-card>
     </div>

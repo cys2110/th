@@ -21,6 +21,7 @@ declare global {
   type RankingsInsert = TablesInsert<{ schema: "tennis" }, "rankings">
 
   type TournamentType = Tables<{ schema: "tennis" }, "tournament">
+  type EditionType = Tables<{ schema: "tennis" }, "editions">
 
   type RoundType = Tables<{ schema: "tennis" }, "rounds">
 

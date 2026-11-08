@@ -44,3 +44,19 @@ export const tournamentInitialState = {
   website: undefined,
   logo: undefined
 }
+
+export const editionInitialState = {
+  category: undefined,
+  currency: undefined,
+  draw_link: undefined,
+  draw_type: undefined,
+  draw_size: undefined,
+  dates: undefined,
+  sponsor_name: undefined,
+  tfc: undefined,
+  tours: [],
+  year: undefined,
+  edition_no: 0,
+  surface: undefined,
+  venue: undefined
+}

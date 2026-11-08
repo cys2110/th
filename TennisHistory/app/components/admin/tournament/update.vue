@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ICONS, prettifyJson, TOUR_OPTIONS, tournamentUpdateSchema } from "#imports"
 import type { FormErrorEvent, FormSubmitEvent } from "@nuxt/ui"
-import { CalendarDate, parseDate } from "@internationalized/date"
+import { CalendarDate } from "@internationalized/date"
 import { tournamentInitialState } from "../utils"
 import { snakeCase } from "change-case"
 
@@ -284,10 +284,10 @@ const onSubmit = async (event: FormSubmitEvent<TournamentUpdateSchema>) => {
       </u-alert>
 
       <u-page-card title="Request Body">
-        <prose-code class="w-full">
+        <prose-code class="min-w-0 w-full overflow-x-auto">
           <pre
-            class="overflow-x-auto"
             v-html="prettifyJson(state)"
+            class="overflow-x-auto"
           />
         </prose-code>
       </u-page-card>
@@ -298,8 +298,8 @@ const onSubmit = async (event: FormSubmitEvent<TournamentUpdateSchema>) => {
       >
         <prose-code class="min-w-0 w-full overflow-x-auto">
           <pre
-            class="overflow-x-auto"
             v-html="prettifyJson(response)"
+            class="overflow-x-auto"
           />
         </prose-code>
       </u-page-card>

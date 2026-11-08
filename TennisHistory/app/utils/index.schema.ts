@@ -131,3 +131,31 @@ export const tournamentUpdateSchema = tournamentSchema.extend({
 })
 export type TournamentUpdateInput = z.input<typeof tournamentUpdateSchema>
 export type TournamentUpdateSchema = z.infer<typeof tournamentUpdateSchema>
+
+export const editionSchema = object({
+  category: string().nullish(),
+  currency: string().nullish(),
+  draw_link: url("Draw link must be a valid URL").nullish(),
+  draw_type: DrawTypeEnum.nullish(),
+  draw_size: coerce.number("Draw size must be a number").int("Draw size must be an integer").positive("Draw size much be positive").nullish(),
+  dates: any().nullish(),
+  sponsor_name: string().nullish(),
+  tfc: coerce.number("Total financial commitment must be a number").nonnegative("Total financial commitment cannot be a negative number").nullish(),
+  tours: array(TourEnum).default([]),
+  year: any(),
+  edition_no: coerce
+    .number("Edition number must be a number")
+    .int("Edition number must be an integer")
+    .positive("Edition number much be positive")
+    .default(0),
+  surface: string().nullish(),
+  venue: object({ id: string() }).nullish()
+})
+export type EditionInput = z.input<typeof editionSchema>
+export type EditionSchema = z.infer<typeof editionSchema>
+
+export const editionUpdateSchema = editionSchema.extend({
+  id: string()
+})
+export type EditionUpdateInput = z.input<typeof editionUpdateSchema>
+export type EditionUpdateSchema = z.infer<typeof editionUpdateSchema>

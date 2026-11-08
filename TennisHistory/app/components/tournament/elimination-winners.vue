@@ -3,7 +3,7 @@ import { ICONS } from "#imports"
 import type { TableColumn, TableRow } from "@nuxt/ui"
 import { type Tables } from "~/types/database.types"
 import { getFacetedRowModel, getFacetedUniqueValues } from "@tanstack/vue-table"
-import { LazyEditionCreate, UButton, UFieldGroup } from "#components"
+import { UButton } from "#components"
 
 type EliminationWinner = Tables<{ schema: "tennis" }, "elimination_winners">
 
@@ -62,10 +62,7 @@ const columns: Array<TableColumn<EliminationWinner>> = [
     accessorKey: "entry",
     footer: () => {
       if (isAdmin.value) {
-        return h(UFieldGroup, {}, () => [
-          h(UButton, { icon: ui.icons.reload, onClick: () => refresh() }),
-          h(LazyEditionCreate, { hydrateOnIdle: true })
-        ])
+        return h(UButton, { icon: ui.icons.reload, onClick: () => refresh() })
       }
     }
   }

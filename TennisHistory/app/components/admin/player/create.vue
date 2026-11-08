@@ -17,7 +17,7 @@ const errors = ref<Array<{ type: string; details: any }>>([])
 const imageUrl = ref<string | null>(null)
 
 const handleReset = () => {
-  set(state, { ...playerInitialState })
+  set(state, { ...playerInitialState, coaches: [], prev_nationalities: [] })
   set(response, null)
   set(errors, [])
   set(imageUrl, null)
@@ -711,7 +711,7 @@ const handleScrape = async () => {
       </template>
     </u-card>
 
-    <div class="min-w-0 basis-1/3 space-y-6">
+    <div class="space-y-6 max-w-1/3">
       <u-alert
         v-if="errors.length"
         v-for="(error, index) in errors"
@@ -726,8 +726,8 @@ const handleScrape = async () => {
       </u-alert>
 
       <u-page-card title="Request Body">
-        <prose-code class="min-w-0 w-full overflow-x-auto">
-          <pre class="overflow-x-auto" v-html="prettifyJson(state)" />
+        <prose-code class="w-full">
+          <pre v-html="prettifyJson(state)" />
         </prose-code>
       </u-page-card>
 
@@ -735,8 +735,8 @@ const handleScrape = async () => {
         v-if="response"
         title="Response"
       >
-        <prose-code class="min-w-0 w-full overflow-x-auto">
-          <pre class="overflow-x-auto" v-html="prettifyJson(response)" />
+        <prose-code class="w-full">
+          <pre v-html="prettifyJson(response)" />
         </prose-code>
       </u-page-card>
     </div>
