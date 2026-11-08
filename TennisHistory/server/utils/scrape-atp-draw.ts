@@ -433,8 +433,6 @@ export async function scrapeAtpDraw(
 
     await page.goto(`https://www.atptour.com/en/scores/archive/x/${tournamentId}/${year}/draws`)
 
-    await page.pause()
-
     const matchTypeButtons = await page.locator(".atp_draw").locator(".tab-switcher-link").all()
 
     // Navigate to each draw page
@@ -448,8 +446,6 @@ export async function scrapeAtpDraw(
 
         try {
           await newPage.goto(new URL(href, page.url()).href)
-
-          await newPage.pause()
 
           const missingPlayersCheck = await checkForMissingPlayers(supabase, newPage)
 
@@ -491,8 +487,6 @@ export async function scrapeAtpDraw(
       // Go to results page
       await singlesNewPage.goto(`https://www.atptour.com/en/scores/archive/x/${tournamentId}/${year}/results`)
 
-      await singlesNewPage.pause()
-
       const singlesMatches = await getResultMatches(singlesNewPage)
       mergeResultMatches(allMatches, singlesMatches)
     } finally {
@@ -505,8 +499,6 @@ export async function scrapeAtpDraw(
     try {
       // Go to results page
       await doublesNewPage.goto(`https://www.atptour.com/en/scores/archive/x/${tournamentId}/${year}/results?matchType=doubles`)
-
-      await doublesNewPage.pause()
 
       const doublesMatches = await getResultMatches(doublesNewPage)
       mergeResultMatches(allMatches, doublesMatches)

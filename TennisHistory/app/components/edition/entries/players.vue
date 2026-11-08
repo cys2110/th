@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ICONS, TourEnum, type DrawEnum } from "#imports"
+import { ICONS } from "#imports"
 import type { TableColumn } from "@nuxt/ui"
 import { createColumnHelper, type ColumnFiltersState } from "@tanstack/vue-table"
 import { UBadge } from "#components"
@@ -7,14 +7,10 @@ import { isDefined } from "@vueuse/core"
 
 const route = useRoute("edition")
 const supabase = useSupabaseClient()
-const { ui } = useAppConfig()
-const toast = useToast()
 
-const { isAdmin } = useAuthState()
 const tournamentStore = useTournamentStore()
 
 const columnFilters = ref<ColumnFiltersState>([])
-const isSaving = ref(false)
 
 const {
   data: entries,
@@ -100,38 +96,6 @@ const setColumnFilter = (id: string, value: unknown) => {
         :model-value="<DrawEnum>getColumnFilter('draw')"
         @update:model-value="setColumnFilter('draw', $event)"
       />
-
-      <u-field-group v-if="isAdmin">
-        <lazy-edition-entries-create
-          hydrate-on-idle
-          @refresh="refresh"
-        />
-
-        <lazy-scrape-activity
-          v-if="entries.filter(e => e.tour === 'ATP').length"
-          tour="ATP"
-          @refresh="refresh"
-          hydrate-on-idle
-        />
-
-        <lazy-scrape-activity
-          v-if="entries.filter(e => e.tour === 'WTA').length"
-          tour="WTA"
-          @refresh="refresh"
-          hydrate-on-idle
-        />
-
-        <u-button
-          :icon="ui.icons.reload"
-          @click="refresh()"
-        />
-        <!-- <u-button
-          :icon="ICONS.save"
-          :loading="isSaving"
-          :loading-icon="ICONS.uploading"
-          @click="handleSave"
-        /> -->
-      </u-field-group>
     </div>
 
     <u-table

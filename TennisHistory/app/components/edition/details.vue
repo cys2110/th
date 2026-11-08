@@ -7,7 +7,6 @@ const supabase = useSupabaseClient()
 const { ui } = useAppConfig()
 
 const { isAdmin } = useAuthState()
-const tournamentStore = useTournamentStore()
 const breakpoints = useBreakpoints(breakpointsTailwind, { ssrWidth: useSSRWidth() })
 const xlAndUp = breakpoints.greaterOrEqual("xl")
 
@@ -35,19 +34,10 @@ const {
     v-if="isAdmin"
     class="flex justify-end my-6"
   >
-    <u-field-group>
-      <u-button
-        :icon="ui.icons.reload"
-        @click="refresh()"
-      />
-
-      <lazy-edition-event-create
-        v-if="edition"
-        hydrate-on-idle
-        @refresh="refresh"
-        :edition-id="edition?.id"
-      />
-    </u-field-group>
+    <u-button
+      :icon="ui.icons.reload"
+      @click="refresh()"
+    />
   </div>
 
   <u-container

@@ -35,6 +35,8 @@ declare global {
   type EntryStatusInsert = TablesInsert<{ schema: "tennis" }, "entry_status">
 
   type MatchInsert = TablesInsert<{ schema: "tennis" }, "matches">
+
+  type MatchScore = Tables<{ schema: "tennis" }, "match_scores">
   type ScoreInsert = TablesInsert<{ schema: "tennis" }, "match_scores">
   type StatsInsert = TablesInsert<{ schema: "tennis" }, "match_stats">
 }

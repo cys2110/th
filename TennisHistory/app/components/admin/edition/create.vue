@@ -67,8 +67,10 @@ const onSubmit = async (event: FormSubmitEvent<EditionSchema>) => {
         venue_id: venue?.id,
         year: year.year
       })
+      .select("*")
 
     if (error || !data) {
+      console.error(error)
       errors.value.push({
         type: "Error creating edition",
         details: error
@@ -112,36 +114,12 @@ const onSubmit = async (event: FormSubmitEvent<EditionSchema>) => {
         class="grid grid-cols-3 gap-y-3 gap-x-6"
       >
         <form-field
-          v-if="!selectedTournament || selectedTournament.tours.length > 1"
           v-model="state"
           :field="{
-            label: 'Tours',
-            key: 'tours',
-            type: 'checkbox',
-            items: selectedTournament?.tours || TOUR_OPTIONS,
-            icon: ICONS.tour,
-            required: true
-          }"
-        />
-
-        <form-field
-          v-model="state"
-          :field="{
-            label: 'Year',
-            key: 'year',
-            type: 'calendar',
-            class: 'row-span-2'
-          }"
-          required
-        />
-
-        <form-field
-          v-model="state"
-          :field="{
-            label: 'Edition Number',
-            key: 'edition_no',
-            type: 'number',
-            required: true
+            label: 'Sponsor Name',
+            key: 'sponsor_name',
+            type: 'text',
+            class: 'col-span-2'
           }"
         />
 
@@ -151,27 +129,72 @@ const onSubmit = async (event: FormSubmitEvent<EditionSchema>) => {
             label: 'Dates',
             key: 'dates',
             type: 'dates',
-            class: 'row-span-4'
+            class: 'row-span-3'
           }"
+        />
+
+        <div class="space-y-3">
+          <form-field
+            v-if="!selectedTournament || selectedTournament.tours.length > 1"
+            v-model="state"
+            :field="{
+              label: 'Tours',
+              key: 'tours',
+              type: 'checkbox',
+              items: selectedTournament?.tours || TOUR_OPTIONS,
+              icon: ICONS.tour,
+              required: true
+            }"
+          />
+
+          <form-field
+            v-model="state"
+            :field="{
+              label: 'Edition Number',
+              key: 'edition_no',
+              type: 'number',
+              required: true
+            }"
+          />
+
+          <form-field
+            v-model="state"
+            :field="{
+              label: 'Category',
+              key: 'category',
+              type: 'inputMenu',
+              items: CATEGORIES
+            }"
+          />
+        </div>
+
+        <form-field
+          v-model="state"
+          :field="{
+            label: 'Year',
+            key: 'year',
+            type: 'calendar',
+            class: 'row-span-1'
+          }"
+          required
         />
 
         <form-field
           v-model="state"
           :field="{
-            label: 'Category',
-            key: 'category',
+            label: 'Surface',
+            key: 'surface',
             type: 'inputMenu',
-            items: CATEGORIES
+            items: SURFACES
           }"
         />
 
         <form-field
           v-model="state"
           :field="{
-            label: 'Sponsor Name',
-            key: 'sponsor_name',
-            type: 'text',
-            class: 'col-span-2'
+            label: 'Venue',
+            key: 'venue',
+            type: 'venue'
           }"
         />
 
@@ -200,28 +223,10 @@ const onSubmit = async (event: FormSubmitEvent<EditionSchema>) => {
         <form-field
           v-model="state"
           :field="{
-            label: 'Surface',
-            key: 'surface',
-            type: 'inputMenu',
-            items: SURFACES
-          }"
-        />
-
-        <form-field
-          v-model="state"
-          :field="{
-            label: 'Venue',
-            key: 'venue',
-            type: 'venue'
-          }"
-        />
-
-        <form-field
-          v-model="state"
-          :field="{
             label: 'Draw Link',
             key: 'draw_link',
-            type: 'textarea'
+            type: 'textarea',
+            class: 'row-span-2'
           }"
         />
 
@@ -248,7 +253,7 @@ const onSubmit = async (event: FormSubmitEvent<EditionSchema>) => {
       <template #footer>
         <div class="flex gap-3">
           <u-button
-            form="tournament-form"
+            form="edition-form"
             color="success"
             type="submit"
             label="Create"

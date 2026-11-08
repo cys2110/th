@@ -17,6 +17,7 @@ input::-webkit-inner-spin-button {
 @theme {
   --font-sans: "Jost", sans-serif;
   --font-cursive: "Homemade Apple", cursive;
+  --container-sidetabs: 105rem;
   --container-8xl: 120rem;
 }
 

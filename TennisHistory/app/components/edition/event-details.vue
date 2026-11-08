@@ -1,20 +1,11 @@
 <script setup lang="ts">
 import { parseDate } from "@internationalized/date"
-import { breakpointsTailwind, useBreakpoints, useSSRWidth } from "@vueuse/core"
 
 const props = defineProps<{ event: EditionQuery["events"][number] }>()
 
 const emits = defineEmits<{ refresh: [] }>()
 
-const route = useRoute("edition")
-const supabase = useSupabaseClient()
-const toast = useToast()
-const { ui } = useAppConfig()
-const breakpoints = useBreakpoints(breakpointsTailwind, { ssrWidth: useSSRWidth() })
-const xlAndUp = breakpoints.greaterOrEqual("xl")
-
 const { isAdmin } = useAuthState()
-const tournamentStore = useTournamentStore()
 </script>
 
 <template>
@@ -33,19 +24,6 @@ const tournamentStore = useTournamentStore()
             :color="event.level"
           />
         </div>
-      </template>
-
-      <template
-        #right
-        v-if="isAdmin"
-      >
-        <u-field-group>
-          <lazy-scrape-draw
-            v-if="event.tour === 'ATP' || event.tour === 'WTA'"
-            :tour="event.tour"
-            hydrate-on-idle
-          />
-        </u-field-group>
       </template>
 
       <div class="flex gap-6 my-6 w-fit mx-auto">

@@ -38,6 +38,12 @@ declare global {
     key: string
     color: string
   }
+
+  type EventSelection = {
+    tournament?: TournamentType
+    edition?: Pick<Tables<{ schema: "tennis" }, "editions">, "id" | "year" | "edition_no" | "tours" | "currency"> & { label: string }
+    event?: Pick<Tables<{ schema: "tennis" }, "events">, "id" | "tour" | "currency">
+  }
 }
 
 export {}

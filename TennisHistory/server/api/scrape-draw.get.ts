@@ -12,6 +12,8 @@ export default defineEventHandler(async event => {
   const format = String(query.format ?? "")
   const editionNo = String(query.edition_no ?? "0")
 
+  console.log(query)
+
   if (!dbId || !year || !tournamentId) {
     throw createError({
       statusCode: 400,

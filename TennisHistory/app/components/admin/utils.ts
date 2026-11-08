@@ -60,3 +60,30 @@ export const editionInitialState = {
   surface: undefined,
   venue: undefined
 }
+
+export const eventInitialState = {
+  tour: undefined,
+  category: undefined,
+  currency: undefined,
+  dates: undefined,
+  level: undefined,
+  sponsor_name: undefined,
+  undefeated_bonus: undefined,
+  surface: undefined,
+  venue: undefined,
+  supervisors: [],
+  pm: undefined,
+  tfc: undefined,
+  s_draw: undefined,
+  s_link: undefined,
+  s_draw_size: undefined,
+  d_draw: undefined,
+  d_link: undefined,
+  d_draw_size: undefined,
+  qs_draw: undefined,
+  qs_link: undefined,
+  qs_draw_size: undefined,
+  qd_draw: undefined,
+  qd_link: undefined,
+  qd_draw_size: undefined
+}

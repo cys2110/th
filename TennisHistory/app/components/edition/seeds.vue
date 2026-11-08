@@ -1,12 +1,8 @@
 <script setup lang="ts">
-import { getColumnFilter, ICONS, setColumnFilter } from "#imports"
+import { getColumnFilter, setColumnFilter } from "#imports"
 import type { TableColumn } from "@nuxt/ui"
-import type { ColumnFiltersState, Row } from "@tanstack/vue-table"
-import { isDefined, set, useArrayUnique } from "@vueuse/core"
-
-interface UpdatedSeeds {
-  [key: string]: number | null
-}
+import type { ColumnFiltersState } from "@tanstack/vue-table"
+import { isDefined, useArrayUnique } from "@vueuse/core"
 
 interface BaseChartData {
   seed: number
@@ -17,16 +13,10 @@ type ChartData = BaseChartData & {
 }
 
 const route = useRoute("edition")
-const router = useRouter()
 const supabase = useSupabaseClient()
-const toast = useToast()
-const { ui } = useAppConfig()
 
 const { isAdmin } = useAuthState()
 const tournamentStore = useTournamentStore()
-
-const updatedSeeds = ref<UpdatedSeeds>({})
-const isSaving = ref(false)
 
 const {
   data: seeds,
@@ -86,33 +76,6 @@ const columnVisibility = computed(() => ({
   checkbox: isAdmin.value,
   tour: tournamentStore.tours.length > 1
 }))
-
-const handleSave = async () => {
-  set(isSaving, true)
-
-  const errors: UpdatedSeeds = {}
-
-  for (const [seedId, rank] of Object.entries(updatedSeeds.value)) {
-    const { error } = await supabase.schema("tennis").from("seeds").update({ rank }).eq("id", Number(seedId))
-
-    if (error) {
-      console.error("Error updating seed:", error)
-      errors[seedId] = rank
-    }
-  }
-
-  const hasErrors = Object.keys(errors).length > 0
-
-  toast.add({
-    title: hasErrors ? "Error updating seeds" : "Seeds successfully updated",
-    icon: ui.icons[hasErrors ? "error" : "success"],
-    color: hasErrors ? "error" : "success"
-  })
-
-  set(updatedSeeds, hasErrors ? errors : {})
-  set(isSaving, false)
-  refresh()
-}
 
 const chartData = computed<ChartData[]>(() => {
   const allSeeds = seeds.value as SeedType[]
@@ -199,25 +162,6 @@ const chartCategories = computed(() => {
         :model-value="<DrawEnum>getColumnFilter('draw', columnFilters)"
         @update:model-value="columnFilters = setColumnFilter('draw', $event, columnFilters)"
       />
-
-      <u-field-group v-if="isAdmin">
-        <lazy-edition-seeds-create
-          hydrate-on-idle
-          @refresh="refresh"
-        />
-
-        <u-button
-          :icon="ui.icons.reload"
-          @click="refresh()"
-        />
-
-        <u-button
-          :icon="ICONS.save"
-          :loading="isSaving"
-          :loading-icon="ICONS.uploading"
-          @click="handleSave"
-        />
-      </u-field-group>
     </div>
 
     <u-table
@@ -246,42 +190,6 @@ const chartCategories = computed(() => {
         />
       </template>
 
-      <template #checkbox-header="{ table }">
-        <u-checkbox
-          :model-value="
-            Object.keys(updatedSeeds).length === table.getFilteredRowModel().rows.length ? true
-            : Object.keys(updatedSeeds).length ? 'indeterminate'
-            : false
-          "
-          @update:model-value="
-            () => {
-              if (Object.keys(updatedSeeds).length) {
-                updatedSeeds = {}
-              } else {
-                table.getFilteredRowModel().rows.map(seed => (updatedSeeds[seed.original.id!] = seed.original.rank))
-              }
-            }
-          "
-          :icon="ICONS.ranking"
-        />
-      </template>
-
-      <template #checkbox-cell="{ row }">
-        <u-checkbox
-          :model-value="row.original.id! in updatedSeeds"
-          @update:model-value="
-            () => {
-              if (row.original.id! in updatedSeeds) {
-                delete updatedSeeds[row.original.id!]
-              } else {
-                updatedSeeds[row.original.id!] = row.original.rank
-              }
-            }
-          "
-          :icon="ICONS.ranking"
-        />
-      </template>
-
       <template #team-cell="{ row }">
         <player-link
           v-if="row.original.team"
@@ -291,17 +199,7 @@ const chartCategories = computed(() => {
       </template>
 
       <template #rank-cell="{ row }">
-        <form-input-number
-          v-if="row.original.id! in updatedSeeds"
-          v-model="updatedSeeds[row.original.id!]"
-          placeholder="Rank"
-          class="max-w-25"
-        />
-
-        <div
-          v-else
-          :class="{ 'line-through': row.original.withdrawn }"
-        >
+        <div :class="{ 'line-through': row.original.withdrawn }">
           {{ isDefined(row.original.rank) ? row.original.rank.toLocaleString() : "—" }}
         </div>
       </template>

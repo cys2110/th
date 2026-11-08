@@ -726,8 +726,11 @@ const handleScrape = async () => {
       </u-alert>
 
       <u-page-card title="Request Body">
-        <prose-code class="w-full">
-          <pre v-html="prettifyJson(state)" />
+        <prose-code class="min-w-0 w-full overflow-x-auto">
+          <pre
+            class="overflow-x-auto"
+            v-html="prettifyJson(state)"
+          />
         </prose-code>
       </u-page-card>
 
@@ -735,8 +738,11 @@ const handleScrape = async () => {
         v-if="response"
         title="Response"
       >
-        <prose-code class="w-full">
-          <pre v-html="prettifyJson(response)" />
+        <prose-code class="min-w-0 w-full overflow-x-auto">
+          <pre
+            class="overflow-x-auto"
+            v-html="prettifyJson(response)"
+          />
         </prose-code>
       </u-page-card>
     </div>
